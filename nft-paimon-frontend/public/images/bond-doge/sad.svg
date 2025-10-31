@@ -1,0 +1,21 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sad Bond Doge - Low Dice Roll -->
+  <circle cx="100" cy="100" r="80" fill="#9E9E9E" opacity="0.2"/>
+  <circle cx="100" cy="100" r="70" fill="#9E9E9E" stroke="#616161" stroke-width="3"/>
+  <!-- Ears (droopy) -->
+  <ellipse cx="60" cy="65" rx="15" ry="25" fill="#9E9E9E"/>
+  <ellipse cx="140" cy="65" rx="15" ry="25" fill="#9E9E9E"/>
+  <!-- Eyes (sad) -->
+  <circle cx="80" cy="90" r="4" fill="#424242"/>
+  <circle cx="120" cy="90" r="4" fill="#424242"/>
+  <path d="M 75 85 L 85 82" stroke="#424242" stroke-width="2"/>
+  <path d="M 115 85 L 125 82" stroke="#424242" stroke-width="2"/>
+  <!-- Nose -->
+  <circle cx="100" cy="110" r="6" fill="#424242"/>
+  <!-- Mouth (frown) -->
+  <path d="M 80 130 Q 100 120 120 130" stroke="#424242" stroke-width="3" fill="none"/>
+  <!-- Tear -->
+  <ellipse cx="75" cy="105" rx="3" ry="8" fill="#64B5F6"/>
+  <!-- Placeholder text -->
+  <text x="100" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#616161">SAD</text>
+</svg>

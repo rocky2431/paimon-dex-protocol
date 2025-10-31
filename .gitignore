@@ -1,0 +1,48 @@
+# Compiler files
+cache/
+out/
+
+# Ignores development broadcast logs
+!/broadcast
+/broadcast/*/31337/
+/broadcast/**/dry-run/
+
+# Dotenv file
+.env
+
+# Ultra Builder Pro
+.ultra/tasks/backups/
+.ultra/tasks/archives/
+.ultra/reports/
+
+# Dependencies
+node_modules/
+paimon-rwa-contracts/lib/
+nft-paimon-frontend/.next/
+nft-paimon-frontend/node_modules/
+
+# Build outputs
+dist/
+build/
+*.log
+*.tgz
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+coverage/
+*.lcov
+.nyc_output/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/

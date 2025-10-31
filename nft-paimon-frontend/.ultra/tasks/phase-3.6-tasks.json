@@ -1,0 +1,414 @@
+{
+  "tasks": [
+    {
+      "id": "RWA-001",
+      "title": "ProjectRegistry Contract (RWA Launchpad Core)",
+      "description": "Implement RWA project registry smart contract for asset issuance platform. Support project submission, veNFT governance voting, compliance document storage (IPFS/HTTP links), and project approval workflow.",
+      "phase": "phase-3.6",
+      "priority": "P0",
+      "complexity": 5,
+      "estimated_days": 2,
+      "status": "completed",
+      "tags": [
+        "smart-contract",
+        "launchpad",
+        "governance"
+      ],
+      "dependencies": [
+        "CORE-003"
+      ],
+      "acceptance_criteria": [
+        "Project submission with compliance docs (complianceDocURI, auditReportURI, disclosureURI)",
+        "veNFT governance voting mechanism (vote weighted by voting power)",
+        "Vote execution (threshold: >50% voting power)",
+        "Event emission for all state changes",
+        "Access control (only approved issuers can submit)",
+        "Unit tests: 100% coverage",
+        "Gas optimization: <200K gas per submission"
+      ],
+      "technical_notes": "ProjectRegistry.sol: struct Project with compliance doc links. veNFT governance integration via VotingEscrow.votingPower(). Voting threshold calculation: totalApproveVotes / totalVotingPower > 0.5.",
+      "reference": ".ultra/docs/planning/PHASE-3.6-RWA-CORE-TASKS.md#rwa-001",
+      "completed_date": "2025-10-27"
+    },
+    {
+      "id": "RWA-002",
+      "title": "IssuanceController Contract (Token Sale Logic)",
+      "description": "Implement RWA token issuance controller for public sales. Handle USDC payments, RWA token distribution, 1.0% issuance fee (70% Treasury, 30% ve pool), refund mechanism, and whitelist support.",
+      "phase": "phase-3.6",
+      "priority": "P0",
+      "complexity": 6,
+      "estimated_days": 3,
+      "status": "completed",
+      "tags": [
+        "smart-contract",
+        "launchpad",
+        "issuance"
+      ],
+      "dependencies": [
+        "RWA-001",
+        "CORE-004"
+      ],
+      "acceptance_criteria": [
+        "USDC payment handling (participate function)",
+        "RWA token distribution logic (claim after sale ends)",
+        "1.0% issuance fee collection (70% Treasury, 30% ve pool)",
+        "Refund mechanism if sale fails to meet minimum raise",
+        "Minimum/maximum raise validation",
+        "Whitelist support (optional for specific projects)",
+        "Unit tests: 100% coverage",
+        "Integration tests with ProjectRegistry"
+      ],
+      "technical_notes": "IssuanceController.sol: ISSUANCE_FEE = 100 bps. Fee split logic: uint256 treasuryFee = totalFee * 70 / 100. Refund condition: totalRaised < minimumRaise after endTime. ERC-20 SafeTransfer for USDC and RWA tokens.",
+      "reference": ".ultra/docs/planning/PHASE-3.6-RWA-CORE-TASKS.md#rwa-002",
+      "completed_date": "2025-10-27"
+    },
+    {
+      "id": "RWA-003",
+      "title": "Launchpad Frontend - Project List Page",
+      "description": "Build RWA Launchpad project list page (/launchpad) with grid/list view, project cards, filters, and sorting. Display project status, raise progress, countdown timers, and compliance doc links.",
+      "phase": "phase-3.6",
+      "priority": "P0",
+      "complexity": 4,
+      "estimated_days": 2,
+      "status": "completed",
+      "tags": [
+        "frontend",
+        "launchpad",
+        "ui"
+      ],
+      "dependencies": [
+        "RWA-001",
+        "RWA-002",
+        "FE-001"
+      ],
+      "acceptance_criteria": [
+        "Project list with real-time blockchain data (wagmi hooks)",
+        "Project status badges (Pending/Active/Completed)",
+        "Progress bar (raised / target)",
+        "Countdown timer for active sales",
+        "Filter by project status",
+        "Sort by raise amount, end date, APY",
+        "Responsive design (mobile + desktop)",
+        "Loading states and error handling",
+        "Load time <2.5s (LCP)",
+        "Material Design 3 compliance with warm color palette",
+        "Bilingual support (EN + ZH)"
+      ],
+      "technical_notes": "Route: /launchpad. Components: ProjectList.tsx, ProjectCard.tsx, ProjectFilters.tsx. Use wagmi useReadContract for project data. Implement virtualized list (react-window) for >50 projects. Color theme: warm orange (#FF6B35) for active projects, amber (#FFB74D) for pending.",
+      "reference": ".ultra/docs/planning/PHASE-3.6-RWA-CORE-TASKS.md#rwa-003",
+      "completed_date": "2025-10-27"
+    },
+    {
+      "id": "RWA-004",
+      "title": "Launchpad Frontend - Project Details & Participation",
+      "description": "Build project details page (/launchpad/[projectId]) with compliance document viewer (IPFS/HTTP links), investment form, transaction preview, and veNFT governance voting UI. 🔑 Compliance docs display is critical.",
+      "phase": "phase-3.6",
+      "priority": "P0",
+      "complexity": 6,
+      "estimated_days": 3,
+      "status": "completed",
+      "tags": [
+        "frontend",
+        "launchpad",
+        "compliance"
+      ],
+      "dependencies": [
+        "RWA-003"
+      ],
+      "acceptance_criteria": [
+        "Compliance Documents Section (above-the-fold, most prominent)",
+        "Display IPFS/HTTP links to compliance docs (Offering Memo, Audit Report, Risk Disclosure)",
+        "PDF preview (if possible via iframe or external viewer)",
+        "One-click download buttons",
+        "Multi-document support",
+        "Project overview (name, description, tier, APY)",
+        "Investment form (USDC amount input with balance check)",
+        "Transaction preview (fees, final RWA token amount)",
+        "Wallet connection check",
+        "veNFT governance voting UI (approve/reject with voting power display)",
+        "Real-time updates (raised amount, time remaining)",
+        "Transaction simulation before signing",
+        "Gas estimation",
+        "Error handling (insufficient balance, sale ended, etc.)",
+        "Success confirmation with transaction link"
+      ],
+      "technical_notes": "Route: /launchpad/[projectId]. Components: ProjectDetails.tsx, ComplianceDocViewer.tsx (reusable), ParticipateForm.tsx, ProjectMetrics.tsx. ComplianceDocViewer props: complianceDocURI, auditReportURI, disclosureURI. Use wagmi useSimulateContract for transaction preview.",
+      "reference": ".ultra/docs/planning/PHASE-3.6-RWA-CORE-TASKS.md#rwa-004",
+      "completed_date": "2025-10-27"
+    },
+    {
+      "id": "RWA-005",
+      "title": "veNFT Governance Integration for Launchpad",
+      "description": "Integrate veNFT governance voting for Launchpad project approval. Extend VotingEscrow interface, build voting page (/launchpad/[projectId]/vote), display voting power, vote history, and current tally.",
+      "phase": "phase-3.6",
+      "priority": "P0",
+      "complexity": 5,
+      "estimated_days": 2,
+      "status": "completed",
+      "tags": [
+        "smart-contract",
+        "frontend",
+        "governance"
+      ],
+      "dependencies": [
+        "RWA-001",
+        "RWA-004",
+        "CORE-003"
+      ],
+      "acceptance_criteria": [
+        "Only veNFT holders can vote",
+        "One vote per veNFT per project",
+        "Vote weighted by voting power",
+        ">50% voting power threshold to approve",
+        "Vote execution by anyone (after threshold met)",
+        "Event emission for vote tracking",
+        "Voting page route: /launchpad/[projectId]/vote",
+        "Display user's veNFT list (if holding multiple)",
+        "Voting power indicator",
+        "Vote history (approved/rejected projects)",
+        "Current vote tally (approve vs reject %)",
+        "Vote execution button (when threshold met)"
+      ],
+      "technical_notes": "Extend IGovernance interface: function votingPower(uint256 veNFTId) external view returns (uint256). ProjectRegistry.voteOnProject() records vote weighted by power. Frontend uses wagmi useAccount + useReadContract(VotingEscrow.balanceOf) to list user's veNFTs.",
+      "reference": ".ultra/docs/planning/PHASE-3.6-RWA-CORE-TASKS.md#rwa-005",
+      "completed_date": "2025-10-27"
+    },
+    {
+      "id": "RWA-006",
+      "title": "Launchpad Testing & Integration",
+      "description": "Comprehensive end-to-end testing for Launchpad system. Unit tests (smart contracts), frontend tests (E2E, wallet connection), integration tests (Treasury fee distribution, VotingEscrow governance, DEX RWA token trading).",
+      "phase": "phase-3.6",
+      "priority": "P0",
+      "complexity": 5,
+      "estimated_days": 2,
+      "status": "completed",
+      "tags": [
+        "testing",
+        "launchpad",
+        "integration"
+      ],
+      "dependencies": [
+        "RWA-001",
+        "RWA-002",
+        "RWA-003",
+        "RWA-004",
+        "RWA-005"
+      ],
+      "acceptance_criteria": [
+        "Unit test coverage ≥80% (smart contracts)",
+        "Integration test coverage ≥70%",
+        "E2E happy path test passes (Submit → Vote → Participate → Claim)",
+        "Smart contract tests: submission, voting, issuance, fee distribution, access control, edge cases",
+        "Frontend tests: wallet connection, transaction signing, error states, loading states",
+        "Integration tests: Launchpad ↔ Treasury, Launchpad ↔ VotingEscrow, Launchpad ↔ DEX",
+        "Gas benchmarks documented",
+        "Security checklist completed"
+      ],
+      "technical_notes": "Use Hardhat test framework for smart contracts. Use Playwright for E2E frontend tests. Integration tests in test/integration/Launchpad.integration.test.ts. Gas benchmarks: track submitProject(), voteOnProject(), participate(), claimTokens(). Security checklist: reentrancy, access control, integer overflow, front-running.",
+      "reference": ".ultra/docs/planning/PHASE-3.6-RWA-CORE-TASKS.md#rwa-006",
+      "completed_date": "2025-10-27"
+    },
+    {
+      "id": "RWA-007",
+      "title": "RWAPriceOracle Contract (Dual-Source Pricing)",
+      "description": "Implement dual-source RWA price oracle with Chainlink integration (1-2 days) and Custodian NAV API support. Include deviation detection (±5% circuit breaker), stale price protection (>24h rejection), and emergency pause.",
+      "phase": "phase-3.6",
+      "priority": "P1",
+      "complexity": 6,
+      "estimated_days": 3,
+      "status": "completed",
+      "tags": [
+        "smart-contract",
+        "oracle",
+        "treasury"
+      ],
+      "dependencies": [
+        "DEFI-001"
+      ],
+      "acceptance_criteria": [
+        "Chainlink Price Feed integration (1-2 days)",
+        "Custodian NAV update mechanism (trusted oracle role)",
+        "Dual-source averaging (50% Chainlink, 50% NAV)",
+        "Deviation detection (±5% triggers circuit breaker)",
+        "Stale price protection (reject >24h old data)",
+        "Emergency pause mechanism",
+        "Unit tests: 100% coverage",
+        "Oracle failure handling (fallback to single source if one fails)"
+      ],
+      "technical_notes": "RWAPriceOracle.sol: struct PriceSource { address chainlinkFeed; address custodianNAV; uint256 lastUpdate; uint256 deviationThreshold; }. getPrice() averages Chainlink and NAV. checkDeviation() compares |chainlinkPrice - navPrice| / navPrice > 0.05. Use AccessControl for updateNAV() (only trusted oracle). Chainlink AggregatorV3Interface.",
+      "reference": ".ultra/docs/planning/PHASE-3.6-RWA-CORE-TASKS.md#rwa-007",
+      "completed_date": "2025-10-27"
+    },
+    {
+      "id": "RWA-008",
+      "title": "Treasury RWA Deposit/Redeem Logic",
+      "description": "Implement RWA deposit/redeem functionality in Treasury contract. Support three-tier LTV ratios (T1: 80%, T2: 65%, T3: 50%), HYD minting formula, cooldown period (7 days), redemption fee (0.50%), position tracking, and health factor monitoring.",
+      "phase": "phase-3.6",
+      "priority": "P1",
+      "complexity": 7,
+      "estimated_days": 4,
+      "status": "completed",
+      "tags": [
+        "smart-contract",
+        "treasury",
+        "collateral"
+      ],
+      "dependencies": [
+        "RWA-007",
+        "CORE-001",
+        "CORE-002"
+      ],
+      "acceptance_criteria": [
+        "Three-tier LTV support (T1: 80%, T2: 65%, T3: 50%)",
+        "HYD minting formula: hydMinted = (rwaValue * ltvRatio * (10000 - mintDiscount)) / 10000^2",
+        "Cooldown period for redemption (7 days)",
+        "Redemption fee: 0.50%",
+        "Position tracking (mapping: user => RWA asset => position)",
+        "Health factor monitoring (formula: (rwaValue / hydDebt) * 100)",
+        "veNFT governance whitelist management (addRWAAsset, removeRWAAsset)",
+        "Unit tests: 100% coverage",
+        "Integration with RWAPriceOracle"
+      ],
+      "technical_notes": "Treasury.sol enhancement. Struct RWATier { uint8 tier; uint256 ltvRatio; uint256 mintDiscount; }. depositRWA() transfers RWA token to Treasury, calls RWAPriceOracle.getPrice(), calculates HYD amount, mints to user. redeemRWA() requires cooldown elapsed, burns HYD, transfers RWA back (minus 0.5% fee). Position struct: { address rwaAsset; uint256 rwaAmount; uint256 hydMinted; uint256 depositTime; }.",
+      "reference": ".ultra/docs/planning/PHASE-3.6-RWA-CORE-TASKS.md#rwa-008",
+      "completed_date": "2025-10-27"
+    },
+    {
+      "id": "RWA-009",
+      "title": "Liquidation Module for RWA Collateral",
+      "description": "Implement liquidation logic for undercollateralized RWA positions. Support liquidation threshold (115%), penalty (5%), partial liquidation, public liquidation function, and Keeper bot compatibility.",
+      "phase": "phase-3.6",
+      "priority": "P1",
+      "complexity": 6,
+      "estimated_days": 3,
+      "status": "completed",
+      "tags": [
+        "smart-contract",
+        "treasury",
+        "liquidation"
+      ],
+      "dependencies": [
+        "RWA-008"
+      ],
+      "acceptance_criteria": [
+        "Health factor formula: (rwaValue / hydDebt) * 100",
+        "Liquidation triggered at <115% health factor",
+        "5% liquidation penalty (4% to liquidator, 1% to protocol)",
+        "Partial liquidation support (liquidate only portion needed to restore health)",
+        "Public liquidation function (anyone can trigger)",
+        "Keeper bot compatibility (view functions for monitoring)",
+        "Unit tests: edge cases (exact threshold, dust positions)",
+        "Gas optimization: <300K gas per liquidation"
+      ],
+      "technical_notes": "LiquidationModule.sol: LIQUIDATION_THRESHOLD = 11500 (115%), LIQUIDATION_PENALTY = 500 (5%). liquidate() calculates liquidation amount to restore health to 125%, seizes RWA collateral, burns HYD debt, distributes penalty. isLiquidatable() public view for Keeper bots. Partial liquidation: liquidationAmount = min(userDebt, amountNeededToRestore125Health).",
+      "reference": ".ultra/docs/planning/PHASE-3.6-RWA-CORE-TASKS.md#rwa-009",
+      "completed_date": "2025-10-27"
+    },
+    {
+      "id": "RWA-010",
+      "title": "Treasury Frontend - RWA Deposit Page",
+      "description": "Build Treasury RWA deposit page (/treasury/deposit) with RWA asset selector (whitelisted assets), amount input, HYD mint preview (real-time calculation), transaction preview, gas estimation, and success confirmation.",
+      "phase": "phase-3.6",
+      "priority": "P1",
+      "complexity": 5,
+      "estimated_days": 2,
+      "status": "completed",
+      "tags": [
+        "frontend",
+        "treasury",
+        "ui"
+      ],
+      "dependencies": [
+        "RWA-008",
+        "FE-001"
+      ],
+      "acceptance_criteria": [
+        "RWA asset dropdown (whitelisted assets only)",
+        "Asset tier indicator (T1/T2/T3)",
+        "Amount input with balance check",
+        "Preview calculation: RWA value, LTV ratio, HYD minted amount, minting discount",
+        "Real-time HYD preview updates (as user types amount)",
+        "Transaction preview",
+        "Gas estimation",
+        "Wallet balance validation",
+        "Allowance check (ERC-20 approve if needed)",
+        "Error handling (oracle failure, insufficient collateral)",
+        "Loading states",
+        "Material Design 3 compliance",
+        "Success confirmation with transaction link"
+      ],
+      "technical_notes": "Route: /treasury/deposit. Components: RWAAssetSelector.tsx, DepositForm.tsx, HYDMintPreview.tsx. Use wagmi useReadContract(RWAPriceOracle.getPrice) + useReadContract(Treasury.rwaTiers) for preview calculation. useSimulateContract for gas estimation. Color theme: warm gold (#FFD700) for deposit actions.",
+      "reference": ".ultra/docs/planning/PHASE-3.6-RWA-CORE-TASKS.md#rwa-010",
+      "completed_date": "2025-10-27"
+    },
+    {
+      "id": "RWA-011",
+      "title": "Treasury Frontend - Position Monitoring Dashboard",
+      "description": "Build Treasury position monitoring dashboard (/treasury/positions) with position list, health factor gauge (color-coded), collateralization ratio, liquidation price alert, redeem button with cooldown timer, and add collateral button. Auto-refresh every 60 seconds.",
+      "phase": "phase-3.6",
+      "priority": "P1",
+      "complexity": 5,
+      "estimated_days": 2,
+      "status": "completed",
+      "tags": [
+        "frontend",
+        "treasury",
+        "monitoring"
+      ],
+      "dependencies": [
+        "RWA-010"
+      ],
+      "acceptance_criteria": [
+        "Position list (all user RWA deposits)",
+        "Health factor display (color-coded: Green >150%, Yellow 115-150%, Red <115%)",
+        "Collateralization ratio",
+        "Liquidation price alert",
+        "Redeem button (with cooldown timer if <7 days)",
+        "Add collateral button",
+        "Real-time updates (oracle price changes)",
+        "Auto-refresh every 60 seconds",
+        "Push notifications for liquidation risk (optional)",
+        "Historical position data",
+        "Export position report (CSV)"
+      ],
+      "technical_notes": "Route: /treasury/positions. Components: PositionList.tsx, PositionCard.tsx, HealthFactorGauge.tsx. Use wagmi useReadContract(Treasury.positions) + useBlockNumber for auto-refresh. Health factor colors: Green (#8BC34A), Yellow (#FFB74D), Red (#FF6B35). Implement useInterval(refetch, 60000) for auto-refresh. CSV export using papaparse library.",
+      "reference": ".ultra/docs/planning/PHASE-3.6-RWA-CORE-TASKS.md#rwa-011",
+      "completed_date": "2025-10-27"
+    },
+    {
+      "id": "RWA-012",
+      "title": "Treasury RWA Testing & Integration",
+      "description": "Comprehensive end-to-end testing for Treasury RWA system. Unit tests (RWA deposit T1/T2/T3, HYD minting accuracy, redemption, liquidation, oracle integration), frontend tests (E2E deposit/monitor/redeem), integration tests (Treasury ↔ RWAPriceOracle, Treasury ↔ PSM, Treasury ↔ VotingEscrow).",
+      "phase": "phase-3.6",
+      "priority": "P1",
+      "complexity": 5,
+      "estimated_days": 2,
+      "status": "completed",
+      "tags": [
+        "testing",
+        "treasury",
+        "integration"
+      ],
+      "dependencies": [
+        "RWA-007",
+        "RWA-008",
+        "RWA-009",
+        "RWA-010",
+        "RWA-011"
+      ],
+      "acceptance_criteria": [
+        "Unit test coverage ≥80%",
+        "Integration test coverage ≥70%",
+        "E2E test passes for all user flows (Deposit RWA → Monitor position → Redeem)",
+        "Smart contract tests: RWA deposit (T1/T2/T3), HYD minting calculation accuracy, redemption (cooldown, fees), liquidation (threshold, penalty), oracle integration (Chainlink + NAV), edge cases (oracle failure, price volatility)",
+        "Frontend tests: Health factor visualization, liquidation warning display, transaction flow",
+        "Integration tests: Treasury ↔ RWAPriceOracle, Treasury ↔ PSM (USDC ↔ HYD interoperability), Treasury ↔ VotingEscrow (lock HYD → veNFT)",
+        "Gas benchmarks documented",
+        "Oracle failure handling tested"
+      ],
+      "technical_notes": "Test files: test/treasury/Treasury.RWA.test.ts (unit), test/integration/Treasury-RWA.integration.test.ts, test/e2e/treasury-deposit-flow.spec.ts (Playwright). Oracle failure simulation: mock Chainlink feed with stale data (>24h), verify fallback to NAV only. Gas benchmarks: depositRWA(), redeemRWA(), liquidate().",
+      "reference": ".ultra/docs/planning/PHASE-3.6-RWA-CORE-TASKS.md#rwa-012",
+      "completed_date": "2025-10-27"
+    }
+  ]
+}

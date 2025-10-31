@@ -1,0 +1,1780 @@
+Warning: `--ir-minimum` enables `viaIR` with minimum optimization, which can result in inaccurate source mappings.
+Only use this flag as a workaround if you are experiencing "stack too deep" errors.
+Note that `viaIR` is production ready since Solidity 0.8.13 and above.
+See more: https://github.com/foundry-rs/foundry/issues/3357
+Compiling 114 files with Solc 0.8.20
+Solc 0.8.20 finished in 40.26s
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/mocks/MockV3Aggregator.sol:52:5:
+   |
+52 |     uint80 _answeredInRound
+   |     ^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+   --> test/integration/BondNFT-VRF.integration.t.sol:121:9:
+    |
+121 |         uint256 expectedResult = (randomWords[0] % 6) + 1; // = (123456 % 6) + 1 = 1
+    |         ^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> test/invariant/handlers/GaugeControllerHandler.sol:116:9:
+    |
+116 |         uint256 weightSeed
+    |         ^^^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+   --> test/unit/IssuanceController.t.sol:332:9:
+    |
+332 |         uint256 expectedRwaTokens = participationAmount / RWA_TOKEN_PRICE;
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+   --> test/unit/RemintController.t.sol:210:13:
+    |
+210 |             uint256 totalRemintEarned,
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+   --> test/unit/RemintController.t.sol:211:13:
+    |
+211 |             uint256 lastWeekNumber
+    |             ^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+   --> test/unit/RemintController.t.sol:763:9:
+    |
+763 |         uint256 requestId = remintController.rollDice(1);
+    |         ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> test/unit/RemintController.t.sol:879:52:
+    |
+879 |     function _completeSocialTasks(uint256 tokenId, address nftOwner, uint256 count) internal {
+    |                                                    ^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+   --> test/unit/Treasury.Liquidation.t.sol:175:6:
+    |
+175 |     (uint256 rwaAmount, uint256 hydDebt) = _createUndercollateralizedPosition(105);
+    |      ^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+   --> script/Deploy.s.sol:240:5:
+    |
+240 |     function deployTreasury() internal {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/invariant/InvariantBondNFT.t.sol:234:5:
+    |
+234 |     function invariant_Maturity_Always90Days() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+    --> test/unit/IssuanceController.t.sol:1098:5:
+     |
+1098 |     function test_ReentrancyProtection_Participate() public {
+     |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+    --> test/unit/IssuanceController.t.sol:1105:5:
+     |
+1105 |     function test_ReentrancyProtection_Claim() public {
+     |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+    --> test/unit/IssuanceController.t.sol:1182:5:
+     |
+1182 |     function test_Integration_WithProjectRegistry() public {
+     |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+    --> test/unit/IssuanceController.t.sol:1226:5:
+     |
+1226 |     function test_Integration_SafeERC20() public {
+     |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> test/unit/RWAPriceOracle.t.sol:81:3:
+   |
+81 |   function test_Constructor_Success() public {
+   |   ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> test/unit/RWAPriceOracle.t.sol:91:3:
+   |
+91 |   function test_GetPrice_ChainlinkOnly_Success() public {
+   |   ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/unit/RWAPriceOracle.t.sol:131:3:
+    |
+131 |   function test_GetFormattedPrice_Success() public {
+    |   ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/unit/Treasury.RWA.t.sol:695:3:
+    |
+695 |   function test_GetHealthFactor_NoPosition_ReturnsMax() public {
+    |   ^ (Relevant source part starts here and spans across multiple lines).
+
+Analysing contracts...
+Running tests...
+
+Ran 26 tests for test/unit/ProjectRegistry.t.sol:ProjectRegistryTest
+[PASS] test_ApproveIssuer_OnlyOwner() (gas: 17769)
+[PASS] test_Constructor_Success() (gas: 22648)
+[PASS] test_ExecuteVote_AlreadyExecuted_Reverts() (gas: 388648)
+[PASS] test_ExecuteVote_ApprovalSuccess() (gas: 465370)
+[PASS] test_ExecuteVote_EmitsEvent() (gas: 381795)
+[PASS] test_ExecuteVote_OnlyOwner() (gas: 259334)
+[PASS] test_ExecuteVote_RejectionSuccess() (gas: 391766)
+[PASS] test_ExecuteVote_VotingPeriodNotEnded_Reverts() (gas: 261868)
+[PASS] test_MultipleProjects_Success() (gas: 463344)
+[PASS] test_RevokeIssuer_OnlyOwner() (gas: 19953)
+[PASS] test_SubmitProject_EmitsEvent() (gas: 254179)
+[PASS] test_SubmitProject_EmptyComplianceDoc_Reverts() (gas: 30212)
+[PASS] test_SubmitProject_GasUsage() (gas: 206384)
+[PASS] test_SubmitProject_Success() (gas: 279045)
+[PASS] test_SubmitProject_UnapprovedIssuer_Reverts() (gas: 29458)
+[PASS] test_SubmitProject_ZeroSaleDuration_Reverts() (gas: 31915)
+[PASS] test_SubmitProject_ZeroTargetRaise_Reverts() (gas: 31230)
+[PASS] test_Vote_DuplicateVote_Reverts() (gas: 356959)
+[PASS] test_Vote_EmitsEvent() (gas: 357769)
+[PASS] test_Vote_ExactThreshold_Success() (gas: 391292)
+[PASS] test_Vote_GasUsage() (gas: 344961)
+[PASS] test_Vote_MultipleVoters_Success() (gas: 514555)
+[PASS] test_Vote_NonExistentProject_Reverts() (gas: 25089)
+[PASS] test_Vote_NotTokenOwner_Reverts() (gas: 268212)
+[PASS] test_Vote_Success() (gas: 352847)
+[PASS] test_VotingEscrowIntegration_Success() (gas: 42294)
+Suite result: ok. 26 passed; 0 failed; 0 skipped; finished in 13.83ms (12.67ms CPU time)
+
+Ran 33 tests for test/unit/RWAPriceOracle.t.sol:RWAPriceOracleTest
+[PASS] test_CircuitBreaker_LargeDeviation_Triggers() (gas: 192035)
+[PASS] test_CircuitBreaker_WithinThreshold_Succeeds() (gas: 191766)
+[PASS] test_Constructor_Success() (gas: 32546)
+[PASS] test_GetFormattedPrice_Success() (gas: 56760)
+[PASS] test_GetPrice_18Decimals_Success() (gas: 3507924)
+[PASS] test_GetPrice_6Decimals_Success() (gas: 3507740)
+[PASS] test_GetPrice_ChainlinkFails_UseNAVOnly() (gas: 159696)
+[PASS] test_GetPrice_ChainlinkOnly_Success() (gas: 53888)
+[PASS] test_GetPrice_DualSource_Success() (gas: 114767)
+[PASS] test_GetPrice_ExactlyStale_Reverts() (gas: 53321)
+[PASS] test_GetPrice_FutureTimestamp_Reverts() (gas: 71222)
+[FAIL: GetPrice should use < 50k gas] test_GetPrice_GasUsage_ChainlinkOnly() (gas: 57980)
+[PASS] test_GetPrice_GasUsage_DualSource() (gas: 116943)
+[PASS] test_GetPrice_GracePeriodNotOver_Reverts() (gas: 102360)
+[PASS] test_GetPrice_GracePeriodOver_Success() (gas: 108181)
+[PASS] test_GetPrice_InvalidRoundId_Reverts() (gas: 122322)
+[PASS] test_GetPrice_InvalidUpdatedAt_Reverts() (gas: 60569)
+[PASS] test_GetPrice_JustBeforeStale_Success() (gas: 57173)
+[PASS] test_GetPrice_MaxSafePrice_Success() (gas: 132094)
+[PASS] test_GetPrice_NegativePrice_Reverts() (gas: 128800)
+[PASS] test_GetPrice_SequencerDown_Reverts() (gas: 126212)
+[PASS] test_GetPrice_StaleNAV_FallbackToChainlink() (gas: 191259)
+[PASS] test_GetPrice_ZeroPrice_Reverts() (gas: 105025)
+[PASS] test_Pause_OwnerOnly_Success() (gas: 27290)
+[PASS] test_Pause_Unauthorized_Reverts() (gas: 16380)
+[PASS] test_SetTrustedOracle_OwnerOnly_Success() (gas: 25857)
+[PASS] test_SetTrustedOracle_Unauthorized_Reverts() (gas: 16643)
+[PASS] test_Unpause_OwnerOnly_Success() (gas: 72386)
+[PASS] test_UpdateNAV_EmitsEvent() (gas: 67847)
+[PASS] test_UpdateNAV_GasUsage() (gas: 68818)
+[PASS] test_UpdateNAV_Success() (gas: 70754)
+[PASS] test_UpdateNAV_Unauthorized_Reverts() (gas: 21820)
+[PASS] test_UpdateNAV_ZeroValue_Success() (gas: 48642)
+Suite result: FAILED. 32 passed; 1 failed; 0 skipped; finished in 13.92ms (13.33ms CPU time)
+
+Ran 20 tests for test/unit/VotingEscrowIntegration.t.sol:VotingEscrowIntegrationTest
+[PASS] test_Boundary_CreateLockFromBondNFT_MaxDuration() (gas: 210313)
+[PASS] test_Boundary_CreateLockFromBondNFT_MinDuration() (gas: 209738)
+[PASS] test_Boundary_CreateLockFromBondNFT_RevertWhen_DurationTooLong() (gas: 54769)
+[PASS] test_Boundary_CreateLockFromBondNFT_RevertWhen_DurationTooShort() (gas: 53857)
+[PASS] test_Boundary_FulfillRedemption_ZeroAmount() (gas: 56249)
+[PASS] test_Boundary_ReceiveBondSales_ZeroAmount() (gas: 50331)
+[PASS] test_Compatibility_ExistingCreateLockStillWorks() (gas: 205175)
+[PASS] test_Compatibility_ExistingTreasuryWithdrawStillWorks() (gas: 58782)
+[PASS] test_Exception_CreateLockFromBondNFT_RevertWhen_UnauthorizedCaller() (gas: 25948)
+[PASS] test_Exception_FulfillRedemption_RevertWhen_InsufficientBalance() (gas: 63731)
+[PASS] test_Exception_FulfillRedemption_RevertWhen_UnauthorizedCaller() (gas: 26700)
+[PASS] test_Exception_ReceiveBondSales_RevertWhen_UnauthorizedCaller() (gas: 24703)
+[PASS] test_Functional_CreateLockFromBondNFT_Success() (gas: 215756)
+[PASS] test_Functional_FulfillRedemption_Success() (gas: 103995)
+[PASS] test_Functional_ReceiveBondSales_Accumulation() (gas: 83342)
+[PASS] test_Functional_ReceiveBondSales_Success() (gas: 75846)
+[PASS] test_Integration_BondMaturityRedemption() (gas: 161191)
+[PASS] test_Integration_BondNFTToVeNFTConversion() (gas: 282762)
+[PASS] test_Security_CreateLockFromBondNFT_ReentrancyProtection() (gas: 430)
+[PASS] test_Security_FulfillRedemption_ReentrancyProtection() (gas: 1074)
+Suite result: ok. 20 passed; 0 failed; 0 skipped; finished in 15.13ms (13.21ms CPU time)
+
+Ran 5 tests for test/integration/BondNFT-VRF.integration.t.sol:BondNFTVRFIntegrationTest
+[PASS] test_Integration_VRF_CompleteDiceRollFlow() (gas: 444766)
+[PASS] test_Integration_VRF_GoldDiceCallback() (gas: 865925)
+[PASS] test_Integration_VRF_HybridMechanismCaps() (gas: 1827196)
+[PASS] test_Integration_VRF_MultipleUsersConcurrent() (gas: 777508)
+[PASS] test_Integration_VRF_RarityUpgradeOnCallback() (gas: 1184419)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 17.71ms (14.47ms CPU time)
+
+Ran 14 tests for test/unit/Treasury.Liquidation.t.sol:TreasuryLiquidationTest
+[PASS] test_DustPositionLiquidation_Success() (gas: 524960)
+[PASS] test_GetLiquidationInfo_QueryFunction() (gas: 501886)
+[PASS] test_IsLiquidatable_ViewFunction() (gas: 662632)
+[PASS] test_LiquidateAt115Threshold_Success() (gas: 512674)
+[PASS] test_LiquidateHealthyPosition_Reverts() (gas: 446988)
+[PASS] test_LiquidateNonExistentPosition_Reverts() (gas: 28642)
+[PASS] test_LiquidateZeroDebt_Reverts() (gas: 31347)
+[PASS] test_Liquidate_Undercollateralized_Success() (gas: 558246)
+[PASS] test_LiquidationGasUsage() (gas: 628724)
+[PASS] test_LiquidationReentrancyProtection() (gas: 614)
+[PASS] test_LiquidationWhenPaused_Reverts() (gas: 501315)
+[PASS] test_LiquidatorReceives4PercentPenalty() (gas: 525240)
+[PASS] test_PartialLiquidation_RestoresTo125_Success() (gas: 660592)
+[PASS] test_ProtocolReceives1PercentPenalty() (gas: 523700)
+Suite result: ok. 14 passed; 0 failed; 0 skipped; finished in 19.18ms (18.02ms CPU time)
+
+Ran 17 tests for test/unit/SettlementRouter.t.sol:SettlementRouterTest
+[PASS] test_Boundary_ConvertToVeNFT_RevertWhen_DurationTooLong() (gas: 287680)
+[PASS] test_Boundary_ConvertToVeNFT_RevertWhen_DurationTooShort() (gas: 288010)
+[PASS] test_Compatibility_BondNFTState() (gas: 406672)
+[PASS] test_Compatibility_MultipleUsersSettlement() (gas: 656149)
+[PASS] test_Exception_ConvertToVeNFT_RevertWhen_NotMatured() (gas: 286757)
+[PASS] test_Exception_ConvertToVeNFT_RevertWhen_NotOwner() (gas: 285950)
+[PASS] test_Exception_RedeemCash_RevertWhen_NotMatured() (gas: 286733)
+[PASS] test_Exception_RedeemCash_RevertWhen_NotOwner() (gas: 285374)
+[FAIL: Lock duration should be ~1 year: 39312000 !~= 31536000 (max delta: 86400, real delta: 7776000)] test_Functional_ConvertToVeNFT_Success() (gas: 528084)
+[PASS] test_Functional_EmitSettledToCash_Event() (gas: 293862)
+[PASS] test_Functional_EmitSettledToVeNFT_Event() (gas: 403682)
+[PASS] test_Functional_RedeemCash_Success() (gas: 302310)
+[PASS] test_Integration_ConvertToVeNFT_WithRemintRewards() (gas: 409355)
+[PASS] test_Integration_RedeemCash_TotalAmount() (gas: 299592)
+[PASS] test_Security_PreventDoubleSettlement() (gas: 411714)
+[PASS] test_Security_SettleToCash_ReentrancyProtection() (gas: 683)
+[PASS] test_Security_SettleToVeNFT_ReentrancyProtection() (gas: 1120)
+Suite result: FAILED. 16 passed; 1 failed; 0 skipped; finished in 21.40ms (19.03ms CPU time)
+
+Ran 25 tests for test/unit/Treasury.RWA.t.sol:TreasuryRWATest
+[PASS] test_AddRWAAsset_T1_Success() (gas: 106372)
+[PASS] test_AddRWAAsset_Unauthorized_Reverts() (gas: 23020)
+[PASS] test_DepositRWA_GasUsage() (gas: 423360)
+[PASS] test_DepositRWA_MinimumAmount() (gas: 425878)
+[PASS] test_DepositRWA_MultipleAssets_Success() (gas: 735873)
+[PASS] test_DepositRWA_T1_Success() (gas: 433691)
+[PASS] test_DepositRWA_T2_Success() (gas: 426591)
+[PASS] test_DepositRWA_T3_Success() (gas: 425786)
+[PASS] test_DepositRWA_UnauthorizedAsset_Reverts() (gas: 68508)
+[PASS] test_DepositRWA_ZeroAmount_Reverts() (gas: 115578)
+[PASS] test_GetAllUserPositions_MultipleAssets_Success() (gas: 731212)
+[PASS] test_GetHealthFactor_AfterPriceDrop_Decreases() (gas: 626094)
+[PASS] test_GetHealthFactor_DangerZone_Below100() (gas: 592465)
+[PASS] test_GetHealthFactor_HealthyZone_Above150() (gas: 454733)
+[PASS] test_GetHealthFactor_MultipleAssets_Success() (gas: 774097)
+[PASS] test_GetHealthFactor_NoPosition_ReturnsMax() (gas: 13622)
+[PASS] test_GetHealthFactor_SingleAsset_Success() (gas: 454871)
+[PASS] test_GetHealthFactor_WarningZone_100to150() (gas: 454999)
+[PASS] test_GetTotalCollateralValue_MultipleAssets_Success() (gas: 762944)
+[PASS] test_GetTotalDebtValue_MultipleAssets_Success() (gas: 720030)
+[PASS] test_RedeemRWA_AfterCooldown_Success() (gas: 437172)
+[PASS] test_RedeemRWA_BeforeCooldown_Reverts() (gas: 430377)
+[PASS] test_RedeemRWA_GasUsage() (gas: 434496)
+[PASS] test_RemoveRWAAsset_OwnerOnly_Success() (gas: 92509)
+[PASS] test_RemoveRWAAsset_Unauthorized_Reverts() (gas: 106683)
+Suite result: ok. 25 passed; 0 failed; 0 skipped; finished in 24.26ms (22.79ms CPU time)
+
+Ran 3 tests for test/integration/BondUserJourney.e2e.t.sol:BondUserJourneyE2ETest
+[PASS] test_E2E_AliceJourney_CashRedemption() (gas: 2496168)
+[PASS] test_E2E_BobJourney_VeNFTConversion() (gas: 2028742)
+[PASS] test_E2E_MultiUserCompetition() (gas: 3566709)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 29.01ms (24.48ms CPU time)
+
+Ran 42 tests for test/unit/IssuanceController.t.sol:IssuanceControllerTest
+[PASS] test_Claim_AlreadyClaimed() (gas: 555160)
+[PASS] test_Claim_BeforeFinalized() (gas: 355255)
+[PASS] test_Claim_EmitsEvent() (gas: 602177)
+[PASS] test_Claim_GasUsage() (gas: 545869)
+[PASS] test_Claim_NoContribution() (gas: 464583)
+[PASS] test_Claim_Success() (gas: 601787)
+[PASS] test_Constructor_Success() (gas: 36176)
+[PASS] test_Constructor_ZeroAddressReverts() (gas: 361354)
+[PASS] test_CreateSale_AlreadyExists() (gas: 290290)
+[FAIL: CreateSale should use < 220K gas: 233393 >= 220000] test_CreateSale_GasUsage() (gas: 280017)
+[PASS] test_CreateSale_MinimumExceedsMaximum() (gas: 95902)
+[PASS] test_CreateSale_NotProjectIssuer() (gas: 58374)
+[PASS] test_CreateSale_ProjectNotActive() (gas: 28174)
+[PASS] test_CreateSale_Success() (gas: 260870)
+[PASS] test_CreateSale_TransfersRWATokens() (gas: 259021)
+[PASS] test_CreateSale_ZeroMinimumRaise() (gas: 95846)
+[PASS] test_FeeDistribution_70_30Split() (gas: 483459)
+[PASS] test_FeeDistribution_EmitsEvent() (gas: 472873)
+[PASS] test_IntegerOverflow_Prevention() (gas: 264909)
+[PASS] test_Integration_SafeERC20() (gas: 1694)
+[PASS] test_Integration_WithProjectRegistry() (gas: 42214)
+[PASS] test_Integration_WithTreasury() (gas: 488115)
+[PASS] test_MultipleProjects_Isolation() (gas: 1521513)
+[PASS] test_OnlyIssuer_AddWhitelist() (gas: 286344)
+[PASS] test_OnlyOwner_FinalizeSale() (gas: 428301)
+[PASS] test_Participate_BelowMinimum() (gas: 265131)
+[PASS] test_Participate_EmitsEvent() (gas: 350929)
+[PASS] test_Participate_ExceedsMaximumPerUser() (gas: 264648)
+[PASS] test_Participate_ExceedsMaximumRaise() (gas: 363036)
+[PASS] test_Participate_GasUsage() (gas: 348851)
+[PASS] test_Participate_MaximumContribution() (gas: 370891)
+[PASS] test_Participate_MinimumContribution() (gas: 351534)
+[PASS] test_Participate_MultipleParticipants() (gas: 461889)
+[PASS] test_Participate_SaleEnded() (gas: 261701)
+[PASS] test_Participate_SaleNotActive() (gas: 24073)
+[PASS] test_Participate_Success() (gas: 359426)
+[PASS] test_ReentrancyProtection_Claim() (gas: 1124)
+[PASS] test_ReentrancyProtection_Participate() (gas: 825)
+[PASS] test_Refund_EmitsEvent() (gas: 405547)
+[PASS] test_Refund_WhenMinimumNotMet() (gas: 409040)
+[PASS] test_Whitelist_BatchAddRemove() (gas: 494408)
+[PASS] test_Whitelist_OnlyWhitelistedCanParticipate() (gas: 425098)
+Suite result: FAILED. 41 passed; 1 failed; 0 skipped; finished in 32.80ms (28.62ms CPU time)
+
+Ran 3 tests for test/integration/LaunchpadIntegration.t.sol:LaunchpadIntegrationTest
+[PASS] testIntegration_CompleteHappyPath() (gas: 1042423)
+[PASS] testIntegration_RejectedProject() (gas: 546355)
+[PASS] testIntegration_StateConsistency() (gas: 893500)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 6.66ms (5.29ms CPU time)
+
+Ran 47 tests for test/unit/RemintController.t.sol:RemintControllerTest
+[FAIL: RemintController: caller is not NFT owner] test_Boundary_DiamondDiceRange() (gas: 40293)
+[FAIL: RemintController: caller is not NFT owner] test_Boundary_GoldDiceRange() (gas: 38683)
+[PASS] test_Boundary_MaxTaskCompletion() (gas: 853527)
+[PASS] test_Boundary_NormalDiceRange() (gas: 4517548)
+[PASS] test_Boundary_WeekNumber_Overflow() (gas: 203489)
+[PASS] test_Compatibility_ERC721Standard() (gas: 262128)
+[PASS] test_Compatibility_IntegrationWithBondNFT() (gas: 183259)
+[PASS] test_Compatibility_MultipleNFTs_SameOwner() (gas: 1342166)
+[PASS] test_Compatibility_VRFCoordinatorV2() (gas: 364130)
+[PASS] test_CompleteSocialTask_RevertWhen_AlreadyCompleted() (gas: 157772)
+[PASS] test_CompleteSocialTask_RevertWhen_InvalidSignature() (gas: 47412)
+[PASS] test_CompleteSocialTask_RevertWhen_NotOwner() (gas: 35908)
+[PASS] test_CompleteSocialTask_Success() (gas: 150255)
+[PASS] test_Constructor_RevertWhen_ZeroAddressBondNFT() (gas: 102087)
+[PASS] test_Constructor_RevertWhen_ZeroAddressOracle() (gas: 102144)
+[PASS] test_Constructor_RevertWhen_ZeroAddressTreasury() (gas: 103721)
+[PASS] test_Constructor_Success() (gas: 34088)
+[FAIL: RemintController: caller is not NFT owner] test_DiceUpgrade_EmitEvent() (gas: 38203)
+[FAIL: RemintController: caller is not NFT owner] test_DiceUpgrade_ToDiamond() (gas: 39977)
+[PASS] test_DiceUpgrade_ToGold() (gas: 517564)
+[PASS] test_Exception_CompleteSocialTask_EmptySignature() (gas: 30460)
+[PASS] test_Exception_CompleteSocialTask_EmptyTaskId() (gas: 36541)
+[PASS] test_Exception_GetLeaderboard_InvalidType() (gas: 15085)
+[PASS] test_Exception_GetLeaderboard_ZeroLimit() (gas: 13695)
+[PASS] test_Exception_RollDice_NonexistentToken() (gas: 28202)
+[PASS] test_Exception_RollDice_ZeroTokenId() (gas: 29665)
+[FAIL: RemintController: caller is not NFT owner] test_Leaderboard_LuckiestRollers() (gas: 39287)
+[FAIL: RemintController: caller is not NFT owner] test_Leaderboard_SocialChampions() (gas: 38275)
+[PASS] test_Leaderboard_Top10Limit() (gas: 23728607)
+[PASS] test_Leaderboard_TopEarners() (gas: 661176)
+[FAIL: RemintController: caller is not NFT owner] test_Performance_BatchSocialTasks() (gas: 38159)
+[PASS] test_Performance_LeaderboardUpdate() (gas: 11304524)
+[FAIL: RemintController: caller is not NFT owner] test_ProcessDiceResult_DiamondDice() (gas: 38114)
+[FAIL: RemintController: caller is not NFT owner] test_ProcessDiceResult_GoldDice() (gas: 39632)
+[PASS] test_ProcessDiceResult_NormalDice_MaxRoll() (gas: 363128)
+[PASS] test_ProcessDiceResult_NormalDice_MinRoll() (gas: 362646)
+[PASS] test_ReferralReward_Deposited() (gas: 199071)
+[PASS] test_ReferralReward_MultipleReferrals() (gas: 330550)
+[PASS] test_RollDice_ResetAfterWeek() (gas: 484020)
+[PASS] test_RollDice_RevertWhen_NoRollsLeft() (gas: 370832)
+[PASS] test_RollDice_RevertWhen_NotOwner() (gas: 30231)
+[PASS] test_RollDice_Success_NormalDice() (gas: 192976)
+[PASS] test_Security_FrontRunning_DiceRoll() (gas: 197230)
+[PASS] test_Security_OwnershipTransfer_MidGame() (gas: 441062)
+[PASS] test_Security_ReentrancyProtection_RollDice() (gas: 183340)
+[PASS] test_Security_SignatureReplay() (gas: 157174)
+[PASS] test_Security_UnauthorizedOracle() (gas: 46056)
+Suite result: FAILED. 38 passed; 9 failed; 0 skipped; finished in 117.40ms (114.08ms CPU time)
+
+Ran 4 tests for test/invariant/InvariantVotingEscrow.t.sol:InvariantVotingEscrow
+[PASS] invariant_callSummary() (runs: 100, calls: 1500, reverts: 0)
+
+╭---------------------+--------------------+-------+---------+----------╮
+| Contract            | Selector           | Calls | Reverts | Discards |
++=======================================================================+
+| VotingEscrowHandler | createLock         | 386   | 0       | 0        |
+|---------------------+--------------------+-------+---------+----------|
+| VotingEscrowHandler | increaseLockAmount | 381   | 0       | 0        |
+|---------------------+--------------------+-------+---------+----------|
+| VotingEscrowHandler | increaseLockTime   | 378   | 0       | 0        |
+|---------------------+--------------------+-------+---------+----------|
+| VotingEscrowHandler | withdraw           | 355   | 0       | 0        |
+╰---------------------+--------------------+-------+---------+----------╯
+
+[PASS] invariant_linearDecay() (runs: 100, calls: 1500, reverts: 0)
+
+╭---------------------+--------------------+-------+---------+----------╮
+| Contract            | Selector           | Calls | Reverts | Discards |
++=======================================================================+
+| VotingEscrowHandler | createLock         | 386   | 0       | 0        |
+|---------------------+--------------------+-------+---------+----------|
+| VotingEscrowHandler | increaseLockAmount | 381   | 0       | 0        |
+|---------------------+--------------------+-------+---------+----------|
+| VotingEscrowHandler | increaseLockTime   | 378   | 0       | 0        |
+|---------------------+--------------------+-------+---------+----------|
+| VotingEscrowHandler | withdraw           | 355   | 0       | 0        |
+╰---------------------+--------------------+-------+---------+----------╯
+
+[PASS] invariant_noEarlyWithdrawal() (runs: 100, calls: 1500, reverts: 0)
+
+╭---------------------+--------------------+-------+---------+----------╮
+| Contract            | Selector           | Calls | Reverts | Discards |
++=======================================================================+
+| VotingEscrowHandler | createLock         | 386   | 0       | 0        |
+|---------------------+--------------------+-------+---------+----------|
+| VotingEscrowHandler | increaseLockAmount | 381   | 0       | 0        |
+|---------------------+--------------------+-------+---------+----------|
+| VotingEscrowHandler | increaseLockTime   | 378   | 0       | 0        |
+|---------------------+--------------------+-------+---------+----------|
+| VotingEscrowHandler | withdraw           | 355   | 0       | 0        |
+╰---------------------+--------------------+-------+---------+----------╯
+
+[PASS] invariant_votingPowerBounded() (runs: 100, calls: 1500, reverts: 0)
+
+╭---------------------+--------------------+-------+---------+----------╮
+| Contract            | Selector           | Calls | Reverts | Discards |
++=======================================================================+
+| VotingEscrowHandler | createLock         | 386   | 0       | 0        |
+|---------------------+--------------------+-------+---------+----------|
+| VotingEscrowHandler | increaseLockAmount | 381   | 0       | 0        |
+|---------------------+--------------------+-------+---------+----------|
+| VotingEscrowHandler | increaseLockTime   | 378   | 0       | 0        |
+|---------------------+--------------------+-------+---------+----------|
+| VotingEscrowHandler | withdraw           | 355   | 0       | 0        |
+╰---------------------+--------------------+-------+---------+----------╯
+
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 348.69ms (659.60ms CPU time)
+
+Ran 52 tests for test/unit/RWABondNFT.t.sol:RWABondNFTTest
+[PASS] test_BaseYield_AfterMaturity() (gas: 276225)
+[PASS] test_BaseYield_At45Days() (gas: 275834)
+[PASS] test_BaseYield_At90Days() (gas: 276733)
+[PASS] test_BaseYield_AtMinting() (gas: 274754)
+[PASS] test_BaseYield_BoundaryAt1Second() (gas: 276395)
+[PASS] test_BaseYield_BoundaryAtExactMaturity() (gas: 275284)
+[PASS] test_CalculateBaseYield_RevertWhen_NonexistentToken() (gas: 16478)
+[PASS] test_CalculateYield_Gas() (gas: 276298)
+[PASS] test_Constructor_RevertWhen_ZeroAddressTreasury() (gas: 150810)
+[PASS] test_Constructor_RevertWhen_ZeroAddressUSDC() (gas: 150880)
+[PASS] test_Constructor_RevertWhen_ZeroAddressVRFCoordinator() (gas: 150633)
+[PASS] test_Constructor_Success() (gas: 37926)
+[PASS] test_ERC721_Approve() (gas: 303959)
+[PASS] test_ERC721_BalanceOf() (gas: 617591)
+[PASS] test_ERC721_OwnerOf() (gas: 270584)
+[PASS] test_ERC721_SetApprovalForAll() (gas: 47310)
+[PASS] test_ERC721_SupportsInterface() (gas: 12798)
+[PASS] test_ERC721_TransferFrom() (gas: 308835)
+[PASS] test_GetBondInfo_RevertWhen_NonexistentToken() (gas: 16330)
+[PASS] test_IntegerOverflow_Protection() (gas: 26801)
+[PASS] test_IsMatured_AfterMaturity() (gas: 271697)
+[PASS] test_IsMatured_AtMaturity() (gas: 272757)
+[PASS] test_IsMatured_BeforeMaturity() (gas: 276682)
+[PASS] test_Mint_ExactlyMaxSupply() (gas: 869495241)
+[FAIL: Batch mint of 10 should use < 1.7M gas] test_Mint_Gas_BatchMint10() (gas: 1833487)
+[FAIL: Single mint should use < 250k gas] test_Mint_Gas_SingleNFT() (gas: 272659)
+[PASS] test_Mint_MultipleNFTs_Success() (gas: 1000248)
+[PASS] test_Mint_OneBeforeMaxSupply() (gas: 869528671)
+[PASS] test_Mint_OneOverMaxSupply() (gas: 869504514)
+[PASS] test_Mint_RevertWhen_ExceedsMaxSupply() (gas: 869505332)
+[PASS] test_Mint_RevertWhen_InsufficientAllowance() (gas: 71753)
+[PASS] test_Mint_RevertWhen_InsufficientUSDCBalance() (gas: 100444)
+[PASS] test_Mint_RevertWhen_Paused() (gas: 46930)
+[PASS] test_Mint_RevertWhen_ZeroQuantity() (gas: 23743)
+[PASS] test_Mint_SingleNFT_Success() (gas: 307945)
+[PASS] test_Name() (gas: 16781)
+[PASS] test_OnlyOwner_Pause() (gas: 19037)
+[PASS] test_OnlyOwner_SetTreasury() (gas: 19898)
+[PASS] test_OnlyOwner_Unpause() (gas: 48645)
+[PASS] test_OpenSea_Compatibility() (gas: 400674)
+[PASS] test_Rarity_BoundaryTransitions() (gas: 325696)
+[PASS] test_Rarity_DiamondTier() (gas: 401016)
+[PASS] test_Rarity_GoldTier() (gas: 400897)
+[PASS] test_Rarity_LegendaryTier() (gas: 399713)
+[PASS] test_Rarity_SilverTier() (gas: 402993)
+[PASS] test_Reentrancy_Protection() (gas: 268827)
+[PASS] test_SetTreasury_RevertWhen_ZeroAddress() (gas: 18534)
+[PASS] test_Symbol() (gas: 16942)
+[PASS] test_TokenURI_BronzeTier() (gas: 398261)
+[PASS] test_TokenURI_RevertWhen_NonexistentToken() (gas: 17371)
+[PASS] test_TotalYield_WithoutRemint() (gas: 277698)
+[PASS] test_Transfer_Success() (gas: 300556)
+Suite result: FAILED. 50 passed; 2 failed; 0 skipped; finished in 445.93ms (983.19ms CPU time)
+
+Ran 5 tests for test/invariant/InvariantPSM.t.sol:InvariantPSM
+[PASS] invariant_1to1Peg() (runs: 100, calls: 1500, reverts: 0)
+
+╭------------+--------------------+-------+---------+----------╮
+| Contract   | Selector           | Calls | Reverts | Discards |
++==============================================================+
+| PSMHandler | swapHYDForUSDC     | 305   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | swapUSDCForHYD     | 296   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | updateFeeIn        | 324   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | updateFeeOut       | 299   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | updateMaxMintedHYD | 276   | 0       | 0        |
+╰------------+--------------------+-------+---------+----------╯
+
+[PASS] invariant_callSummary() (runs: 100, calls: 1500, reverts: 0)
+
+╭------------+--------------------+-------+---------+----------╮
+| Contract   | Selector           | Calls | Reverts | Discards |
++==============================================================+
+| PSMHandler | swapHYDForUSDC     | 305   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | swapUSDCForHYD     | 296   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | updateFeeIn        | 324   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | updateFeeOut       | 299   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | updateMaxMintedHYD | 276   | 0       | 0        |
+╰------------+--------------------+-------+---------+----------╯
+
+[PASS] invariant_feeAccuracy() (runs: 100, calls: 1500, reverts: 0)
+
+╭------------+--------------------+-------+---------+----------╮
+| Contract   | Selector           | Calls | Reverts | Discards |
++==============================================================+
+| PSMHandler | swapHYDForUSDC     | 305   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | swapUSDCForHYD     | 296   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | updateFeeIn        | 324   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | updateFeeOut       | 299   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | updateMaxMintedHYD | 276   | 0       | 0        |
+╰------------+--------------------+-------+---------+----------╯
+
+[PASS] invariant_maxMintNotExceeded() (runs: 100, calls: 1500, reverts: 0)
+
+╭------------+--------------------+-------+---------+----------╮
+| Contract   | Selector           | Calls | Reverts | Discards |
++==============================================================+
+| PSMHandler | swapHYDForUSDC     | 305   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | swapUSDCForHYD     | 296   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | updateFeeIn        | 324   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | updateFeeOut       | 299   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | updateMaxMintedHYD | 276   | 0       | 0        |
+╰------------+--------------------+-------+---------+----------╯
+
+[PASS] invariant_reserveCoversSupply() (runs: 100, calls: 1500, reverts: 0)
+
+╭------------+--------------------+-------+---------+----------╮
+| Contract   | Selector           | Calls | Reverts | Discards |
++==============================================================+
+| PSMHandler | swapHYDForUSDC     | 305   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | swapUSDCForHYD     | 296   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | updateFeeIn        | 324   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | updateFeeOut       | 299   | 0       | 0        |
+|------------+--------------------+-------+---------+----------|
+| PSMHandler | updateMaxMintedHYD | 276   | 0       | 0        |
+╰------------+--------------------+-------+---------+----------╯
+
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 543.63ms (1.15s CPU time)
+
+Ran 3 tests for test/invariant/InvariantGaugeController.t.sol:InvariantGaugeController
+[PASS] invariant_batchVoteConsistency() (runs: 100, calls: 1500, reverts: 0)
+
+╭------------------------+-------------+-------+---------+----------╮
+| Contract               | Selector    | Calls | Reverts | Discards |
++===================================================================+
+| GaugeControllerHandler | addGauge    | 390   | 0       | 0        |
+|------------------------+-------------+-------+---------+----------|
+| GaugeControllerHandler | batchVote   | 381   | 0       | 0        |
+|------------------------+-------------+-------+---------+----------|
+| GaugeControllerHandler | createVeNFT | 370   | 0       | 0        |
+|------------------------+-------------+-------+---------+----------|
+| GaugeControllerHandler | vote        | 359   | 0       | 0        |
+╰------------------------+-------------+-------+---------+----------╯
+
+[PASS] invariant_callSummary() (runs: 100, calls: 1500, reverts: 0)
+
+╭------------------------+-------------+-------+---------+----------╮
+| Contract               | Selector    | Calls | Reverts | Discards |
++===================================================================+
+| GaugeControllerHandler | addGauge    | 390   | 0       | 0        |
+|------------------------+-------------+-------+---------+----------|
+| GaugeControllerHandler | batchVote   | 381   | 0       | 0        |
+|------------------------+-------------+-------+---------+----------|
+| GaugeControllerHandler | createVeNFT | 370   | 0       | 0        |
+|------------------------+-------------+-------+---------+----------|
+| GaugeControllerHandler | vote        | 359   | 0       | 0        |
+╰------------------------+-------------+-------+---------+----------╯
+
+[PASS] invariant_totalWeight100Percent() (runs: 100, calls: 1500, reverts: 0)
+
+╭------------------------+-------------+-------+---------+----------╮
+| Contract               | Selector    | Calls | Reverts | Discards |
++===================================================================+
+| GaugeControllerHandler | addGauge    | 390   | 0       | 0        |
+|------------------------+-------------+-------+---------+----------|
+| GaugeControllerHandler | batchVote   | 381   | 0       | 0        |
+|------------------------+-------------+-------+---------+----------|
+| GaugeControllerHandler | createVeNFT | 370   | 0       | 0        |
+|------------------------+-------------+-------+---------+----------|
+| GaugeControllerHandler | vote        | 359   | 0       | 0        |
+╰------------------------+-------------+-------+---------+----------╯
+
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 603.48ms (870.71ms CPU time)
+
+Ran 3 tests for test/invariant/InvariantDEX.t.sol:InvariantDEX
+[PASS] invariant_callSummary() (runs: 100, calls: 1500, reverts: 0)
+
+╭----------------+---------------------+-------+---------+----------╮
+| Contract       | Selector            | Calls | Reverts | Discards |
++===================================================================+
+| DEXPairHandler | addLiquidity        | 403   | 0       | 0        |
+|----------------+---------------------+-------+---------+----------|
+| DEXPairHandler | removeLiquidity     | 371   | 0       | 0        |
+|----------------+---------------------+-------+---------+----------|
+| DEXPairHandler | swapToken0ForToken1 | 377   | 0       | 0        |
+|----------------+---------------------+-------+---------+----------|
+| DEXPairHandler | swapToken1ForToken0 | 349   | 0       | 0        |
+╰----------------+---------------------+-------+---------+----------╯
+
+[PASS] invariant_feeAccounting() (runs: 100, calls: 1500, reverts: 0)
+
+╭----------------+---------------------+-------+---------+----------╮
+| Contract       | Selector            | Calls | Reverts | Discards |
++===================================================================+
+| DEXPairHandler | addLiquidity        | 403   | 0       | 0        |
+|----------------+---------------------+-------+---------+----------|
+| DEXPairHandler | removeLiquidity     | 371   | 0       | 0        |
+|----------------+---------------------+-------+---------+----------|
+| DEXPairHandler | swapToken0ForToken1 | 377   | 0       | 0        |
+|----------------+---------------------+-------+---------+----------|
+| DEXPairHandler | swapToken1ForToken0 | 349   | 0       | 0        |
+╰----------------+---------------------+-------+---------+----------╯
+
+[PASS] invariant_kInvariantHolds() (runs: 100, calls: 1500, reverts: 0)
+
+╭----------------+---------------------+-------+---------+----------╮
+| Contract       | Selector            | Calls | Reverts | Discards |
++===================================================================+
+| DEXPairHandler | addLiquidity        | 403   | 0       | 0        |
+|----------------+---------------------+-------+---------+----------|
+| DEXPairHandler | removeLiquidity     | 371   | 0       | 0        |
+|----------------+---------------------+-------+---------+----------|
+| DEXPairHandler | swapToken0ForToken1 | 377   | 0       | 0        |
+|----------------+---------------------+-------+---------+----------|
+| DEXPairHandler | swapToken1ForToken0 | 349   | 0       | 0        |
+╰----------------+---------------------+-------+---------+----------╯
+
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 803.10ms (1.77s CPU time)
+
+Ran 8 tests for test/invariant/InvariantBondNFT.t.sol:InvariantBondNFTTest
+[PASS] invariant_BaseYield_Always0Point5USDC() (runs: 100, calls: 1500, reverts: 1301)
+
+╭----------------------+-----------------------------+-------+---------+----------╮
+| Contract             | Selector                    | Calls | Reverts | Discards |
++=================================================================================+
+| HYD                  | approve                     | 26    | 1       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | authorizeMinter             | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | blacklist                   | 34    | 34      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | burn                        | 20    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | burnFrom                    | 24    | 24      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | grantRole                   | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | mint                        | 19    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | pause                       | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | renounceOwnership           | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | revokeMinter                | 25    | 25      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transfer                    | 27    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transferFrom                | 25    | 24      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transferOwnership           | 33    | 33      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | unblacklist                 | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | unpause                     | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | approve                     | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | authorizeContract           | 25    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | createLock                  | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | createLockFromBondNFT       | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | deauthorizeContract         | 20    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | increaseAmount              | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | increaseUnlockTime          | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | safeTransferFrom            | 47    | 47      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | setApprovalForAll           | 27    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | transferFrom                | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | withdraw                    | 16    | 16      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | approve                     | 28    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | burn                        | 28    | 28      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | mint                        | 20    | 1       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | transfer                    | 29    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | transferFrom                | 15    | 15      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockVRFCoordinatorV2 | fulfillRandomWords          | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockVRFCoordinatorV2 | requestRandomWords          | 22    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | _requestRandomWordsExternal | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | acceptOwnership             | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | approve                     | 27    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | burn                        | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | mint                        | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | pause                       | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | rawFulfillRandomWords       | 29    | 29      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | renounceOwnership           | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | requestDiceRoll             | 30    | 30      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | safeTransferFrom            | 56    | 56      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setApprovalForAll           | 29    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setRemintController         | 20    | 20      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setSettlementRouter         | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setTreasury                 | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setVRFSubscriptionId        | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | transferFrom                | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | transferOwnership           | 19    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | unpause                     | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | acceptOwnership             | 16    | 16      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | completeSocialTask          | 32    | 32      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | rawFulfillRandomWords       | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | renounceOwnership           | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | rollDice                    | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | setOracle                   | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | setTreasury                 | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | transferOwnership           | 30    | 30      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | withdrawUSDC                | 11    | 11      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| SettlementRouter     | settleToCash                | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| SettlementRouter     | settleToVeNFT               | 28    | 28      | 0        |
+╰----------------------+-----------------------------+-------+---------+----------╯
+
+[PASS] invariant_Leaderboard_TopEarners_Sorted() (runs: 100, calls: 1500, reverts: 1301)
+
+╭----------------------+-----------------------------+-------+---------+----------╮
+| Contract             | Selector                    | Calls | Reverts | Discards |
++=================================================================================+
+| HYD                  | approve                     | 26    | 1       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | authorizeMinter             | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | blacklist                   | 34    | 34      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | burn                        | 20    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | burnFrom                    | 24    | 24      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | grantRole                   | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | mint                        | 19    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | pause                       | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | renounceOwnership           | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | revokeMinter                | 25    | 25      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transfer                    | 27    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transferFrom                | 25    | 24      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transferOwnership           | 33    | 33      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | unblacklist                 | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | unpause                     | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | approve                     | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | authorizeContract           | 25    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | createLock                  | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | createLockFromBondNFT       | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | deauthorizeContract         | 20    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | increaseAmount              | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | increaseUnlockTime          | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | safeTransferFrom            | 47    | 47      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | setApprovalForAll           | 27    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | transferFrom                | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | withdraw                    | 16    | 16      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | approve                     | 28    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | burn                        | 28    | 28      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | mint                        | 20    | 1       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | transfer                    | 29    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | transferFrom                | 15    | 15      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockVRFCoordinatorV2 | fulfillRandomWords          | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockVRFCoordinatorV2 | requestRandomWords          | 22    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | _requestRandomWordsExternal | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | acceptOwnership             | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | approve                     | 27    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | burn                        | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | mint                        | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | pause                       | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | rawFulfillRandomWords       | 29    | 29      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | renounceOwnership           | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | requestDiceRoll             | 30    | 30      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | safeTransferFrom            | 56    | 56      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setApprovalForAll           | 29    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setRemintController         | 20    | 20      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setSettlementRouter         | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setTreasury                 | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setVRFSubscriptionId        | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | transferFrom                | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | transferOwnership           | 19    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | unpause                     | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | acceptOwnership             | 16    | 16      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | completeSocialTask          | 32    | 32      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | rawFulfillRandomWords       | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | renounceOwnership           | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | rollDice                    | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | setOracle                   | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | setTreasury                 | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | transferOwnership           | 30    | 30      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | withdrawUSDC                | 11    | 11      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| SettlementRouter     | settleToCash                | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| SettlementRouter     | settleToVeNFT               | 28    | 28      | 0        |
+╰----------------------+-----------------------------+-------+---------+----------╯
+
+[PASS] invariant_Maturity_Always90Days() (runs: 100, calls: 1500, reverts: 1301)
+
+╭----------------------+-----------------------------+-------+---------+----------╮
+| Contract             | Selector                    | Calls | Reverts | Discards |
++=================================================================================+
+| HYD                  | approve                     | 26    | 1       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | authorizeMinter             | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | blacklist                   | 34    | 34      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | burn                        | 20    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | burnFrom                    | 24    | 24      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | grantRole                   | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | mint                        | 19    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | pause                       | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | renounceOwnership           | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | revokeMinter                | 25    | 25      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transfer                    | 27    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transferFrom                | 25    | 24      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transferOwnership           | 33    | 33      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | unblacklist                 | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | unpause                     | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | approve                     | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | authorizeContract           | 25    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | createLock                  | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | createLockFromBondNFT       | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | deauthorizeContract         | 20    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | increaseAmount              | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | increaseUnlockTime          | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | safeTransferFrom            | 47    | 47      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | setApprovalForAll           | 27    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | transferFrom                | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | withdraw                    | 16    | 16      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | approve                     | 28    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | burn                        | 28    | 28      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | mint                        | 20    | 1       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | transfer                    | 29    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | transferFrom                | 15    | 15      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockVRFCoordinatorV2 | fulfillRandomWords          | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockVRFCoordinatorV2 | requestRandomWords          | 22    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | _requestRandomWordsExternal | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | acceptOwnership             | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | approve                     | 27    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | burn                        | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | mint                        | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | pause                       | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | rawFulfillRandomWords       | 29    | 29      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | renounceOwnership           | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | requestDiceRoll             | 30    | 30      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | safeTransferFrom            | 56    | 56      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setApprovalForAll           | 29    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setRemintController         | 20    | 20      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setSettlementRouter         | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setTreasury                 | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setVRFSubscriptionId        | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | transferFrom                | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | transferOwnership           | 19    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | unpause                     | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | acceptOwnership             | 16    | 16      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | completeSocialTask          | 32    | 32      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | rawFulfillRandomWords       | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | renounceOwnership           | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | rollDice                    | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | setOracle                   | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | setTreasury                 | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | transferOwnership           | 30    | 30      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | withdrawUSDC                | 11    | 11      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| SettlementRouter     | settleToCash                | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| SettlementRouter     | settleToVeNFT               | 28    | 28      | 0        |
+╰----------------------+-----------------------------+-------+---------+----------╯
+
+[PASS] invariant_Ownership_Consistent() (runs: 100, calls: 1500, reverts: 1301)
+
+╭----------------------+-----------------------------+-------+---------+----------╮
+| Contract             | Selector                    | Calls | Reverts | Discards |
++=================================================================================+
+| HYD                  | approve                     | 26    | 1       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | authorizeMinter             | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | blacklist                   | 34    | 34      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | burn                        | 20    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | burnFrom                    | 24    | 24      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | grantRole                   | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | mint                        | 19    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | pause                       | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | renounceOwnership           | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | revokeMinter                | 25    | 25      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transfer                    | 27    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transferFrom                | 25    | 24      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transferOwnership           | 33    | 33      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | unblacklist                 | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | unpause                     | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | approve                     | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | authorizeContract           | 25    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | createLock                  | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | createLockFromBondNFT       | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | deauthorizeContract         | 20    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | increaseAmount              | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | increaseUnlockTime          | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | safeTransferFrom            | 47    | 47      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | setApprovalForAll           | 27    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | transferFrom                | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | withdraw                    | 16    | 16      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | approve                     | 28    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | burn                        | 28    | 28      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | mint                        | 20    | 1       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | transfer                    | 29    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | transferFrom                | 15    | 15      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockVRFCoordinatorV2 | fulfillRandomWords          | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockVRFCoordinatorV2 | requestRandomWords          | 22    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | _requestRandomWordsExternal | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | acceptOwnership             | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | approve                     | 27    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | burn                        | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | mint                        | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | pause                       | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | rawFulfillRandomWords       | 29    | 29      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | renounceOwnership           | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | requestDiceRoll             | 30    | 30      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | safeTransferFrom            | 56    | 56      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setApprovalForAll           | 29    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setRemintController         | 20    | 20      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setSettlementRouter         | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setTreasury                 | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setVRFSubscriptionId        | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | transferFrom                | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | transferOwnership           | 19    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | unpause                     | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | acceptOwnership             | 16    | 16      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | completeSocialTask          | 32    | 32      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | rawFulfillRandomWords       | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | renounceOwnership           | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | rollDice                    | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | setOracle                   | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | setTreasury                 | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | transferOwnership           | 30    | 30      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | withdrawUSDC                | 11    | 11      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| SettlementRouter     | settleToCash                | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| SettlementRouter     | settleToVeNFT               | 28    | 28      | 0        |
+╰----------------------+-----------------------------+-------+---------+----------╯
+
+[PASS] invariant_Remint_NeverExceedsLayer2Cap() (runs: 100, calls: 1500, reverts: 1301)
+
+╭----------------------+-----------------------------+-------+---------+----------╮
+| Contract             | Selector                    | Calls | Reverts | Discards |
++=================================================================================+
+| HYD                  | approve                     | 26    | 1       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | authorizeMinter             | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | blacklist                   | 34    | 34      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | burn                        | 20    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | burnFrom                    | 24    | 24      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | grantRole                   | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | mint                        | 19    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | pause                       | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | renounceOwnership           | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | revokeMinter                | 25    | 25      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transfer                    | 27    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transferFrom                | 25    | 24      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transferOwnership           | 33    | 33      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | unblacklist                 | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | unpause                     | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | approve                     | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | authorizeContract           | 25    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | createLock                  | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | createLockFromBondNFT       | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | deauthorizeContract         | 20    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | increaseAmount              | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | increaseUnlockTime          | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | safeTransferFrom            | 47    | 47      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | setApprovalForAll           | 27    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | transferFrom                | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | withdraw                    | 16    | 16      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | approve                     | 28    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | burn                        | 28    | 28      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | mint                        | 20    | 1       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | transfer                    | 29    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | transferFrom                | 15    | 15      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockVRFCoordinatorV2 | fulfillRandomWords          | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockVRFCoordinatorV2 | requestRandomWords          | 22    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | _requestRandomWordsExternal | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | acceptOwnership             | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | approve                     | 27    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | burn                        | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | mint                        | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | pause                       | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | rawFulfillRandomWords       | 29    | 29      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | renounceOwnership           | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | requestDiceRoll             | 30    | 30      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | safeTransferFrom            | 56    | 56      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setApprovalForAll           | 29    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setRemintController         | 20    | 20      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setSettlementRouter         | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setTreasury                 | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setVRFSubscriptionId        | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | transferFrom                | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | transferOwnership           | 19    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | unpause                     | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | acceptOwnership             | 16    | 16      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | completeSocialTask          | 32    | 32      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | rawFulfillRandomWords       | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | renounceOwnership           | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | rollDice                    | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | setOracle                   | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | setTreasury                 | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | transferOwnership           | 30    | 30      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | withdrawUSDC                | 11    | 11      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| SettlementRouter     | settleToCash                | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| SettlementRouter     | settleToVeNFT               | 28    | 28      | 0        |
+╰----------------------+-----------------------------+-------+---------+----------╯
+
+[PASS] invariant_TotalRemint_NeverExceedsGlobalPool() (runs: 100, calls: 1500, reverts: 1301)
+
+╭----------------------+-----------------------------+-------+---------+----------╮
+| Contract             | Selector                    | Calls | Reverts | Discards |
++=================================================================================+
+| HYD                  | approve                     | 26    | 1       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | authorizeMinter             | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | blacklist                   | 34    | 34      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | burn                        | 20    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | burnFrom                    | 24    | 24      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | grantRole                   | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | mint                        | 19    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | pause                       | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | renounceOwnership           | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | revokeMinter                | 25    | 25      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transfer                    | 27    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transferFrom                | 25    | 24      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transferOwnership           | 33    | 33      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | unblacklist                 | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | unpause                     | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | approve                     | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | authorizeContract           | 25    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | createLock                  | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | createLockFromBondNFT       | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | deauthorizeContract         | 20    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | increaseAmount              | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | increaseUnlockTime          | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | safeTransferFrom            | 47    | 47      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | setApprovalForAll           | 27    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | transferFrom                | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | withdraw                    | 16    | 16      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | approve                     | 28    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | burn                        | 28    | 28      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | mint                        | 20    | 1       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | transfer                    | 29    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | transferFrom                | 15    | 15      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockVRFCoordinatorV2 | fulfillRandomWords          | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockVRFCoordinatorV2 | requestRandomWords          | 22    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | _requestRandomWordsExternal | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | acceptOwnership             | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | approve                     | 27    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | burn                        | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | mint                        | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | pause                       | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | rawFulfillRandomWords       | 29    | 29      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | renounceOwnership           | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | requestDiceRoll             | 30    | 30      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | safeTransferFrom            | 56    | 56      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setApprovalForAll           | 29    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setRemintController         | 20    | 20      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setSettlementRouter         | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setTreasury                 | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setVRFSubscriptionId        | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | transferFrom                | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | transferOwnership           | 19    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | unpause                     | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | acceptOwnership             | 16    | 16      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | completeSocialTask          | 32    | 32      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | rawFulfillRandomWords       | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | renounceOwnership           | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | rollDice                    | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | setOracle                   | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | setTreasury                 | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | transferOwnership           | 30    | 30      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | withdrawUSDC                | 11    | 11      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| SettlementRouter     | settleToCash                | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| SettlementRouter     | settleToVeNFT               | 28    | 28      | 0        |
+╰----------------------+-----------------------------+-------+---------+----------╯
+
+[PASS] invariant_TotalSupply_NeverExceedsMax() (runs: 100, calls: 1500, reverts: 1301)
+
+╭----------------------+-----------------------------+-------+---------+----------╮
+| Contract             | Selector                    | Calls | Reverts | Discards |
++=================================================================================+
+| HYD                  | approve                     | 26    | 1       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | authorizeMinter             | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | blacklist                   | 34    | 34      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | burn                        | 20    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | burnFrom                    | 24    | 24      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | grantRole                   | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | mint                        | 19    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | pause                       | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | renounceOwnership           | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | revokeMinter                | 25    | 25      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transfer                    | 27    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transferFrom                | 25    | 24      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transferOwnership           | 33    | 33      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | unblacklist                 | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | unpause                     | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | approve                     | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | authorizeContract           | 25    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | createLock                  | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | createLockFromBondNFT       | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | deauthorizeContract         | 20    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | increaseAmount              | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | increaseUnlockTime          | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | safeTransferFrom            | 47    | 47      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | setApprovalForAll           | 27    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | transferFrom                | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | withdraw                    | 16    | 16      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | approve                     | 28    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | burn                        | 28    | 28      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | mint                        | 20    | 1       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | transfer                    | 29    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | transferFrom                | 15    | 15      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockVRFCoordinatorV2 | fulfillRandomWords          | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockVRFCoordinatorV2 | requestRandomWords          | 22    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | _requestRandomWordsExternal | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | acceptOwnership             | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | approve                     | 27    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | burn                        | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | mint                        | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | pause                       | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | rawFulfillRandomWords       | 29    | 29      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | renounceOwnership           | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | requestDiceRoll             | 30    | 30      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | safeTransferFrom            | 56    | 56      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setApprovalForAll           | 29    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setRemintController         | 20    | 20      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setSettlementRouter         | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setTreasury                 | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setVRFSubscriptionId        | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | transferFrom                | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | transferOwnership           | 19    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | unpause                     | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | acceptOwnership             | 16    | 16      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | completeSocialTask          | 32    | 32      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | rawFulfillRandomWords       | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | renounceOwnership           | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | rollDice                    | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | setOracle                   | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | setTreasury                 | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | transferOwnership           | 30    | 30      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | withdrawUSDC                | 11    | 11      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| SettlementRouter     | settleToCash                | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| SettlementRouter     | settleToVeNFT               | 28    | 28      | 0        |
+╰----------------------+-----------------------------+-------+---------+----------╯
+
+[PASS] invariant_Treasury_Solvency() (runs: 100, calls: 1500, reverts: 1301)
+
+╭----------------------+-----------------------------+-------+---------+----------╮
+| Contract             | Selector                    | Calls | Reverts | Discards |
++=================================================================================+
+| HYD                  | approve                     | 26    | 1       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | authorizeMinter             | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | blacklist                   | 34    | 34      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | burn                        | 20    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | burnFrom                    | 24    | 24      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | grantRole                   | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | mint                        | 19    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | pause                       | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | renounceOwnership           | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | revokeMinter                | 25    | 25      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transfer                    | 27    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transferFrom                | 25    | 24      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | transferOwnership           | 33    | 33      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | unblacklist                 | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| HYD                  | unpause                     | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | approve                     | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | authorizeContract           | 25    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | createLock                  | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | createLockFromBondNFT       | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | deauthorizeContract         | 20    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | increaseAmount              | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | increaseUnlockTime          | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | safeTransferFrom            | 47    | 47      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | setApprovalForAll           | 27    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | transferFrom                | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| VotingEscrow         | withdraw                    | 16    | 16      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | approve                     | 28    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | burn                        | 28    | 28      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | mint                        | 20    | 1       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | transfer                    | 29    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockERC20            | transferFrom                | 15    | 15      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockVRFCoordinatorV2 | fulfillRandomWords          | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| MockVRFCoordinatorV2 | requestRandomWords          | 22    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | _requestRandomWordsExternal | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | acceptOwnership             | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | approve                     | 27    | 27      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | burn                        | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | mint                        | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | pause                       | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | rawFulfillRandomWords       | 29    | 29      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | renounceOwnership           | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | requestDiceRoll             | 30    | 30      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | safeTransferFrom            | 56    | 56      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setApprovalForAll           | 29    | 0       | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setRemintController         | 20    | 20      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setSettlementRouter         | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setTreasury                 | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | setVRFSubscriptionId        | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | transferFrom                | 17    | 17      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | transferOwnership           | 19    | 19      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RWABondNFT           | unpause                     | 26    | 26      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | acceptOwnership             | 16    | 16      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | completeSocialTask          | 32    | 32      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | rawFulfillRandomWords       | 31    | 31      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | renounceOwnership           | 23    | 23      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | rollDice                    | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | setOracle                   | 22    | 22      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | setTreasury                 | 21    | 21      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | transferOwnership           | 30    | 30      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| RemintController     | withdrawUSDC                | 11    | 11      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| SettlementRouter     | settleToCash                | 18    | 18      | 0        |
+|----------------------+-----------------------------+-------+---------+----------|
+| SettlementRouter     | settleToVeNFT               | 28    | 28      | 0        |
+╰----------------------+-----------------------------+-------+---------+----------╯
+
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 1.36s (560.28ms CPU time)
+
+Ran 27 tests for test/unit/Treasury.t.sol:TreasuryTest
+[PASS] testFuzz_MultipleWithdrawals(uint256,uint256) (runs: 10000, μ: 122437, ~: 122460)
+[PASS] testFuzz_Withdraw(uint256) (runs: 10000, μ: 96494, ~: 96277)
+[PASS] test_ClaimDEXFees_RevertWhen_EmptyArray() (gas: 29511)
+[PASS] test_ClaimDEXFees_RevertWhen_NotOwner() (gas: 23341)
+[PASS] test_ClaimDEXFees_RevertWhen_Paused() (gas: 51836)
+[PASS] test_ClaimDEXFees_RevertWhen_ZeroRecipient() (gas: 30273)
+[PASS] test_ClaimDEXFees_Success() (gas: 144628)
+[PASS] test_Constructor_RevertWhen_ZeroAddress() (gas: 45556)
+[PASS] test_Constructor_Success() (gas: 4290602)
+[PASS] test_GetBalance_Success() (gas: 58308)
+[PASS] test_GetBalances_Success() (gas: 113784)
+[PASS] test_Pause_RevertWhen_NotOwner() (gas: 16288)
+[PASS] test_Pause_Success() (gas: 42533)
+[PASS] test_ReceiveETH_Success() (gas: 21982)
+[PASS] test_TransferOwnership_RevertWhen_NotOwner() (gas: 20194)
+[PASS] test_TransferOwnership_Success() (gas: 40854)
+[PASS] test_Unpause_RevertWhen_NotOwner() (gas: 46103)
+[PASS] test_Unpause_Success() (gas: 33590)
+[PASS] test_WithdrawETH_RevertWhen_NotOwner() (gas: 19834)
+[PASS] test_WithdrawETH_RevertWhen_Paused() (gas: 46457)
+[PASS] test_WithdrawETH_Success() (gas: 61027)
+[PASS] test_Withdraw_RevertWhen_InsufficientBalance() (gas: 38584)
+[PASS] test_Withdraw_RevertWhen_NotOwner() (gas: 22107)
+[PASS] test_Withdraw_RevertWhen_Paused() (gas: 49929)
+[PASS] test_Withdraw_RevertWhen_ZeroAddress() (gas: 47711)
+[PASS] test_Withdraw_RevertWhen_ZeroAmount() (gas: 31606)
+[PASS] test_Withdraw_Success() (gas: 118253)
+Suite result: ok. 27 passed; 0 failed; 0 skipped; finished in 1.74s (2.87s CPU time)
+
+Ran 18 test suites in 1.75s (6.16s CPU time): 323 tests passed, 14 failed, 0 skipped (337 total tests)
+
+Failing tests:
+Encountered 1 failing test in test/unit/IssuanceController.t.sol:IssuanceControllerTest
+[FAIL: CreateSale should use < 220K gas: 233393 >= 220000] test_CreateSale_GasUsage() (gas: 280017)
+
+Encountered 2 failing tests in test/unit/RWABondNFT.t.sol:RWABondNFTTest
+[FAIL: Batch mint of 10 should use < 1.7M gas] test_Mint_Gas_BatchMint10() (gas: 1833487)
+[FAIL: Single mint should use < 250k gas] test_Mint_Gas_SingleNFT() (gas: 272659)
+
+Encountered 1 failing test in test/unit/RWAPriceOracle.t.sol:RWAPriceOracleTest
+[FAIL: GetPrice should use < 50k gas] test_GetPrice_GasUsage_ChainlinkOnly() (gas: 57980)
+
+Encountered 9 failing tests in test/unit/RemintController.t.sol:RemintControllerTest
+[FAIL: RemintController: caller is not NFT owner] test_Boundary_DiamondDiceRange() (gas: 40293)
+[FAIL: RemintController: caller is not NFT owner] test_Boundary_GoldDiceRange() (gas: 38683)
+[FAIL: RemintController: caller is not NFT owner] test_DiceUpgrade_EmitEvent() (gas: 38203)
+[FAIL: RemintController: caller is not NFT owner] test_DiceUpgrade_ToDiamond() (gas: 39977)
+[FAIL: RemintController: caller is not NFT owner] test_Leaderboard_LuckiestRollers() (gas: 39287)
+[FAIL: RemintController: caller is not NFT owner] test_Leaderboard_SocialChampions() (gas: 38275)
+[FAIL: RemintController: caller is not NFT owner] test_Performance_BatchSocialTasks() (gas: 38159)
+[FAIL: RemintController: caller is not NFT owner] test_ProcessDiceResult_DiamondDice() (gas: 38114)
+[FAIL: RemintController: caller is not NFT owner] test_ProcessDiceResult_GoldDice() (gas: 39632)
+
+Encountered 1 failing test in test/unit/SettlementRouter.t.sol:SettlementRouterTest
+[FAIL: Lock duration should be ~1 year: 39312000 !~= 31536000 (max delta: 86400, real delta: 7776000)] test_Functional_ConvertToVeNFT_Success() (gas: 528084)
+
+Encountered a total of 14 failing tests, 323 tests succeeded

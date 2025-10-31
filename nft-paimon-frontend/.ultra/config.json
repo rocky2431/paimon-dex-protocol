@@ -1,0 +1,31 @@
+{
+  "project": {
+    "name": "paimon-dex",
+    "type": "defi-protocol",
+    "version": "0.1.0",
+    "created": "2025-10-24T18:26:00Z",
+    "description": "RWA Launchpad + ve33 DEX + Treasury + HYD Synthetic Asset Protocol",
+    "components": ["rwa-launchpad", "ve33-dex", "treasury", "hyd-synthetic", "venft-governance"],
+    "tokens": {
+      "hyd": "Low-volatility synthetic asset backed by treasury RWA",
+      "paimon": "Platform governance and utility token",
+      "venft": "Vote-escrowed NFT for governance and fee distribution"
+    }
+  },
+  "settings": {
+    "auto_backup": true,
+    "backup_interval": 10,
+    "max_backups": 20,
+    "archive_completed": true,
+    "archive_after_days": 30
+  },
+  "task_defaults": {
+    "statuses": ["pending", "in_progress", "blocked", "completed", "cancelled"],
+    "priorities": ["low", "medium", "high", "critical"],
+    "default_priority": "medium"
+  },
+  "integrations": {
+    "git": true,
+    "ci_cd": null
+  }
+}

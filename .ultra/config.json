@@ -1,0 +1,48 @@
+{
+  "project": {
+    "name": "Paimon.dex",
+    "type": "fullstack",
+    "stack": "Solidity (Foundry) + Next.js 14 (TypeScript)",
+    "version": "1.0.0",
+    "initialized": "2025-10-31"
+  },
+  "quality": {
+    "functionMaxLines": 50,
+    "maxNestingDepth": 3,
+    "cyclomaticComplexity": 10,
+    "testCoverage": 80
+  },
+  "testing": {
+    "allowUnitMocks": true,
+    "requireSixDimensions": true,
+    "minCoverage": {
+      "overall": 80,
+      "critical": 100,
+      "branch": 75
+    }
+  },
+  "vitals": {
+    "targets": {
+      "LCP": 2.5,
+      "INP": 0.2,
+      "CLS": 0.1
+    },
+    "enabled": true
+  },
+  "context": {
+    "thresholds": {
+      "safe": 140000,
+      "warn": 170000,
+      "danger": 190000,
+      "critical": 200000
+    }
+  },
+  "skills": {
+    "mode": "slim"
+  },
+  "git": {
+    "branchPrefix": "feat/task-",
+    "commitConvention": "conventional",
+    "requireTests": true
+  }
+}

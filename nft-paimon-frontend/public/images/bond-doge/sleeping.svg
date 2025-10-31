@@ -1,0 +1,24 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sleeping Bond Doge - Before Maturity -->
+  <circle cx="100" cy="100" r="80" fill="#BCAAA4" opacity="0.2"/>
+  <circle cx="100" cy="100" r="70" fill="#BCAAA4" stroke="#8D6E63" stroke-width="3"/>
+  <!-- Ears (relaxed) -->
+  <ellipse cx="60" cy="60" rx="15" ry="25" fill="#BCAAA4"/>
+  <ellipse cx="140" cy="60" rx="15" ry="25" fill="#BCAAA4"/>
+  <!-- Eyes (closed) -->
+  <path d="M 70 90 Q 80 95 90 90" stroke="#5D4037" stroke-width="3" fill="none"/>
+  <path d="M 110 90 Q 120 95 130 90" stroke="#5D4037" stroke-width="3" fill="none"/>
+  <!-- Nose -->
+  <circle cx="100" cy="110" r="6" fill="#5D4037"/>
+  <!-- Mouth (peaceful) -->
+  <path d="M 90 125 Q 100 130 110 125" stroke="#5D4037" stroke-width="2" fill="none"/>
+  <!-- Sleep cap -->
+  <path d="M 75 45 Q 75 30 90 30 L 110 30 Q 125 30 125 45" fill="#9C27B0" stroke="#7B1FA2" stroke-width="2"/>
+  <circle cx="130" cy="25" r="6" fill="#FFFFFF"/>
+  <!-- Zzz -->
+  <text x="140" y="65" font-family="Arial, sans-serif" font-size="18" fill="#8D6E63">Z</text>
+  <text x="150" y="50" font-family="Arial, sans-serif" font-size="14" fill="#8D6E63">Z</text>
+  <text x="158" y="38" font-family="Arial, sans-serif" font-size="12" fill="#8D6E63">Z</text>
+  <!-- Placeholder text -->
+  <text x="100" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#8D6E63">SLEEPING</text>
+</svg>
