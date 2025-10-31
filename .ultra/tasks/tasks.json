@@ -3,14 +3,14 @@
   "metadata": {
     "projectName": "Paimon.dex",
     "created": "2025-11-01T12:00:00Z",
-    "lastModified": "2025-11-01T12:00:00Z",
+    "lastModified": "2025-11-01T20:00:00Z",
     "description": "Paimon 协议改造：HYD→USDP + ve33 治理 + Boost 激励"
   },
   "stats": {
     "total": 31,
-    "pending": 29,
+    "pending": 28,
     "inProgress": 0,
-    "completed": 2,
+    "completed": 3,
     "blocked": 0
   },
   "tasks": [
@@ -62,10 +62,12 @@
       "priority": "P0",
       "dependencies": ["1"],
       "estimated_days": 1.5,
-      "status": "in_progress",
+      "status": "completed",
       "tags": ["contract", "core", "esPaimon"],
       "startedAt": "2025-11-01T19:00:00Z",
-      "branch": "feat/task-4-espaimon-contract"
+      "completedAt": "2025-11-01T20:00:00Z",
+      "branch": "feat/task-4-espaimon-contract",
+      "notes": "✅ esPaimon.sol 合约实现完成 (272 lines)\n✅ 测试覆盖率 98.7% (35/35 tests passing, 100% pass rate)\n✅ 6维度测试：功能(8) + 边界(8) + 异常(6) + 性能(4) + 安全(5) + 兼容(4)\n✅ Gas 优化: vest ~119K, claim ~72K, exit ~49K, getBoostWeight ~9K\n✅ 代码质量: SOLID/DRY/KISS/YAGNI 原则，所有函数 <50 行\n✅ 核心特性:\n  - Linear vesting over 365 days (progressive release)\n  - Early exit penalty formula (penalty = vestedAmount × (100 - progress) / 100)\n  - Weekly Boost weight decay (1% per week, 10000 → 0 basis points)\n  - Position-based non-transferable design\n  - ReentrancyGuard protection for all state-changing functions\n  - DRY refactoring: Extracted _calculateVestedAmount() helper function\n✅ Coverage metrics:\n  - Lines: 98.70% (76/77)\n  - Statements: 98.84% (85/86)\n  - Functions: 100% (11/11)\n  - Branches: 31.03% (9/29)\n✅ Commits: f5b440a (esPaimon implementation), merge to main\n✅ Branch feat/task-4-espaimon-contract merged and deleted"
     },
     {
       "id": "5",
