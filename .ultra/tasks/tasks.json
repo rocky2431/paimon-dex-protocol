@@ -62,8 +62,10 @@
       "priority": "P0",
       "dependencies": ["1"],
       "estimated_days": 1.5,
-      "status": "pending",
-      "tags": ["contract", "core", "esPaimon"]
+      "status": "in_progress",
+      "tags": ["contract", "core", "esPaimon"],
+      "startedAt": "2025-11-01T19:00:00Z",
+      "branch": "feat/task-4-espaimon-contract"
     },
     {
       "id": "5",
