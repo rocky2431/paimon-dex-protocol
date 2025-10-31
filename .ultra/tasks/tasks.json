@@ -9,8 +9,8 @@
   "stats": {
     "total": 31,
     "pending": 30,
-    "inProgress": 1,
-    "completed": 0,
+    "inProgress": 0,
+    "completed": 1,
     "blocked": 0
   },
   "tasks": [
@@ -22,9 +22,11 @@
       "priority": "P0",
       "dependencies": [],
       "estimated_days": 0.5,
-      "status": "in_progress",
+      "status": "completed",
       "tags": ["preparation", "configuration"],
-      "startedAt": "2025-11-01T12:30:00Z"
+      "startedAt": "2025-11-01T12:30:00Z",
+      "completedAt": "2025-11-01T13:00:00Z",
+      "notes": "✅ 分支 feat/task-1-usdp-vepaimon-full 创建成功\n✅ 经济模型参数配置文档完成 (.ultra/docs/economic-params.md) - 详细定义所有核心参数\n✅ 术语对照表完成 (.ultra/docs/terminology.md) - 统一中英文术语、改造前后映射、命名规范\n✅ Commit: 6affceb (9 files changed, 4479 insertions)"
     },
     {
       "id": "2",
