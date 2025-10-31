@@ -1,0 +1,6 @@
+[submodule "paimon-rwa-contracts/lib/forge-std"]
+	path = paimon-rwa-contracts/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "paimon-rwa-contracts/lib/openzeppelin-contracts"]
+	path = paimon-rwa-contracts/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
