@@ -8,8 +8,8 @@
   },
   "stats": {
     "total": 31,
-    "pending": 30,
-    "inProgress": 0,
+    "pending": 29,
+    "inProgress": 1,
     "completed": 1,
     "blocked": 0
   },
@@ -47,8 +47,10 @@
       "priority": "P0",
       "dependencies": ["1"],
       "estimated_days": 2,
-      "status": "pending",
-      "tags": ["contract", "core", "USDP"]
+      "status": "in_progress",
+      "tags": ["contract", "core", "USDP"],
+      "startedAt": "2025-11-01T14:00:00Z",
+      "branch": "feat/task-3-usdp-contract"
     },
     {
       "id": "4",
