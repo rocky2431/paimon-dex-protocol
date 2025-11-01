@@ -8,9 +8,9 @@
   },
   "stats": {
     "total": 31,
-    "pending": 19,
+    "pending": 18,
     "inProgress": 1,
-    "completed": 10,
+    "completed": 12,
     "blocked": 0
   },
   "tasks": [
@@ -196,8 +196,10 @@
       "priority": "P0",
       "dependencies": ["3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
       "estimated_days": 2,
-      "status": "pending",
-      "tags": ["testing", "security", "invariant"]
+      "status": "in_progress",
+      "tags": ["testing", "security", "invariant"],
+      "startedAt": "2025-11-02T14:30:00Z",
+      "branch": "feat/task-13-invariant-tests"
     },
     {
       "id": "14",

@@ -102,6 +102,9 @@ contract InvariantDEX is StdInvariant, Test {
     /**
      * @notice Invariant: Fee split is correct (70% voter, 30% treasury)
      * @dev Verifies the fee distribution mechanism
+     *      Updated for dynamic fee calculation (Task 10):
+     *      voterShare = (fee * 7) / 10
+     *      treasuryShare = fee - voterShare
      */
     function invariant_feeAccounting() public view {
         // Get accumulated fees from pair
@@ -121,12 +124,12 @@ contract InvariantDEX is StdInvariant, Test {
         // Verify fee split (70% voter, 30% treasury) with tolerance
         if (totalFees0 > 100) { // Only check if enough fees to avoid rounding errors
             uint256 voterPercentage = (voterFees0 * 100) / totalFees0;
-            // Allow 5% tolerance for rounding
+            // Allow 2% tolerance for rounding (dynamic calculation precision)
             assertApproxEqAbs(
                 voterPercentage,
-                68, // Target is 68% (17/25)
-                5,
-                "INVARIANT VIOLATION: Token0 fee split incorrect"
+                70, // Target is 70% (dynamic: fee × 7 / 10)
+                2,
+                "INVARIANT VIOLATION: Token0 fee split incorrect (expected 70%)"
             );
         }
 
@@ -134,9 +137,9 @@ contract InvariantDEX is StdInvariant, Test {
             uint256 voterPercentage = (voterFees1 * 100) / totalFees1;
             assertApproxEqAbs(
                 voterPercentage,
-                68,
-                5,
-                "INVARIANT VIOLATION: Token1 fee split incorrect"
+                70, // Target is 70%
+                2,
+                "INVARIANT VIOLATION: Token1 fee split incorrect (expected 70%)"
             );
         }
     }
