@@ -8,9 +8,9 @@
   },
   "stats": {
     "total": 31,
-    "pending": 13,
-    "inProgress": 1,
-    "completed": 17,
+    "pending": 17,
+    "inProgress": 0,
+    "completed": 14,
     "blocked": 0
   },
   "tasks": [
@@ -23,10 +23,7 @@
       "dependencies": [],
       "estimated_days": 0.5,
       "status": "completed",
-      "tags": [
-        "preparation",
-        "configuration"
-      ],
+      "tags": ["preparation", "configuration"],
       "startedAt": "2025-11-01T12:30:00Z",
       "completedAt": "2025-11-01T13:00:00Z",
       "notes": "✅ 分支 feat/task-1-usdp-vepaimon-full 创建成功\n✅ 经济模型参数配置文档完成 (.ultra/docs/economic-params.md) - 详细定义所有核心参数\n✅ 术语对照表完成 (.ultra/docs/terminology.md) - 统一中英文术语、改造前后映射、命名规范\n✅ Commit: 6affceb (9 files changed, 4479 insertions)"
@@ -40,11 +37,7 @@
       "dependencies": [],
       "estimated_days": 0.5,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "performance",
-        "baseline"
-      ]
+      "tags": ["frontend", "performance", "baseline"]
     },
     {
       "id": "3",
@@ -52,16 +45,10 @@
       "description": "实现 USDP 稳定币合约，支持 accrualIndex 分红机制（份额-索引模式）。包含 mint/burn（仅 Treasury/PSM 可调用）、accumulate（每日更新索引）、balanceOf（动态计算）。\n\n**技术要点**：\n- 继承 ERC20、ERC20Permit、Ownable、ReentrancyGuard\n- 状态变量：accrualIndex (1e18), lastAccrualTime, distributor, _shares, _totalShares\n- 精度优化：先乘后除\n- Invariant: sum(_shares) == _totalShares\n\n**验收标准**（TDD）：\n- ✅ RED: 编写 6 维度测试用例（功能/边界/异常/性能/安全/兼容）\n- ✅ GREEN: 合约实现通过所有测试\n- ✅ REFACTOR: 代码符合 SOLID 原则，函数 <50 行\n- ✅ 测试覆盖率 ≥90%",
       "complexity": 7,
       "priority": "P0",
-      "dependencies": [
-        "1"
-      ],
+      "dependencies": ["1"],
       "estimated_days": 2,
       "status": "completed",
-      "tags": [
-        "contract",
-        "core",
-        "USDP"
-      ],
+      "tags": ["contract", "core", "USDP"],
       "startedAt": "2025-11-01T14:00:00Z",
       "completedAt": "2025-11-01T18:30:00Z",
       "branch": "feat/task-3-usdp-contract",
@@ -73,16 +60,10 @@
       "description": "实现 esPaimon 线性释放合约（365天），支持提前退出罚则、每周 1% Boost 权重衰减。与 RewardDistributor/BribeMarketplace 兼容。\n\n**技术要点**：\n- 线性释放：vestedAmount = totalAmount × (elapsed / VESTING_PERIOD)\n- 罚则公式：penalty = vestedAmount × (100 - progress) / 100\n- 衰减率：每周递减 1%（仅影响 Boost 权重）\n- 事件：Vested, EarlyExit, WeeklyEmissionUpdated\n\n**验收标准**（TDD）：\n- ✅ RED: 测试释放曲线、罚则计算、衰减逻辑\n- ✅ GREEN: 实现通过所有测试\n- ✅ REFACTOR: 符合 SOLID，Gas 优化\n- ✅ 覆盖率 ≥90%",
       "complexity": 6,
       "priority": "P0",
-      "dependencies": [
-        "1"
-      ],
+      "dependencies": ["1"],
       "estimated_days": 1.5,
       "status": "completed",
-      "tags": [
-        "contract",
-        "core",
-        "esPaimon"
-      ],
+      "tags": ["contract", "core", "esPaimon"],
       "startedAt": "2025-11-01T19:00:00Z",
       "completedAt": "2025-11-01T20:00:00Z",
       "branch": "feat/task-4-espaimon-contract",
@@ -94,17 +75,10 @@
       "description": "继承 VotingEscrow，绑定 PAIMON 代币，支持 1 周~4 年锁仓（线性衰减权重）。NFT 可转让，与 GaugeController 兼容。\n\n**技术要点**：\n- 权重公式：power = amount × (lockEnd - now) / MAX_TIME\n- MAX_TIME = 4 years (最终确认)\n- NFT 可转让（不覆写 _transfer）\n- 快照周期：7 天\n\n**验收标准**（TDD）：\n- ✅ RED: 测试锁仓/延长/权重查询/NFT 转让\n- ✅ GREEN: 实现通过所有测试\n- ✅ REFACTOR: 接口与 GaugeController 完全兼容\n- ✅ 覆盖率 ≥90%",
       "complexity": 6,
       "priority": "P0",
-      "dependencies": [
-        "1",
-        "4"
-      ],
+      "dependencies": ["1", "4"],
       "estimated_days": 1.5,
       "status": "completed",
-      "tags": [
-        "contract",
-        "core",
-        "vePaimon"
-      ],
+      "tags": ["contract", "core", "vePaimon"],
       "startedAt": "2025-11-01T20:30:00Z",
       "completedAt": "2025-11-01T21:45:00Z",
       "implementationNotes": "成功实现 VotingEscrowPaimon.sol (105 lines) 和完整测试套件 (650+ lines, 35 tests)。采用简单继承模式，仅覆写 name() 和 symbol()，所有核心功能继承自 VotingEscrow 基类。100% 测试通过率，100% 代码覆盖率。完全符合 SOLID/DRY/KISS/YAGNI 原则。Gas 性能优异：createLock ~125K, withdraw ~42K, balanceOfNFT ~5.5K。"
@@ -115,16 +89,10 @@
       "description": "实现 esPaimon 质押合约，支持 7 天最低锁定，计算 Boost 倍数（1.0x - 1.5x）。为 RewardDistributor 提供查询接口。\n\n**技术要点**：\n- 公式：boostMultiplier = 10000 + (amount / 1000) × 100，上限 15000 (1.5x)\n- MIN_STAKE_DURATION = 7 days\n- 事件：Staked, Unstaked, BoostCalculated\n\n**验收标准**（TDD）：\n- ✅ RED: 测试质押/解锁/Boost 计算/边界情况\n- ✅ GREEN: 实现通过测试\n- ✅ REFACTOR: 防闪电贷攻击\n- ✅ 覆盖率 ≥90%",
       "complexity": 5,
       "priority": "P0",
-      "dependencies": [
-        "4"
-      ],
+      "dependencies": ["4"],
       "estimated_days": 1.5,
       "status": "completed",
-      "tags": [
-        "contract",
-        "incentive",
-        "boost"
-      ],
+      "tags": ["contract", "incentive", "boost"],
       "startedAt": "2025-11-01T22:00:00Z",
       "completedAt": "2025-11-01T23:30:00Z",
       "branch": "feat/task-6-boost-staking",
@@ -136,16 +104,10 @@
       "description": "实现 Nitro 池合约，允许外部项目方创建额外激励池（需 vePaimon 投票批准）。配置锁定期限、最低流动性要求、奖励代币白名单。\n\n**技术要点**：\n- 创建需 vePaimon 投票（governance approval）\n- 参数：lockDuration, minLiquidity, rewardTokens[]\n- 事件：NitroCreated, NitroEntered, NitroRewardClaimed\n- 平台费：2%\n\n**验收标准**（TDD）：\n- ✅ RED: 测试创建/参与/领取/治理流程\n- ✅ GREEN: 实现通过测试\n- ✅ REFACTOR: 恶意代币防护\n- ✅ 覆盖率 ≥90%",
       "complexity": 6,
       "priority": "P0",
-      "dependencies": [
-        "5"
-      ],
+      "dependencies": ["5"],
       "estimated_days": 1.5,
       "status": "completed",
-      "tags": [
-        "contract",
-        "incentive",
-        "nitro"
-      ],
+      "tags": ["contract", "incentive", "nitro"],
       "startedAt": "2025-11-02T00:00:00Z",
       "completedAt": "2025-11-02T01:00:00Z",
       "branch": "feat/task-7-nitro-pool",
@@ -157,16 +119,10 @@
       "description": "实现 USDP 储蓄生息合约，支持每日利息累积（来源：RWA 收益提成 2%）。支持存入/取出/领取利息。\n\n**技术要点**：\n- 年化利率：annualRate (200 = 2%)\n- 每日累积：利息 = 本金 × annualRate / 365 / 10000\n- 利率来源：Treasury 注资\n- 事件：Deposited, Withdrawn, InterestAccrued\n\n**验收标准**（TDD）：\n- ✅ RED: 测试存取/利息计算/边界情况\n- ✅ GREEN: 实现通过测试\n- ✅ REFACTOR: 精度优化\n- ✅ 覆盖率 ≥90%",
       "complexity": 4,
       "priority": "P1",
-      "dependencies": [
-        "3"
-      ],
+      "dependencies": ["3"],
       "estimated_days": 1,
       "status": "completed",
-      "tags": [
-        "contract",
-        "treasury",
-        "savings"
-      ],
+      "tags": ["contract", "treasury", "savings"],
       "startedAt": "2025-11-02T02:00:00Z",
       "completedAt": "2025-11-02T03:00:00Z",
       "branch": "feat/task-8-saving-rate",
@@ -178,17 +134,10 @@
       "description": "完全重构 PSM 合约，从 USDC↔HYD 改为 USDC↔USDP 1:1 兑换。修改接口、函数名、移除 mint cap 追踪。\n\n**重构要点**：\n- 接口：IHYD → IUSDP\n- 函数：swapUSDCForHYD → swapUSDCForUSDP\n- 函数：swapHYDForUSDC → swapUSDPForUSDC\n- 移除：maxMintedHYD, totalMinted 追踪\n- 保持：1:1 兑换逻辑（1e12 转换）、费用机制\n\n**验收标准**（TDD）：\n- ✅ RED: 重写所有 PSM.t.sol 测试用例\n- ✅ GREEN: 重构后合约通过测试\n- ✅ REFACTOR: 套利机制验证\n- ✅ 覆盖率 ≥90%\n- ✅ Invariant: USDC_balance ≥ USDP_minted_via_PSM",
       "complexity": 7,
       "priority": "P0",
-      "dependencies": [
-        "3"
-      ],
+      "dependencies": ["3"],
       "estimated_days": 2,
       "status": "completed",
-      "tags": [
-        "contract",
-        "core",
-        "PSM",
-        "refactor"
-      ],
+      "tags": ["contract", "core", "PSM", "refactor"],
       "startedAt": "2025-11-02T04:00:00Z",
       "completedAt": "2025-11-02T06:00:00Z",
       "branch": "feat/task-9-psm-refactor",
@@ -200,16 +149,10 @@
       "description": "修改 DEXPair 手续费分配为动态计算，避免固定常量的精度问题。最终确认 70/30 比例。\n\n**修改要点**：\n- 删除：VOTER_FEE, TREASURY_FEE 固定常量\n- 新增：动态计算 voterShare = (fee × 7) / 10; treasuryShare = fee - voterShare\n- 保持：总费率 0.25%\n\n**验收标准**（TDD）：\n- ✅ RED: 测试费用分配精度\n- ✅ GREEN: 修改后通过测试\n- ✅ REFACTOR: 符合 DRY 原则\n- ✅ 受影响测试：~10 个（DEXPair.t.sol）",
       "complexity": 3,
       "priority": "P1",
-      "dependencies": [
-        "1"
-      ],
+      "dependencies": ["1"],
       "estimated_days": 0.5,
       "status": "completed",
-      "tags": [
-        "contract",
-        "dex",
-        "optimization"
-      ],
+      "tags": ["contract", "dex", "optimization"],
       "startedAt": "2025-11-02T10:00:00Z",
       "completedAt": "2025-11-02T11:00:00Z",
       "branch": "feat/task-10-dexpair-fee-split",
@@ -221,16 +164,10 @@
       "description": "修改 RewardDistributor，集成 BoostStaking 合约查询，应用 Boost 倍数到奖励分发。支持多资产奖励（esPaimon/USDC/USDP）。\n\n**技术要点**：\n- 查询：boostMultiplier = BoostStaking.getBoostMultiplier(user)\n- 计算：actualReward = baseReward × boostMultiplier / 10000\n- 事件：RewardDistributed, BoostApplied\n\n**验收标准**（TDD）：\n- ✅ RED: 测试 Boost 集成、多资产分发\n- ✅ GREEN: 实现通过测试\n- ✅ REFACTOR: 奖励计算优化\n- ✅ 受影响测试：~15 个",
       "complexity": 5,
       "priority": "P0",
-      "dependencies": [
-        "6"
-      ],
+      "dependencies": ["6"],
       "estimated_days": 1.5,
       "status": "completed",
-      "tags": [
-        "contract",
-        "governance",
-        "boost-integration"
-      ],
+      "tags": ["contract", "governance", "boost-integration"],
       "startedAt": "2025-11-02T11:30:00Z",
       "completedAt": "2025-11-02T12:00:00Z",
       "branch": "feat/task-11-boost-integration",
@@ -242,16 +179,10 @@
       "description": "修改 BribeMarketplace，将 esPaimon 加入代币白名单，支持用户用 esPaimon 进行 bribe。\n\n**修改要点**：\n- 白名单：添加 esPaimon 地址\n- 测试：验证 esPaimon bribe 流程\n\n**验收标准**（TDD）：\n- ✅ RED: 测试 esPaimon bribe 创建/领取\n- ✅ GREEN: 实现通过测试\n- ✅ 受影响测试：~10 个",
       "complexity": 3,
       "priority": "P1",
-      "dependencies": [
-        "4"
-      ],
+      "dependencies": ["4"],
       "estimated_days": 0.5,
       "status": "completed",
-      "tags": [
-        "contract",
-        "governance",
-        "bribe"
-      ],
+      "tags": ["contract", "governance", "bribe"],
       "startedAt": "2025-11-02T12:30:00Z",
       "completedAt": "2025-11-02T14:15:00Z",
       "branch": "feat/task-12-espaimon-bribe",
@@ -263,25 +194,10 @@
       "description": "更新所有 invariant 测试，确保新合约和修改后的合约满足核心不变量。准备安全审计清单。\n\n**核心 Invariants**：\n- PSM: USDC balance ≥ USDP supply\n- USDP: sum(user_shares) == total_supply\n- Boost: actualReward ≤ baseReward × 1.5\n- DEX: voterFees + treasuryFees == totalFees\n- Treasury: Total HYD minted ≤ Total RWA value × LTV\n\n**验收标准**：\n- ✅ 所有 invariant 测试通过（fuzzing 10000+ runs）\n- ✅ 无 Slither/Mythril 高危漏洞\n- ✅ 安全审计清单完成",
       "complexity": 5,
       "priority": "P0",
-      "dependencies": [
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
-        "10",
-        "11",
-        "12"
-      ],
+      "dependencies": ["3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
       "estimated_days": 2,
       "status": "completed",
-      "tags": [
-        "testing",
-        "security",
-        "invariant"
-      ],
+      "tags": ["testing", "security", "invariant"],
       "startedAt": "2025-11-02T14:30:00Z",
       "completedAt": "2025-11-02T18:00:00Z",
       "branch": "feat/task-13-invariant-tests",
@@ -293,16 +209,10 @@
       "description": "确认 GaugeController 与 vePaimon 的接口兼容性，验证 epoch 对齐（7 天周期）、快照机制、投票权重查询。\n\n**验收标准**：\n- ✅ vePaimon.balanceOf 与 GaugeController.vote_user_power 兼容\n- ✅ Epoch 周期对齐（每周四 00:00 UTC）\n- ✅ 集成测试通过",
       "complexity": 3,
       "priority": "P1",
-      "dependencies": [
-        "5"
-      ],
+      "dependencies": ["5"],
       "estimated_days": 1,
       "status": "completed",
-      "tags": [
-        "contract",
-        "governance",
-        "integration"
-      ],
+      "tags": ["contract", "governance", "integration"],
       "startedAt": "2025-11-02T18:30:00Z",
       "completedAt": "2025-11-02T19:00:00Z",
       "branch": "feat/task-14-gauge-vepaimon-alignment",
@@ -314,17 +224,10 @@
       "description": "实现外部项目创建 Nitro 池需经 vePaimon 投票批准的流程。设置代币白名单审计机制，前端显著提示风险。\n\n**治理流程**：\n- 提案：外部项目提交 Nitro 池创建提案\n- 投票：vePaimon 持有者投票（≥51% 通过）\n- 执行：通过后激活 Nitro 池\n\n**验收标准**：\n- ✅ 治理合约集成测试通过\n- ✅ 前端风险提示 UI 完成",
       "complexity": 4,
       "priority": "P1",
-      "dependencies": [
-        "7",
-        "14"
-      ],
+      "dependencies": ["7", "14"],
       "estimated_days": 1,
       "status": "pending",
-      "tags": [
-        "governance",
-        "nitro",
-        "frontend"
-      ]
+      "tags": ["governance", "nitro", "frontend"]
     },
     {
       "id": "16",
@@ -332,16 +235,10 @@
       "description": "配置 SavingRate 利率来源（RWA 收益提成 2% + DEX 手续费国库部分）。设置每日自动更新机制（Chainlink Automation 或 Keeper）。\n\n**配置要点**：\n- 利率计算：RWA 年化 5% → 分配 2%\n- 波动上限：单周 APR 变动 <20%\n- 更新频率：每日 00:00 UTC\n\n**验收标准**：\n- ✅ 利率计算逻辑测试通过\n- ✅ Keeper 脚本部署测试网\n- ✅ 储备金平滑机制验证",
       "complexity": 4,
       "priority": "P1",
-      "dependencies": [
-        "8"
-      ],
+      "dependencies": ["8"],
       "estimated_days": 1,
       "status": "pending",
-      "tags": [
-        "treasury",
-        "automation",
-        "configuration"
-      ]
+      "tags": ["treasury", "automation", "configuration"]
     },
     {
       "id": "17",
@@ -349,20 +246,10 @@
       "description": "在前端配置新增的 6 个合约地址和 ABI（USDP, esPaimon, vePaimon, BoostStaking, NitroPool, SavingRate），更新 wagmi 配置。\n\n**配置文件**：\n- src/config/contracts.ts: 新增合约地址\n- src/config/wagmi.ts: 更新合约配置\n- src/hooks/: 创建自定义 hooks\n\n**验收标准**：\n- ✅ 所有合约地址配置完成（测试网）\n- ✅ ABI 导入无错误\n- ✅ TypeScript 类型检查通过",
       "complexity": 3,
       "priority": "P1",
-      "dependencies": [
-        "13"
-      ],
+      "dependencies": ["13"],
       "estimated_days": 0.5,
-      "status": "completed",
-      "tags": [
-        "frontend",
-        "configuration",
-        "wagmi"
-      ],
-      "startedAt": "2025-11-02T19:30:00Z",
-      "branch": "feat/task-17-frontend-contracts-config",
-      "completedAt": "2025-11-02T20:00:00Z",
-      "notes": "✅ 前端合约配置完成（6个新合约）\n✅ 合约配置文件创建（minimal ABI）\n✅ testnet.ts 更新（新增 3 个合约地址 + 2 个 tokenConfig）\n✅ 自定义 wagmi hooks 创建（6个）\n✅ TypeScript 类型检查通过\n\n**核心配置**：\n- USDP (share-based stablecoin with accrual index)\n- esPaimon (vesting token with 365-day linear release)\n- VotingEscrowPaimon (vote-escrowed NFT, 1 week - 4 years lock)\n- BoostStaking (stake PAIMON for 1.0x-1.5x reward multiplier)\n- NitroPool (external incentive pools with governance approval)\n- SavingRate (USDP savings with RWA yield distribution)\n\n**文件变更** (14 files, 1836 insertions):\n- Config files: usdp.ts, esPaimon.ts, vePaimon.ts, boostStaking.ts, nitroPool.ts, savingRate.ts\n- Hooks: useUsdp.ts, useEsPaimon.ts, useVePaimon.ts, useBoostStaking.ts, useNitroPool.ts, useSavingRate.ts\n- Chain config: testnet.ts (added USDP, esPaimon, vePaimon, boostStaking, nitroPool, savingRate)\n- Tasks: tasks.json (Task 17 completed)\n\n**Commits**:\n- 19c44c6: feat: configure new contract addresses and wagmi hooks\n- 6fa3b02: chore: merge Task 17\n- Branch feat/task-17-frontend-contracts-config merged and deleted"
+      "status": "pending",
+      "tags": ["frontend", "configuration", "wagmi"]
     },
     {
       "id": "18",
@@ -370,19 +257,10 @@
       "description": "更新 next-intl 翻译文件，新增 USDP、esPaimon、vePaimon、Boost、Nitro、储蓄率等术语的中英文对照。\n\n**翻译文件**：\n- public/locales/en/*.json\n- public/locales/zh/*.json\n\n**验收标准**：\n- ✅ 所有新术语翻译完成\n- ✅ 语言切换功能正常\n- ✅ 无遗漏或错别字",
       "complexity": 2,
       "priority": "P1",
-      "dependencies": [
-        "17"
-      ],
+      "dependencies": ["17"],
       "estimated_days": 0.5,
-      "status": "completed",
-      "tags": [
-        "frontend",
-        "i18n"
-      ],
-      "startedAt": "2025-11-02T20:15:00Z",
-      "completedAt": "2025-11-02T20:30:00Z",
-      "branch": "feat/task-18-i18n-update",
-      "notes": "✅ 双语翻译文件完成（英文 + 中文）\n✅ 所有 6 个新合约术语翻译完成\n✅ 15 个功能模块完整覆盖\n✅ 键结构完全一致（en.json ↔ zh.json）\n\n**核心翻译**：\n- USDP: Share-based stablecoin with accrual index / 基于份额的稳定币，通过累积指数分配 RWA 收益\n- esPaimon: Escrowed PAIMON with 365-day linear vesting / 托管 PAIMON，365 天线性释放\n- vePaimon: Vote-escrowed NFT for governance (1 week - 4 years lock) / 投票托管 NFT，用于治理，投票权线性衰减\n- BoostStaking: Stake PAIMON to receive reward boost multipliers (1.0x - 1.5x) / 质押 PAIMON 获得奖励加速倍数（1.0x - 1.5x）\n- NitroPool: External incentive pools with governance approval / 需要治理批准的外部激励池\n- SavingRate: Earn interest on USDP from RWA yields / 通过 USDP 赚取 RWA 收益利息\n\n**文件变更** (3 files, 390 insertions):\n- messages/en.json (192 lines, 200+ keys)\n- messages/zh.json (192 lines, 200+ keys)\n- .ultra/tasks/tasks.json (updated)\n\n**翻译组织**:\n- common: UI 通用元素（连接钱包、余额、授权等）\n- tokens: 代币名称（HYD, USDP, PAIMON, esPAIMON, vePAIMON 等）\n- nav: 导航菜单（兑换、流动性池、锁仓、投票、金库、奖励、Boost、Nitro、储蓄）\n- usdp: USDP 模块（余额、份额、累积指数、铸造、销毁）\n- esPaimon: esPaimon 模块（总数量、已领取、已释放、可领取、加速权重、退出罚金）\n- vePaimon: vePaimon 模块（锁定时长、投票权重、创建锁仓、增加数量、延长锁定、合并 NFT）\n- boost: Boost 模块（加速倍数、质押数量、质押时间、计算器、公式）\n- nitro: Nitro 模块（池 ID、LP 代币、锁定时长、总质押量、奖励代币、创建/加入/退出池）\n- savings: 储蓄模块（年化利率、本金、已累积利息、存入、提取、利息来源）\n- treasury: 金库模块（RWA 资产、抵押率、健康因子、铸造 USDP、赎回 RWA）\n- swap: 兑换模块（滑点容忍度、价格影响、最少获得、PSM 1:1 兑换）\n- pool: 流动性池模块（添加/移除流动性、您的流动性、池份额）\n- vote: 投票模块（为 Gauge 投票、投票权重、Gauge 权重）\n- rewards: 奖励模块（可领取奖励、已领取、全部领取、已应用加速）\n- errors: 错误消息（钱包未连接、授权额度不足、交易失败、合约调用失败、网络错误）\n\n**质量保证**：\n- ✅ 键结构 100% 匹配\n- ✅ 无遗漏或重复键\n- ✅ 专业术语准确翻译\n- ✅ 符合产品设计文档（PRD）术语规范\n\n**Commits**：\n- 4f3023d: feat: add bilingual i18n translations for 6 new contracts\n- Merge to main: chore: merge Task 18\n- Branch feat/task-18-i18n-update merged and deleted"
+      "status": "pending",
+      "tags": ["frontend", "i18n"]
     },
     {
       "id": "19",
@@ -390,21 +268,10 @@
       "description": "实现 Boost 质押展示模块（app/boost/ 或 app/rewards/boost），包含质押卡片、计算器、历史记录。\n\n**核心组件**：\n- BoostStakingCard.tsx: 当前 Boost 倍数（1.0x-1.5x）、质押数量、解锁倒计时\n- BoostCalculator.tsx: 预计收益提升计算\n- BoostHistory.tsx: 历史 Boost 操作记录\n- hooks/useBoostStaking.ts: wagmi hooks\n\n**验收标准**（TDD）：\n- ✅ RED: 组件单元测试\n- ✅ GREEN: 实现通过测试\n- ✅ REFACTOR: Material Design 3 合规\n- ✅ 测试覆盖率 ≥80%\n- ✅ Core Web Vitals 达标",
       "complexity": 6,
       "priority": "P0",
-      "dependencies": [
-        "17",
-        "18"
-      ],
+      "dependencies": ["17", "18"],
       "estimated_days": 2,
-      "status": "completed",
-      "tags": [
-        "frontend",
-        "boost",
-        "ui"
-      ],
-      "startedAt": "2025-11-02T20:45:00Z",
-      "completedAt": "2025-11-02T22:30:00Z",
-      "branch": "main",
-      "notes": "✅ Phase 1 完成：BoostStakingCard 核心展示组件\n✅ Phase 2 完成：Stake/Unstake 交互操作\n✅ Phase 3 完成：Calculator + History 工具组件\n\n**Phase 1 成果** (已完成 - Commit 7034fd4):\n- ✅ BoostStakingCard.tsx: 显示质押状态、倍数 (1.0x-1.5x)、解锁倒计时\n- ✅ 6 维度测试覆盖 (Functional, Boundary, Exception, Security, Compatibility)\n- ✅ Material Design 3 合规（暖色调 #ff6b00, 圆角 24px, 渐变背景）\n- ✅ 响应式设计 (Grid xs/sm breakpoints)\n- ✅ /boost 页面集成 (wagmi hooks from Task 17)\n- ✅ TDD 流程：RED → GREEN → REFACTOR\n\n**Phase 2 成果** (已完成 - Commit db4da0e):\n- ✅ BoostStakeModal.tsx: 质押 PAIMON 模态框 (344 行)\n  - 输入验证（余额检查、数值验证）\n  - 实时 boost 倍数预览\n  - Max 按钮快速填充余额\n  - 错误处理和用户提示\n- ✅ BoostUnstakeButton.tsx: 解除质押按钮 (259 行)\n  - 锁定/解锁状态可视化\n  - 确认对话框防止误操作\n  - 显示解除质押的后果\n  - 双击防护\n- ✅ page.tsx 集成 (335 行):\n  - wagmi hooks 集成（stake/unstake）\n  - PAIMON 余额读取\n  - 交易状态管理（approve + stake 两步）\n  - 数据自动刷新\n- ✅ 6 维度测试覆盖：\n  - BoostStakeModal.test.tsx: 425 行，38 个测试用例\n  - BoostUnstakeButton.test.tsx: 321 行，25 个测试用例\n- ✅ 质量保证：SOLID/DRY/KISS/YAGNI 合规\n\n**Phase 3 成果** (已完成 - Commit 429486a):\n- ✅ BoostCalculator.tsx: 预计收益提升计算器 (247 行)\n  - 输入验证（余额检查、仅数字）\n  - 实时预览：质押后总倍数、收益增幅百分比\n  - 示例对比：基础奖励 vs 加成后奖励（100 PAIMON 示例）\n  - 上限提醒：5000 PAIMON = 1.5x 封顶\n  - 考虑当前已质押金额（反推计算）\n- ✅ BoostHistory.tsx: 历史交易记录 (216 行)\n  - 交易列表：操作类型（Stake/Unstake）、金额、时间戳\n  - 交易哈希：缩短显示（0x1234...cdef）+ 区块浏览器链接\n  - 倍数跟踪：每次操作后的 Boost 倍数\n  - 空状态和加载状态处理\n  - 滚动支持（maxHeight: 500px）\n- ✅ page.tsx 集成更新 (347 行):\n  - Grid 布局并排显示 Calculator + History\n  - Calculator 自动接收当前倍数和余额\n  - History 预留接口（当前为空数组，待后续集成事件数据）\n- ✅ 6 维度测试覆盖：\n  - BoostCalculator.test.tsx: 219 行，27 个测试用例\n  - BoostHistory.test.tsx: 220 行，24 个测试用例\n- ✅ 质量保证：SOLID/DRY/KISS/YAGNI 合规\n\n**最终代码统计** (Phase 1 + 2 + 3):\n- 组件：5 个 (BoostStakingCard, BoostStakeModal, BoostUnstakeButton, BoostCalculator, BoostHistory)\n- 测试文件：5 个，131 个测试用例\n- 总行数：~4654 行（含测试）\n\n**Commits**:\n- 7034fd4: Phase 1 - BoostStakingCard (7 files, 933 insertions)\n- db4da0e: Phase 2 - Stake/Unstake actions (7 files, 1567 insertions)\n- 429486a: Phase 3 - Calculator + History (6 files, 922 insertions)\n- Merge to main: chore: merge Task 19 Phase 3\n- Branches deleted: feat/task-19-boost-ui-module, feat/task-19-boost-actions-phase2, feat/task-19-boost-calculator-history-phase3\n\n**Task 19 总结**:\n- ✅ 所有验收标准达成（TDD, MD3, 测试覆盖率 ≥80%）\n- ✅ 三阶段迭代开发顺利完成\n- ✅ 代码质量高，SOLID 原则严格遵守\n- ✅ Material Design 3 完全合规\n- ✅ 响应式设计完善（xs/sm/lg breakpoints）"
+      "status": "pending",
+      "tags": ["frontend", "boost", "ui"]
     },
     {
       "id": "20",
@@ -412,20 +279,10 @@
       "description": "实现 Nitro 外部激励池列表模块（app/liquidity/nitro 或 app/nitro），包含池列表、参与模态框、我的参与记录。\n\n**核心组件**：\n- NitroPoolList.tsx: 外部项目池列表（项目名、锁定期、APR、奖励代币）\n- NitroParticipateModal.tsx: 参与 Nitro 池（存入 LP Token）\n- NitroRewardsCard.tsx: 我的 Nitro 奖励\n- hooks/useNitroPool.ts: wagmi hooks\n\n**验收标准**（TDD）：\n- ✅ RED: 组件单元测试\n- ✅ GREEN: 实现通过测试\n- ✅ REFACTOR: 风险提示 UI（外部代币风险）\n- ✅ 测试覆盖率 ≥80%",
       "complexity": 6,
       "priority": "P0",
-      "dependencies": [
-        "17",
-        "18"
-      ],
+      "dependencies": ["17", "18"],
       "estimated_days": 2,
-      "status": "in_progress",
-      "startedAt": "2025-11-02T22:30:00Z",
-      "branch": "feat/task-20-nitro-pool-list",
-      "tags": [
-        "frontend",
-        "nitro",
-        "ui"
-      ],
-      "notes": "✅ Phase 1 完成：NitroPoolList 核心展示组件\n✅ Phase 2 进行中：NitroParticipateModal 参与模态框\n\n**Phase 1 成果** (Commit 4a13be0):\n- ✅ NitroPoolList.tsx: 池列表展示组件 (305 lines)\n- ✅ 6 维度测试覆盖 (Functional, Boundary, Exception, Performance, Security, Compatibility)\n- ✅ Material Design 3 合规（暖色调 #ff6b00, 圆角 24px, 渐变背景）\n- ✅ 响应式设计 (Grid xs/sm/md breakpoints)\n- ✅ 测试通过率：100% (35/35 tests)\n- ✅ TDD 流程：RED → GREEN → REFACTOR\n\n**Phase 2 成果** (Commit 2833934 - WIP):\n- ✅ NitroParticipateModal.tsx: 质押模态框 (306 lines)\n- 🔄 测试通过率：71% (25/35 tests passing)\n- ✅ 核心功能已实现：\n  - LP token 余额展示 + Max 按钮\n  - 数量输入（18 位小数精度）\n  - 风险警告（锁定期提示）\n  - 大额确认（>90% 余额）\n  - 地址验证和错误处理\n  - 加载和交易状态管理\n  - 双语支持（EN/ZH）\n  - Material Design 3 合规\n- ⚠️ 待修复：10 个测试失败（主要是 mock hooks 配置问题）\n  - Balance loading states\n  - Transaction error handling\n  - Wallet connection states\n\n**Next**: \n1. 修复 Phase 2 剩余测试问题（10 个）\n2. Phase 3 - NitroRewardsCard（我的奖励卡片）\n3. 创建 /app/nitro/page.tsx 集成页面"
+      "status": "pending",
+      "tags": ["frontend", "nitro", "ui"]
     },
     {
       "id": "21",
@@ -433,17 +290,10 @@
       "description": "实现 USDP 储蓄率展示模块（app/treasury/savings 或 app/swap/savings），包含储蓄卡片、存取模态框、利息曲线。\n\n**核心组件**：\n- SavingsRateCard.tsx: 当前 APR、我的存款、待领利息\n- SavingsDepositModal.tsx: 存入/取出 USDP\n- InterestChart.tsx: 历史 APR 和利息曲线（recharts）\n- hooks/useSavingRate.ts: wagmi hooks\n\n**验收标准**（TDD）：\n- ✅ RED: 组件单元测试\n- ✅ GREEN: 实现通过测试\n- ✅ REFACTOR: 利息来源说明（悬停提示）\n- ✅ 测试覆盖率 ≥80%",
       "complexity": 5,
       "priority": "P1",
-      "dependencies": [
-        "17",
-        "18"
-      ],
+      "dependencies": ["17", "18"],
       "estimated_days": 1.5,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "savings",
-        "ui"
-      ]
+      "tags": ["frontend", "savings", "ui"]
     },
     {
       "id": "22",
@@ -451,16 +301,10 @@
       "description": "更新 Treasury 模块，展示 USDP 的 accrualIndex 累积收益视图（历史曲线 + 当日增长），集成储蓄率模块。\n\n**修改要点**：\n- 新增 AccrualIndexChart.tsx: 历史 accrualIndex 曲线\n- 集成 SavingsRateCard 到 Treasury 页面\n- 更新 hooks: useTreasury.ts\n\n**验收标准**：\n- ✅ accrualIndex 历史数据展示正确\n- ✅ 储蓄率模块集成无缝\n- ✅ 测试覆盖率 ≥80%",
       "complexity": 4,
       "priority": "P1",
-      "dependencies": [
-        "21"
-      ],
+      "dependencies": ["21"],
       "estimated_days": 1,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "treasury",
-        "update"
-      ]
+      "tags": ["frontend", "treasury", "update"]
     },
     {
       "id": "23",
@@ -468,17 +312,10 @@
       "description": "更新 Swap 模块，新增 USDC↔USDP 1:1 兑换入口（PSM），显示手续费（如有）。\n\n**修改要点**：\n- 新增 PSMSwapCard.tsx: USDC↔USDP 兑换\n- 更新 hooks: useSwap.ts（集成 PSM）\n- UI: 1:1 兑换比例明显标识\n\n**验收标准**：\n- ✅ PSM 兑换功能正常\n- ✅ 手续费展示准确\n- ✅ 测试覆盖率 ≥80%",
       "complexity": 4,
       "priority": "P1",
-      "dependencies": [
-        "9",
-        "17"
-      ],
+      "dependencies": ["9", "17"],
       "estimated_days": 1,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "swap",
-        "PSM"
-      ]
+      "tags": ["frontend", "swap", "PSM"]
     },
     {
       "id": "24",
@@ -486,17 +323,10 @@
       "description": "更新 Bribes 模块，支持 esPaimon 作为 bribe 资产，显示每个 Gauge 的 bribe 金额（USDC、USDP、esPaimon、外部代币）。\n\n**修改要点**：\n- 更新 BribeList.tsx: 支持多资产显示\n- 更新 CreateBribeModal.tsx: esPaimon 选项\n- 更新 hooks: useBribe.ts\n\n**验收标准**：\n- ✅ esPaimon bribe 创建/领取正常\n- ✅ 多资产显示无 UI 错位\n- ✅ 测试覆盖率 ≥80%",
       "complexity": 3,
       "priority": "P1",
-      "dependencies": [
-        "12",
-        "17"
-      ],
+      "dependencies": ["12", "17"],
       "estimated_days": 1,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "bribes",
-        "update"
-      ]
+      "tags": ["frontend", "bribes", "update"]
     },
     {
       "id": "25",
@@ -504,17 +334,10 @@
       "description": "更新 Rewards 模块，支持多资产领取（esPaimon、USDC、USDP），实现一键归集所有奖励。\n\n**修改要点**：\n- 更新 RewardsList.tsx: 多资产余额展示\n- 新增 ClaimAllButton.tsx: 一键归集\n- 更新 hooks: useRewards.ts\n\n**验收标准**：\n- ✅ 多资产领取功能正常\n- ✅ 一键归集 gas 优化\n- ✅ 测试覆盖率 ≥80%",
       "complexity": 4,
       "priority": "P1",
-      "dependencies": [
-        "11",
-        "17"
-      ],
+      "dependencies": ["11", "17"],
       "estimated_days": 1,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "rewards",
-        "update"
-      ]
+      "tags": ["frontend", "rewards", "update"]
     },
     {
       "id": "26",
@@ -522,25 +345,10 @@
       "description": "编写所有新增和修改合约的单元测试，确保 6 维度全覆盖（功能/边界/异常/性能/安全/兼容），覆盖率 ≥80%（关键路径 100%）。\n\n**测试文件**：\n- test/core/USDP.t.sol\n- test/core/esPaimon.t.sol\n- test/core/VotingEscrowPaimon.t.sol\n- test/incentives/BoostStaking.t.sol\n- test/incentives/NitroPool.t.sol\n- test/treasury/SavingRate.t.sol\n- test/core/PSM.t.sol (重写)\n- test/dex/DEXPair.t.sol (更新)\n- test/governance/RewardDistributor.t.sol (更新)\n- test/governance/BribeMarketplace.t.sol (更新)\n\n**验收标准**：\n- ✅ 总测试数量：~150 个\n- ✅ 覆盖率：≥80%（forge coverage）\n- ✅ Gas 基准：关键路径 <250K gas\n- ✅ 所有测试通过（forge test -vvv）",
       "complexity": 8,
       "priority": "P0",
-      "dependencies": [
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
-        "10",
-        "11",
-        "12"
-      ],
+      "dependencies": ["3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
       "estimated_days": 3,
       "status": "pending",
-      "tags": [
-        "testing",
-        "unit",
-        "6-dimensional"
-      ]
+      "tags": ["testing", "unit", "6-dimensional"]
     },
     {
       "id": "27",
@@ -548,16 +356,10 @@
       "description": "编写合约集成测试，验证完整的用户流程：RWA 存入 → USDP 铸造 → 锁仓 vePaimon → 投票 Gauge → 添加流动性 → 获得奖励（含 Boost）→ 参与 Nitro 池 → 储蓄生息。\n\n**测试场景**：\n1. 完整 DeFi 流程（上述流程）\n2. PSM 套利场景（USDP 价格偏离 $1）\n3. Boost 倍数验证（不同质押量）\n4. Nitro 池多项目并行\n5. 储蓄率利息计算\n\n**验收标准**：\n- ✅ 所有集成测试通过\n- ✅ 端到端流程无断点\n- ✅ Gas 优化验证",
       "complexity": 6,
       "priority": "P0",
-      "dependencies": [
-        "26"
-      ],
+      "dependencies": ["26"],
       "estimated_days": 2,
       "status": "pending",
-      "tags": [
-        "testing",
-        "integration",
-        "e2e"
-      ]
+      "tags": ["testing", "integration", "e2e"]
     },
     {
       "id": "28",
@@ -565,22 +367,10 @@
       "description": "编写所有新增和修改前端组件的单元测试（Jest + React Testing Library），覆盖率 ≥80%。\n\n**测试文件**：\n- __tests__/components/boost/*.test.tsx\n- __tests__/components/nitro/*.test.tsx\n- __tests__/components/savings/*.test.tsx\n- __tests__/hooks/useBoostStaking.test.ts\n- __tests__/hooks/useNitroPool.test.ts\n- __tests__/hooks/useSavingRate.test.ts\n\n**验收标准**：\n- ✅ 总测试数量：~50 个\n- ✅ 覆盖率：≥80%（npm run test:coverage）\n- ✅ 所有测试通过（npm test）",
       "complexity": 5,
       "priority": "P1",
-      "dependencies": [
-        "19",
-        "20",
-        "21",
-        "22",
-        "23",
-        "24",
-        "25"
-      ],
+      "dependencies": ["19", "20", "21", "22", "23", "24", "25"],
       "estimated_days": 2,
       "status": "pending",
-      "tags": [
-        "testing",
-        "frontend",
-        "unit"
-      ]
+      "tags": ["testing", "frontend", "unit"]
     },
     {
       "id": "29",
@@ -588,16 +378,10 @@
       "description": "使用 chrome-devtools MCP 编写前端端到端测试，验证完整用户交互流程（Boost 质押、Nitro 参与、储蓄存取）。\n\n**测试场景**：\n1. 连接钱包 → 质押 esPaimon → 查看 Boost 倍数\n2. 浏览 Nitro 池 → 参与 → 领取奖励\n3. 存入 USDP → 查看利息 → 取出\n4. PSM 兑换 USDC↔USDP\n5. 锁仓 vePaimon → 投票 Gauge\n\n**验收标准**：\n- ✅ 所有 E2E 测试通过\n- ✅ 无 UI 阻塞或错误\n- ✅ Core Web Vitals 达标",
       "complexity": 4,
       "priority": "P1",
-      "dependencies": [
-        "28"
-      ],
+      "dependencies": ["28"],
       "estimated_days": 1.5,
       "status": "pending",
-      "tags": [
-        "testing",
-        "e2e",
-        "chrome-devtools"
-      ]
+      "tags": ["testing", "e2e", "chrome-devtools"]
     },
     {
       "id": "30",
@@ -605,16 +389,10 @@
       "description": "编写完整的部署脚本（5 个阶段），配置初始化参数（Oracle、Treasury、PSM、GaugeController 等）。\n\n**部署阶段**：\n- Phase 0: HYD → Oracle → Treasury\n- Phase 1: USDP → PSM\n- Phase 2: Paimon → esPaimon → vePaimon\n- Phase 3: DEXFactory/Pair → DEXRouter\n- Phase 4: GaugeController → BribeMarketplace\n- Phase 5: BoostStaking → RewardDistributor → NitroPool → SavingRate\n\n**验收标准**：\n- ✅ 部署脚本完整（script/DeployFull.s.sol）\n- ✅ 初始化配置验证（所有权限、白名单、参数）\n- ✅ 测试网部署成功（BSC Testnet）",
       "complexity": 6,
       "priority": "P0",
-      "dependencies": [
-        "27"
-      ],
+      "dependencies": ["27"],
       "estimated_days": 2,
       "status": "pending",
-      "tags": [
-        "deployment",
-        "script",
-        "initialization"
-      ]
+      "tags": ["deployment", "script", "initialization"]
     },
     {
       "id": "31",
@@ -622,17 +400,10 @@
       "description": "在 BSC 测试网部署完整协议，进行全流程验证。准备主网部署清单（多签、Timelock、审计报告、应急预案）。\n\n**验证项**：\n1. 所有合约部署成功\n2. 初始化参数正确\n3. 前端连接测试网正常\n4. 完整用户流程测试（从 RWA 存入到奖励领取）\n5. PSM 套利机制验证\n6. Boost/Nitro/储蓄率功能正常\n\n**主网准备**：\n- ✅ 多签钱包配置（3-of-5 Treasury、4-of-7 Emergency）\n- ✅ Timelock 配置（48 小时）\n- ✅ 安全审计报告（如有）\n- ✅ 应急暂停预案\n- ✅ 部署检查清单\n\n**验收标准**：\n- ✅ 测试网验证通过（所有流程正常）\n- ✅ 主网部署清单完成\n- ✅ 性能达标（Core Web Vitals）\n- ✅ 无高危安全漏洞",
       "complexity": 7,
       "priority": "P0",
-      "dependencies": [
-        "30"
-      ],
+      "dependencies": ["30"],
       "estimated_days": 2.5,
       "status": "pending",
-      "tags": [
-        "deployment",
-        "testnet",
-        "mainnet",
-        "verification"
-      ]
+      "tags": ["deployment", "testnet", "mainnet", "verification"]
     }
   ]
 }
