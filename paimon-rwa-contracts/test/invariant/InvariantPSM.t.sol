@@ -5,7 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {StdInvariant} from "forge-std/StdInvariant.sol";
 import {console} from "forge-std/console.sol";
 import {PSM} from "../../src/core/PSM.sol";
-import {HYD} from "../../src/core/HYD.sol";
+import {USDP} from "../../src/core/USDP.sol";
 import {MockERC20} from "../../src/mocks/MockERC20.sol";
 import {PSMHandler} from "./handlers/PSMHandler.sol";
 
@@ -27,7 +27,7 @@ import {PSMHandler} from "./handlers/PSMHandler.sol";
  */
 contract InvariantPSM is StdInvariant, Test {
     PSM public psm;
-    HYD public hyd;
+    USDP public usdp;
     MockERC20 public usdc;
     PSMHandler public handler;
 
@@ -40,33 +40,23 @@ contract InvariantPSM is StdInvariant, Test {
         // Deploy mock USDC (6 decimals)
         usdc = new MockERC20("USD Coin", "USDC", 6);
 
-        // Use a two-step process to handle circular dependency:
-        // 1. Deploy contracts with temporary addresses
-        // 2. Create new instances with correct addresses
+        // Deploy USDP
+        usdp = new USDP();
 
-        // First, deploy HYD with a temporary PSM address (we'll use address(this))
-        address tempPSM = address(this);
-        //hyd = new HYD(tempPSM);
-        hyd=new HYD();
-        hyd.initTempPsm(tempPSM);
+        // Deploy PSM with USDP and USDC
+        psm = new PSM(address(usdp), address(usdc));
 
-        // Deploy PSM with the HYD address
-        psm = new PSM(address(hyd), address(usdc));
-
-        // Now we have a problem: HYD's PSM is immutable and set to address(this)
-        // Solution: Deploy a fresh HYD with the correct PSM address
-        //hyd = new HYD(address(psm));
-        hyd=new HYD();
-        hyd.initTempPsm(address(psm));
-
-        // Redeploy PSM with the correct HYD
-        psm = new PSM(address(hyd), address(usdc));
+        // Authorize PSM as USDP minter
+        usdp.setAuthorizedMinter(address(psm), true);
 
         // Fund PSM with initial USDC reserve
         usdc.mint(address(psm), INITIAL_USDC_RESERVE);
 
         // Create handler
-        handler = new PSMHandler(psm, hyd, usdc);
+        handler = new PSMHandler(psm, usdp, usdc);
+
+        // Authorize handler as USDP minter (for testing)
+        usdp.setAuthorizedMinter(address(handler), true);
 
         // Fund handler with USDC for testing
         usdc.mint(address(handler), HANDLER_USDC_BALANCE);
@@ -76,7 +66,7 @@ contract InvariantPSM is StdInvariant, Test {
 
         // Label contracts for better trace output
         vm.label(address(psm), "PSM");
-        vm.label(address(hyd), "HYD");
+        vm.label(address(usdp), "USDP");
         vm.label(address(usdc), "USDC");
         vm.label(address(handler), "PSMHandler");
     }
@@ -86,19 +76,19 @@ contract InvariantPSM is StdInvariant, Test {
     // ============================================================
 
     /**
-     * @notice Invariant: USDC reserve must always cover minted HYD supply
-     * @dev Formula: USDC.balanceOf(PSM) >= totalMinted / 1e12
-     *      This ensures all minted HYD can be redeemed for USDC
+     * @notice Invariant: USDC reserve must always cover minted USDP supply
+     * @dev Formula: USDC.balanceOf(PSM) >= USDP.totalSupply() / 1e12
+     *      This ensures all minted USDP can be redeemed for USDC
      */
     function invariant_reserveCoversSupply() public view {
         uint256 reserve = usdc.balanceOf(address(psm));
-        uint256 totalMinted = psm.totalMinted();
-        uint256 requiredReserve = totalMinted / 1e12;
+        uint256 totalSupply = usdp.totalSupply();
+        uint256 requiredReserve = totalSupply / 1e12;
 
         assertGe(
             reserve,
             requiredReserve,
-            "INVARIANT VIOLATION: Reserve must cover minted HYD supply"
+            "INVARIANT VIOLATION: Reserve must cover minted USDP supply"
         );
     }
 
@@ -137,17 +127,12 @@ contract InvariantPSM is StdInvariant, Test {
 
     /**
      * @notice Invariant: Total minted HYD never exceeds cap
-     * @dev Formula: totalMinted <= maxMintedHYD
+     * @dev REMOVED: No mint cap in USDP version of PSM
      */
     function invariant_maxMintNotExceeded() public view {
-        uint256 totalMinted = psm.totalMinted();
-        uint256 maxMinted = psm.maxMintedHYD();
-
-        assertLe(
-            totalMinted,
-            maxMinted,
-            "INVARIANT VIOLATION: Total minted exceeds cap"
-        );
+        // No-op: Mint cap removed in USDP version
+        // This invariant is no longer applicable
+        assertTrue(true, "Mint cap invariant removed");
     }
 
     // ============================================================
@@ -188,12 +173,11 @@ contract InvariantPSM is StdInvariant, Test {
         console.log("Total Swaps:", handler.ghost_totalSwaps());
         console.log("Total USDC In:", handler.ghost_totalUSDCIn());
         console.log("Total USDC Out:", handler.ghost_totalUSDCOut());
-        console.log("Total HYD Minted:", handler.ghost_totalHYDMinted());
-        console.log("Total HYD Burned:", handler.ghost_totalHYDBurned());
+        console.log("Total USDP Minted:", handler.ghost_totalUSDPMinted());
+        console.log("Total USDP Burned:", handler.ghost_totalUSDPBurned());
         console.log("\nCurrent State:");
         console.log("USDC Reserve:", usdc.balanceOf(address(psm)));
-        console.log("Total Minted HYD:", psm.totalMinted());
-        console.log("Max Minted HYD:", psm.maxMintedHYD());
+        console.log("Total USDP Supply:", usdp.totalSupply());
         console.log("Current Fee In (bp):", psm.feeIn());
         console.log("Current Fee Out (bp):", psm.feeOut());
     }
