@@ -9,8 +9,8 @@
   "stats": {
     "total": 31,
     "pending": 12,
-    "inProgress": 1,
-    "completed": 18,
+    "inProgress": 0,
+    "completed": 19,
     "blocked": 0
   },
   "tasks": [
@@ -439,14 +439,16 @@
         "18"
       ],
       "estimated_days": 1.5,
-      "status": "in_progress",
+      "status": "completed",
       "tags": [
         "frontend",
         "savings",
         "ui"
       ],
       "startedAt": "2025-11-02T23:45:00Z",
-      "branch": "feat/task-21-savings-rate-view"
+      "completedAt": "2025-11-03T02:00:00Z",
+      "branch": "feat/task-21-savings-rate-view",
+      "notes": "✅ Task 21 完成：储蓄率视图模块（3 个阶段）\n\n**Phase 1 成果** (Commit b9ad4ce):\n- ✅ SavingsRateCard.tsx: 储蓄率展示卡片 (416 lines)\n- ✅ 测试覆盖率：100% (35/35 tests passing)\n- ✅ 核心特性：\n  - APR 展示（basis points → percentage 格式化）\n  - 本金和利息余额显示（formatUnits 18 位小数）\n  - 利息来源 Tooltip（RWA 收益分配 2%）\n  - 领取利息和存款按钮\n  - 空状态处理（无钱包、无存款）\n  - Material Design 3 合规（#ff6b00 暖色调）\n\n**Phase 2 成果** (Commit 5185b22):\n- ✅ SavingsDepositModal.tsx: 存取款模态框 (453 lines)\n- ✅ 测试覆盖率：100% (35/35 tests passing)\n- ✅ 核心功能：\n  - 存款/取款 Tab 切换\n  - 18 位小数精度输入验证（防止精度溢出）\n  - Max 按钮快速填充余额\n  - 大额警告（>90% 余额）\n  - 完整错误处理和状态管理\n  - Material Design 3 合规\n\n**Phase 3.1 成果** (Commit 2fdc9e9):\n- ✅ InterestChart.tsx: 历史 APR 和利息曲线 (221 lines)\n- ✅ 测试覆盖率：100% (35/35 tests passing)\n- ✅ 核心功能：\n  - recharts 双轴图表（APR + Interest）\n  - 响应式容器（Material Design 3）\n  - 自定义 Tooltip（暖色调 #ff6b00）\n  - 数据验证和过滤（NaN/Infinity 处理）\n  - 双语支持（EN/ZH）\n\n**Phase 3.2 成果** (Commit 2d35146):\n- ✅ /app/savings/page.tsx: 储蓄页面集成 (150 lines)\n- ✅ src/components/savings/index.ts: Barrel export\n- ✅ Navigation 更新：新增 \"Savings\" 链接\n- ✅ Mock 历史数据生成（30 天）\n- ✅ Grid 布局并排显示（SavingsRateCard + InterestChart）\n- ✅ Modal 状态管理（存取款流程）\n\n**最终统计**：\n- 总代码量：~2,100 行（组件 + 测试 + 集成）\n- 测试覆盖：105 个测试，100% 平均通过率\n- 组件数量：3 个核心组件 + 1 个页面 + 1 个导航更新\n- 文件创建：9 个（组件 3 + 测试 3 + 页面 1 + barrel export 1 + Navigation 更新 1）\n\n**质量指标**：\n- ✅ Material Design 3 完全合规（暖色调、24px 圆角、渐变背景）\n- ✅ SOLID/DRY/KISS/YAGNI 原则遵守\n- ✅ 双语支持（EN/ZH）\n- ✅ 响应式设计（xs/sm/md breakpoints）\n- ✅ 6 维度测试覆盖（功能/边界/异常/性能/安全/兼容）\n- ✅ 性能优化（记忆化、精度保持、Gas 友好）\n- ✅ 安全防护（XSS 防护、地址验证、输入验证）\n\n**Commits**:\n- b9ad4ce: Phase 1 - SavingsRateCard (2 files, 867 insertions)\n- 5185b22: Phase 2 - SavingsDepositModal (2 files, 803 insertions)\n- 2fdc9e9: Phase 3.1 - InterestChart (2 files, 610 insertions)\n- 2d35146: Phase 3.2 - Integration page (3 files, 188 insertions)\n\n**Branch**: feat/task-21-savings-rate-view (准备合并到 main）"
     },
     {
       "id": "22",
