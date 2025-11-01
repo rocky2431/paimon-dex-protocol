@@ -4,7 +4,13 @@ import { useState } from 'react';
 import { Box, Container, Typography, Button, Grid } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { Navigation } from '@/components/layout';
-import { BoostStakingCard, BoostStakeModal, BoostUnstakeButton } from '@/components/boost';
+import {
+  BoostStakingCard,
+  BoostStakeModal,
+  BoostUnstakeButton,
+  BoostCalculator,
+  BoostHistory,
+} from '@/components/boost';
 import { useAccount, useReadContract } from 'wagmi';
 import {
   useBoostStakingAmount,
@@ -53,7 +59,7 @@ const ERC20_ABI = [
  *
  * Phase 1: Read-only display (✅ completed)
  * Phase 2: Stake/unstake actions (✅ completed)
- * Phase 3: Calculator and history (TODO)
+ * Phase 3: Calculator and history (✅ completed)
  */
 export default function BoostPage() {
   const { address, isConnected } = useAccount();
@@ -310,10 +316,24 @@ export default function BoostPage() {
             {/* Huge whitespace (OlympusDAO style) */}
             <Box sx={{ height: { xs: 40, sm: 60 } }} />
 
-            {/* Phase 3 Placeholder (TODO) */}
-            <Typography variant="body2" sx={{ color: 'text.secondary', mt: 4, textAlign: 'center' }}>
-              🚧 Phase 3: Boost Calculator & History (Coming soon)
-            </Typography>
+            {/* Calculator & History Section */}
+            <Grid container spacing={3}>
+              {/* Boost Calculator */}
+              <Grid item xs={12} lg={6}>
+                <BoostCalculator
+                  userBalance={paimonBalanceFormatted}
+                  currentMultiplier={boostMultiplier ? Number(boostMultiplier) : 10000}
+                />
+              </Grid>
+
+              {/* Boost History */}
+              <Grid item xs={12} lg={6}>
+                <BoostHistory
+                  entries={[]}
+                  isLoading={false}
+                />
+              </Grid>
+            </Grid>
           </>
         )}
 
