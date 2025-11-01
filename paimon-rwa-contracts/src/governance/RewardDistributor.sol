@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "../core/VotingEscrow.sol";
+import "../incentives/BoostStaking.sol";
 
 /**
  * @title RewardDistributor
@@ -44,6 +45,9 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
     /// @notice VotingEscrow contract for veNFT verification
     VotingEscrow public immutable votingEscrow;
 
+    /// @notice BoostStaking contract for reward multipliers
+    BoostStaking public immutable boostStaking;
+
     /// @notice Treasury address for protocol fees
     address public treasury;
 
@@ -70,19 +74,25 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
     /// @notice Emitted when user claims rewards
     event RewardClaimed(uint256 indexed epoch, address indexed user, address indexed token, uint256 amount);
 
+    /// @notice Emitted when boost multiplier is applied to rewards
+    event BoostApplied(address indexed user, uint256 baseReward, uint256 boostMultiplier, uint256 actualReward);
+
     /// @notice Emitted when epoch advances
     event EpochAdvanced(uint256 indexed newEpoch, uint256 timestamp);
 
     /**
      * @notice Constructor
      * @param _votingEscrow VotingEscrow contract address
+     * @param _boostStaking BoostStaking contract address
      * @param _treasury Treasury address
      */
-    constructor(address _votingEscrow, address _treasury) Ownable(msg.sender) {
+    constructor(address _votingEscrow, address _boostStaking, address _treasury) Ownable(msg.sender) {
         require(_votingEscrow != address(0), "Invalid votingEscrow");
+        require(_boostStaking != address(0), "Invalid boostStaking");
         require(_treasury != address(0), "Invalid treasury");
 
         votingEscrow = VotingEscrow(_votingEscrow);
+        boostStaking = BoostStaking(_boostStaking);
         treasury = _treasury;
         epochStartTime = block.timestamp;
         currentEpoch = 0;
@@ -103,11 +113,15 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice Claim rewards for a specific epoch and token
+     * @notice Claim rewards for a specific epoch and token (with boost applied)
      * @param epoch Epoch number
      * @param token Reward token address
-     * @param amount Reward amount
+     * @param amount Base reward amount (before boost)
      * @param proof Merkle proof
+     *
+     * @dev Boost multiplier is queried from BoostStaking contract at claim time
+     *      actualReward = baseReward × boostMultiplier / 10000
+     *      Example: baseReward=100, boostMultiplier=11000 (1.1x) → actualReward=110
      */
     function claim(uint256 epoch, address token, uint256 amount, bytes32[] calldata proof) external nonReentrant {
         require(amount > 0, "Amount must be > 0");
@@ -123,10 +137,19 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
         // Mark as claimed
         claimed[epoch][token][msg.sender] = true;
 
-        // Transfer rewards
-        IERC20(token).safeTransfer(msg.sender, amount);
+        // Query boost multiplier from BoostStaking (10000 = 1.0x, 15000 = 1.5x)
+        uint256 boostMultiplier = boostStaking.getBoostMultiplier(msg.sender);
 
-        emit RewardClaimed(epoch, msg.sender, token, amount);
+        // Calculate actual reward with boost applied (multiply before divide for precision)
+        uint256 actualReward = (amount * boostMultiplier) / 10000;
+
+        // Emit BoostApplied event
+        emit BoostApplied(msg.sender, amount, boostMultiplier, actualReward);
+
+        // Transfer boosted rewards
+        IERC20(token).safeTransfer(msg.sender, actualReward);
+
+        emit RewardClaimed(epoch, msg.sender, token, actualReward);
     }
 
     /**

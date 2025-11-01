@@ -8,8 +8,8 @@
   },
   "stats": {
     "total": 31,
-    "pending": 21,
-    "inProgress": 0,
+    "pending": 20,
+    "inProgress": 1,
     "completed": 9,
     "blocked": 0
   },
@@ -166,8 +166,10 @@
       "priority": "P0",
       "dependencies": ["6"],
       "estimated_days": 1.5,
-      "status": "pending",
-      "tags": ["contract", "governance", "boost-integration"]
+      "status": "in_progress",
+      "tags": ["contract", "governance", "boost-integration"],
+      "startedAt": "2025-11-02T11:30:00Z",
+      "branch": "feat/task-11-boost-integration"
     },
     {
       "id": "12",
