@@ -8,8 +8,8 @@
   },
   "stats": {
     "total": 31,
-    "pending": 13,
-    "inProgress": 0,
+    "pending": 12,
+    "inProgress": 1,
     "completed": 18,
     "blocked": 0
   },
@@ -439,12 +439,14 @@
         "18"
       ],
       "estimated_days": 1.5,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "frontend",
         "savings",
         "ui"
-      ]
+      ],
+      "startedAt": "2025-11-02T23:45:00Z",
+      "branch": "feat/task-21-savings-rate-view"
     },
     {
       "id": "22",
