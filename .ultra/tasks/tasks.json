@@ -9,8 +9,8 @@
   "stats": {
     "total": 31,
     "pending": 16,
-    "inProgress": 1,
-    "completed": 14,
+    "inProgress": 0,
+    "completed": 15,
     "blocked": 0
   },
   "tasks": [
@@ -353,14 +353,16 @@
         "13"
       ],
       "estimated_days": 0.5,
-      "status": "in_progress",
+      "status": "completed",
       "tags": [
         "frontend",
         "configuration",
         "wagmi"
       ],
       "startedAt": "2025-11-02T19:30:00Z",
-      "branch": "feat/task-17-frontend-contracts-config"
+      "branch": "feat/task-17-frontend-contracts-config",
+      "completedAt": "2025-11-02T20:00:00Z",
+      "notes": "✅ 前端合约配置完成（6个新合约）\n✅ 合约配置文件创建（minimal ABI）\n✅ testnet.ts 更新（新增 3 个合约地址 + 2 个 tokenConfig）\n✅ 自定义 wagmi hooks 创建（6个）\n✅ TypeScript 类型检查通过\n\n**核心配置**：\n- USDP (share-based stablecoin with accrual index)\n- esPaimon (vesting token with 365-day linear release)\n- VotingEscrowPaimon (vote-escrowed NFT, 1 week - 4 years lock)\n- BoostStaking (stake PAIMON for 1.0x-1.5x reward multiplier)\n- NitroPool (external incentive pools with governance approval)\n- SavingRate (USDP savings with RWA yield distribution)\n\n**文件变更** (14 files, 1836 insertions):\n- Config files: usdp.ts, esPaimon.ts, vePaimon.ts, boostStaking.ts, nitroPool.ts, savingRate.ts\n- Hooks: useUsdp.ts, useEsPaimon.ts, useVePaimon.ts, useBoostStaking.ts, useNitroPool.ts, useSavingRate.ts\n- Chain config: testnet.ts (added USDP, esPaimon, vePaimon, boostStaking, nitroPool, savingRate)\n- Tasks: tasks.json (Task 17 completed)\n\n**Commits**:\n- 19c44c6: feat: configure new contract addresses and wagmi hooks\n- 6fa3b02: chore: merge Task 17\n- Branch feat/task-17-frontend-contracts-config merged and deleted"
     },
     {
       "id": "18",
