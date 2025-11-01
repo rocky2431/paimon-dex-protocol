@@ -346,14 +346,14 @@
     },
     {
       "id": "29",
-      "title": "前端 E2E 测试（Playwright）",
-      "description": "使用 Playwright MCP 编写前端端到端测试，验证完整用户交互流程（Boost 质押、Nitro 参与、储蓄存取）。\n\n**测试场景**：\n1. 连接钱包 → 质押 esPaimon → 查看 Boost 倍数\n2. 浏览 Nitro 池 → 参与 → 领取奖励\n3. 存入 USDP → 查看利息 → 取出\n4. PSM 兑换 USDC↔USDP\n5. 锁仓 vePaimon → 投票 Gauge\n\n**验收标准**：\n- ✅ 所有 E2E 测试通过\n- ✅ 无 UI 阻塞或错误\n- ✅ Core Web Vitals 达标",
+      "title": "前端 E2E 测试（chrome-devtools）",
+      "description": "使用 chrome-devtools MCP 编写前端端到端测试，验证完整用户交互流程（Boost 质押、Nitro 参与、储蓄存取）。\n\n**测试场景**：\n1. 连接钱包 → 质押 esPaimon → 查看 Boost 倍数\n2. 浏览 Nitro 池 → 参与 → 领取奖励\n3. 存入 USDP → 查看利息 → 取出\n4. PSM 兑换 USDC↔USDP\n5. 锁仓 vePaimon → 投票 Gauge\n\n**验收标准**：\n- ✅ 所有 E2E 测试通过\n- ✅ 无 UI 阻塞或错误\n- ✅ Core Web Vitals 达标",
       "complexity": 4,
       "priority": "P1",
       "dependencies": ["28"],
       "estimated_days": 1.5,
       "status": "pending",
-      "tags": ["testing", "e2e", "playwright"]
+      "tags": ["testing", "e2e", "chrome-devtools"]
     },
     {
       "id": "30",
