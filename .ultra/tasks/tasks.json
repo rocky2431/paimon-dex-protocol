@@ -8,8 +8,8 @@
   },
   "stats": {
     "total": 31,
-    "pending": 23,
-    "inProgress": 0,
+    "pending": 22,
+    "inProgress": 1,
     "completed": 7,
     "blocked": 0
   },
@@ -136,8 +136,10 @@
       "priority": "P0",
       "dependencies": ["3"],
       "estimated_days": 2,
-      "status": "pending",
-      "tags": ["contract", "core", "PSM", "refactor"]
+      "status": "in_progress",
+      "tags": ["contract", "core", "PSM", "refactor"],
+      "startedAt": "2025-11-02T04:00:00Z",
+      "branch": "feat/task-9-psm-refactor"
     },
     {
       "id": "10",
