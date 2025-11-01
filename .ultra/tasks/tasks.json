@@ -9,8 +9,8 @@
   "stats": {
     "total": 31,
     "pending": 15,
-    "inProgress": 1,
-    "completed": 15,
+    "inProgress": 0,
+    "completed": 16,
     "blocked": 0
   },
   "tasks": [
@@ -374,13 +374,15 @@
         "17"
       ],
       "estimated_days": 0.5,
-      "status": "in_progress",
+      "status": "completed",
       "tags": [
         "frontend",
         "i18n"
       ],
       "startedAt": "2025-11-02T20:15:00Z",
-      "branch": "feat/task-18-i18n-update"
+      "completedAt": "2025-11-02T20:30:00Z",
+      "branch": "feat/task-18-i18n-update",
+      "notes": "✅ 双语翻译文件完成（英文 + 中文）\n✅ 所有 6 个新合约术语翻译完成\n✅ 15 个功能模块完整覆盖\n✅ 键结构完全一致（en.json ↔ zh.json）\n\n**核心翻译**：\n- USDP: Share-based stablecoin with accrual index / 基于份额的稳定币，通过累积指数分配 RWA 收益\n- esPaimon: Escrowed PAIMON with 365-day linear vesting / 托管 PAIMON，365 天线性释放\n- vePaimon: Vote-escrowed NFT for governance (1 week - 4 years lock) / 投票托管 NFT，用于治理，投票权线性衰减\n- BoostStaking: Stake PAIMON to receive reward boost multipliers (1.0x - 1.5x) / 质押 PAIMON 获得奖励加速倍数（1.0x - 1.5x）\n- NitroPool: External incentive pools with governance approval / 需要治理批准的外部激励池\n- SavingRate: Earn interest on USDP from RWA yields / 通过 USDP 赚取 RWA 收益利息\n\n**文件变更** (3 files, 390 insertions):\n- messages/en.json (192 lines, 200+ keys)\n- messages/zh.json (192 lines, 200+ keys)\n- .ultra/tasks/tasks.json (updated)\n\n**翻译组织**:\n- common: UI 通用元素（连接钱包、余额、授权等）\n- tokens: 代币名称（HYD, USDP, PAIMON, esPAIMON, vePAIMON 等）\n- nav: 导航菜单（兑换、流动性池、锁仓、投票、金库、奖励、Boost、Nitro、储蓄）\n- usdp: USDP 模块（余额、份额、累积指数、铸造、销毁）\n- esPaimon: esPaimon 模块（总数量、已领取、已释放、可领取、加速权重、退出罚金）\n- vePaimon: vePaimon 模块（锁定时长、投票权重、创建锁仓、增加数量、延长锁定、合并 NFT）\n- boost: Boost 模块（加速倍数、质押数量、质押时间、计算器、公式）\n- nitro: Nitro 模块（池 ID、LP 代币、锁定时长、总质押量、奖励代币、创建/加入/退出池）\n- savings: 储蓄模块（年化利率、本金、已累积利息、存入、提取、利息来源）\n- treasury: 金库模块（RWA 资产、抵押率、健康因子、铸造 USDP、赎回 RWA）\n- swap: 兑换模块（滑点容忍度、价格影响、最少获得、PSM 1:1 兑换）\n- pool: 流动性池模块（添加/移除流动性、您的流动性、池份额）\n- vote: 投票模块（为 Gauge 投票、投票权重、Gauge 权重）\n- rewards: 奖励模块（可领取奖励、已领取、全部领取、已应用加速）\n- errors: 错误消息（钱包未连接、授权额度不足、交易失败、合约调用失败、网络错误）\n\n**质量保证**：\n- ✅ 键结构 100% 匹配\n- ✅ 无遗漏或重复键\n- ✅ 专业术语准确翻译\n- ✅ 符合产品设计文档（PRD）术语规范\n\n**Commits**：\n- 4f3023d: feat: add bilingual i18n translations for 6 new contracts\n- Merge to main: chore: merge Task 18\n- Branch feat/task-18-i18n-update merged and deleted"
     },
     {
       "id": "19",
