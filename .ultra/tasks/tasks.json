@@ -8,8 +8,8 @@
   },
   "stats": {
     "total": 31,
-    "pending": 15,
-    "inProgress": 0,
+    "pending": 14,
+    "inProgress": 1,
     "completed": 16,
     "blocked": 0
   },
@@ -395,12 +395,14 @@
         "18"
       ],
       "estimated_days": 2,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "frontend",
         "boost",
         "ui"
-      ]
+      ],
+      "startedAt": "2025-11-02T20:45:00Z",
+      "branch": "feat/task-19-boost-ui-module"
     },
     {
       "id": "20",
