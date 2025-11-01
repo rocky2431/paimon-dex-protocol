@@ -111,3 +111,29 @@ export interface BoostHistoryProps {
   /** Loading state */
   isLoading?: boolean;
 }
+
+export interface BoostStakeModalProps {
+  /** Modal open state */
+  open: boolean;
+  /** User's PAIMON balance */
+  userBalance: string;
+  /** Current staked amount */
+  currentStaked: string;
+  /** On close callback */
+  onClose: () => void;
+  /** On stake callback */
+  onStake: (amount: string) => Promise<void>;
+  /** Staking in progress */
+  staking?: boolean;
+}
+
+export interface BoostUnstakeButtonProps {
+  /** Can unstake? (7 days passed) */
+  canUnstake: boolean;
+  /** Staked amount */
+  stakedAmount: string;
+  /** On unstake callback */
+  onUnstake: () => Promise<void>;
+  /** Unstaking in progress */
+  unstaking?: boolean;
+}

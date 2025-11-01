@@ -1,18 +1,44 @@
 'use client';
 
-import { Box, Container, Typography } from '@mui/material';
+import { useState } from 'react';
+import { Box, Container, Typography, Button, Grid } from '@mui/material';
+import { Add as AddIcon } from '@mui/icons-material';
 import { Navigation } from '@/components/layout';
-import { BoostStakingCard } from '@/components/boost';
-import { useAccount } from 'wagmi';
+import { BoostStakingCard, BoostStakeModal, BoostUnstakeButton } from '@/components/boost';
+import { useAccount, useReadContract } from 'wagmi';
 import {
   useBoostStakingAmount,
   useBoostStakingTime,
   useBoostMultiplier,
   useCanUnstake,
+  useBoostStake,
+  useBoostUnstake,
 } from '@/hooks/useBoostStaking';
-import { formatUnits } from 'viem';
+import { formatUnits, parseUnits } from 'viem';
 import { formatBoostMultiplier, calculateTimeRemaining } from '@/components/boost/constants';
 import { BoostStake } from '@/components/boost/types';
+import { testnet } from '@/config/chains/testnet';
+
+// Standard ERC20 ABI (balanceOf)
+const ERC20_ABI = [
+  {
+    inputs: [{ name: 'account', type: 'address' }],
+    name: 'balanceOf',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { name: 'spender', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    name: 'approve',
+    outputs: [{ name: '', type: 'bool' }],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+] as const;
 
 /**
  * Boost Page
@@ -22,26 +48,55 @@ import { BoostStake } from '@/components/boost/types';
  * - View current Boost staking status
  * - Display boost multiplier (1.0x - 1.5x)
  * - Show unlock countdown
- * - Stake/unstake PAIMON (future phase)
+ * - Stake PAIMON to boost rewards
+ * - Unstake PAIMON (after 7-day lock)
  *
- * Phase 1: Read-only display (completed)
- * Phase 2: Stake/unstake actions (TODO)
+ * Phase 1: Read-only display (✅ completed)
+ * Phase 2: Stake/unstake actions (✅ completed)
  * Phase 3: Calculator and history (TODO)
  */
 export default function BoostPage() {
   const { address, isConnected } = useAccount();
 
-  // Fetch boost staking data using wagmi hooks
-  const { data: stakedAmount, isLoading: isLoadingAmount, error: errorAmount } = useBoostStakingAmount(address);
-  const { data: stakeTime, isLoading: isLoadingTime } = useBoostStakingTime(address);
-  const { data: boostMultiplier, isLoading: isLoadingMultiplier } = useBoostMultiplier(address);
-  const { data: canUnstake, isLoading: isLoadingUnstake } = useCanUnstake(address);
+  // Modal state
+  const [stakeModalOpen, setStakeModalOpen] = useState(false);
+
+  // Write hooks
+  const { writeContractAsync: stakeAsync, isPending: isStaking } = useBoostStake();
+  const { writeContractAsync: unstakeAsync, isPending: isUnstaking } = useBoostUnstake();
+
+  // Read hooks - Boost staking data
+  const { data: stakedAmount, isLoading: isLoadingAmount, error: errorAmount, refetch: refetchAmount } = useBoostStakingAmount(address);
+  const { data: stakeTime, isLoading: isLoadingTime, refetch: refetchTime } = useBoostStakingTime(address);
+  const { data: boostMultiplier, isLoading: isLoadingMultiplier, refetch: refetchMultiplier } = useBoostMultiplier(address);
+  const { data: canUnstake, isLoading: isLoadingUnstake, refetch: refetchUnstake } = useCanUnstake(address);
+
+  // Read PAIMON balance
+  const { data: paimonBalance, refetch: refetchBalance } = useReadContract({
+    address: testnet.tokens.paimon,
+    abi: ERC20_ABI,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address,
+    },
+  });
 
   // Combine loading states
   const isLoading = isLoadingAmount || isLoadingTime || isLoadingMultiplier || isLoadingUnstake;
 
   // Error handling
   const error = errorAmount ? 'Failed to load boost data' : undefined;
+
+  // Format balance
+  const paimonBalanceFormatted = paimonBalance
+    ? formatUnits(paimonBalance as bigint, 18)
+    : '0';
+
+  // Format current staked
+  const currentStakedFormatted = stakedAmount
+    ? formatUnits(stakedAmount as bigint, 18)
+    : '0';
 
   // Transform data to BoostStake type
   let stake: BoostStake | undefined;
@@ -70,6 +125,86 @@ export default function BoostPage() {
       };
     }
   }
+
+  // Handle stake
+  const handleStake = async (amount: string) => {
+    if (!address) return;
+
+    try {
+      // 1. Approve BoostStaking contract to spend PAIMON
+      await stakeAsync({
+        address: testnet.tokens.paimon,
+        abi: ERC20_ABI,
+        functionName: 'approve',
+        args: [testnet.tokens.boostStaking, parseUnits(amount, 18)],
+      });
+
+      // 2. Stake PAIMON
+      await stakeAsync({
+        address: testnet.tokens.boostStaking,
+        abi: [
+          {
+            inputs: [{ name: 'amount', type: 'uint256' }],
+            name: 'stake',
+            outputs: [],
+            stateMutability: 'nonpayable',
+            type: 'function',
+          },
+        ] as const,
+        functionName: 'stake',
+        args: [parseUnits(amount, 18)],
+      });
+
+      // 3. Refetch data
+      await Promise.all([
+        refetchAmount(),
+        refetchTime(),
+        refetchMultiplier(),
+        refetchUnstake(),
+        refetchBalance(),
+      ]);
+
+      // 4. Close modal
+      setStakeModalOpen(false);
+    } catch (error) {
+      // Error will be displayed by modal
+      throw error;
+    }
+  };
+
+  // Handle unstake
+  const handleUnstake = async () => {
+    if (!address) return;
+
+    try {
+      // Unstake PAIMON
+      await unstakeAsync({
+        address: testnet.tokens.boostStaking,
+        abi: [
+          {
+            inputs: [],
+            name: 'unstake',
+            outputs: [],
+            stateMutability: 'nonpayable',
+            type: 'function',
+          },
+        ] as const,
+        functionName: 'unstake',
+      });
+
+      // Refetch data
+      await Promise.all([
+        refetchAmount(),
+        refetchTime(),
+        refetchMultiplier(),
+        refetchUnstake(),
+        refetchBalance(),
+      ]);
+    } catch (error) {
+      // Error will be displayed by button component
+      throw error;
+    }
+  };
 
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
@@ -140,14 +275,43 @@ export default function BoostPage() {
             {/* Boost Staking Card */}
             <BoostStakingCard stake={stake} isLoading={isLoading} error={error} />
 
+            {/* Action Buttons */}
+            <Grid container spacing={2} sx={{ mt: 2 }}>
+              <Grid item xs={12} sm={6}>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  startIcon={<AddIcon />}
+                  onClick={() => setStakeModalOpen(true)}
+                  disabled={isStaking}
+                  sx={{
+                    textTransform: 'none',
+                    fontWeight: 700,
+                    py: 1.5,
+                    backgroundColor: '#ff6b00',
+                    '&:hover': {
+                      backgroundColor: '#ff8c00',
+                    },
+                  }}
+                >
+                  Stake PAIMON
+                </Button>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <BoostUnstakeButton
+                  canUnstake={stake?.canUnstake || false}
+                  stakedAmount={stake?.amountFormatted || '0'}
+                  onUnstake={handleUnstake}
+                  unstaking={isUnstaking}
+                />
+              </Grid>
+            </Grid>
+
             {/* Huge whitespace (OlympusDAO style) */}
             <Box sx={{ height: { xs: 40, sm: 60 } }} />
 
-            {/* Phase 2 & 3 Placeholders (TODO) */}
+            {/* Phase 3 Placeholder (TODO) */}
             <Typography variant="body2" sx={{ color: 'text.secondary', mt: 4, textAlign: 'center' }}>
-              🚧 Phase 2: Stake/Unstake actions (Coming soon)
-            </Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1, textAlign: 'center' }}>
               🚧 Phase 3: Boost Calculator & History (Coming soon)
             </Typography>
           </>
@@ -156,6 +320,16 @@ export default function BoostPage() {
         {/* Huge whitespace (OlympusDAO style) */}
         <Box sx={{ height: { xs: 40, sm: 60 } }} />
       </Container>
+
+      {/* Stake Modal */}
+      <BoostStakeModal
+        open={stakeModalOpen}
+        userBalance={paimonBalanceFormatted}
+        currentStaked={currentStakedFormatted}
+        onClose={() => setStakeModalOpen(false)}
+        onStake={handleStake}
+        staking={isStaking}
+      />
     </Box>
   );
 }
