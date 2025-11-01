@@ -119,7 +119,7 @@ function CustomTooltip({
 }: TooltipProps<ValueType, NameType> & { locale?: 'en' | 'zh' }) {
   const t = translations[locale];
 
-  if (!active || !payload || !payload.length) {
+  if (!active || !payload || !Array.isArray(payload) || !payload.length) {
     return null;
   }
 
@@ -134,9 +134,9 @@ function CustomTooltip({
       }}
     >
       <Typography variant="caption" sx={{ display: 'block', mb: 0.5, fontWeight: 600 }}>
-        {formatDate(label, locale)}
+        {formatDate(label as number, locale)}
       </Typography>
-      {payload.map((entry, index) => (
+      {payload.map((entry: any, index: number) => (
         <Typography
           key={index}
           variant="caption"

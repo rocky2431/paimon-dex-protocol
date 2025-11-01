@@ -390,9 +390,8 @@ describe('AccrualIndexChart - Security Tests', () => {
         timestamp: Date.now(),
         index: 1.0e18,
         dailyGrowth: 0,
-        // @ts-expect-error - Testing XSS injection
         malicious: '<script>alert("xss")</script>',
-      },
+      } as any,
     ];
 
     render(<AccrualIndexChart data={data} />);
@@ -404,14 +403,11 @@ describe('AccrualIndexChart - Security Tests', () => {
   it('should validate data types', () => {
     const data = [
       {
-        // @ts-expect-error - Testing type validation
         timestamp: '2024-01-01',
-        // @ts-expect-error
         index: '1.5e18',
-        // @ts-expect-error
         dailyGrowth: '0.01',
       },
-    ];
+    ] as any;
 
     render(<AccrualIndexChart data={data} />);
 
@@ -440,9 +436,8 @@ describe('AccrualIndexChart - Security Tests', () => {
         timestamp: Date.now(),
         index: 1.0e18,
         dailyGrowth: 0,
-        // @ts-expect-error - Testing prototype pollution
         __proto__: { polluted: true },
-      },
+      } as any,
     ];
 
     render(<AccrualIndexChart data={data} />);
@@ -490,8 +485,7 @@ describe('AccrualIndexChart - Compatibility Tests', () => {
 
   it('should handle invalid locale gracefully', () => {
     const data = generateMockData(7);
-    // @ts-expect-error - Testing invalid locale
-    render(<AccrualIndexChart data={data} locale="fr" />);
+    render(<AccrualIndexChart data={data} locale={'fr' as any} />);
 
     // Should fallback to English
     expect(screen.getByText('Accrual Index History')).toBeInTheDocument();
