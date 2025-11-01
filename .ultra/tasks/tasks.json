@@ -3,14 +3,14 @@
   "metadata": {
     "projectName": "Paimon.dex",
     "created": "2025-11-01T12:00:00Z",
-    "lastModified": "2025-11-02T06:00:00Z",
+    "lastModified": "2025-11-02T11:00:00Z",
     "description": "Paimon 协议改造：HYD→USDP + ve33 治理 + Boost 激励"
   },
   "stats": {
     "total": 31,
     "pending": 21,
-    "inProgress": 1,
-    "completed": 8,
+    "inProgress": 0,
+    "completed": 9,
     "blocked": 0
   },
   "tasks": [
@@ -151,10 +151,12 @@
       "priority": "P1",
       "dependencies": ["1"],
       "estimated_days": 0.5,
-      "status": "in_progress",
+      "status": "completed",
       "tags": ["contract", "dex", "optimization"],
       "startedAt": "2025-11-02T10:00:00Z",
-      "branch": "feat/task-10-dexpair-fee-split"
+      "completedAt": "2025-11-02T11:00:00Z",
+      "branch": "feat/task-10-dexpair-fee-split",
+      "notes": "✅ DEXPair.sol 手续费分配优化完成\n✅ TDD 流程：RED → GREEN → REFACTOR 全部完成\n✅ 所有 InvariantDEX 测试通过（3 tests, 256 runs each, 384000 operations）\n✅ 代码质量：SOLID/DRY/KISS/YAGNI 原则全部符合\n\n**核心改动**：\n- 删除固定常量 VOTER_FEE (17) 和 TREASURY_FEE (8)\n- 实现动态计算：voterShare = (fee × 7) / 10, treasuryShare = fee - voterShare\n- 修复精度问题：旧常量 68%/32% → 新公式精确 70%/30%\n\n**技术细节**：\n- 先乘后除保证精度：(fee × 7) / 10\n- 无舍入误差：treasuryShare = fee - voterShare 确保不丢失任何 wei\n- 向后兼容：保持总费率 0.25% 不变\n- Gas 成本不变：操作数相同\n\n**测试覆盖**：\n- InvariantDEX 3 个不变量全部通过（K invariant, Fee accounting, Call summary）\n- 384000 次随机操作（add/remove liquidity, swap）无失败\n- 向后兼容性验证：所有现有测试通过\n\n✅ Commit: 4c1a110 (refactor: optimize DEXPair fee split)\n✅ Branch feat/task-10-dexpair-fee-split merged to main and deleted"
     },
     {
       "id": "11",
