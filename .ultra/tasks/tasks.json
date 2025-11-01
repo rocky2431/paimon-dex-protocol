@@ -8,8 +8,8 @@
   },
   "stats": {
     "total": 31,
-    "pending": 28,
-    "inProgress": 0,
+    "pending": 27,
+    "inProgress": 1,
     "completed": 3,
     "blocked": 0
   },
@@ -77,8 +77,10 @@
       "priority": "P0",
       "dependencies": ["1", "4"],
       "estimated_days": 1.5,
-      "status": "pending",
-      "tags": ["contract", "core", "vePaimon"]
+      "status": "in_progress",
+      "tags": ["contract", "core", "vePaimon"],
+      "startedAt": "2025-11-01T20:30:00Z",
+      "branch": "feat/task-5-vepaimon-contract"
     },
     {
       "id": "6",
