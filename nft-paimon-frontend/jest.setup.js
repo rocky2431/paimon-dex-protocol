@@ -5,6 +5,13 @@ import '@testing-library/jest-dom'
 global.TextEncoder = require('util').TextEncoder
 global.TextDecoder = require('util').TextDecoder
 
+// Mock ResizeObserver for recharts
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
+}))
+
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
   useRouter() {
