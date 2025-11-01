@@ -272,6 +272,10 @@ contract DeployScript is Script {
         // Whitelist HYD in BribeMarketplace
         bribeMarketplace.whitelistToken(address(hyd), true);
         console.log("  Whitelisted HYD in BribeMarketplace");
+
+        // Whitelist PAIMON in BribeMarketplace
+        bribeMarketplace.whitelistToken(address(paimon), true);
+        console.log("  Whitelisted PAIMON in BribeMarketplace");
     }
 
     /**

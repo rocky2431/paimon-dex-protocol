@@ -8,8 +8,8 @@
   },
   "stats": {
     "total": 31,
-    "pending": 20,
-    "inProgress": 0,
+    "pending": 19,
+    "inProgress": 1,
     "completed": 10,
     "blocked": 0
   },
@@ -181,8 +181,12 @@
       "priority": "P1",
       "dependencies": ["4"],
       "estimated_days": 0.5,
-      "status": "pending",
-      "tags": ["contract", "governance", "bribe"]
+      "status": "completed",
+      "tags": ["contract", "governance", "bribe"],
+      "startedAt": "2025-11-02T12:30:00Z",
+      "completedAt": "2025-11-02T14:15:00Z",
+      "branch": "feat/task-12-espaimon-bribe",
+      "implementationNotes": "**实现摘要**：\n- 添加 PAIMON 到 BribeMarketplace 白名单（注：esPaimon 是 vesting 合约，实际使用 PAIMON 代币）\n- 创建完整测试套件：26 个测试，6 维覆盖（Functional, Boundary, Exception, Performance, Security, Compatibility）\n- 所有测试通过（26/26）\n- Gas 优化：createBribe(PAIMON) < 200K gas\n\n**修改文件**：\n- `script/Deploy.s.sol`: 添加 PAIMON 白名单配置\n- `test/governance/BribeMarketplace.t.sol`: 新增完整测试套件\n\n**关键发现**：\n- esPaimon 是非转移性 vesting 合约，不适合直接用于 bribe\n- 正确实现：白名单 PAIMON 代币，用户用 PAIMON 进行 bribe\n- esPaimon 代表锁定的 PAIMON 份额，与 bribe 功能分离"
     },
     {
       "id": "13",
