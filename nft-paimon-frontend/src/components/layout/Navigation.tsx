@@ -19,7 +19,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import LockIcon from '@mui/icons-material/Lock';
 
-export type NavPage = 'swap' | 'liquidity' | 'lock' | 'vote' | 'presale' | 'treasury' | 'launchpad' | 'analytics' | 'bribes' | 'rewards';
+export type NavPage = 'swap' | 'liquidity' | 'lock' | 'vote' | 'presale' | 'treasury' | 'launchpad' | 'analytics' | 'bribes' | 'rewards' | 'savings';
 
 interface NavigationProps {
   /**
@@ -273,6 +273,24 @@ export function Navigation({ activePage }: NavigationProps) {
                 }}
               >
                 Vote
+              </Typography>
+            </Link>
+
+            <Link href="/savings" style={{ textDecoration: 'none' }}>
+              <Typography
+                variant="body1"
+                fontWeight={600}
+                sx={{
+                  color: activePage === 'savings' ? 'primary.main' : 'text.secondary',
+                  cursor: 'pointer',
+                  transition: 'color 0.3s',
+                  whiteSpace: 'nowrap',
+                  '&:hover': {
+                    color: 'primary.main',
+                  },
+                }}
+              >
+                Savings
               </Typography>
             </Link>
 
