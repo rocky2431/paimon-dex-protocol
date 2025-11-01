@@ -4,5 +4,6 @@
  */
 
 export { NitroPoolList } from './NitroPoolList';
+export { NitroParticipateModal } from './NitroParticipateModal';
 export * from './types';
 export * from './constants';

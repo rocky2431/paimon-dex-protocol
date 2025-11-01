@@ -424,7 +424,8 @@
         "frontend",
         "nitro",
         "ui"
-      ]
+      ],
+      "notes": "✅ Phase 1 完成：NitroPoolList 核心展示组件\n\n**Phase 1 成果** (Commit 4a13be0):\n- ✅ NitroPoolList.tsx: 池列表展示组件 (305 lines)\n- ✅ 6 维度测试覆盖 (Functional, Boundary, Exception, Performance, Security, Compatibility)\n- ✅ Material Design 3 合规（暖色调 #ff6b00, 圆角 24px, 渐变背景）\n- ✅ 响应式设计 (Grid xs/sm/md breakpoints)\n- ✅ 测试通过率：100% (35/35 tests)\n- ✅ TDD 流程：RED → GREEN → REFACTOR\n\n**核心特性**:\n- Pool card 展示：池名称、锁定期限、APR、奖励代币\n- 风险警告：外部激励池风险提示\n- 高 APR 警告：>100% APR 显示警告标签\n- LP token 验证：无效地址显示错误提示\n- 性能优化：\n  - Memoized pool cards（防止不必要的重渲染）\n  - Virtualization（>20 pools 时仅渲染可见项）\n- 安全性：XSS 防护、地址格式验证\n- 兼容性：双语支持（EN/ZH）、响应式布局\n\n**Next**: Phase 2 - NitroParticipateModal (参与模态框) + NitroRewardsCard (我的奖励卡片)"
     },
     {
       "id": "21",
