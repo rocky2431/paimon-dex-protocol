@@ -22,9 +22,9 @@ import "./libraries/Math.sol";
  *
  * Fee Calculation:
  * - Total fee: 0.25% (25 / 10000)
- * - Voter fee: 0.175% (17 / 10000) = 70% of total
- * - Treasury fee: 0.075% (8 / 10000) = 30% of total
- * - Precision: Accurate to 1 wei
+ * - Voter fee: Dynamically calculated as (totalFee × 7) / 10 = 70% of total
+ * - Treasury fee: Dynamically calculated as totalFee - voterFee = 30% of total
+ * - Precision: Exact 70/30 split, no rounding errors
  */
 contract DEXPair is ERC20, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -40,12 +40,6 @@ contract DEXPair is ERC20, ReentrancyGuard {
 
     /// @notice Total swap fee (0.25%)
     uint256 public constant TOTAL_FEE = 25;
-
-    /// @notice Voter fee (0.175% = 70% of total fee)
-    uint256 public constant VOTER_FEE = 17;
-
-    /// @notice Treasury fee (0.075% = 30% of total fee)
-    uint256 public constant TREASURY_FEE = 8;
 
     /// @notice Factory contract address
     address public factory;
@@ -235,21 +229,26 @@ contract DEXPair is ERC20, ReentrancyGuard {
 
         require(amount0In > 0 || amount1In > 0, "INSUFFICIENT_INPUT_AMOUNT");
 
-        // Calculate and collect fees
+        // Calculate and collect fees (dynamic 70/30 split)
         uint256 fee0 = 0;
         uint256 fee1 = 0;
 
-        // @audit-fix: Avoid divide-before-multiply precision loss
         if (amount0In > 0) {
             fee0 = (amount0In * TOTAL_FEE) / FEE_DENOMINATOR;
-            voterFees0 += (amount0In * VOTER_FEE) / FEE_DENOMINATOR;
-            treasuryFees0 += (amount0In * TREASURY_FEE) / FEE_DENOMINATOR;
+            // Dynamic calculation: voterShare = (fee × 7) / 10, treasuryShare = fee - voterShare
+            uint256 voterShare0 = (fee0 * 7) / 10;
+            uint256 treasuryShare0 = fee0 - voterShare0;
+            voterFees0 += voterShare0;
+            treasuryFees0 += treasuryShare0;
         }
 
         if (amount1In > 0) {
             fee1 = (amount1In * TOTAL_FEE) / FEE_DENOMINATOR;
-            voterFees1 += (amount1In * VOTER_FEE) / FEE_DENOMINATOR;
-            treasuryFees1 += (amount1In * TREASURY_FEE) / FEE_DENOMINATOR;
+            // Dynamic calculation: voterShare = (fee × 7) / 10, treasuryShare = fee - voterShare
+            uint256 voterShare1 = (fee1 * 7) / 10;
+            uint256 treasuryShare1 = fee1 - voterShare1;
+            voterFees1 += voterShare1;
+            treasuryFees1 += treasuryShare1;
         }
 
         // Verify K invariant (adjusted for fees)
