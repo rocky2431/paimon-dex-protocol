@@ -8,8 +8,8 @@
   },
   "stats": {
     "total": 31,
-    "pending": 22,
-    "inProgress": 0,
+    "pending": 21,
+    "inProgress": 1,
     "completed": 8,
     "blocked": 0
   },
@@ -151,8 +151,10 @@
       "priority": "P1",
       "dependencies": ["1"],
       "estimated_days": 0.5,
-      "status": "pending",
-      "tags": ["contract", "dex", "optimization"]
+      "status": "in_progress",
+      "tags": ["contract", "dex", "optimization"],
+      "startedAt": "2025-11-02T10:00:00Z",
+      "branch": "feat/task-10-dexpair-fee-split"
     },
     {
       "id": "11",
