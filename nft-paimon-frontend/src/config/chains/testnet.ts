@@ -14,14 +14,22 @@ export const tokens = {
   // Protocol contracts
   treasury: "0xFfFB900a2BC2eeDA59347883e4B07B1747C8f81e" as const,
   hyd: "0x13487611cDb4A729ca449F0586F1d0E5F586949C" as const,
+  usdp: "0x0000000000000000000000000000000000000001" as const, // TODO: Update after deployment
   paimon: "0x97cdb42F7E751CD0Cf90b0b0F14f6c61854146e3" as const,
+  esPaimon: "0x0000000000000000000000000000000000000002" as const, // TODO: Update after deployment
   venft: "0x0000000000000000000000000000000000000003" as const, // TODO: Update after deployment
+  vePaimon: "0x0000000000000000000000000000000000000010" as const, // TODO: Update after deployment
   launchpad: "0x0000000000000000000000000000000000000004" as const, // TODO: Update after deployment
   governance: "0x0000000000000000000000000000000000000005" as const, // TODO: Update after deployment
   psm: "0xBF194c604462168747C66b077F722C7F4a550AdC" as const, // TODO: Update after deployment
   votingEscrow: "0x0566FF5A8b3bb5c4801E6D4b43e58B81070572F0" as const, // TODO: Update after deployment
   remintController: "0x0000000000000000000000000000000000000008" as const, // TODO: Update after deployment
   bondNft: "0x0000000000000000000000000000000000000009" as const, // TODO: Update after deployment
+
+  // New contracts (Task 17)
+  boostStaking: "0x0000000000000000000000000000000000000011" as const, // TODO: Update after deployment
+  nitroPool: "0x0000000000000000000000000000000000000012" as const, // TODO: Update after deployment
+  savingRate: "0x0000000000000000000000000000000000000013" as const, // TODO: Update after deployment
 
   // External tokens
   usdc: "0xaa3F4B0cEF6F8f4C584cc6fD3A5e79E68dAa13b2" as const,
@@ -82,6 +90,13 @@ export const tokenConfig = {
     address: tokens.usdc,
     icon: "/tokens/usdc.svg",
   },
+  usdp: {
+    symbol: "USDP" as const,
+    name: "USD Paimon",
+    decimals: 18,
+    address: tokens.usdp,
+    icon: "/tokens/usdp.svg",
+  },
   hyd: {
     symbol: "HYD" as const,
     name: "Hydra Token",
@@ -109,6 +124,13 @@ export const tokenConfig = {
     decimals: 18,
     address: tokens.paimon,
     icon: "/tokens/paimon.svg",
+  },
+  esPaimon: {
+    symbol: "esPAIMON" as const,
+    name: "Escrowed Paimon",
+    decimals: 18,
+    address: tokens.esPaimon,
+    icon: "/tokens/espaimon.svg",
   },
 } as const;
 
