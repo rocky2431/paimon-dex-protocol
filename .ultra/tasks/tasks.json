@@ -8,8 +8,8 @@
   },
   "stats": {
     "total": 31,
-    "pending": 16,
-    "inProgress": 0,
+    "pending": 15,
+    "inProgress": 1,
     "completed": 15,
     "blocked": 0
   },
@@ -374,11 +374,13 @@
         "17"
       ],
       "estimated_days": 0.5,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "frontend",
         "i18n"
-      ]
+      ],
+      "startedAt": "2025-11-02T20:15:00Z",
+      "branch": "feat/task-18-i18n-update"
     },
     {
       "id": "19",
