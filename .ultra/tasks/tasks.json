@@ -3,14 +3,14 @@
   "metadata": {
     "projectName": "Paimon.dex",
     "created": "2025-11-01T12:00:00Z",
-    "lastModified": "2025-11-02T12:00:00Z",
+    "lastModified": "2025-11-02T19:00:00Z",
     "description": "Paimon 协议改造：HYD→USDP + ve33 治理 + Boost 激励"
   },
   "stats": {
     "total": 31,
-    "pending": 18,
+    "pending": 17,
     "inProgress": 0,
-    "completed": 13,
+    "completed": 14,
     "blocked": 0
   },
   "tasks": [
@@ -211,8 +211,12 @@
       "priority": "P1",
       "dependencies": ["5"],
       "estimated_days": 1,
-      "status": "pending",
-      "tags": ["contract", "governance", "integration"]
+      "status": "completed",
+      "tags": ["contract", "governance", "integration"],
+      "startedAt": "2025-11-02T18:30:00Z",
+      "completedAt": "2025-11-02T19:00:00Z",
+      "branch": "feat/task-14-gauge-vepaimon-alignment",
+      "notes": "✅ GaugeController ↔ VotingEscrowPaimon 完全兼容\n✅ 集成测试 100% 通过（13/13 tests）\n✅ 接口兼容性验证完成\n✅ Epoch 对齐验证完成（7-day period）\n✅ 快照机制验证完成（real-time voting power）\n\n**验证结果**：\n\n1. **接口兼容性** (3 tests):\n   - ✅ `balanceOfNFT(tokenId)` - GaugeController 可查询 vePaimon 投票权重\n   - ✅ `ownerOf(tokenId)` - GaugeController 可验证 NFT 所有权\n   - ✅ `locked(tokenId)` - 可查询锁仓详情（amount, end）\n\n2. **Epoch 对齐** (2 tests):\n   - ✅ GaugeController.EPOCH_DURATION = 7 days\n   - ✅ VotingEscrow.WEEK = 7 days\n   - ✅ 两者常量完全匹配\n   - ✅ Epoch 自动推进机制正常\n\n3. **快照机制** (2 tests):\n   - ✅ 投票权重实时计算（time-decayed）\n   - ✅ 公式: power = amount × (lockEnd - now) / MAXTIME\n   - ✅ 线性衰减验证通过\n   - ✅ 过期锁仓投票权重为 0\n\n4. **完整投票流程** (3 tests):\n   - ✅ 锁仓 → 投票 → 权重查询\n   - ✅ NFT 转让后投票权一并转移\n   - ✅ 跨 epoch 投票正常\n   - ✅ 批量投票功能正常\n\n5. **边界情况** (3 tests):\n   - ✅ 过期锁仓投票权重为 0\n   - ✅ 最大 4 年锁仓 → ~100% 投票权重\n   - ✅ 同一 epoch 内更新投票正常\n\n**技术细节**：\n- 投票权重计算: `power = amount × (remaining_time / MAXTIME)`\n- 4 年锁仓: power ≈ 100% of amount\n- 1 年锁仓: power ≈ 25% of amount\n- 1 周锁仓: power ≈ 0.48% of amount\n- 过期锁仓: power = 0\n\n**测试覆盖**：\n- 测试文件: test/integration/GaugeVePaimonIntegration.t.sol (543 lines)\n- 测试数量: 13 tests\n- 通过率: 100% (13/13)\n- Gas 基准: 134K-478K per test\n\n**Commits**：\n- 6434be6: test: add GaugeController ↔ vePaimon integration tests\n- Merge to main: chore: merge Task 14\n- Branch deleted: feat/task-14-gauge-vepaimon-alignment"
     },
     {
       "id": "15",
