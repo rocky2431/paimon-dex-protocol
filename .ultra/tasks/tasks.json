@@ -3,13 +3,13 @@
   "metadata": {
     "projectName": "Paimon.dex",
     "created": "2025-11-01T12:00:00Z",
-    "lastModified": "2025-11-01T23:30:00Z",
+    "lastModified": "2025-11-02T00:00:00Z",
     "description": "Paimon 协议改造：HYD→USDP + ve33 治理 + Boost 激励"
   },
   "stats": {
     "total": 31,
-    "pending": 25,
-    "inProgress": 0,
+    "pending": 24,
+    "inProgress": 1,
     "completed": 5,
     "blocked": 0
   },
@@ -106,8 +106,10 @@
       "priority": "P0",
       "dependencies": ["5"],
       "estimated_days": 1.5,
-      "status": "pending",
-      "tags": ["contract", "incentive", "nitro"]
+      "status": "in_progress",
+      "tags": ["contract", "incentive", "nitro"],
+      "startedAt": "2025-11-02T00:00:00Z",
+      "branch": "feat/task-7-nitro-pool"
     },
     {
       "id": "8",
