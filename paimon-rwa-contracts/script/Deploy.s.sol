@@ -10,6 +10,7 @@ import "../src/core/VotingEscrow.sol";
 import "../src/governance/GaugeController.sol";
 import "../src/governance/RewardDistributor.sol";
 import "../src/governance/BribeMarketplace.sol";
+import "../src/incentives/BoostStaking.sol";
 import "../src/dex/DEXFactory.sol";
 import "../src/dex/DEXPair.sol";
 import "../src/oracle/PriceOracle.sol";
@@ -42,6 +43,7 @@ contract DeployScript is Script {
     GaugeController public gaugeController;
     RewardDistributor public rewardDistributor;
     BribeMarketplace public bribeMarketplace;
+    BoostStaking public boostStaking;
 
     // DEX Contracts
     DEXFactory public dexFactory;
@@ -186,11 +188,13 @@ contract DeployScript is Script {
         gaugeController = new GaugeController(address(votingEscrow));
         console.log("  GaugeController deployed:", address(gaugeController));
 
-        // Deploy RewardDistributor
-        rewardDistributor = new RewardDistributor(
-            address(paimon),
-            address(gaugeController)
-        );
+        // Deploy BoostStaking (requires PAIMON token)
+        boostStaking = new BoostStaking(address(paimon));
+        console.log("  BoostStaking deployed:", address(boostStaking));
+
+        // Deploy RewardDistributor (with BoostStaking integration)
+        // Note: Using deployer as temporary treasury address (will transfer ownership later)
+        rewardDistributor = new RewardDistributor(address(votingEscrow), address(boostStaking), deployer);
         console.log("  RewardDistributor deployed:", address(rewardDistributor));
 
         // Deploy BribeMarketplace (needs treasury first)
