@@ -5,5 +5,6 @@
 
 export { NitroPoolList } from './NitroPoolList';
 export { NitroParticipateModal } from './NitroParticipateModal';
+export { NitroRewardsCard } from './NitroRewardsCard';
 export * from './types';
 export * from './constants';
