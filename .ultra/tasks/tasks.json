@@ -3,13 +3,13 @@
   "metadata": {
     "projectName": "Paimon.dex",
     "created": "2025-11-01T12:00:00Z",
-    "lastModified": "2025-11-02T08:04:30.227Z",
+    "lastModified": "2025-11-02T08:20:51.244Z",
     "description": "Paimon 协议改造：HYD→USDP + ve33 治理 + Boost 激励"
   },
   "stats": {
     "total": 31,
-    "pending": 9,
-    "inProgress": 0,
+    "pending": 8,
+    "inProgress": 1,
     "completed": 22,
     "blocked": 0
   },
@@ -343,12 +343,13 @@
         "8"
       ],
       "estimated_days": 1,
-      "status": "pending",
+      "status": "inProgress",
       "tags": [
         "treasury",
         "automation",
         "configuration"
-      ]
+      ],
+      "startedAt": "2025-11-02T08:20:51.243Z"
     },
     {
       "id": "17",

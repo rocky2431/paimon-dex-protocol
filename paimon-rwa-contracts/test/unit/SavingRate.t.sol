@@ -611,4 +611,266 @@ contract SavingRateTest is Test {
             "Interest lost after withdrawal"
         );
     }
+
+    // ==================== 7. TASK 16: RATE SOURCE CONFIGURATION TESTS ====================
+    // Test multi-source interest rate calculation (RWA yields + DEX fees)
+
+    function test_Task16_ConfigureRWARateSource() public {
+        // RWA annual yield: 5% → allocate 2% (200 bps) to savings
+        uint256 rwaAnnualYield = 500; // 5% in basis points
+        uint256 allocationRatio = 4000; // 40% of RWA yield (40% × 5% = 2%)
+
+        vm.prank(owner);
+        savingRate.setRWARateSource(rwaAnnualYield, allocationRatio);
+
+        // Expected rate: 500 × 4000 / 10000 = 200 bps
+        assertEq(savingRate.rwaRatePortion(), 200, "RWA rate portion incorrect");
+    }
+
+    function test_Task16_ConfigureDEXFeeSource() public {
+        // DEX fees: 100 USDP collected per day
+        // Total DEX TVL: 1,000,000 USDP
+        // Daily yield: 100 / 1,000,000 = 0.01%
+        // Annual yield: 0.01% × 365 = 3.65%
+        // In basis points: 3.65% = 365 bps
+
+        uint256 dailyFees = 100 * 1e18;
+        uint256 totalTVL = 1_000_000 * 1e18;
+
+        vm.prank(owner);
+        savingRate.updateDEXFeeRate(dailyFees, totalTVL);
+
+        // Expected: (100 × 365 × 10000) / 1,000,000 = 365 bps
+        assertApproxEqAbs(
+            savingRate.dexFeeRatePortion(),
+            365,
+            1, // Allow 1 bps tolerance
+            "DEX fee rate calculation incorrect"
+        );
+
+        // Actual rate is smoothed: 200 → 365 is +82.5% increase
+        // Cap at +20%: 200 × 1.2 = 240 bps (NOT 160!)
+        assertEq(savingRate.annualRate(), 240, "Rate should be capped at 240 by smoothing");
+    }
+
+    function test_Task16_CombinedRateCalculation() public {
+        // RWA: 200 bps
+        vm.prank(owner);
+        savingRate.setRWARateSource(500, 4000);
+
+        // DEX: Calculate for 50 bps
+        // 50 bps = 0.5% annual = (dailyFees × 365 × 10000) / TVL
+        // dailyFees = (50 × 1M × 1e18) / (365 × 10000) ≈ 13.7e18 USDP/day
+        vm.prank(owner);
+        savingRate.updateDEXFeeRate(13698630136986301370, 1_000_000 * 1e18); // 50 bps annually
+
+        // Combined theoretical: 200 + 50 = 250 bps
+        // But smoothing caps at 200 × 1.2 = 240 bps
+        assertEq(
+            savingRate.annualRate(),
+            240,
+            "Combined rate should be capped at 240 by smoothing"
+        );
+    }
+
+    function test_Task16_SmoothingMechanism_NoCapNeeded() public {
+        // Initial rate: 200 bps
+        assertEq(savingRate.annualRate(), 200, "Initial rate mismatch");
+
+        // Propose new rate: 220 bps (+10% change)
+        // 220 / 200 = 1.1 → 10% increase (< 20% threshold)
+        vm.warp(block.timestamp + 7 days); // 1 week later
+
+        vm.prank(owner);
+        savingRate.proposeRateUpdate(220);
+
+        // Should apply immediately (no cap)
+        assertEq(savingRate.annualRate(), 220, "Rate should update without capping");
+    }
+
+    function test_Task16_SmoothingMechanism_CapAt20Percent() public {
+        // Initial rate: 200 bps
+        assertEq(savingRate.annualRate(), 200, "Initial rate mismatch");
+
+        // Propose new rate: 300 bps (+50% change)
+        // 300 / 200 = 1.5 → 50% increase (> 20% threshold)
+        // Should cap at 20%: 200 × 1.2 = 240 bps
+        vm.warp(block.timestamp + 7 days);
+
+        vm.prank(owner);
+        savingRate.proposeRateUpdate(300);
+
+        // Should cap at 240 bps
+        assertEq(savingRate.annualRate(), 240, "Rate should be capped at 20% increase");
+    }
+
+    function test_Task16_SmoothingMechanism_CapDecrease() public {
+        // Set initial rate to 300 bps
+        vm.prank(owner);
+        savingRate.updateAnnualRate(300);
+
+        vm.warp(block.timestamp + 7 days);
+
+        // Propose new rate: 150 bps (-50% change)
+        // 150 / 300 = 0.5 → -50% decrease (> 20% threshold)
+        // Should cap at -20%: 300 × 0.8 = 240 bps
+        vm.prank(owner);
+        savingRate.proposeRateUpdate(150);
+
+        // Should cap at 240 bps
+        assertEq(savingRate.annualRate(), 240, "Rate should be capped at 20% decrease");
+    }
+
+    function test_Task16_SmoothingMechanism_WeeklyWindow() public {
+        // Initial rate: 200 bps
+        assertEq(savingRate.annualRate(), 200, "Initial rate mismatch");
+
+        // Day 1: Propose 220 bps
+        vm.warp(block.timestamp + 1 days);
+        vm.prank(owner);
+        savingRate.proposeRateUpdate(220);
+        assertEq(savingRate.annualRate(), 220, "Day 1 update failed");
+
+        // Day 2: Propose 240 bps (within 7-day window, should enforce 20% cap)
+        vm.warp(block.timestamp + 1 days);
+        vm.prank(owner);
+        savingRate.proposeRateUpdate(240);
+
+        // 240 / 200 (original) = 1.2 → exactly 20% from start of week
+        assertEq(savingRate.annualRate(), 240, "Day 2 update should reach 20% cap");
+
+        // Day 3: Propose 250 bps (should still be capped at 20% from week start)
+        vm.warp(block.timestamp + 1 days);
+        vm.prank(owner);
+        savingRate.proposeRateUpdate(250);
+
+        // Should remain at 240 (20% cap from 200)
+        assertEq(savingRate.annualRate(), 240, "Should not exceed 20% weekly cap");
+    }
+
+    function test_Task16_SmoothingMechanism_ResetAfterWeek() public {
+        // Initial: 200 bps
+        assertEq(savingRate.annualRate(), 200, "Initial rate should be 200");
+
+        // Record start time
+        uint256 startTime = block.timestamp;
+
+        // Week 1: Update to 240 bps (20% cap from 200)
+        uint256 week1Time = startTime + 7 days;
+        vm.warp(week1Time);
+        vm.prank(owner);
+        savingRate.proposeRateUpdate(300);
+        assertEq(savingRate.annualRate(), 240, "Week 1 should cap at 240");
+
+        // Week 2: New 7-day window, can increase another 20% from 240
+        uint256 week2Time = week1Time + 7 days;
+        vm.warp(week2Time);
+        vm.prank(owner);
+        savingRate.proposeRateUpdate(350);
+
+        // 240 × 1.2 = 288 bps
+        assertEq(savingRate.annualRate(), 288, "Week 2 should cap at 288");
+    }
+
+    function test_Task16_KeeperCompatibility_UpdateInterval() public {
+        // Keeper should update daily at 00:00 UTC
+        // Test that checkUpkeep returns true after 24 hours
+
+        uint256 lastUpdateTime = block.timestamp;
+
+        // Warp 23 hours (should not trigger)
+        vm.warp(block.timestamp + 23 hours);
+        (bool upkeepNeeded,) = savingRate.checkUpkeep("");
+        assertFalse(upkeepNeeded, "Upkeep should not be needed before 24h");
+
+        // Warp 1 more hour (24h total, should trigger)
+        vm.warp(block.timestamp + 1 hours);
+        (upkeepNeeded,) = savingRate.checkUpkeep("");
+        assertTrue(upkeepNeeded, "Upkeep should be needed after 24h");
+    }
+
+    function test_Task16_KeeperCompatibility_PerformUpkeep() public {
+        // Set up rate sources
+        vm.prank(owner);
+        savingRate.setRWARateSource(500, 4000); // 200 bps from RWA
+
+        vm.prank(owner);
+        savingRate.updateDEXFeeRate(100 * 1e18, 1_000_000 * 1e18); // ~36.5 bps from DEX
+
+        // Warp 24 hours
+        vm.warp(block.timestamp + 24 hours);
+
+        // Perform upkeep (Keeper automation)
+        savingRate.performUpkeep("");
+
+        // Rate should be updated based on sources
+        uint256 newRate = savingRate.annualRate();
+        assertGt(newRate, 0, "Rate should be updated after upkeep");
+    }
+
+    function test_Task16_RateSourcePriority() public {
+        // If RWA source fails/unavailable, should fallback gracefully
+        // Set RWA source
+        vm.prank(owner);
+        savingRate.setRWARateSource(500, 4000); // 200 bps
+
+        // Set DEX source (100 USDP/day on 1M TVL = 365 bps)
+        vm.prank(owner);
+        savingRate.updateDEXFeeRate(100 * 1e18, 1_000_000 * 1e18);
+
+        // Disable RWA source (rate will be DEX only = 365 bps)
+        vm.prank(owner);
+        savingRate.setRWARateSource(0, 0);
+
+        // dexFeeRatePortion should still return 365
+        assertEq(savingRate.dexFeeRatePortion(), 365, "DEX portion should be 365 bps");
+
+        // But actual rate is smoothed: 200 → 365 is +82.5% increase
+        // Cap at +20%: 200 × 1.2 = 240 bps
+        assertEq(savingRate.annualRate(), 240, "Rate should be capped at 240 by smoothing");
+    }
+
+    function test_Task16_Boundary_ZeroRateSources() public {
+        // Edge case: Both rate sources return 0
+        vm.prank(owner);
+        savingRate.setRWARateSource(0, 0);
+
+        vm.prank(owner);
+        savingRate.updateDEXFeeRate(0, 1_000_000 * 1e18);
+
+        // Theoretical rate: 0 bps
+        // But smoothing prevents going to 0 immediately
+        // Cap at -20%: 200 × 0.8 = 160 bps
+        assertEq(savingRate.annualRate(), 160, "Rate should be capped at 160 by smoothing");
+    }
+
+    function test_Task16_Security_UnauthorizedRateSourceUpdate() public {
+        // Attacker tries to manipulate rate sources
+        vm.prank(attacker);
+        vm.expectRevert();
+        savingRate.setRWARateSource(10000, 10000); // Try to set 100% rate
+
+        vm.prank(attacker);
+        vm.expectRevert();
+        savingRate.updateDEXFeeRate(1_000_000 * 1e18, 1 * 1e18); // Try to set extreme rate
+    }
+
+    function test_Task16_Performance_KeeperGasCost() public {
+        // Keeper upkeep should be gas-efficient (< 150K gas)
+        vm.prank(owner);
+        savingRate.setRWARateSource(500, 4000);
+
+        vm.prank(owner);
+        savingRate.updateDEXFeeRate(100 * 1e18, 1_000_000 * 1e18);
+
+        vm.warp(block.timestamp + 24 hours);
+
+        uint256 gasBefore = gasleft();
+        savingRate.performUpkeep("");
+        uint256 gasUsed = gasBefore - gasleft();
+
+        // Target: < 150K gas for Keeper operations
+        assertLt(gasUsed, 150_000, "Keeper upkeep gas too high");
+        emit log_named_uint("Keeper upkeep gas used", gasUsed);
+    }
 }
