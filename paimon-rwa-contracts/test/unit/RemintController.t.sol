@@ -895,7 +895,7 @@ contract RemintControllerTest is Test {
 
         for (uint256 i = 0; i < tasksToComplete; i++) {
             bytes memory sig = _createOracleSignature(tokenId, allTasks[i]);
-            vm.prank(owner);
+            vm.prank(nftOwner);
             remintController.completeSocialTask(tokenId, allTasks[i], sig);
         }
     }
