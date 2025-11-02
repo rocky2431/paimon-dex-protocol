@@ -59,9 +59,45 @@ jest.mock('@/config', () => ({
         address: '0x13487611cDb4A729ca449F0586F1d0E5F586949C',
         icon: '/tokens/hyd.svg',
       },
+      busd: {
+        symbol: 'BUSD',
+        name: 'Binance USD',
+        decimals: 18,
+        address: '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
+        icon: '/tokens/busd.svg',
+      },
+      wbnb: {
+        symbol: 'WBNB',
+        name: 'Wrapped BNB',
+        decimals: 18,
+        address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+        icon: '/tokens/wbnb.svg',
+      },
+      paimon: {
+        symbol: 'PAIMON',
+        name: 'Paimon Token',
+        decimals: 18,
+        address: '0x0000000000000000000000000000000000000003',
+        icon: '/tokens/paimon.svg',
+      },
+      esPaimon: {
+        symbol: 'esPAIMON',
+        name: 'Escrowed Paimon',
+        decimals: 18,
+        address: '0x0000000000000000000000000000000000000002',
+        icon: '/tokens/espaimon.svg',
+      },
     },
     tokens: {
       psm: '0xBF194c604462168747C66b077F722C7F4a550AdC',
+    },
+    pools: {
+      hydUsdc: '0x0000000000000000000000000000000000000010',
+      paimonUsdc: '0x0000000000000000000000000000000000000011',
+    },
+    gauges: {
+      hydUsdc: '0x1000000000000000000000000000000000000000',
+      paimonUsdc: '0x1000000000000000000000000000000000000001',
     },
   },
 }))

@@ -503,12 +503,15 @@
         "17"
       ],
       "estimated_days": 1,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "frontend",
         "bribes",
         "update"
-      ]
+      ],
+      "notes": "esPaimon支持已添加到Bribes模块。新增esPaimon到WHITELISTED_BRIBE_TOKENS，包含46个测试（100%通过率），6维度测试覆盖。BribesList已支持多资产显示（每个Gauge可显示USDC、USDP、esPAIMON等多个代币）。",
+      "started_at": "2025-11-02T07:00:00.000Z",
+      "completed_at": "2025-11-02T07:30:00.000Z"
     },
     {
       "id": "25",

@@ -76,6 +76,13 @@ export const WHITELISTED_BRIBE_TOKENS: BribeToken[] = [
     decimals: config.tokenConfig.paimon.decimals,
     logoURI: config.tokenConfig.paimon.icon,
   },
+  {
+    address: config.tokenConfig.esPaimon.address as `0x${string}`,
+    symbol: config.tokenConfig.esPaimon.symbol,
+    name: config.tokenConfig.esPaimon.name,
+    decimals: config.tokenConfig.esPaimon.decimals,
+    logoURI: config.tokenConfig.esPaimon.icon,
+  },
 ];
 
 /**
