@@ -81,9 +81,9 @@ export const RewardsDashboard: React.FC = () => {
               isLoading={isLoading}
             />
 
-            {/* Right: Claim All Button */}
+            {/* Right: Claim All Button - Multi-Asset */}
             <ClaimAllButton
-              totalEarned={summary.totalEarnedPAIMONFormatted}
+              summary={summary}
               dashboardState={dashboardState}
               validation={validation}
               onClaimAll={handleClaimAll}
