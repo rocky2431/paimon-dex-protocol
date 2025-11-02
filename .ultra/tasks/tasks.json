@@ -503,12 +503,13 @@
         "17"
       ],
       "estimated_days": 1,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "frontend",
         "bribes",
         "update"
-      ]
+      ],
+      "started_at": "2025-11-02T07:00:00.000Z"
     },
     {
       "id": "25",
