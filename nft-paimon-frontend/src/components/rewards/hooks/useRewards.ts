@@ -270,9 +270,10 @@ export const useRewards = () => {
     setDashboardState(RewardsDashboardState.READY);
   }, [poolRewards]);
 
-  // ==================== Summary Statistics ====================
+  // ==================== Summary Statistics (Multi-Asset) ====================
 
   const summary: RewardsSummary = useMemo(() => {
+    // Calculate PAIMON rewards from gauges
     const totalEarnedPAIMON = poolRewards.reduce(
       (sum, pool) => sum + pool.earnedRewards,
       0n
@@ -282,9 +283,30 @@ export const useRewards = () => {
     ).length;
     const averageAPR = calculateAverageAPR(poolRewards);
 
+    // TODO: Query RewardDistributor for multi-asset rewards (esPAIMON, USDC, USDP)
+    // This will require:
+    // 1. Current epoch from RewardDistributor contract
+    // 2. Merkle proof API endpoint to get claimable amounts
+    // 3. Integration with backend service
+    //
+    // For now, return zeros for multi-asset rewards
+    // Future implementation will query:
+    // - claim(epoch, esPAIMON_address, amount, proof[])
+    // - claim(epoch, USDC_address, amount, proof[])
+    // - claim(epoch, USDP_address, amount, proof[])
+    const totalEarnedESPAIMON = 0n; // Placeholder
+    const totalEarnedUSDC = 0n; // Placeholder
+    const totalEarnedUSDP = 0n; // Placeholder
+
     return {
       totalEarnedPAIMON,
       totalEarnedPAIMONFormatted: formatUnits(totalEarnedPAIMON, 18),
+      totalEarnedESPAIMON,
+      totalEarnedESPAIMONFormatted: formatUnits(totalEarnedESPAIMON, 18),
+      totalEarnedUSDC,
+      totalEarnedUSDCFormatted: formatUnits(totalEarnedUSDC, 18),
+      totalEarnedUSDP,
+      totalEarnedUSDPFormatted: formatUnits(totalEarnedUSDP, 18),
       totalStakedValueUSD: "$0", // TODO: Calculate from oracle prices
       averageAPR,
       activePositions,
@@ -298,7 +320,13 @@ export const useRewards = () => {
       return { isValid: false, error: "Please connect wallet" };
     }
 
-    const hasRewards = summary.totalEarnedPAIMON > 0n;
+    // Check if there are any rewards across all asset types
+    const hasRewards =
+      summary.totalEarnedPAIMON > 0n ||
+      summary.totalEarnedESPAIMON > 0n ||
+      summary.totalEarnedUSDC > 0n ||
+      summary.totalEarnedUSDP > 0n;
+
     if (!hasRewards) {
       return { isValid: false, error: "No rewards to claim" };
     }

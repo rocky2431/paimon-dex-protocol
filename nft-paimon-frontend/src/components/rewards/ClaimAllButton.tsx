@@ -1,13 +1,13 @@
 'use client';
 
-import { Button, Box, Typography } from '@mui/material';
+import { Button, Box, Typography, Chip, Stack } from '@mui/material';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { RewardsDashboardState, ValidationResult } from './types';
+import { RewardsDashboardState, ValidationResult, RewardsSummary } from './types';
 import { REWARDS_DESIGN_TOKENS } from './constants';
 
 interface ClaimAllButtonProps {
-  totalEarned: string;
+  summary: RewardsSummary;
   dashboardState: RewardsDashboardState;
   validation: ValidationResult;
   onClaimAll: () => void;
@@ -24,7 +24,7 @@ interface ClaimAllButtonProps {
  * - Success animation
  */
 export const ClaimAllButton: React.FC<ClaimAllButtonProps> = ({
-  totalEarned,
+  summary,
   dashboardState,
   validation,
   onClaimAll,
@@ -61,33 +61,65 @@ export const ClaimAllButton: React.FC<ClaimAllButtonProps> = ({
         border: '1px solid rgba(255, 152, 0, 0.2)',
       }}
     >
-      {/* Total Earned Display */}
-      <Box sx={{ textAlign: 'center' }}>
-        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
+      {/* Total Earned Display - Multi-Asset */}
+      <Box sx={{ textAlign: 'center', width: '100%' }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
           Total Claimable Rewards
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5, justifyContent: 'center' }}>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-              background: 'linear-gradient(90deg, #ff9800, #ffb74d)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
-          >
-            {parseFloat(totalEarned).toFixed(2)}
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              color: 'text.secondary',
-              fontWeight: 500,
-            }}
-          >
-            PAIMON
-          </Typography>
-        </Box>
+
+        {/* Multi-Asset Breakdown */}
+        <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent="center" sx={{ mb: 1 }}>
+          {parseFloat(summary.totalEarnedPAIMONFormatted) > 0 && (
+            <Chip
+              label={`${parseFloat(summary.totalEarnedPAIMONFormatted).toFixed(2)} PAIMON`}
+              sx={{
+                background: 'linear-gradient(90deg, #ff9800, #ffb74d)',
+                color: 'white',
+                fontWeight: 600,
+              }}
+            />
+          )}
+          {parseFloat(summary.totalEarnedESPAIMONFormatted) > 0 && (
+            <Chip
+              label={`${parseFloat(summary.totalEarnedESPAIMONFormatted).toFixed(2)} esPAIMON`}
+              sx={{
+                background: 'linear-gradient(90deg, #ffa726, #ffb74d)',
+                color: 'white',
+                fontWeight: 600,
+              }}
+            />
+          )}
+          {parseFloat(summary.totalEarnedUSDCFormatted) > 0 && (
+            <Chip
+              label={`${parseFloat(summary.totalEarnedUSDCFormatted).toFixed(2)} USDC`}
+              sx={{
+                background: 'linear-gradient(90deg, #ff7043, #ffab91)',
+                color: 'white',
+                fontWeight: 600,
+              }}
+            />
+          )}
+          {parseFloat(summary.totalEarnedUSDPFormatted) > 0 && (
+            <Chip
+              label={`${parseFloat(summary.totalEarnedUSDPFormatted).toFixed(2)} USDP`}
+              sx={{
+                background: 'linear-gradient(90deg, #ff6f00, #ff9800)',
+                color: 'white',
+                fontWeight: 600,
+              }}
+            />
+          )}
+        </Stack>
+
+        {/* Fallback if no chips displayed */}
+        {parseFloat(summary.totalEarnedPAIMONFormatted) === 0 &&
+          parseFloat(summary.totalEarnedESPAIMONFormatted) === 0 &&
+          parseFloat(summary.totalEarnedUSDCFormatted) === 0 &&
+          parseFloat(summary.totalEarnedUSDPFormatted) === 0 && (
+            <Typography variant="h5" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+              0.00
+            </Typography>
+          )}
       </Box>
 
       {/* Claim All Button */}

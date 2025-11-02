@@ -27,13 +27,51 @@ export interface PoolReward {
 }
 
 /**
- * Rewards summary data
+ * Single reward asset (for multi-asset rewards)
+ */
+export interface RewardAsset {
+  /** Token symbol (e.g., "esPAIMON", "USDC", "USDP") */
+  token: string;
+  /** Token contract address */
+  address: `0x${string}`;
+  /** Raw reward amount (wei) */
+  amount: bigint;
+  /** Formatted reward amount */
+  amountFormatted: string;
+  /** Token symbol for display */
+  symbol: string;
+}
+
+/**
+ * Multi-asset reward collection
+ */
+export interface MultiAssetReward {
+  /** Array of reward assets */
+  assets: RewardAsset[];
+  /** Total value in USD */
+  totalValueUSD: string;
+}
+
+/**
+ * Rewards summary data (extended for multi-asset support)
  */
 export interface RewardsSummary {
   /** Total earned PAIMON across all pools */
   totalEarnedPAIMON: bigint;
   /** Total earned PAIMON (formatted) */
   totalEarnedPAIMONFormatted: string;
+  /** Total earned esPAIMON from RewardDistributor */
+  totalEarnedESPAIMON: bigint;
+  /** Total earned esPAIMON (formatted) */
+  totalEarnedESPAIMONFormatted: string;
+  /** Total earned USDC from RewardDistributor */
+  totalEarnedUSDC: bigint;
+  /** Total earned USDC (formatted) */
+  totalEarnedUSDCFormatted: string;
+  /** Total earned USDP from RewardDistributor */
+  totalEarnedUSDP: bigint;
+  /** Total earned USDP (formatted) */
+  totalEarnedUSDPFormatted: string;
   /** Total staked value (USD estimate) */
   totalStakedValueUSD: string;
   /** Average APR across all pools */
