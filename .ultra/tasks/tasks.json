@@ -482,12 +482,14 @@
         "17"
       ],
       "estimated_days": 1,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "frontend",
         "swap",
         "PSM"
-      ]
+      ],
+      "notes": "开始开发 PSM Swap 功能",
+      "started_at": "2025-11-01T14:17:58.418Z"
     },
     {
       "id": "24",

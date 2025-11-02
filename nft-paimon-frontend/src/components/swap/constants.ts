@@ -74,6 +74,13 @@ export const TOKEN_CONFIG: Record<Token, TokenInfo> = {
     address: config.tokenConfig.usdc.address as `0x${string}`,
     icon: config.tokenConfig.usdc.icon,
   },
+  [Token.USDP]: {
+    symbol: Token.USDP,
+    name: config.tokenConfig.usdp.name,
+    decimals: config.tokenConfig.usdp.decimals,
+    address: config.tokenConfig.usdp.address as `0x${string}`,
+    icon: config.tokenConfig.usdp.icon,
+  },
   [Token.HYD]: {
     symbol: Token.HYD,
     name: config.tokenConfig.hyd.name,
