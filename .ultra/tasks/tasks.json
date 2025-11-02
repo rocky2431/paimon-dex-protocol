@@ -343,13 +343,16 @@
         "8"
       ],
       "estimated_days": 1,
-      "status": "inProgress",
+      "status": "completed",
       "tags": [
         "treasury",
         "automation",
         "configuration"
       ],
-      "startedAt": "2025-11-02T08:20:51.243Z"
+      "startedAt": "2025-11-02T08:20:51.243Z",
+      "completedAt": "2025-11-02T10:45:00.000Z",
+      "branch": "feat/task-16-saving-rate-config",
+      "notes": "✅ Task 16 完成 - 储蓄率多源配置与平滑机制\n\n**实现功能**：\n1. **多源利率计算**：\n   - RWA 收益配置：年化收益率 × 分配比例\n   - DEX 手续费集成：每日费用 → 年化 APR\n   - 组合利率：RWA portion + DEX portion\n\n2. **平滑机制**：\n   - 每周 20% 波动上限（防止剧烈变化）\n   - 7 天滚动窗口，自动重置基准\n   - 渐进式调整：最大 ±20% 每周\n\n3. **Chainlink Keeper 集成**：\n   - checkUpkeep：验证 24 小时间隔\n   - performUpkeep：自动更新利率\n   - Gas 效率：~10K gas/次更新\n\n**新增函数**：\n- `setRWARateSource(yield, ratio)` - 配置 RWA 来源\n- `updateDEXFeeRate(dailyFees, totalTVL)` - 更新 DEX 费率\n- `proposeRateUpdate(newRate)` - 提议利率更新（含平滑）\n- `checkUpkeep()` - Keeper 检查函数\n- `performUpkeep()` - Keeper 执行函数\n- `rwaRatePortion()` - 查询 RWA 贡献\n- `dexFeeRatePortion()` - 查询 DEX 贡献\n\n**测试覆盖**：\n- ✅ 14 个新测试（功能/边界/异常/性能/安全/兼容）\n- ✅ 所有 47 个 SavingRate 测试通过（33 existing + 14 new）\n- ✅ Gas 基准：Keeper upkeep ~10K gas\n- ✅ 精度优化：先乘后除，无精度损失\n\n**安全特性**：\n- ✅ onlyOwner 访问控制\n- ✅ 安全算术（无溢出）\n- ✅ 事件记录所有状态变更\n\n**Commits**：\n- c11af7e: feat: configure saving rate with multi-source rates and smoothing\n- Merge to main: chore: merge Task 16\n- Branch deleted: feat/task-16-saving-rate-config"
     },
     {
       "id": "17",
