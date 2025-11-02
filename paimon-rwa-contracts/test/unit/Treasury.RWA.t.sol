@@ -93,10 +93,10 @@ contract TreasuryRWATest is Test {
     );
 
     // Deploy HYD Token (PSM will be Treasury for simplicity)
-    vm.prank(owner);
-    //hydToken = new HYD(owner); // Use owner as PSM temporarily
-       hydToken=new HYD();
-        hydToken.initTempPsm(address(owner));
+    vm.startPrank(owner);
+    hydToken = new HYD();
+    hydToken.initTempPsm(address(owner));
+    vm.stopPrank();
 
     // Deploy Treasury
     vm.prank(owner);
