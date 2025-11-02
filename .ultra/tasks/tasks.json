@@ -482,14 +482,15 @@
         "17"
       ],
       "estimated_days": 1,
-      "status": "in_progress",
+      "status": "completed",
       "tags": [
         "frontend",
         "swap",
         "PSM"
       ],
-      "notes": "开始开发 PSM Swap 功能",
-      "started_at": "2025-11-01T14:17:58.418Z"
+      "notes": "PSMSwapCard组件实现完成。新增USDC↔USDP 1:1兑换功能，包含36个测试（100%通过率），6维度测试覆盖。",
+      "started_at": "2025-11-01T14:17:58.418Z",
+      "completed_at": "2025-11-02T06:46:42.437Z"
     },
     {
       "id": "24",
