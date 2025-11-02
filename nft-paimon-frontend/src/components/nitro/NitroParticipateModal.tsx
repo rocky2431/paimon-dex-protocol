@@ -282,19 +282,83 @@ export function NitroParticipateModal({
           </Alert>
         )}
 
-        {/* Risk Warning */}
+        {/* Governance Approval Status */}
         <Alert
-          severity="warning"
-          icon={<WarningIcon />}
-          sx={{ mb: 3, borderRadius: '12px' }}
+          severity="info"
+          sx={{ mb: 2, borderRadius: '12px' }}
         >
           <AlertTitle sx={{ fontWeight: 700 }}>
-            {locale === 'zh' ? '风险警告' : 'Risk Warning'}
+            {locale === 'zh' ? '治理审批状态' : 'Governance Approval Status'}
           </AlertTitle>
           <Typography variant="body2">
             {locale === 'zh'
+              ? '此 Nitro 池已通过 vePaimon 持有者投票审批（≥51% 赞成）。'
+              : 'This Nitro pool has been approved by vePaimon holder voting (≥51% in favor).'}
+          </Typography>
+        </Alert>
+
+        {/* Risk Warning - Lock Period */}
+        <Alert
+          severity="warning"
+          icon={<WarningIcon />}
+          sx={{ mb: 2, borderRadius: '12px' }}
+        >
+          <AlertTitle sx={{ fontWeight: 700 }}>
+            {locale === 'zh' ? '⚠️ 锁定期风险' : '⚠️ Lock Period Risk'}
+          </AlertTitle>
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            {locale === 'zh'
               ? `您的资金将被锁定 ${lockDays} 天。在此期间无法提取。`
               : `Your funds will be locked for ${lockDays} days and cannot be withdrawn during this period.`}
+          </Typography>
+        </Alert>
+
+        {/* Risk Warning - External Token */}
+        <Alert
+          severity="error"
+          icon={<WarningIcon />}
+          sx={{ mb: 3, borderRadius: '12px', border: '2px solid #d32f2f' }}
+        >
+          <AlertTitle sx={{ fontWeight: 700 }}>
+            {locale === 'zh' ? '🚨 外部代币风险警告' : '🚨 External Token Risk Warning'}
+          </AlertTitle>
+          <Typography variant="body2" component="div" sx={{ mb: 1 }}>
+            {locale === 'zh' ? (
+              <>
+                <strong>此 Nitro 池由外部项目创建</strong>，奖励代币未经过官方审计。请注意以下风险：
+              </>
+            ) : (
+              <>
+                <strong>This Nitro pool is created by an external project</strong>, and reward tokens have not been officially audited. Please be aware of the following risks:
+              </>
+            )}
+          </Typography>
+          <Box component="ul" sx={{ pl: 2, my: 1 }}>
+            <Typography variant="body2" component="li">
+              {locale === 'zh'
+                ? '奖励代币可能存在恶意代码（如重入攻击、权限后门）'
+                : 'Reward tokens may contain malicious code (e.g., reentrancy, backdoors)'}
+            </Typography>
+            <Typography variant="body2" component="li">
+              {locale === 'zh'
+                ? '外部项目可能随时终止奖励分发'
+                : 'External projects may terminate reward distribution at any time'}
+            </Typography>
+            <Typography variant="body2" component="li">
+              {locale === 'zh'
+                ? '代币流动性可能不足，导致无法兑换'
+                : 'Tokens may have insufficient liquidity, making them untradeable'}
+            </Typography>
+            <Typography variant="body2" component="li">
+              {locale === 'zh'
+                ? '项目方可能"跑路"（Rug Pull）导致代币归零'
+                : 'Projects may "rug pull", causing token value to go to zero'}
+            </Typography>
+          </Box>
+          <Typography variant="body2" sx={{ fontWeight: 600, mt: 1 }}>
+            {locale === 'zh'
+              ? '⚠️ 仅投入您能够承受损失的资金。Paimon 协议不对外部奖励代币负责。'
+              : '⚠️ Only invest funds you can afford to lose. Paimon protocol is not responsible for external reward tokens.'}
           </Typography>
         </Alert>
 
