@@ -57,10 +57,36 @@ contract SavingRate is Ownable, ReentrancyGuard {
     /// @notice Last accrual timestamp per user
     mapping(address => uint256) private _lastAccrualTime;
 
+    // ==================== Task 16: Rate Source Configuration ====================
+
+    /// @notice RWA annual yield in basis points (e.g., 500 = 5%)
+    uint256 public rwaAnnualYield;
+
+    /// @notice RWA allocation ratio to savings (e.g., 4000 = 40%)
+    uint256 public rwaAllocationRatio;
+
+    /// @notice Daily DEX fees collected (in USDP, 18 decimals)
+    uint256 public dailyDEXFees;
+
+    /// @notice Total DEX TVL (in USDP, 18 decimals)
+    uint256 public totalDEXTVL;
+
+    /// @notice Last rate update timestamp (for weekly smoothing window)
+    uint256 public lastRateUpdateTime;
+
+    /// @notice Rate at the start of current week (for 20% cap calculation)
+    uint256 public weekStartRate;
+
+    /// @notice Last upkeep timestamp (for Keeper automation)
+    uint256 public lastUpkeepTime;
+
     // ==================== Constants ====================
 
     uint256 private constant BASIS_POINTS = 10000;
     uint256 private constant SECONDS_PER_YEAR = 365 days;
+    uint256 private constant SMOOTHING_CAP_BPS = 2000; // 20% cap = 2000 / 10000
+    uint256 private constant WEEK_DURATION = 7 days;
+    uint256 private constant UPKEEP_INTERVAL = 24 hours;
 
     // ==================== Events ====================
 
@@ -70,6 +96,9 @@ contract SavingRate is Ownable, ReentrancyGuard {
     event InterestAccrued(address indexed user, uint256 interest, uint256 timestamp);
     event AnnualRateUpdated(uint256 oldRate, uint256 newRate);
     event TreasuryFunded(address indexed funder, uint256 amount);
+    event RWARateSourceUpdated(uint256 annualYield, uint256 allocationRatio);
+    event DEXFeeRateUpdated(uint256 dailyFees, uint256 totalTVL);
+    event RateSmoothed(uint256 proposedRate, uint256 cappedRate, uint256 timestamp);
 
     // ==================== Constructor ====================
 
@@ -82,6 +111,11 @@ contract SavingRate is Ownable, ReentrancyGuard {
         require(_usdp != address(0), "Invalid USDP address");
         usdp = IERC20(_usdp);
         annualRate = _annualRate;
+
+        // Initialize Task 16 state variables
+        lastRateUpdateTime = block.timestamp;
+        weekStartRate = _annualRate;
+        lastUpkeepTime = block.timestamp;
 
         emit AnnualRateUpdated(0, _annualRate);
     }
@@ -168,6 +202,79 @@ contract SavingRate is Ownable, ReentrancyGuard {
         emit AnnualRateUpdated(oldRate, newRate);
     }
 
+    // ==================== Task 16: Rate Source Configuration ====================
+
+    /**
+     * @notice Configure RWA rate source
+     * @param _rwaAnnualYield RWA annual yield in basis points (e.g., 500 = 5%)
+     * @param _allocationRatio Allocation ratio to savings in basis points (e.g., 4000 = 40%)
+     * @dev Only owner can call. Formula: rwaRatePortion = yield × ratio / 10000
+     */
+    function setRWARateSource(uint256 _rwaAnnualYield, uint256 _allocationRatio) external onlyOwner {
+        require(_allocationRatio <= BASIS_POINTS, "Allocation ratio too high");
+
+        rwaAnnualYield = _rwaAnnualYield;
+        rwaAllocationRatio = _allocationRatio;
+
+        // Recalculate combined rate
+        uint256 combinedRate = _calculateCombinedRate();
+        _updateRateWithSmoothing(combinedRate);
+
+        emit RWARateSourceUpdated(_rwaAnnualYield, _allocationRatio);
+    }
+
+    /**
+     * @notice Update DEX fee rate source
+     * @param _dailyFees Daily DEX fees collected (18 decimals)
+     * @param _totalTVL Total DEX TVL (18 decimals)
+     * @dev Only owner can call. Formula: DEX APR = (dailyFees × 365 × 10000) / totalTVL
+     */
+    function updateDEXFeeRate(uint256 _dailyFees, uint256 _totalTVL) external onlyOwner {
+        require(_totalTVL > 0, "TVL must be > 0");
+
+        dailyDEXFees = _dailyFees;
+        totalDEXTVL = _totalTVL;
+
+        // Recalculate combined rate
+        uint256 combinedRate = _calculateCombinedRate();
+        _updateRateWithSmoothing(combinedRate);
+
+        emit DEXFeeRateUpdated(_dailyFees, _totalTVL);
+    }
+
+    /**
+     * @notice Propose a rate update with smoothing mechanism
+     * @param proposedRate Proposed new rate in basis points
+     * @dev Applies 20% weekly cap to prevent volatile rate changes
+     */
+    function proposeRateUpdate(uint256 proposedRate) external onlyOwner {
+        _updateRateWithSmoothing(proposedRate);
+    }
+
+    /**
+     * @notice Chainlink Keeper - Check if upkeep is needed
+     * @return upkeepNeeded True if 24 hours have passed since last upkeep
+     * @return performData Empty bytes (not used)
+     */
+    function checkUpkeep(bytes calldata /* checkData */) external view returns (bool upkeepNeeded, bytes memory performData) {
+        upkeepNeeded = (block.timestamp >= lastUpkeepTime + UPKEEP_INTERVAL);
+        performData = "";
+    }
+
+    /**
+     * @notice Chainlink Keeper - Perform daily rate update
+     * @dev Recalculates rate from sources and applies smoothing
+     */
+    function performUpkeep(bytes calldata /* performData */) external {
+        require(block.timestamp >= lastUpkeepTime + UPKEEP_INTERVAL, "Upkeep not needed yet");
+
+        // Recalculate rate from sources
+        uint256 combinedRate = _calculateCombinedRate();
+        _updateRateWithSmoothing(combinedRate);
+
+        lastUpkeepTime = block.timestamp;
+    }
+
     // ==================== View Functions ====================
 
     /**
@@ -195,6 +302,29 @@ contract SavingRate is Ownable, ReentrancyGuard {
      */
     function lastAccrualTimeOf(address user) external view returns (uint256) {
         return _lastAccrualTime[user];
+    }
+
+    /**
+     * @notice Get RWA rate contribution in basis points
+     * @return RWA portion of annual rate
+     */
+    function rwaRatePortion() public view returns (uint256) {
+        if (rwaAllocationRatio == 0) return 0;
+        return (rwaAnnualYield * rwaAllocationRatio) / BASIS_POINTS;
+    }
+
+    /**
+     * @notice Get DEX fee rate contribution in basis points
+     * @return DEX portion of annual rate
+     */
+    function dexFeeRatePortion() public view returns (uint256) {
+        if (totalDEXTVL == 0) return 0;
+
+        // Annual APR in bps = (dailyFees × 365 × 10000) / totalTVL
+        // Example: (100 USDP/day × 365 × 10000) / 1M USDP TVL = 365 bps (3.65%)
+        // Both values are in 18 decimals, so they cancel out
+        uint256 annualFees = dailyDEXFees * 365;
+        return (annualFees * BASIS_POINTS) / totalDEXTVL;
     }
 
     // ==================== Internal Functions ====================
@@ -242,5 +372,56 @@ contract SavingRate is Ownable, ReentrancyGuard {
         uint256 interest = (principal * annualRate * timeElapsed) / SECONDS_PER_YEAR / BASIS_POINTS;
 
         return interest;
+    }
+
+    // ==================== Task 16: Internal Helper Functions ====================
+
+    /**
+     * @notice Calculate combined rate from all sources
+     * @return Combined annual rate in basis points
+     */
+    function _calculateCombinedRate() internal view returns (uint256) {
+        uint256 rwaRate = rwaRatePortion();
+        uint256 dexRate = dexFeeRatePortion();
+
+        return rwaRate + dexRate;
+    }
+
+    /**
+     * @notice Update rate with smoothing mechanism (20% weekly cap)
+     * @param proposedRate Proposed new rate in basis points
+     * @dev Applies weekly 20% cap to prevent volatile changes
+     */
+    function _updateRateWithSmoothing(uint256 proposedRate) internal {
+        // Check if new week has started
+        if (block.timestamp >= lastRateUpdateTime + WEEK_DURATION) {
+            // New week: reset baseline to current rate
+            weekStartRate = annualRate;
+            lastRateUpdateTime = block.timestamp;
+        }
+
+        // Calculate 20% cap from week start rate
+        uint256 maxIncrease = (weekStartRate * (BASIS_POINTS + SMOOTHING_CAP_BPS)) / BASIS_POINTS;
+        uint256 maxDecrease = (weekStartRate * (BASIS_POINTS - SMOOTHING_CAP_BPS)) / BASIS_POINTS;
+
+        uint256 cappedRate;
+
+        if (proposedRate > maxIncrease) {
+            // Cap at +20%
+            cappedRate = maxIncrease;
+            emit RateSmoothed(proposedRate, cappedRate, block.timestamp);
+        } else if (proposedRate < maxDecrease) {
+            // Cap at -20%
+            cappedRate = maxDecrease;
+            emit RateSmoothed(proposedRate, cappedRate, block.timestamp);
+        } else {
+            // Within 20% range, apply directly
+            cappedRate = proposedRate;
+        }
+
+        uint256 oldRate = annualRate;
+        annualRate = cappedRate;
+
+        emit AnnualRateUpdated(oldRate, cappedRate);
     }
 }
