@@ -3,14 +3,14 @@
   "metadata": {
     "projectName": "Paimon.dex",
     "created": "2025-11-01T12:00:00Z",
-    "lastModified": "2025-11-02T07:31:14.981953+00:00",
+    "lastModified": "2025-11-02T07:44:24.902Z",
     "description": "Paimon 协议改造：HYD→USDP + ve33 治理 + Boost 激励"
   },
   "stats": {
     "total": 31,
-    "pending": 11,
+    "pending": 10,
     "inProgress": 0,
-    "completed": 20,
+    "completed": 21,
     "blocked": 0
   },
   "tasks": [
@@ -39,12 +39,15 @@
       "priority": "P1",
       "dependencies": [],
       "estimated_days": 0.5,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "frontend",
         "performance",
         "baseline"
-      ]
+      ],
+      "startedAt": "2025-11-02T07:37:10.825Z",
+      "completedAt": "2025-11-02T07:44:24.902Z",
+      "notes": "✅ 前端性能基线测量完成 (Chrome DevTools MCP)\n✅ 测量 4 个关键页面：Home, Swap, Pool, Lock\n✅ CLS 指标优异：所有页面均为 0.00 (目标 < 0.1)\n✅ 第三方资源影响最小：Web3Modal (593B) + WalletConnect (58B)\n✅ 性能基线报告已保存：.ultra/docs/performance-baseline.md\n\n**测量结果摘要**：\n- CLS (Cumulative Layout Shift): 0.00 ✅ (所有页面)\n- 页面加载时间: ~5.3-5.7s (开发模式，无节流)\n- 第三方影响: 可忽略 (总计 <1KB)\n\n**已知限制**：\n- LCP/INP 未直接暴露于 Chrome DevTools MCP trace API\n- 建议后续集成 web-vitals 库进行实时监控\n- 开发模式性能，生产构建将显著更快\n\n**迁移验证策略**：\n1. ✅ 当前基线建立（CLS: 0.00）\n2. ⏭️ 部署后集成 web-vitals 客户端监控\n3. ⏭️ 收集真实用户 LCP/INP 数据（7天样本）\n4. ⏭️ 对比迁移前后性能变化\n\n**风险评估**: 🟢 低风险 - 当前基线稳固，第三方开销小，为架构改造提供安全边际。"
     },
     {
       "id": "3",
