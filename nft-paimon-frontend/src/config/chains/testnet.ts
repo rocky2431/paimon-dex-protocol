@@ -31,6 +31,12 @@ export const tokens = {
   nitroPool: "0x0000000000000000000000000000000000000012" as const, // TODO: Update after deployment
   savingRate: "0x0000000000000000000000000000000000000013" as const, // TODO: Update after deployment
 
+  // New contracts (Task 43)
+  vault: "0x0000000000000000000000000000000000000014" as const, // TODO: Update after deployment
+  stabilityPool: "0x0000000000000000000000000000000000000015" as const, // TODO: Update after deployment
+  rewardDistributor: "0x0000000000000000000000000000000000000016" as const, // TODO: Update after deployment
+  emissionManager: "0x0000000000000000000000000000000000000017" as const, // TODO: Update after deployment
+
   // External tokens
   usdc: "0xaa3F4B0cEF6F8f4C584cc6fD3A5e79E68dAa13b2" as const,
   usdt: "0xaB1a4d4f1D656d2450692d237fdD6C7f9146e814" as const,
