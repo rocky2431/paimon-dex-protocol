@@ -212,6 +212,44 @@ contract SavingRateTest is Test {
         assertEq(savingRate.annualRate(), newRate, "Rate update failed");
     }
 
+    function test_Functional_Fund() public {
+        // Transfer USDP to SavingRate contract first
+        uint256 fundAmount = 1000 * 1e18;
+        vm.prank(treasury);
+        usdp.mint(address(savingRate), fundAmount);
+
+        uint256 totalFundedBefore = savingRate.totalFunded();
+
+        // Fund the contract
+        vm.prank(owner);
+        vm.expectEmit(true, false, false, true);
+        emit TreasuryFunded(owner, fundAmount);
+        savingRate.fund(fundAmount);
+
+        // Verify totalFunded updated
+        assertEq(savingRate.totalFunded(), totalFundedBefore + fundAmount, "totalFunded not updated");
+    }
+
+    function test_Functional_FundMultipleTimes() public {
+        // First funding
+        uint256 fund1 = 1000 * 1e18;
+        vm.prank(treasury);
+        usdp.mint(address(savingRate), fund1);
+        vm.prank(owner);
+        savingRate.fund(fund1);
+
+        assertEq(savingRate.totalFunded(), fund1, "First funding failed");
+
+        // Second funding
+        uint256 fund2 = 500 * 1e18;
+        vm.prank(treasury);
+        usdp.mint(address(savingRate), fund2);
+        vm.prank(owner);
+        savingRate.fund(fund2);
+
+        assertEq(savingRate.totalFunded(), fund1 + fund2, "Second funding failed");
+    }
+
     // ==================== 2. BOUNDARY TESTS ====================
     // Test edge cases and boundary conditions
 
@@ -311,6 +349,23 @@ contract SavingRateTest is Test {
         assertEq(savingRate.annualRate(), 0, "Rate should be 0");
     }
 
+    function test_Boundary_FundZeroAmount() public {
+        vm.prank(owner);
+        vm.expectRevert("Amount must be > 0");
+        savingRate.fund(0);
+    }
+
+    function test_Boundary_FundLargeAmount() public {
+        uint256 largeAmount = 1_000_000 * 1e18;
+        vm.prank(treasury);
+        usdp.mint(address(savingRate), largeAmount);
+
+        vm.prank(owner);
+        savingRate.fund(largeAmount);
+
+        assertEq(savingRate.totalFunded(), largeAmount, "Large funding failed");
+    }
+
     // ==================== 3. EXCEPTION TESTS ====================
     // Test error handling and access control
 
@@ -336,6 +391,12 @@ contract SavingRateTest is Test {
         vm.prank(attacker);
         vm.expectRevert();
         savingRate.updateAnnualRate(500);
+    }
+
+    function test_Exception_FundUnauthorized() public {
+        vm.prank(attacker);
+        vm.expectRevert();
+        savingRate.fund(1000 * 1e18);
     }
 
     function test_Exception_AccrueInterestWithoutDeposit() public {
@@ -437,6 +498,21 @@ contract SavingRateTest is Test {
         emit log_named_uint("Accrue interest gas used", gasUsed);
     }
 
+    function test_Performance_FundGas() public {
+        uint256 fundAmount = 1000 * 1e18;
+        vm.prank(treasury);
+        usdp.mint(address(savingRate), fundAmount);
+
+        uint256 gasBefore = gasleft();
+        vm.prank(owner);
+        savingRate.fund(fundAmount);
+        uint256 gasUsed = gasBefore - gasleft();
+
+        // Target: < 50K gas
+        assertLt(gasUsed, 50_000, "Fund gas too high");
+        emit log_named_uint("Fund gas used", gasUsed);
+    }
+
     // ==================== 5. SECURITY TESTS ====================
     // Test reentrancy, access control, and security issues
 
@@ -506,6 +582,47 @@ contract SavingRateTest is Test {
 
         // Even tiny amounts should earn something
         // (May be 0 due to precision limits, but should not revert)
+    }
+
+    function test_Security_FundOnlyOwner() public {
+        // Verify only owner can fund
+        vm.prank(user1);
+        vm.expectRevert();
+        savingRate.fund(1000 * 1e18);
+
+        vm.prank(attacker);
+        vm.expectRevert();
+        savingRate.fund(1000 * 1e18);
+
+        // Owner can fund successfully
+        vm.prank(treasury);
+        usdp.mint(address(savingRate), 1000 * 1e18);
+        vm.prank(owner);
+        savingRate.fund(1000 * 1e18);
+
+        assertEq(savingRate.totalFunded(), 1000 * 1e18, "Funding failed");
+    }
+
+    function test_Security_FundBookkeepingAccuracy() public {
+        // Test that totalFunded accurately tracks funding
+        uint256 fund1 = 1000 * 1e18;
+        uint256 fund2 = 2000 * 1e18;
+        uint256 fund3 = 500 * 1e18;
+
+        vm.prank(treasury);
+        usdp.mint(address(savingRate), fund1 + fund2 + fund3);
+
+        vm.prank(owner);
+        savingRate.fund(fund1);
+        assertEq(savingRate.totalFunded(), fund1, "First funding incorrect");
+
+        vm.prank(owner);
+        savingRate.fund(fund2);
+        assertEq(savingRate.totalFunded(), fund1 + fund2, "Second funding incorrect");
+
+        vm.prank(owner);
+        savingRate.fund(fund3);
+        assertEq(savingRate.totalFunded(), fund1 + fund2 + fund3, "Third funding incorrect");
     }
 
     // ==================== 6. COMPATIBILITY TESTS ====================
