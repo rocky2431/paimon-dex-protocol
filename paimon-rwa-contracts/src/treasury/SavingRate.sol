@@ -48,6 +48,9 @@ contract SavingRate is Ownable, ReentrancyGuard {
     /// @notice Total USDP deposits across all users
     uint256 public totalDeposits;
 
+    /// @notice Total USDP funded by Treasury for interest payments
+    uint256 public totalFunded;
+
     /// @notice User principal balances
     mapping(address => uint256) private _balances;
 
@@ -200,6 +203,22 @@ contract SavingRate is Ownable, ReentrancyGuard {
         annualRate = newRate;
 
         emit AnnualRateUpdated(oldRate, newRate);
+    }
+
+    /**
+     * @notice Fund the contract with USDP for interest payments
+     * @param amount Amount of USDP to record as funded
+     * @dev Assumes USDP has already been transferred to contract (via PSM or Treasury)
+     *      This function only updates accounting and emits event
+     *
+     * Flow: USDC → PSM → USDP → SavingRate.fund()
+     */
+    function fund(uint256 amount) external onlyOwner {
+        require(amount > 0, "Amount must be > 0");
+
+        totalFunded += amount;
+
+        emit TreasuryFunded(msg.sender, amount);
     }
 
     // ==================== Task 16: Rate Source Configuration ====================
