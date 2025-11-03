@@ -1138,13 +1138,14 @@
         "37"
       ],
       "estimatedHours": 8,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "frontend",
         "rewards",
         "vesting"
       ],
-      "phase": "P1-Core"
+      "phase": "P1-Core",
+      "startedAt": "2025-11-03T12:20:00.154Z"
     },
     {
       "id": "52",

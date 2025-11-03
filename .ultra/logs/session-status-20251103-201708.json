@@ -1,0 +1,19 @@
+{
+  "command": "ultra-status",
+  "timestamp": "2025-11-03T12:15:00Z",
+  "estimatedTokens": 2100,
+  "filesReadTopN": [".ultra/tasks/tasks.json"],
+  "triggeredSkills": ["workflow-guide"],
+  "summary": {
+    "progressPct": 88,
+    "total": 50,
+    "completed": 44,
+    "pending": 6,
+    "inProgress": 0,
+    "cancelled": 3,
+    "blockers": 2,
+    "readyTasks": 4,
+    "velocity": 22.0,
+    "etaDays": 0.27
+  }
+}

@@ -107,6 +107,13 @@ export const REWARD_DISTRIBUTOR_ABI = [
   },
   {
     "type": "function",
+    "name": "useEsVesting",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "treasury",
     "inputs": [],
     "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
