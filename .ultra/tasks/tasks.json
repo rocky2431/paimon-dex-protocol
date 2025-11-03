@@ -3,12 +3,12 @@
   "metadata": {
     "projectName": "Paimon.dex",
     "created": "2025-11-01T12:00:00Z",
-    "lastModified": "2025-11-03T07:57:07Z",
+    "lastModified": "2025-11-03T08:23:27Z",
     "description": "Paimon 协议改造：HYD→USDP + ve33 治理 + Boost 激励 + 系统改进计划"
   },
   "stats": {
-    "total": 47,
-    "pending": 14,
+    "total": 51,
+    "pending": 16,
     "inProgress": 0,
     "completed": 32,
     "blocked": 0
@@ -982,6 +982,80 @@
         "backend",
         "data",
         "emission"
+      ],
+      "phase": "P1-Core"
+    },
+    {
+      "id": "48",
+      "title": "【前端】USDPVault - Borrow/Repay 完整功能实现",
+      "description": "为 USDPVault 合约实现完整的前端借贷界面，包括抵押、借款、还款、健康度监控等核心功能。\n\n实现内容：\n1. 页面创建：\n   - app/vault/page.tsx - Vault 主页（抵押品管理）\n   - app/vault/borrow/page.tsx - 借款页面\n   - app/vault/repay/page.tsx - 还款页面\n2. Hooks 开发：\n   - hooks/vault/useVault.ts - Vault 核心操作\n   - hooks/vault/useVaultPosition.ts - 用户仓位查询\n   - hooks/vault/useHealthFactor.ts - 健康度计算\n   - hooks/vault/useCollateralPrice.ts - 抵押品价格查询\n3. 组件开发：\n   - components/vault/DepositCollateral.tsx - 存入抵押品\n   - components/vault/WithdrawCollateral.tsx - 提取抵押品\n   - components/vault/BorrowUSDPForm.tsx - 借款表单\n   - components/vault/RepayUSDPForm.tsx - 还款表单\n   - components/vault/HealthFactorIndicator.tsx - 健康度指示器\n   - components/vault/CollateralCard.tsx - 抵押品卡片\n4. 功能要求：\n   - 实时显示用户抵押品余额、债务、健康度\n   - 支持多种抵押品类型切换\n   - LTV 实时计算和警告（80% 警告，85% 危险）\n   - 健康度低于 1.0 时清算风险提示\n   - 最大借款/还款金额自动计算\n   - 交易确认前的详细预览\n5. UI/UX 设计：\n   - Material Design 3 规范\n   - 暖色调主题（红橙黄褐）\n   - 响应式布局（移动端 + 桌面端）\n   - 中英文双语支持\n   - 加载状态和错误处理\n6. 测试覆盖：\n   - 单元测试：Hooks 逻辑测试\n   - 组件测试：UI 交互测试\n   - E2E 测试：完整借贷流程\n\n依赖合约：\n- USDPVault.sol (Task 38 已完成)\n- USDP.sol\n- RWAPriceOracle.sol\n\n验收标准：\n- ✅ 用户可以存入/提取抵押品\n- ✅ 用户可以借出 USDP（不超过 LTV）\n- ✅ 用户可以偿还债务\n- ✅ 健康度实时显示且准确\n- ✅ 清算风险警告正常工作\n- ✅ 所有测试通过（覆盖率 ≥80%）",
+      "complexity": 8,
+      "priority": "P1",
+      "dependencies": [
+        "38"
+      ],
+      "estimatedHours": 24,
+      "status": "pending",
+      "tags": [
+        "frontend",
+        "vault",
+        "lending",
+        "ui"
+      ],
+      "phase": "P1-Core"
+    },
+    {
+      "id": "49",
+      "title": "【前端】SavingRate - 系统注资状态显示",
+      "description": "在前端显示 SavingRate 合约的系统注资状态，让用户了解收益来源和资金池健康度。\n\n实现内容：\n1. Hooks 开发：\n   - hooks/saving/useSavingRateStats.ts\n     - totalFunded: 累计注资金额\n     - annualRate: 当前年化利率\n     - lastRateUpdateTime: 上次更新时间\n     - weekStartRate: 本周起始利率\n2. 组件开发：\n   - components/saving/SavingRateCard.tsx\n     - 显示年化收益率\n     - 显示累计注资金额\n     - 显示资金池状态（健康/警告）\n     - 显示下次利率更新时间\n   - components/analytics/TreasuryFundingChart.tsx\n     - 历史注资趋势图表\n     - 收益率变化曲线\n3. 页面集成：\n   - app/analytics/page.tsx 增加注资模块\n   - app/stake/page.tsx 显示当前收益率\n4. 功能要求：\n   - 实时读取 totalFunded 和 annualRate\n   - 只读显示，无需交互（onlyOwner 函数）\n   - 历史数据通过事件索引获取\n5. UI 设计：\n   - 信息卡片样式\n   - 清晰的数据可视化\n   - 响应式布局\n\n依赖合约：\n- SavingRate.sol (Task 35 已完成)\n\n验收标准：\n- ✅ 正确显示 totalFunded 和 annualRate\n- ✅ 图表展示历史注资趋势\n- ✅ 响应式设计良好\n- ✅ 单元测试通过",
+      "complexity": 3,
+      "priority": "P2",
+      "dependencies": [
+        "35"
+      ],
+      "estimatedHours": 6,
+      "status": "pending",
+      "tags": [
+        "frontend",
+        "saving-rate",
+        "analytics"
+      ],
+      "phase": "P1-Core"
+    },
+    {
+      "id": "50",
+      "title": "【前端】esPaimon Convert 页面 - 归属进度显示",
+      "description": "更新 esPaimon Convert 页面，集成 vestFor 函数后的归属进度查询和展示功能。\n\n实现内容：\n1. Hooks 更新：\n   - hooks/espaimon/useVestingPosition.ts\n     - totalVested: 总归属金额\n     - vested: 已解锁金额\n     - locked: 仍锁定金额\n     - claimable: 可领取金额\n     - vestingProgress: 归属进度百分比\n     - remainingDays: 剩余天数\n2. 组件更新：\n   - components/convert/VestingProgressBar.tsx\n     - 365 天线性进度条\n     - 已解锁/锁定金额显示\n     - 剩余时间倒计时\n   - components/convert/VestingDetails.tsx\n     - 归属历史记录（VestedFor 事件）\n     - 来源标记（RewardDistributor/Treasury）\n     - 早退罚则说明\n   - components/convert/ClaimVestedButton.tsx\n     - 领取已解锁代币\n     - 早退选项（带罚则警告）\n3. 页面更新：\n   - app/convert/page.tsx 集成新组件\n4. 功能要求：\n   - 实时查询归属状态\n   - 支持多笔归属记录合并显示\n   - 早退罚则清晰提示（50% 惩罚）\n   - 交易确认详情\n5. UI 优化：\n   - 进度条动画效果\n   - 时间轴展示归属历史\n   - Material Design 3 规范\n\n依赖合约：\n- esPaimon.sol (Task 36 已完成)\n\n验收标准：\n- ✅ 正确显示归属进度和可领取金额\n- ✅ 早退罚则警告清晰\n- ✅ Claim 功能正常工作\n- ✅ 历史记录正确显示\n- ✅ 单元测试和组件测试通过",
+      "complexity": 5,
+      "priority": "P2",
+      "dependencies": [
+        "36"
+      ],
+      "estimatedHours": 10,
+      "status": "pending",
+      "tags": [
+        "frontend",
+        "es-paimon",
+        "vesting"
+      ],
+      "phase": "P1-Core"
+    },
+    {
+      "id": "51",
+      "title": "【前端】RewardDistributor 领取页面 - 归属化标记",
+      "description": "更新 Rewards 领取页面，增加 es 归属化模式的标识和说明，让用户清楚奖励发放方式。\n\n实现内容：\n1. Hooks 更新：\n   - hooks/rewards/useRewardDistributor.ts\n     - useEsVesting: 是否启用归属化\n     - esPaimonAddress: esPaimon 合约地址\n     - boostMultiplier: Boost 乘数\n     - actualReward: 实际奖励（含 Boost）\n2. 组件开发：\n   - components/rewards/VestingModeIndicator.tsx\n     - 显示当前模式（归属化/直接发放）\n     - 模式说明（365 天归属 vs 即时到账）\n     - 优劣对比\n   - components/rewards/RewardBreakdown.tsx\n     - 基础奖励\n     - Boost 乘数加成\n     - 实际奖励（= 基础 × Boost）\n     - 归属方式标注\n3. 页面更新：\n   - app/rewards/page.tsx 集成新组件\n4. 功能要求：\n   - 实时读取 useEsVesting 配置\n   - 清晰展示奖励计算公式\n   - 归属化模式下链接到 Convert 页面\n   - Boost 乘数来源说明（BoostStaking）\n5. UI 设计：\n   - 信息提示卡片\n   - 徽章样式标记（归属/直接）\n   - 响应式布局\n\n依赖合约：\n- RewardDistributor.sol (Task 37 已完成)\n- esPaimon.sol (Task 36 已完成)\n\n验收标准：\n- ✅ 正确显示归属化模式状态\n- ✅ 奖励计算公式展示清晰\n- ✅ Boost 乘数正确显示\n- ✅ 用户体验流畅\n- ✅ 单元测试通过",
+      "complexity": 4,
+      "priority": "P2",
+      "dependencies": [
+        "36",
+        "37"
+      ],
+      "estimatedHours": 8,
+      "status": "pending",
+      "tags": [
+        "frontend",
+        "rewards",
+        "vesting"
       ],
       "phase": "P1-Core"
     }
