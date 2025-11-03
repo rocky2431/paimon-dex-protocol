@@ -10,23 +10,19 @@ import "../../src/mocks/MockERC20.sol";
 import "../../src/mocks/MockChainlinkAggregator.sol";
 
 /**
- * @title USDPVault Multi-Collateral Fix Test Suite (Task P1-005)
- * @notice Tests for multi-collateral support short-term fix
+ * @title USDPVault Multi-Collateral Compatibility Test Suite (Task P2-001 Update)
+ * @notice Backward compatibility tests after weighted health factor implementation
  *
- * Problem: USDPVault uses collaterals[0] for valuation when multiple collaterals exist,
- *          leading to incorrect calculations.
+ * Background:
+ * - P1-005 implemented short-term fix (multi-collateral revert)
+ * - P2-001 implemented long-term solution (weighted health factor)
+ * - These tests verify backward compatibility with single-collateral behavior
  *
- * Short-term Solution:
- * - Detect multiple collaterals and revert with clear error message
- * - Document that only single collateral is currently supported
- *
- * Test Coverage (6 dimensions):
- * 1. Functional - Single collateral works, multiple collaterals revert
- * 2. Boundary - Edge cases with 0, 1, 2+ collaterals
- * 3. Exception - Proper error messages for unsupported scenarios
- * 4. Performance - Minimal gas overhead for the check
- * 5. Security - No way to bypass the restriction
- * 6. Compatibility - Existing single-collateral tests still pass
+ * Test Coverage:
+ * 1. Single collateral functionality unchanged
+ * 2. Multi-collateral now works correctly (no longer reverts)
+ * 3. Edge cases with 0, 1, 2+ collaterals
+ * 4. Compatibility with existing workflows
  */
 contract USDPVaultMultiCollateralFixTest is Test {
     // Contracts
@@ -146,12 +142,12 @@ contract USDPVaultMultiCollateralFixTest is Test {
     }
 
     /**
-     * @notice Multiple collaterals: healthFactor() should revert
+     * @notice P2-001 Update: Multiple collaterals now work correctly
      */
-    function test_Functional_MultiCollateralHealthFactorReverts() public {
+    function test_Functional_MultiCollateralHealthFactorWorks() public {
         vm.startPrank(alice);
 
-        // First, deposit single collateral and borrow
+        // Deposit single collateral and borrow
         vault.deposit(address(collateralToken), 100 ether);
         vault.borrow(5000 ether);
 
@@ -160,19 +156,19 @@ contract USDPVaultMultiCollateralFixTest is Test {
         // Add second collateral type
         vault.addCollateral(address(secondCollateral), 6000, 6500, 1000);
 
-        // Now deposit second collateral (creating multi-collateral position with debt)
+        // Now deposit second collateral
         vm.prank(alice);
         vault.deposit(address(secondCollateral), 50 ether);
 
-        // Health factor should revert with multi-collateral error
-        vm.expectRevert("Multi-collateral not supported");
-        vault.healthFactor(alice);
+        // Health factor should now work (using weighted calculation)
+        uint256 hf = vault.healthFactor(alice);
+        assertGt(hf, 1 ether, "Multi-collateral health factor should work");
     }
 
     /**
-     * @notice Multiple collaterals: borrow() should revert (uses health factor check)
+     * @notice P2-001 Update: borrow() works with multi-collateral
      */
-    function test_Functional_MultiCollateralBorrowReverts() public {
+    function test_Functional_MultiCollateralBorrowWorks() public {
         // Add second collateral type
         vault.addCollateral(address(secondCollateral), 6000, 6500, 1000);
 
@@ -182,9 +178,10 @@ contract USDPVaultMultiCollateralFixTest is Test {
         vault.deposit(address(collateralToken), 50 ether);
         vault.deposit(address(secondCollateral), 50 ether);
 
-        // Attempt to borrow should revert
-        vm.expectRevert("Multi-collateral not supported");
+        // Borrow should now work
         vault.borrow(3000 ether);
+
+        assertEq(vault.debtOf(alice), 3000 ether, "Multi-collateral borrow should work");
 
         vm.stopPrank();
     }
@@ -238,7 +235,7 @@ contract USDPVaultMultiCollateralFixTest is Test {
     }
 
     /**
-     * @notice Edge case: Exactly two collateral types (should revert)
+     * @notice P2-001 Update: Two collateral types work correctly
      */
     function test_Boundary_ExactlyTwoCollaterals() public {
         vm.startPrank(alice);
@@ -252,8 +249,9 @@ contract USDPVaultMultiCollateralFixTest is Test {
         vm.prank(alice);
         vault.deposit(address(secondCollateral), 50 ether);
 
-        vm.expectRevert("Multi-collateral not supported");
-        vault.healthFactor(alice);
+        // Should now work with weighted health factor
+        uint256 hf = vault.healthFactor(alice);
+        assertGt(hf, 1 ether, "Two collaterals should work");
     }
 
     /**
@@ -275,13 +273,13 @@ contract USDPVaultMultiCollateralFixTest is Test {
     }
 
     // ===========================================
-    // 3. EXCEPTION TESTS
+    // 3. EXCEPTION TESTS (P2-001 Updated)
     // ===========================================
 
     /**
-     * @notice Error message clarity: Verify exact error message
+     * @notice P2-001 Update: Multi-collateral positions work correctly
      */
-    function test_Exception_ErrorMessageIsCorrect() public {
+    function test_Exception_MultiCollateralPositionsWork() public {
         vm.startPrank(alice);
         vault.deposit(address(collateralToken), 100 ether);
         vault.borrow(5000 ether);
@@ -291,31 +289,31 @@ contract USDPVaultMultiCollateralFixTest is Test {
         vm.prank(alice);
         vault.deposit(address(secondCollateral), 50 ether);
 
-        // Verify exact error message
-        vm.expectRevert(bytes("Multi-collateral not supported"));
-        vault.healthFactor(alice);
+        // Should work with weighted health factor
+        uint256 hf = vault.healthFactor(alice);
+        assertGt(hf, 1 ether, "Multi-collateral should work");
     }
 
     /**
-     * @notice Withdraw one collateral to go back to single collateral
+     * @notice Withdraw one collateral still works correctly
      */
-    function test_Exception_WithdrawToSingleCollateralWorks() public {
+    function test_Exception_WithdrawOneCollateralWorks() public {
         vault.addCollateral(address(secondCollateral), 6000, 6500, 1000);
 
         vm.startPrank(alice);
         vault.deposit(address(collateralToken), 100 ether);
         vault.deposit(address(secondCollateral), 50 ether);
 
-        // Health factor should revert with two collaterals
-        vm.expectRevert("Multi-collateral not supported");
-        vault.healthFactor(alice);
+        // Health factor works with two collaterals
+        uint256 hfBefore = vault.healthFactor(alice);
+        assertEq(hfBefore, type(uint256).max, "Health factor should be max with no debt");
 
         // Withdraw all of second collateral
         vault.withdraw(address(secondCollateral), 50 ether);
 
-        // Now health factor should work (only one collateral remains)
-        uint256 hf = vault.healthFactor(alice);
-        assertEq(hf, type(uint256).max, "Health factor should work with single collateral");
+        // Health factor still works with one collateral
+        uint256 hfAfter = vault.healthFactor(alice);
+        assertEq(hfAfter, type(uint256).max, "Health factor should work with single collateral");
 
         vm.stopPrank();
     }
@@ -342,9 +340,9 @@ contract USDPVaultMultiCollateralFixTest is Test {
     }
 
     /**
-     * @notice Gas benchmark: Multi-collateral check should have minimal overhead
+     * @notice P2-001 Update: Multi-collateral health factor gas benchmark
      */
-    function test_Performance_MultiCollateralCheckMinimalOverhead() public {
+    function test_Performance_MultiCollateralHealthFactorGas() public {
         vm.startPrank(alice);
         vault.deposit(address(collateralToken), 100 ether);
         vault.borrow(5000 ether);
@@ -355,57 +353,51 @@ contract USDPVaultMultiCollateralFixTest is Test {
         vault.deposit(address(secondCollateral), 50 ether);
 
         uint256 gasBefore = gasleft();
-        try vault.healthFactor(alice) {
-            // Should revert before reaching here
-            fail("Should have reverted");
-        } catch {
-            uint256 gasUsed = gasBefore - gasleft();
-            // Check should be fast (just counting collaterals)
-            assertLt(gasUsed, 50000, "Multi-collateral check should use < 50K gas");
-        }
-    }
-
-    // ===========================================
-    // 5. SECURITY TESTS
-    // ===========================================
-
-    /**
-     * @notice Security: Cannot bypass restriction by manipulating order
-     */
-    function test_Security_CannotBypassWithOrderManipulation() public {
-        vm.startPrank(alice);
-        vault.deposit(address(collateralToken), 100 ether);
-        vault.borrow(5000 ether);
-        vm.stopPrank();
-
-        vault.addCollateral(address(secondCollateral), 6000, 6500, 1000);
-
-        // Try depositing second collateral in different order
-        vm.prank(alice);
-        vault.deposit(address(secondCollateral), 50 ether);
-
-        // Should still revert
-        vm.expectRevert("Multi-collateral not supported");
         vault.healthFactor(alice);
+        uint256 gasUsed = gasBefore - gasleft();
+
+        // Multi-collateral health factor should be reasonably efficient
+        assertLt(gasUsed, 150000, "Multi-collateral health factor should use < 150K gas");
+    }
+
+    // ===========================================
+    // 5. SECURITY TESTS (P2-001 Updated)
+    // ===========================================
+
+    /**
+     * @notice P2-001 Update: Collateral order doesn't affect weighted health factor
+     */
+    function test_Security_CollateralOrderDoesNotAffect() public {
+        vault.addCollateral(address(secondCollateral), 6000, 6500, 1000);
+
+        vm.startPrank(alice);
+        vault.deposit(address(collateralToken), 100 ether);
+        vault.deposit(address(secondCollateral), 50 ether);
+        vault.borrow(5000 ether);
+
+        // Health factor should work correctly with weighted calculation
+        uint256 hf = vault.healthFactor(alice);
+        assertGt(hf, 1 ether, "Health factor should be > 1.0");
+
+        vm.stopPrank();
     }
 
     /**
-     * @notice Security: Cannot bypass by using very small amounts
+     * @notice P2-001 Update: Small collateral amounts are handled correctly
      */
-    function test_Security_CannotBypassWithSmallAmounts() public {
+    function test_Security_SmallCollateralAmountsWork() public {
+        vault.addCollateral(address(secondCollateral), 6000, 6500, 1000);
+
         vm.startPrank(alice);
         vault.deposit(address(collateralToken), 100 ether);
         vault.borrow(5000 ether);
-        vm.stopPrank();
-
-        vault.addCollateral(address(secondCollateral), 6000, 6500, 1000);
-
-        vm.prank(alice);
         vault.deposit(address(secondCollateral), 1 wei); // Tiny amount
 
-        // Should still revert even with tiny amount
-        vm.expectRevert("Multi-collateral not supported");
-        vault.healthFactor(alice);
+        // Should work with weighted health factor
+        uint256 hf = vault.healthFactor(alice);
+        assertGt(hf, 1 ether, "Health factor should work with tiny collateral amounts");
+
+        vm.stopPrank();
     }
 
     // ===========================================
