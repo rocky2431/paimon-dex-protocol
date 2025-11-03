@@ -53,6 +53,10 @@ contract USDP is IERC20, Ownable, ReentrancyGuard {
     /// @notice Last accumulation timestamp (for daily update tracking)
     uint256 public lastAccumulationTime;
 
+    /// @notice Accrual pause state (default: true to prevent accidental distributions)
+    /// @dev When true, accumulate() is disabled. Only SavingRate should handle yield.
+    bool public accrualPaused;
+
     // ==================== EIP-2612 Permit ====================
 
     /// @notice EIP-712 domain separator
@@ -71,6 +75,7 @@ contract USDP is IERC20, Ownable, ReentrancyGuard {
     event MinterAdded(address indexed minter);
     event MinterRemoved(address indexed minter);
     event DistributorUpdated(address indexed oldDistributor, address indexed newDistributor);
+    event AccrualPausedUpdated(bool paused);
 
     // Note: Using require with string messages for test compatibility
     // (Tests expect specific error message strings)
@@ -84,6 +89,7 @@ contract USDP is IERC20, Ownable, ReentrancyGuard {
     constructor() Ownable(msg.sender) {
         accrualIndex = 1e18; // Initial index = 1.0
         lastAccumulationTime = block.timestamp;
+        accrualPaused = true; // Default: paused to prevent accidental distributions
 
         // Initialize EIP-712 domain separator
         DOMAIN_SEPARATOR = keccak256(
@@ -327,6 +333,7 @@ contract USDP is IERC20, Ownable, ReentrancyGuard {
      */
     function accumulate(uint256 newIndex) external nonReentrant {
         require(msg.sender == distributor, "USDP: Not distributor");
+        require(!accrualPaused, "USDP: Accrual is paused");
         require(newIndex > accrualIndex, "USDP: Index must increase");
 
         accrualIndex = newIndex;
@@ -362,6 +369,20 @@ contract USDP is IERC20, Ownable, ReentrancyGuard {
         address oldDistributor = distributor;
         distributor = newDistributor;
         emit DistributorUpdated(oldDistributor, newDistributor);
+    }
+
+    /**
+     * @notice Set accrual pause state
+     * @dev Controls whether accumulate() can be called
+     * @param paused True to pause accrual, false to unpause
+     *
+     * Use case:
+     * - Pause by default to prevent accidental yield distribution
+     * - Unpause only when SavingRate contract is ready
+     */
+    function setAccrualPaused(bool paused) external onlyOwner {
+        accrualPaused = paused;
+        emit AccrualPausedUpdated(paused);
     }
 
     /**
