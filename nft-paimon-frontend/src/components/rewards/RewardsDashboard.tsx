@@ -5,7 +5,10 @@ import { useRewards } from './hooks/useRewards';
 import { RewardsSummary } from './RewardsSummary';
 import { PoolRewardsList } from './PoolRewardsList';
 import { ClaimAllButton } from './ClaimAllButton';
+import { VestingModeIndicator } from './VestingModeIndicator';
+import { RewardBreakdown } from './RewardBreakdown';
 import { RewardsDashboardState } from './types';
+import { useRewardDistributorVesting } from '@/hooks/useRewardDistributor';
 
 /**
  * RewardsDashboard Component
@@ -27,6 +30,9 @@ export const RewardsDashboard: React.FC = () => {
     handleClaimSingle,
     handleClaimAll,
   } = useRewards();
+
+  // Query vesting mode
+  const { data: useEsVesting, isLoading: vestingLoading } = useRewardDistributorVesting();
 
   const isLoading =
     dashboardState === RewardsDashboardState.LOADING ||
@@ -63,8 +69,20 @@ export const RewardsDashboard: React.FC = () => {
       {/* Content */}
       {dashboardState !== RewardsDashboardState.LOADING && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {/* Vesting Mode Indicator */}
+          <VestingModeIndicator useEsVesting={useEsVesting} loading={vestingLoading} />
+
           {/* Summary Card */}
           <RewardsSummary summary={summary} />
+
+          {/* Reward Breakdown - Show example with first pool reward */}
+          {poolRewards.length > 0 && poolRewards[0].earnedRewards > 0n && (
+            <RewardBreakdown
+              baseReward={poolRewards[0].earnedRewards}
+              boostMultiplier={10000n} // TODO: Get from BoostStaking contract
+              useEsVesting={useEsVesting || false}
+            />
+          )}
 
           {/* Two-Column Layout */}
           <Box
