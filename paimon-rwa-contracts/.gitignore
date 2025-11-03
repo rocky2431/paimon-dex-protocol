@@ -9,6 +9,8 @@ out/
 
 # Docs
 docs/
+# Allow emission schedule JSON (needed by frontend)
+!.ultra/docs/emission-schedule.json
 
 # Dotenv file
 .env

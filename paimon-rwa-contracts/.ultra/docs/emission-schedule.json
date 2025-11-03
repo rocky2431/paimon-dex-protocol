@@ -1,0 +1,3220 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "generatedAt": "2025-11-03T10:57:47.067013+00:00",
+    "totalWeeks": 352,
+    "totalEmission": "9942634884",
+    "description": "352-week PAIMON emission schedule generated from EmissionManager.sol formula",
+    "contract": "EmissionManager.sol",
+    "phases": {
+      "A": "Week 1-12: Fixed 64080000M/week",
+      "B": "Week 13-248: Linear decay",
+      "C": "Week 249-352: Fixed 7390000M/week"
+    }
+  },
+  "allocation": {
+    "debt": "10.0%",
+    "lpPairs": "42.0%",
+    "stabilityPool": "28.0%",
+    "eco": "20.0%"
+  },
+  "weeklySchedule": [
+    {
+      "week": 1,
+      "phase": "A",
+      "total": "64080000",
+      "debt": "6408000",
+      "lpPairs": "26913600",
+      "stabilityPool": "17942400",
+      "eco": "12816000"
+    },
+    {
+      "week": 2,
+      "phase": "A",
+      "total": "64080000",
+      "debt": "6408000",
+      "lpPairs": "26913600",
+      "stabilityPool": "17942400",
+      "eco": "12816000"
+    },
+    {
+      "week": 3,
+      "phase": "A",
+      "total": "64080000",
+      "debt": "6408000",
+      "lpPairs": "26913600",
+      "stabilityPool": "17942400",
+      "eco": "12816000"
+    },
+    {
+      "week": 4,
+      "phase": "A",
+      "total": "64080000",
+      "debt": "6408000",
+      "lpPairs": "26913600",
+      "stabilityPool": "17942400",
+      "eco": "12816000"
+    },
+    {
+      "week": 5,
+      "phase": "A",
+      "total": "64080000",
+      "debt": "6408000",
+      "lpPairs": "26913600",
+      "stabilityPool": "17942400",
+      "eco": "12816000"
+    },
+    {
+      "week": 6,
+      "phase": "A",
+      "total": "64080000",
+      "debt": "6408000",
+      "lpPairs": "26913600",
+      "stabilityPool": "17942400",
+      "eco": "12816000"
+    },
+    {
+      "week": 7,
+      "phase": "A",
+      "total": "64080000",
+      "debt": "6408000",
+      "lpPairs": "26913600",
+      "stabilityPool": "17942400",
+      "eco": "12816000"
+    },
+    {
+      "week": 8,
+      "phase": "A",
+      "total": "64080000",
+      "debt": "6408000",
+      "lpPairs": "26913600",
+      "stabilityPool": "17942400",
+      "eco": "12816000"
+    },
+    {
+      "week": 9,
+      "phase": "A",
+      "total": "64080000",
+      "debt": "6408000",
+      "lpPairs": "26913600",
+      "stabilityPool": "17942400",
+      "eco": "12816000"
+    },
+    {
+      "week": 10,
+      "phase": "A",
+      "total": "64080000",
+      "debt": "6408000",
+      "lpPairs": "26913600",
+      "stabilityPool": "17942400",
+      "eco": "12816000"
+    },
+    {
+      "week": 11,
+      "phase": "A",
+      "total": "64080000",
+      "debt": "6408000",
+      "lpPairs": "26913600",
+      "stabilityPool": "17942400",
+      "eco": "12816000"
+    },
+    {
+      "week": 12,
+      "phase": "A",
+      "total": "64080000",
+      "debt": "6408000",
+      "lpPairs": "26913600",
+      "stabilityPool": "17942400",
+      "eco": "12816000"
+    },
+    {
+      "week": 13,
+      "phase": "B",
+      "total": "63839788",
+      "debt": "6383978",
+      "lpPairs": "26812711",
+      "stabilityPool": "17875140",
+      "eco": "12767957"
+    },
+    {
+      "week": 14,
+      "phase": "B",
+      "total": "63599576",
+      "debt": "6359957",
+      "lpPairs": "26711822",
+      "stabilityPool": "17807881",
+      "eco": "12719915"
+    },
+    {
+      "week": 15,
+      "phase": "B",
+      "total": "63359364",
+      "debt": "6335936",
+      "lpPairs": "26610933",
+      "stabilityPool": "17740622",
+      "eco": "12671872"
+    },
+    {
+      "week": 16,
+      "phase": "B",
+      "total": "63119152",
+      "debt": "6311915",
+      "lpPairs": "26510044",
+      "stabilityPool": "17673362",
+      "eco": "12623830"
+    },
+    {
+      "week": 17,
+      "phase": "B",
+      "total": "62878940",
+      "debt": "6287894",
+      "lpPairs": "26409155",
+      "stabilityPool": "17606103",
+      "eco": "12575788"
+    },
+    {
+      "week": 18,
+      "phase": "B",
+      "total": "62638728",
+      "debt": "6263872",
+      "lpPairs": "26308266",
+      "stabilityPool": "17538844",
+      "eco": "12527745"
+    },
+    {
+      "week": 19,
+      "phase": "B",
+      "total": "62398516",
+      "debt": "6239851",
+      "lpPairs": "26207377",
+      "stabilityPool": "17471584",
+      "eco": "12479703"
+    },
+    {
+      "week": 20,
+      "phase": "B",
+      "total": "62158305",
+      "debt": "6215830",
+      "lpPairs": "26106488",
+      "stabilityPool": "17404325",
+      "eco": "12431661"
+    },
+    {
+      "week": 21,
+      "phase": "B",
+      "total": "61918093",
+      "debt": "6191809",
+      "lpPairs": "26005599",
+      "stabilityPool": "17337066",
+      "eco": "12383618"
+    },
+    {
+      "week": 22,
+      "phase": "B",
+      "total": "61677881",
+      "debt": "6167788",
+      "lpPairs": "25904710",
+      "stabilityPool": "17269806",
+      "eco": "12335576"
+    },
+    {
+      "week": 23,
+      "phase": "B",
+      "total": "61437669",
+      "debt": "6143766",
+      "lpPairs": "25803821",
+      "stabilityPool": "17202547",
+      "eco": "12287533"
+    },
+    {
+      "week": 24,
+      "phase": "B",
+      "total": "61197457",
+      "debt": "6119745",
+      "lpPairs": "25702932",
+      "stabilityPool": "17135288",
+      "eco": "12239491"
+    },
+    {
+      "week": 25,
+      "phase": "B",
+      "total": "60957245",
+      "debt": "6095724",
+      "lpPairs": "25602043",
+      "stabilityPool": "17068028",
+      "eco": "12191449"
+    },
+    {
+      "week": 26,
+      "phase": "B",
+      "total": "60717033",
+      "debt": "6071703",
+      "lpPairs": "25501154",
+      "stabilityPool": "17000769",
+      "eco": "12143406"
+    },
+    {
+      "week": 27,
+      "phase": "B",
+      "total": "60476822",
+      "debt": "6047682",
+      "lpPairs": "25400265",
+      "stabilityPool": "16933510",
+      "eco": "12095364"
+    },
+    {
+      "week": 28,
+      "phase": "B",
+      "total": "60236610",
+      "debt": "6023661",
+      "lpPairs": "25299376",
+      "stabilityPool": "16866250",
+      "eco": "12047322"
+    },
+    {
+      "week": 29,
+      "phase": "B",
+      "total": "59996398",
+      "debt": "5999639",
+      "lpPairs": "25198487",
+      "stabilityPool": "16798991",
+      "eco": "11999279"
+    },
+    {
+      "week": 30,
+      "phase": "B",
+      "total": "59756186",
+      "debt": "5975618",
+      "lpPairs": "25097598",
+      "stabilityPool": "16731732",
+      "eco": "11951237"
+    },
+    {
+      "week": 31,
+      "phase": "B",
+      "total": "59515974",
+      "debt": "5951597",
+      "lpPairs": "24996709",
+      "stabilityPool": "16664472",
+      "eco": "11903194"
+    },
+    {
+      "week": 32,
+      "phase": "B",
+      "total": "59275762",
+      "debt": "5927576",
+      "lpPairs": "24895820",
+      "stabilityPool": "16597213",
+      "eco": "11855152"
+    },
+    {
+      "week": 33,
+      "phase": "B",
+      "total": "59035550",
+      "debt": "5903555",
+      "lpPairs": "24794931",
+      "stabilityPool": "16529954",
+      "eco": "11807110"
+    },
+    {
+      "week": 34,
+      "phase": "B",
+      "total": "58795338",
+      "debt": "5879533",
+      "lpPairs": "24694042",
+      "stabilityPool": "16462694",
+      "eco": "11759067"
+    },
+    {
+      "week": 35,
+      "phase": "B",
+      "total": "58555127",
+      "debt": "5855512",
+      "lpPairs": "24593153",
+      "stabilityPool": "16395435",
+      "eco": "11711025"
+    },
+    {
+      "week": 36,
+      "phase": "B",
+      "total": "58314915",
+      "debt": "5831491",
+      "lpPairs": "24492264",
+      "stabilityPool": "16328176",
+      "eco": "11662983"
+    },
+    {
+      "week": 37,
+      "phase": "B",
+      "total": "58074703",
+      "debt": "5807470",
+      "lpPairs": "24391375",
+      "stabilityPool": "16260916",
+      "eco": "11614940"
+    },
+    {
+      "week": 38,
+      "phase": "B",
+      "total": "57834491",
+      "debt": "5783449",
+      "lpPairs": "24290486",
+      "stabilityPool": "16193657",
+      "eco": "11566898"
+    },
+    {
+      "week": 39,
+      "phase": "B",
+      "total": "57594279",
+      "debt": "5759427",
+      "lpPairs": "24189597",
+      "stabilityPool": "16126398",
+      "eco": "11518855"
+    },
+    {
+      "week": 40,
+      "phase": "B",
+      "total": "57354067",
+      "debt": "5735406",
+      "lpPairs": "24088708",
+      "stabilityPool": "16059138",
+      "eco": "11470813"
+    },
+    {
+      "week": 41,
+      "phase": "B",
+      "total": "57113855",
+      "debt": "5711385",
+      "lpPairs": "23987819",
+      "stabilityPool": "15991879",
+      "eco": "11422771"
+    },
+    {
+      "week": 42,
+      "phase": "B",
+      "total": "56873644",
+      "debt": "5687364",
+      "lpPairs": "23886930",
+      "stabilityPool": "15924620",
+      "eco": "11374728"
+    },
+    {
+      "week": 43,
+      "phase": "B",
+      "total": "56633432",
+      "debt": "5663343",
+      "lpPairs": "23786041",
+      "stabilityPool": "15857361",
+      "eco": "11326686"
+    },
+    {
+      "week": 44,
+      "phase": "B",
+      "total": "56393220",
+      "debt": "5639322",
+      "lpPairs": "23685152",
+      "stabilityPool": "15790101",
+      "eco": "11278644"
+    },
+    {
+      "week": 45,
+      "phase": "B",
+      "total": "56153008",
+      "debt": "5615300",
+      "lpPairs": "23584263",
+      "stabilityPool": "15722842",
+      "eco": "11230601"
+    },
+    {
+      "week": 46,
+      "phase": "B",
+      "total": "55912796",
+      "debt": "5591279",
+      "lpPairs": "23483374",
+      "stabilityPool": "15655583",
+      "eco": "11182559"
+    },
+    {
+      "week": 47,
+      "phase": "B",
+      "total": "55672584",
+      "debt": "5567258",
+      "lpPairs": "23382485",
+      "stabilityPool": "15588323",
+      "eco": "11134516"
+    },
+    {
+      "week": 48,
+      "phase": "B",
+      "total": "55432372",
+      "debt": "5543237",
+      "lpPairs": "23281596",
+      "stabilityPool": "15521064",
+      "eco": "11086474"
+    },
+    {
+      "week": 49,
+      "phase": "B",
+      "total": "55192161",
+      "debt": "5519216",
+      "lpPairs": "23180707",
+      "stabilityPool": "15453805",
+      "eco": "11038432"
+    },
+    {
+      "week": 50,
+      "phase": "B",
+      "total": "54951949",
+      "debt": "5495194",
+      "lpPairs": "23079818",
+      "stabilityPool": "15386545",
+      "eco": "10990389"
+    },
+    {
+      "week": 51,
+      "phase": "B",
+      "total": "54711737",
+      "debt": "5471173",
+      "lpPairs": "22978929",
+      "stabilityPool": "15319286",
+      "eco": "10942347"
+    },
+    {
+      "week": 52,
+      "phase": "B",
+      "total": "54471525",
+      "debt": "5447152",
+      "lpPairs": "22878040",
+      "stabilityPool": "15252027",
+      "eco": "10894305"
+    },
+    {
+      "week": 53,
+      "phase": "B",
+      "total": "54231313",
+      "debt": "5423131",
+      "lpPairs": "22777151",
+      "stabilityPool": "15184767",
+      "eco": "10846262"
+    },
+    {
+      "week": 54,
+      "phase": "B",
+      "total": "53991101",
+      "debt": "5399110",
+      "lpPairs": "22676262",
+      "stabilityPool": "15117508",
+      "eco": "10798220"
+    },
+    {
+      "week": 55,
+      "phase": "B",
+      "total": "53750889",
+      "debt": "5375088",
+      "lpPairs": "22575373",
+      "stabilityPool": "15050249",
+      "eco": "10750177"
+    },
+    {
+      "week": 56,
+      "phase": "B",
+      "total": "53510677",
+      "debt": "5351067",
+      "lpPairs": "22474484",
+      "stabilityPool": "14982989",
+      "eco": "10702135"
+    },
+    {
+      "week": 57,
+      "phase": "B",
+      "total": "53270466",
+      "debt": "5327046",
+      "lpPairs": "22373595",
+      "stabilityPool": "14915730",
+      "eco": "10654093"
+    },
+    {
+      "week": 58,
+      "phase": "B",
+      "total": "53030254",
+      "debt": "5303025",
+      "lpPairs": "22272706",
+      "stabilityPool": "14848471",
+      "eco": "10606050"
+    },
+    {
+      "week": 59,
+      "phase": "B",
+      "total": "52790042",
+      "debt": "5279004",
+      "lpPairs": "22171817",
+      "stabilityPool": "14781211",
+      "eco": "10558008"
+    },
+    {
+      "week": 60,
+      "phase": "B",
+      "total": "52549830",
+      "debt": "5254983",
+      "lpPairs": "22070928",
+      "stabilityPool": "14713952",
+      "eco": "10509966"
+    },
+    {
+      "week": 61,
+      "phase": "B",
+      "total": "52309618",
+      "debt": "5230961",
+      "lpPairs": "21970039",
+      "stabilityPool": "14646693",
+      "eco": "10461923"
+    },
+    {
+      "week": 62,
+      "phase": "B",
+      "total": "52069406",
+      "debt": "5206940",
+      "lpPairs": "21869150",
+      "stabilityPool": "14579433",
+      "eco": "10413881"
+    },
+    {
+      "week": 63,
+      "phase": "B",
+      "total": "51829194",
+      "debt": "5182919",
+      "lpPairs": "21768261",
+      "stabilityPool": "14512174",
+      "eco": "10365838"
+    },
+    {
+      "week": 64,
+      "phase": "B",
+      "total": "51588983",
+      "debt": "5158898",
+      "lpPairs": "21667372",
+      "stabilityPool": "14444915",
+      "eco": "10317796"
+    },
+    {
+      "week": 65,
+      "phase": "B",
+      "total": "51348771",
+      "debt": "5134877",
+      "lpPairs": "21566483",
+      "stabilityPool": "14377655",
+      "eco": "10269754"
+    },
+    {
+      "week": 66,
+      "phase": "B",
+      "total": "51108559",
+      "debt": "5110855",
+      "lpPairs": "21465594",
+      "stabilityPool": "14310396",
+      "eco": "10221711"
+    },
+    {
+      "week": 67,
+      "phase": "B",
+      "total": "50868347",
+      "debt": "5086834",
+      "lpPairs": "21364705",
+      "stabilityPool": "14243137",
+      "eco": "10173669"
+    },
+    {
+      "week": 68,
+      "phase": "B",
+      "total": "50628135",
+      "debt": "5062813",
+      "lpPairs": "21263816",
+      "stabilityPool": "14175877",
+      "eco": "10125627"
+    },
+    {
+      "week": 69,
+      "phase": "B",
+      "total": "50387923",
+      "debt": "5038792",
+      "lpPairs": "21162927",
+      "stabilityPool": "14108618",
+      "eco": "10077584"
+    },
+    {
+      "week": 70,
+      "phase": "B",
+      "total": "50147711",
+      "debt": "5014771",
+      "lpPairs": "21062038",
+      "stabilityPool": "14041359",
+      "eco": "10029542"
+    },
+    {
+      "week": 71,
+      "phase": "B",
+      "total": "49907500",
+      "debt": "4990750",
+      "lpPairs": "20961150",
+      "stabilityPool": "13974100",
+      "eco": "9981500"
+    },
+    {
+      "week": 72,
+      "phase": "B",
+      "total": "49667288",
+      "debt": "4966728",
+      "lpPairs": "20860261",
+      "stabilityPool": "13906840",
+      "eco": "9933457"
+    },
+    {
+      "week": 73,
+      "phase": "B",
+      "total": "49427076",
+      "debt": "4942707",
+      "lpPairs": "20759372",
+      "stabilityPool": "13839581",
+      "eco": "9885415"
+    },
+    {
+      "week": 74,
+      "phase": "B",
+      "total": "49186864",
+      "debt": "4918686",
+      "lpPairs": "20658483",
+      "stabilityPool": "13772322",
+      "eco": "9837372"
+    },
+    {
+      "week": 75,
+      "phase": "B",
+      "total": "48946652",
+      "debt": "4894665",
+      "lpPairs": "20557594",
+      "stabilityPool": "13705062",
+      "eco": "9789330"
+    },
+    {
+      "week": 76,
+      "phase": "B",
+      "total": "48706440",
+      "debt": "4870644",
+      "lpPairs": "20456705",
+      "stabilityPool": "13637803",
+      "eco": "9741288"
+    },
+    {
+      "week": 77,
+      "phase": "B",
+      "total": "48466228",
+      "debt": "4846622",
+      "lpPairs": "20355816",
+      "stabilityPool": "13570544",
+      "eco": "9693245"
+    },
+    {
+      "week": 78,
+      "phase": "B",
+      "total": "48226016",
+      "debt": "4822601",
+      "lpPairs": "20254927",
+      "stabilityPool": "13503284",
+      "eco": "9645203"
+    },
+    {
+      "week": 79,
+      "phase": "B",
+      "total": "47985805",
+      "debt": "4798580",
+      "lpPairs": "20154038",
+      "stabilityPool": "13436025",
+      "eco": "9597161"
+    },
+    {
+      "week": 80,
+      "phase": "B",
+      "total": "47745593",
+      "debt": "4774559",
+      "lpPairs": "20053149",
+      "stabilityPool": "13368766",
+      "eco": "9549118"
+    },
+    {
+      "week": 81,
+      "phase": "B",
+      "total": "47505381",
+      "debt": "4750538",
+      "lpPairs": "19952260",
+      "stabilityPool": "13301506",
+      "eco": "9501076"
+    },
+    {
+      "week": 82,
+      "phase": "B",
+      "total": "47265169",
+      "debt": "4726516",
+      "lpPairs": "19851371",
+      "stabilityPool": "13234247",
+      "eco": "9453033"
+    },
+    {
+      "week": 83,
+      "phase": "B",
+      "total": "47024957",
+      "debt": "4702495",
+      "lpPairs": "19750482",
+      "stabilityPool": "13166988",
+      "eco": "9404991"
+    },
+    {
+      "week": 84,
+      "phase": "B",
+      "total": "46784745",
+      "debt": "4678474",
+      "lpPairs": "19649593",
+      "stabilityPool": "13099728",
+      "eco": "9356949"
+    },
+    {
+      "week": 85,
+      "phase": "B",
+      "total": "46544533",
+      "debt": "4654453",
+      "lpPairs": "19548704",
+      "stabilityPool": "13032469",
+      "eco": "9308906"
+    },
+    {
+      "week": 86,
+      "phase": "B",
+      "total": "46304322",
+      "debt": "4630432",
+      "lpPairs": "19447815",
+      "stabilityPool": "12965210",
+      "eco": "9260864"
+    },
+    {
+      "week": 87,
+      "phase": "B",
+      "total": "46064110",
+      "debt": "4606411",
+      "lpPairs": "19346926",
+      "stabilityPool": "12897950",
+      "eco": "9212822"
+    },
+    {
+      "week": 88,
+      "phase": "B",
+      "total": "45823898",
+      "debt": "4582389",
+      "lpPairs": "19246037",
+      "stabilityPool": "12830691",
+      "eco": "9164779"
+    },
+    {
+      "week": 89,
+      "phase": "B",
+      "total": "45583686",
+      "debt": "4558368",
+      "lpPairs": "19145148",
+      "stabilityPool": "12763432",
+      "eco": "9116737"
+    },
+    {
+      "week": 90,
+      "phase": "B",
+      "total": "45343474",
+      "debt": "4534347",
+      "lpPairs": "19044259",
+      "stabilityPool": "12696172",
+      "eco": "9068694"
+    },
+    {
+      "week": 91,
+      "phase": "B",
+      "total": "45103262",
+      "debt": "4510326",
+      "lpPairs": "18943370",
+      "stabilityPool": "12628913",
+      "eco": "9020652"
+    },
+    {
+      "week": 92,
+      "phase": "B",
+      "total": "44863050",
+      "debt": "4486305",
+      "lpPairs": "18842481",
+      "stabilityPool": "12561654",
+      "eco": "8972610"
+    },
+    {
+      "week": 93,
+      "phase": "B",
+      "total": "44622838",
+      "debt": "4462283",
+      "lpPairs": "18741592",
+      "stabilityPool": "12494394",
+      "eco": "8924567"
+    },
+    {
+      "week": 94,
+      "phase": "B",
+      "total": "44382627",
+      "debt": "4438262",
+      "lpPairs": "18640703",
+      "stabilityPool": "12427135",
+      "eco": "8876525"
+    },
+    {
+      "week": 95,
+      "phase": "B",
+      "total": "44142415",
+      "debt": "4414241",
+      "lpPairs": "18539814",
+      "stabilityPool": "12359876",
+      "eco": "8828483"
+    },
+    {
+      "week": 96,
+      "phase": "B",
+      "total": "43902203",
+      "debt": "4390220",
+      "lpPairs": "18438925",
+      "stabilityPool": "12292616",
+      "eco": "8780440"
+    },
+    {
+      "week": 97,
+      "phase": "B",
+      "total": "43661991",
+      "debt": "4366199",
+      "lpPairs": "18338036",
+      "stabilityPool": "12225357",
+      "eco": "8732398"
+    },
+    {
+      "week": 98,
+      "phase": "B",
+      "total": "43421779",
+      "debt": "4342177",
+      "lpPairs": "18237147",
+      "stabilityPool": "12158098",
+      "eco": "8684355"
+    },
+    {
+      "week": 99,
+      "phase": "B",
+      "total": "43181567",
+      "debt": "4318156",
+      "lpPairs": "18136258",
+      "stabilityPool": "12090838",
+      "eco": "8636313"
+    },
+    {
+      "week": 100,
+      "phase": "B",
+      "total": "42941355",
+      "debt": "4294135",
+      "lpPairs": "18035369",
+      "stabilityPool": "12023579",
+      "eco": "8588271"
+    },
+    {
+      "week": 101,
+      "phase": "B",
+      "total": "42701144",
+      "debt": "4270114",
+      "lpPairs": "17934480",
+      "stabilityPool": "11956320",
+      "eco": "8540228"
+    },
+    {
+      "week": 102,
+      "phase": "B",
+      "total": "42460932",
+      "debt": "4246093",
+      "lpPairs": "17833591",
+      "stabilityPool": "11889061",
+      "eco": "8492186"
+    },
+    {
+      "week": 103,
+      "phase": "B",
+      "total": "42220720",
+      "debt": "4222072",
+      "lpPairs": "17732702",
+      "stabilityPool": "11821801",
+      "eco": "8444144"
+    },
+    {
+      "week": 104,
+      "phase": "B",
+      "total": "41980508",
+      "debt": "4198050",
+      "lpPairs": "17631813",
+      "stabilityPool": "11754542",
+      "eco": "8396101"
+    },
+    {
+      "week": 105,
+      "phase": "B",
+      "total": "41740296",
+      "debt": "4174029",
+      "lpPairs": "17530924",
+      "stabilityPool": "11687283",
+      "eco": "8348059"
+    },
+    {
+      "week": 106,
+      "phase": "B",
+      "total": "41500084",
+      "debt": "4150008",
+      "lpPairs": "17430035",
+      "stabilityPool": "11620023",
+      "eco": "8300016"
+    },
+    {
+      "week": 107,
+      "phase": "B",
+      "total": "41259872",
+      "debt": "4125987",
+      "lpPairs": "17329146",
+      "stabilityPool": "11552764",
+      "eco": "8251974"
+    },
+    {
+      "week": 108,
+      "phase": "B",
+      "total": "41019661",
+      "debt": "4101966",
+      "lpPairs": "17228257",
+      "stabilityPool": "11485505",
+      "eco": "8203932"
+    },
+    {
+      "week": 109,
+      "phase": "B",
+      "total": "40779449",
+      "debt": "4077944",
+      "lpPairs": "17127368",
+      "stabilityPool": "11418245",
+      "eco": "8155889"
+    },
+    {
+      "week": 110,
+      "phase": "B",
+      "total": "40539237",
+      "debt": "4053923",
+      "lpPairs": "17026479",
+      "stabilityPool": "11350986",
+      "eco": "8107847"
+    },
+    {
+      "week": 111,
+      "phase": "B",
+      "total": "40299025",
+      "debt": "4029902",
+      "lpPairs": "16925590",
+      "stabilityPool": "11283727",
+      "eco": "8059805"
+    },
+    {
+      "week": 112,
+      "phase": "B",
+      "total": "40058813",
+      "debt": "4005881",
+      "lpPairs": "16824701",
+      "stabilityPool": "11216467",
+      "eco": "8011762"
+    },
+    {
+      "week": 113,
+      "phase": "B",
+      "total": "39818601",
+      "debt": "3981860",
+      "lpPairs": "16723812",
+      "stabilityPool": "11149208",
+      "eco": "7963720"
+    },
+    {
+      "week": 114,
+      "phase": "B",
+      "total": "39578389",
+      "debt": "3957838",
+      "lpPairs": "16622923",
+      "stabilityPool": "11081949",
+      "eco": "7915677"
+    },
+    {
+      "week": 115,
+      "phase": "B",
+      "total": "39338177",
+      "debt": "3933817",
+      "lpPairs": "16522034",
+      "stabilityPool": "11014689",
+      "eco": "7867635"
+    },
+    {
+      "week": 116,
+      "phase": "B",
+      "total": "39097966",
+      "debt": "3909796",
+      "lpPairs": "16421145",
+      "stabilityPool": "10947430",
+      "eco": "7819593"
+    },
+    {
+      "week": 117,
+      "phase": "B",
+      "total": "38857754",
+      "debt": "3885775",
+      "lpPairs": "16320256",
+      "stabilityPool": "10880171",
+      "eco": "7771550"
+    },
+    {
+      "week": 118,
+      "phase": "B",
+      "total": "38617542",
+      "debt": "3861754",
+      "lpPairs": "16219367",
+      "stabilityPool": "10812911",
+      "eco": "7723508"
+    },
+    {
+      "week": 119,
+      "phase": "B",
+      "total": "38377330",
+      "debt": "3837733",
+      "lpPairs": "16118478",
+      "stabilityPool": "10745652",
+      "eco": "7675466"
+    },
+    {
+      "week": 120,
+      "phase": "B",
+      "total": "38137118",
+      "debt": "3813711",
+      "lpPairs": "16017589",
+      "stabilityPool": "10678393",
+      "eco": "7627423"
+    },
+    {
+      "week": 121,
+      "phase": "B",
+      "total": "37896906",
+      "debt": "3789690",
+      "lpPairs": "15916700",
+      "stabilityPool": "10611133",
+      "eco": "7579381"
+    },
+    {
+      "week": 122,
+      "phase": "B",
+      "total": "37656694",
+      "debt": "3765669",
+      "lpPairs": "15815811",
+      "stabilityPool": "10543874",
+      "eco": "7531338"
+    },
+    {
+      "week": 123,
+      "phase": "B",
+      "total": "37416483",
+      "debt": "3741648",
+      "lpPairs": "15714922",
+      "stabilityPool": "10476615",
+      "eco": "7483296"
+    },
+    {
+      "week": 124,
+      "phase": "B",
+      "total": "37176271",
+      "debt": "3717627",
+      "lpPairs": "15614033",
+      "stabilityPool": "10409355",
+      "eco": "7435254"
+    },
+    {
+      "week": 125,
+      "phase": "B",
+      "total": "36936059",
+      "debt": "3693605",
+      "lpPairs": "15513144",
+      "stabilityPool": "10342096",
+      "eco": "7387211"
+    },
+    {
+      "week": 126,
+      "phase": "B",
+      "total": "36695847",
+      "debt": "3669584",
+      "lpPairs": "15412255",
+      "stabilityPool": "10274837",
+      "eco": "7339169"
+    },
+    {
+      "week": 127,
+      "phase": "B",
+      "total": "36455635",
+      "debt": "3645563",
+      "lpPairs": "15311366",
+      "stabilityPool": "10207577",
+      "eco": "7291127"
+    },
+    {
+      "week": 128,
+      "phase": "B",
+      "total": "36215423",
+      "debt": "3621542",
+      "lpPairs": "15210477",
+      "stabilityPool": "10140318",
+      "eco": "7243084"
+    },
+    {
+      "week": 129,
+      "phase": "B",
+      "total": "35975211",
+      "debt": "3597521",
+      "lpPairs": "15109588",
+      "stabilityPool": "10073059",
+      "eco": "7195042"
+    },
+    {
+      "week": 130,
+      "phase": "B",
+      "total": "35735000",
+      "debt": "3573500",
+      "lpPairs": "15008700",
+      "stabilityPool": "10005800",
+      "eco": "7147000"
+    },
+    {
+      "week": 131,
+      "phase": "B",
+      "total": "35494788",
+      "debt": "3549478",
+      "lpPairs": "14907811",
+      "stabilityPool": "9938540",
+      "eco": "7098957"
+    },
+    {
+      "week": 132,
+      "phase": "B",
+      "total": "35254576",
+      "debt": "3525457",
+      "lpPairs": "14806922",
+      "stabilityPool": "9871281",
+      "eco": "7050915"
+    },
+    {
+      "week": 133,
+      "phase": "B",
+      "total": "35014364",
+      "debt": "3501436",
+      "lpPairs": "14706033",
+      "stabilityPool": "9804022",
+      "eco": "7002872"
+    },
+    {
+      "week": 134,
+      "phase": "B",
+      "total": "34774152",
+      "debt": "3477415",
+      "lpPairs": "14605144",
+      "stabilityPool": "9736762",
+      "eco": "6954830"
+    },
+    {
+      "week": 135,
+      "phase": "B",
+      "total": "34533940",
+      "debt": "3453394",
+      "lpPairs": "14504255",
+      "stabilityPool": "9669503",
+      "eco": "6906788"
+    },
+    {
+      "week": 136,
+      "phase": "B",
+      "total": "34293728",
+      "debt": "3429372",
+      "lpPairs": "14403366",
+      "stabilityPool": "9602244",
+      "eco": "6858745"
+    },
+    {
+      "week": 137,
+      "phase": "B",
+      "total": "34053516",
+      "debt": "3405351",
+      "lpPairs": "14302477",
+      "stabilityPool": "9534984",
+      "eco": "6810703"
+    },
+    {
+      "week": 138,
+      "phase": "B",
+      "total": "33813305",
+      "debt": "3381330",
+      "lpPairs": "14201588",
+      "stabilityPool": "9467725",
+      "eco": "6762661"
+    },
+    {
+      "week": 139,
+      "phase": "B",
+      "total": "33573093",
+      "debt": "3357309",
+      "lpPairs": "14100699",
+      "stabilityPool": "9400466",
+      "eco": "6714618"
+    },
+    {
+      "week": 140,
+      "phase": "B",
+      "total": "33332881",
+      "debt": "3333288",
+      "lpPairs": "13999810",
+      "stabilityPool": "9333206",
+      "eco": "6666576"
+    },
+    {
+      "week": 141,
+      "phase": "B",
+      "total": "33092669",
+      "debt": "3309266",
+      "lpPairs": "13898921",
+      "stabilityPool": "9265947",
+      "eco": "6618533"
+    },
+    {
+      "week": 142,
+      "phase": "B",
+      "total": "32852457",
+      "debt": "3285245",
+      "lpPairs": "13798032",
+      "stabilityPool": "9198688",
+      "eco": "6570491"
+    },
+    {
+      "week": 143,
+      "phase": "B",
+      "total": "32612245",
+      "debt": "3261224",
+      "lpPairs": "13697143",
+      "stabilityPool": "9131428",
+      "eco": "6522449"
+    },
+    {
+      "week": 144,
+      "phase": "B",
+      "total": "32372033",
+      "debt": "3237203",
+      "lpPairs": "13596254",
+      "stabilityPool": "9064169",
+      "eco": "6474406"
+    },
+    {
+      "week": 145,
+      "phase": "B",
+      "total": "32131822",
+      "debt": "3213182",
+      "lpPairs": "13495365",
+      "stabilityPool": "8996910",
+      "eco": "6426364"
+    },
+    {
+      "week": 146,
+      "phase": "B",
+      "total": "31891610",
+      "debt": "3189161",
+      "lpPairs": "13394476",
+      "stabilityPool": "8929650",
+      "eco": "6378322"
+    },
+    {
+      "week": 147,
+      "phase": "B",
+      "total": "31651398",
+      "debt": "3165139",
+      "lpPairs": "13293587",
+      "stabilityPool": "8862391",
+      "eco": "6330279"
+    },
+    {
+      "week": 148,
+      "phase": "B",
+      "total": "31411186",
+      "debt": "3141118",
+      "lpPairs": "13192698",
+      "stabilityPool": "8795132",
+      "eco": "6282237"
+    },
+    {
+      "week": 149,
+      "phase": "B",
+      "total": "31170974",
+      "debt": "3117097",
+      "lpPairs": "13091809",
+      "stabilityPool": "8727872",
+      "eco": "6234194"
+    },
+    {
+      "week": 150,
+      "phase": "B",
+      "total": "30930762",
+      "debt": "3093076",
+      "lpPairs": "12990920",
+      "stabilityPool": "8660613",
+      "eco": "6186152"
+    },
+    {
+      "week": 151,
+      "phase": "B",
+      "total": "30690550",
+      "debt": "3069055",
+      "lpPairs": "12890031",
+      "stabilityPool": "8593354",
+      "eco": "6138110"
+    },
+    {
+      "week": 152,
+      "phase": "B",
+      "total": "30450338",
+      "debt": "3045033",
+      "lpPairs": "12789142",
+      "stabilityPool": "8526094",
+      "eco": "6090067"
+    },
+    {
+      "week": 153,
+      "phase": "B",
+      "total": "30210127",
+      "debt": "3021012",
+      "lpPairs": "12688253",
+      "stabilityPool": "8458835",
+      "eco": "6042025"
+    },
+    {
+      "week": 154,
+      "phase": "B",
+      "total": "29969915",
+      "debt": "2996991",
+      "lpPairs": "12587364",
+      "stabilityPool": "8391576",
+      "eco": "5993983"
+    },
+    {
+      "week": 155,
+      "phase": "B",
+      "total": "29729703",
+      "debt": "2972970",
+      "lpPairs": "12486475",
+      "stabilityPool": "8324316",
+      "eco": "5945940"
+    },
+    {
+      "week": 156,
+      "phase": "B",
+      "total": "29489491",
+      "debt": "2948949",
+      "lpPairs": "12385586",
+      "stabilityPool": "8257057",
+      "eco": "5897898"
+    },
+    {
+      "week": 157,
+      "phase": "B",
+      "total": "29249279",
+      "debt": "2924927",
+      "lpPairs": "12284697",
+      "stabilityPool": "8189798",
+      "eco": "5849855"
+    },
+    {
+      "week": 158,
+      "phase": "B",
+      "total": "29009067",
+      "debt": "2900906",
+      "lpPairs": "12183808",
+      "stabilityPool": "8122538",
+      "eco": "5801813"
+    },
+    {
+      "week": 159,
+      "phase": "B",
+      "total": "28768855",
+      "debt": "2876885",
+      "lpPairs": "12082919",
+      "stabilityPool": "8055279",
+      "eco": "5753771"
+    },
+    {
+      "week": 160,
+      "phase": "B",
+      "total": "28528644",
+      "debt": "2852864",
+      "lpPairs": "11982030",
+      "stabilityPool": "7988020",
+      "eco": "5705728"
+    },
+    {
+      "week": 161,
+      "phase": "B",
+      "total": "28288432",
+      "debt": "2828843",
+      "lpPairs": "11881141",
+      "stabilityPool": "7920761",
+      "eco": "5657686"
+    },
+    {
+      "week": 162,
+      "phase": "B",
+      "total": "28048220",
+      "debt": "2804822",
+      "lpPairs": "11780252",
+      "stabilityPool": "7853501",
+      "eco": "5609644"
+    },
+    {
+      "week": 163,
+      "phase": "B",
+      "total": "27808008",
+      "debt": "2780800",
+      "lpPairs": "11679363",
+      "stabilityPool": "7786242",
+      "eco": "5561601"
+    },
+    {
+      "week": 164,
+      "phase": "B",
+      "total": "27567796",
+      "debt": "2756779",
+      "lpPairs": "11578474",
+      "stabilityPool": "7718983",
+      "eco": "5513559"
+    },
+    {
+      "week": 165,
+      "phase": "B",
+      "total": "27327584",
+      "debt": "2732758",
+      "lpPairs": "11477585",
+      "stabilityPool": "7651723",
+      "eco": "5465516"
+    },
+    {
+      "week": 166,
+      "phase": "B",
+      "total": "27087372",
+      "debt": "2708737",
+      "lpPairs": "11376696",
+      "stabilityPool": "7584464",
+      "eco": "5417474"
+    },
+    {
+      "week": 167,
+      "phase": "B",
+      "total": "26847161",
+      "debt": "2684716",
+      "lpPairs": "11275807",
+      "stabilityPool": "7517205",
+      "eco": "5369432"
+    },
+    {
+      "week": 168,
+      "phase": "B",
+      "total": "26606949",
+      "debt": "2660694",
+      "lpPairs": "11174918",
+      "stabilityPool": "7449945",
+      "eco": "5321389"
+    },
+    {
+      "week": 169,
+      "phase": "B",
+      "total": "26366737",
+      "debt": "2636673",
+      "lpPairs": "11074029",
+      "stabilityPool": "7382686",
+      "eco": "5273347"
+    },
+    {
+      "week": 170,
+      "phase": "B",
+      "total": "26126525",
+      "debt": "2612652",
+      "lpPairs": "10973140",
+      "stabilityPool": "7315427",
+      "eco": "5225305"
+    },
+    {
+      "week": 171,
+      "phase": "B",
+      "total": "25886313",
+      "debt": "2588631",
+      "lpPairs": "10872251",
+      "stabilityPool": "7248167",
+      "eco": "5177262"
+    },
+    {
+      "week": 172,
+      "phase": "B",
+      "total": "25646101",
+      "debt": "2564610",
+      "lpPairs": "10771362",
+      "stabilityPool": "7180908",
+      "eco": "5129220"
+    },
+    {
+      "week": 173,
+      "phase": "B",
+      "total": "25405889",
+      "debt": "2540588",
+      "lpPairs": "10670473",
+      "stabilityPool": "7113649",
+      "eco": "5081177"
+    },
+    {
+      "week": 174,
+      "phase": "B",
+      "total": "25165677",
+      "debt": "2516567",
+      "lpPairs": "10569584",
+      "stabilityPool": "7046389",
+      "eco": "5033135"
+    },
+    {
+      "week": 175,
+      "phase": "B",
+      "total": "24925466",
+      "debt": "2492546",
+      "lpPairs": "10468695",
+      "stabilityPool": "6979130",
+      "eco": "4985093"
+    },
+    {
+      "week": 176,
+      "phase": "B",
+      "total": "24685254",
+      "debt": "2468525",
+      "lpPairs": "10367806",
+      "stabilityPool": "6911871",
+      "eco": "4937050"
+    },
+    {
+      "week": 177,
+      "phase": "B",
+      "total": "24445042",
+      "debt": "2444504",
+      "lpPairs": "10266917",
+      "stabilityPool": "6844611",
+      "eco": "4889008"
+    },
+    {
+      "week": 178,
+      "phase": "B",
+      "total": "24204830",
+      "debt": "2420483",
+      "lpPairs": "10166028",
+      "stabilityPool": "6777352",
+      "eco": "4840966"
+    },
+    {
+      "week": 179,
+      "phase": "B",
+      "total": "23964618",
+      "debt": "2396461",
+      "lpPairs": "10065139",
+      "stabilityPool": "6710093",
+      "eco": "4792923"
+    },
+    {
+      "week": 180,
+      "phase": "B",
+      "total": "23724406",
+      "debt": "2372440",
+      "lpPairs": "9964250",
+      "stabilityPool": "6642833",
+      "eco": "4744881"
+    },
+    {
+      "week": 181,
+      "phase": "B",
+      "total": "23484194",
+      "debt": "2348419",
+      "lpPairs": "9863361",
+      "stabilityPool": "6575574",
+      "eco": "4696838"
+    },
+    {
+      "week": 182,
+      "phase": "B",
+      "total": "23243983",
+      "debt": "2324398",
+      "lpPairs": "9762472",
+      "stabilityPool": "6508315",
+      "eco": "4648796"
+    },
+    {
+      "week": 183,
+      "phase": "B",
+      "total": "23003771",
+      "debt": "2300377",
+      "lpPairs": "9661583",
+      "stabilityPool": "6441055",
+      "eco": "4600754"
+    },
+    {
+      "week": 184,
+      "phase": "B",
+      "total": "22763559",
+      "debt": "2276355",
+      "lpPairs": "9560694",
+      "stabilityPool": "6373796",
+      "eco": "4552711"
+    },
+    {
+      "week": 185,
+      "phase": "B",
+      "total": "22523347",
+      "debt": "2252334",
+      "lpPairs": "9459805",
+      "stabilityPool": "6306537",
+      "eco": "4504669"
+    },
+    {
+      "week": 186,
+      "phase": "B",
+      "total": "22283135",
+      "debt": "2228313",
+      "lpPairs": "9358916",
+      "stabilityPool": "6239277",
+      "eco": "4456627"
+    },
+    {
+      "week": 187,
+      "phase": "B",
+      "total": "22042923",
+      "debt": "2204292",
+      "lpPairs": "9258027",
+      "stabilityPool": "6172018",
+      "eco": "4408584"
+    },
+    {
+      "week": 188,
+      "phase": "B",
+      "total": "21802711",
+      "debt": "2180271",
+      "lpPairs": "9157138",
+      "stabilityPool": "6104759",
+      "eco": "4360542"
+    },
+    {
+      "week": 189,
+      "phase": "B",
+      "total": "21562500",
+      "debt": "2156250",
+      "lpPairs": "9056250",
+      "stabilityPool": "6037500",
+      "eco": "4312500"
+    },
+    {
+      "week": 190,
+      "phase": "B",
+      "total": "21322288",
+      "debt": "2132228",
+      "lpPairs": "8955361",
+      "stabilityPool": "5970240",
+      "eco": "4264457"
+    },
+    {
+      "week": 191,
+      "phase": "B",
+      "total": "21082076",
+      "debt": "2108207",
+      "lpPairs": "8854472",
+      "stabilityPool": "5902981",
+      "eco": "4216415"
+    },
+    {
+      "week": 192,
+      "phase": "B",
+      "total": "20841864",
+      "debt": "2084186",
+      "lpPairs": "8753583",
+      "stabilityPool": "5835722",
+      "eco": "4168372"
+    },
+    {
+      "week": 193,
+      "phase": "B",
+      "total": "20601652",
+      "debt": "2060165",
+      "lpPairs": "8652694",
+      "stabilityPool": "5768462",
+      "eco": "4120330"
+    },
+    {
+      "week": 194,
+      "phase": "B",
+      "total": "20361440",
+      "debt": "2036144",
+      "lpPairs": "8551805",
+      "stabilityPool": "5701203",
+      "eco": "4072288"
+    },
+    {
+      "week": 195,
+      "phase": "B",
+      "total": "20121228",
+      "debt": "2012122",
+      "lpPairs": "8450916",
+      "stabilityPool": "5633944",
+      "eco": "4024245"
+    },
+    {
+      "week": 196,
+      "phase": "B",
+      "total": "19881016",
+      "debt": "1988101",
+      "lpPairs": "8350027",
+      "stabilityPool": "5566684",
+      "eco": "3976203"
+    },
+    {
+      "week": 197,
+      "phase": "B",
+      "total": "19640805",
+      "debt": "1964080",
+      "lpPairs": "8249138",
+      "stabilityPool": "5499425",
+      "eco": "3928161"
+    },
+    {
+      "week": 198,
+      "phase": "B",
+      "total": "19400593",
+      "debt": "1940059",
+      "lpPairs": "8148249",
+      "stabilityPool": "5432166",
+      "eco": "3880118"
+    },
+    {
+      "week": 199,
+      "phase": "B",
+      "total": "19160381",
+      "debt": "1916038",
+      "lpPairs": "8047360",
+      "stabilityPool": "5364906",
+      "eco": "3832076"
+    },
+    {
+      "week": 200,
+      "phase": "B",
+      "total": "18920169",
+      "debt": "1892016",
+      "lpPairs": "7946471",
+      "stabilityPool": "5297647",
+      "eco": "3784033"
+    },
+    {
+      "week": 201,
+      "phase": "B",
+      "total": "18679957",
+      "debt": "1867995",
+      "lpPairs": "7845582",
+      "stabilityPool": "5230388",
+      "eco": "3735991"
+    },
+    {
+      "week": 202,
+      "phase": "B",
+      "total": "18439745",
+      "debt": "1843974",
+      "lpPairs": "7744693",
+      "stabilityPool": "5163128",
+      "eco": "3687949"
+    },
+    {
+      "week": 203,
+      "phase": "B",
+      "total": "18199533",
+      "debt": "1819953",
+      "lpPairs": "7643804",
+      "stabilityPool": "5095869",
+      "eco": "3639906"
+    },
+    {
+      "week": 204,
+      "phase": "B",
+      "total": "17959322",
+      "debt": "1795932",
+      "lpPairs": "7542915",
+      "stabilityPool": "5028610",
+      "eco": "3591864"
+    },
+    {
+      "week": 205,
+      "phase": "B",
+      "total": "17719110",
+      "debt": "1771911",
+      "lpPairs": "7442026",
+      "stabilityPool": "4961350",
+      "eco": "3543822"
+    },
+    {
+      "week": 206,
+      "phase": "B",
+      "total": "17478898",
+      "debt": "1747889",
+      "lpPairs": "7341137",
+      "stabilityPool": "4894091",
+      "eco": "3495779"
+    },
+    {
+      "week": 207,
+      "phase": "B",
+      "total": "17238686",
+      "debt": "1723868",
+      "lpPairs": "7240248",
+      "stabilityPool": "4826832",
+      "eco": "3447737"
+    },
+    {
+      "week": 208,
+      "phase": "B",
+      "total": "16998474",
+      "debt": "1699847",
+      "lpPairs": "7139359",
+      "stabilityPool": "4759572",
+      "eco": "3399694"
+    },
+    {
+      "week": 209,
+      "phase": "B",
+      "total": "16758262",
+      "debt": "1675826",
+      "lpPairs": "7038470",
+      "stabilityPool": "4692313",
+      "eco": "3351652"
+    },
+    {
+      "week": 210,
+      "phase": "B",
+      "total": "16518050",
+      "debt": "1651805",
+      "lpPairs": "6937581",
+      "stabilityPool": "4625054",
+      "eco": "3303610"
+    },
+    {
+      "week": 211,
+      "phase": "B",
+      "total": "16277838",
+      "debt": "1627783",
+      "lpPairs": "6836692",
+      "stabilityPool": "4557794",
+      "eco": "3255567"
+    },
+    {
+      "week": 212,
+      "phase": "B",
+      "total": "16037627",
+      "debt": "1603762",
+      "lpPairs": "6735803",
+      "stabilityPool": "4490535",
+      "eco": "3207525"
+    },
+    {
+      "week": 213,
+      "phase": "B",
+      "total": "15797415",
+      "debt": "1579741",
+      "lpPairs": "6634914",
+      "stabilityPool": "4423276",
+      "eco": "3159483"
+    },
+    {
+      "week": 214,
+      "phase": "B",
+      "total": "15557203",
+      "debt": "1555720",
+      "lpPairs": "6534025",
+      "stabilityPool": "4356016",
+      "eco": "3111440"
+    },
+    {
+      "week": 215,
+      "phase": "B",
+      "total": "15316991",
+      "debt": "1531699",
+      "lpPairs": "6433136",
+      "stabilityPool": "4288757",
+      "eco": "3063398"
+    },
+    {
+      "week": 216,
+      "phase": "B",
+      "total": "15076779",
+      "debt": "1507677",
+      "lpPairs": "6332247",
+      "stabilityPool": "4221498",
+      "eco": "3015355"
+    },
+    {
+      "week": 217,
+      "phase": "B",
+      "total": "14836567",
+      "debt": "1483656",
+      "lpPairs": "6231358",
+      "stabilityPool": "4154238",
+      "eco": "2967313"
+    },
+    {
+      "week": 218,
+      "phase": "B",
+      "total": "14596355",
+      "debt": "1459635",
+      "lpPairs": "6130469",
+      "stabilityPool": "4086979",
+      "eco": "2919271"
+    },
+    {
+      "week": 219,
+      "phase": "B",
+      "total": "14356144",
+      "debt": "1435614",
+      "lpPairs": "6029580",
+      "stabilityPool": "4019720",
+      "eco": "2871228"
+    },
+    {
+      "week": 220,
+      "phase": "B",
+      "total": "14115932",
+      "debt": "1411593",
+      "lpPairs": "5928691",
+      "stabilityPool": "3952461",
+      "eco": "2823186"
+    },
+    {
+      "week": 221,
+      "phase": "B",
+      "total": "13875720",
+      "debt": "1387572",
+      "lpPairs": "5827802",
+      "stabilityPool": "3885201",
+      "eco": "2775144"
+    },
+    {
+      "week": 222,
+      "phase": "B",
+      "total": "13635508",
+      "debt": "1363550",
+      "lpPairs": "5726913",
+      "stabilityPool": "3817942",
+      "eco": "2727101"
+    },
+    {
+      "week": 223,
+      "phase": "B",
+      "total": "13395296",
+      "debt": "1339529",
+      "lpPairs": "5626024",
+      "stabilityPool": "3750683",
+      "eco": "2679059"
+    },
+    {
+      "week": 224,
+      "phase": "B",
+      "total": "13155084",
+      "debt": "1315508",
+      "lpPairs": "5525135",
+      "stabilityPool": "3683423",
+      "eco": "2631016"
+    },
+    {
+      "week": 225,
+      "phase": "B",
+      "total": "12914872",
+      "debt": "1291487",
+      "lpPairs": "5424246",
+      "stabilityPool": "3616164",
+      "eco": "2582974"
+    },
+    {
+      "week": 226,
+      "phase": "B",
+      "total": "12674661",
+      "debt": "1267466",
+      "lpPairs": "5323357",
+      "stabilityPool": "3548905",
+      "eco": "2534932"
+    },
+    {
+      "week": 227,
+      "phase": "B",
+      "total": "12434449",
+      "debt": "1243444",
+      "lpPairs": "5222468",
+      "stabilityPool": "3481645",
+      "eco": "2486889"
+    },
+    {
+      "week": 228,
+      "phase": "B",
+      "total": "12194237",
+      "debt": "1219423",
+      "lpPairs": "5121579",
+      "stabilityPool": "3414386",
+      "eco": "2438847"
+    },
+    {
+      "week": 229,
+      "phase": "B",
+      "total": "11954025",
+      "debt": "1195402",
+      "lpPairs": "5020690",
+      "stabilityPool": "3347127",
+      "eco": "2390805"
+    },
+    {
+      "week": 230,
+      "phase": "B",
+      "total": "11713813",
+      "debt": "1171381",
+      "lpPairs": "4919801",
+      "stabilityPool": "3279867",
+      "eco": "2342762"
+    },
+    {
+      "week": 231,
+      "phase": "B",
+      "total": "11473601",
+      "debt": "1147360",
+      "lpPairs": "4818912",
+      "stabilityPool": "3212608",
+      "eco": "2294720"
+    },
+    {
+      "week": 232,
+      "phase": "B",
+      "total": "11233389",
+      "debt": "1123338",
+      "lpPairs": "4718023",
+      "stabilityPool": "3145349",
+      "eco": "2246677"
+    },
+    {
+      "week": 233,
+      "phase": "B",
+      "total": "10993177",
+      "debt": "1099317",
+      "lpPairs": "4617134",
+      "stabilityPool": "3078089",
+      "eco": "2198635"
+    },
+    {
+      "week": 234,
+      "phase": "B",
+      "total": "10752966",
+      "debt": "1075296",
+      "lpPairs": "4516245",
+      "stabilityPool": "3010830",
+      "eco": "2150593"
+    },
+    {
+      "week": 235,
+      "phase": "B",
+      "total": "10512754",
+      "debt": "1051275",
+      "lpPairs": "4415356",
+      "stabilityPool": "2943571",
+      "eco": "2102550"
+    },
+    {
+      "week": 236,
+      "phase": "B",
+      "total": "10272542",
+      "debt": "1027254",
+      "lpPairs": "4314467",
+      "stabilityPool": "2876311",
+      "eco": "2054508"
+    },
+    {
+      "week": 237,
+      "phase": "B",
+      "total": "10032330",
+      "debt": "1003233",
+      "lpPairs": "4213578",
+      "stabilityPool": "2809052",
+      "eco": "2006466"
+    },
+    {
+      "week": 238,
+      "phase": "B",
+      "total": "9792118",
+      "debt": "979211",
+      "lpPairs": "4112689",
+      "stabilityPool": "2741793",
+      "eco": "1958423"
+    },
+    {
+      "week": 239,
+      "phase": "B",
+      "total": "9551906",
+      "debt": "955190",
+      "lpPairs": "4011800",
+      "stabilityPool": "2674533",
+      "eco": "1910381"
+    },
+    {
+      "week": 240,
+      "phase": "B",
+      "total": "9311694",
+      "debt": "931169",
+      "lpPairs": "3910911",
+      "stabilityPool": "2607274",
+      "eco": "1862338"
+    },
+    {
+      "week": 241,
+      "phase": "B",
+      "total": "9071483",
+      "debt": "907148",
+      "lpPairs": "3810022",
+      "stabilityPool": "2540015",
+      "eco": "1814296"
+    },
+    {
+      "week": 242,
+      "phase": "B",
+      "total": "8831271",
+      "debt": "883127",
+      "lpPairs": "3709133",
+      "stabilityPool": "2472755",
+      "eco": "1766254"
+    },
+    {
+      "week": 243,
+      "phase": "B",
+      "total": "8591059",
+      "debt": "859105",
+      "lpPairs": "3608244",
+      "stabilityPool": "2405496",
+      "eco": "1718211"
+    },
+    {
+      "week": 244,
+      "phase": "B",
+      "total": "8350847",
+      "debt": "835084",
+      "lpPairs": "3507355",
+      "stabilityPool": "2338237",
+      "eco": "1670169"
+    },
+    {
+      "week": 245,
+      "phase": "B",
+      "total": "8110635",
+      "debt": "811063",
+      "lpPairs": "3406466",
+      "stabilityPool": "2270977",
+      "eco": "1622127"
+    },
+    {
+      "week": 246,
+      "phase": "B",
+      "total": "7870423",
+      "debt": "787042",
+      "lpPairs": "3305577",
+      "stabilityPool": "2203718",
+      "eco": "1574084"
+    },
+    {
+      "week": 247,
+      "phase": "B",
+      "total": "7630211",
+      "debt": "763021",
+      "lpPairs": "3204688",
+      "stabilityPool": "2136459",
+      "eco": "1526042"
+    },
+    {
+      "week": 248,
+      "phase": "B",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 249,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 250,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 251,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 252,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 253,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 254,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 255,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 256,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 257,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 258,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 259,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 260,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 261,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 262,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 263,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 264,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 265,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 266,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 267,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 268,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 269,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 270,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 271,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 272,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 273,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 274,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 275,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 276,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 277,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 278,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 279,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 280,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 281,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 282,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 283,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 284,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 285,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 286,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 287,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 288,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 289,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 290,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 291,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 292,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 293,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 294,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 295,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 296,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 297,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 298,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 299,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 300,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 301,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 302,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 303,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 304,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 305,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 306,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 307,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 308,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 309,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 310,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 311,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 312,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 313,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 314,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 315,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 316,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 317,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 318,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 319,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 320,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 321,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 322,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 323,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 324,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 325,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 326,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 327,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 328,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 329,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 330,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 331,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 332,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 333,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 334,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 335,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 336,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 337,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 338,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 339,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 340,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 341,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 342,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 343,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 344,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 345,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 346,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 347,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 348,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 349,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 350,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 351,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    },
+    {
+      "week": 352,
+      "phase": "C",
+      "total": "7390000",
+      "debt": "739000",
+      "lpPairs": "3103800",
+      "stabilityPool": "2069200",
+      "eco": "1478000"
+    }
+  ],
+  "phaseSummaries": {
+    "phaseA": {
+      "weeks": 12,
+      "weekRange": "1-12",
+      "totalEmission": "768960000",
+      "debt": "76896000",
+      "lpPairs": "322963200",
+      "stabilityPool": "215308800",
+      "eco": "153792000"
+    },
+    "phaseB": {
+      "weeks": 236,
+      "weekRange": "13-248",
+      "totalEmission": "8405114999",
+      "debt": "840511499",
+      "lpPairs": "3530148300",
+      "stabilityPool": "2353432199",
+      "eco": "1681023000"
+    },
+    "phaseC": {
+      "weeks": 104,
+      "weekRange": "249-352",
+      "totalEmission": "768560000",
+      "debt": "76856000",
+      "lpPairs": "322795200",
+      "stabilityPool": "215196800",
+      "eco": "153712000"
+    }
+  }
+}
