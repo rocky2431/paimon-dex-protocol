@@ -586,12 +586,13 @@
         "26"
       ],
       "estimated_days": 2,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "testing",
         "integration",
         "e2e"
-      ]
+      ],
+      "startedAt": "2025-11-02T10:12:58Z"
     },
     {
       "id": "28",
