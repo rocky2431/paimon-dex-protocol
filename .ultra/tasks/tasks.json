@@ -1229,7 +1229,7 @@
       "priority": "P0",
       "dependencies": [],
       "estimated_days": 0.25,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "security",
         "critical",
@@ -1244,7 +1244,9 @@
         "test_PSM_FeeCalculation_MulDiv()",
         "test_PSM_ExtremeAmounts_NoOverflow()",
         "test_PSM_BoundaryValues()"
-      ]
+      ],
+      "completedAt": "2025-11-04",
+      "notes": "Fixed PSM fee calculation overflow using OZMath.mulDiv. All 24 tests passing. Gas increase ~5K (acceptable)."
     },
     {
       "id": "P1-001",
