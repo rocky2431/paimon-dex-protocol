@@ -114,7 +114,7 @@ export const VotingCard: React.FC = () => {
                 color="text.secondary"
                 sx={{ mt: 0.5, fontSize: '0.875rem' }}
               >
-                Allocate your voting power to direct HYD emissions
+                Allocate your voting power to direct PAIMON emissions
               </Typography>
             </Box>
 

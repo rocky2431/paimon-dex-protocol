@@ -15,7 +15,7 @@ interface MyVotingPowerProps {
  * OlympusDAO-style display of user's voting power and allocation
  *
  * Features:
- * - Total voting power (veHYD)
+ * - Total voting power (from veNFT)
  * - Allocated vs remaining power
  * - Visual progress bar
  * - Animated counters
@@ -110,7 +110,7 @@ export const MyVotingPower: React.FC<MyVotingPowerProps> = ({
           <AnimatedNumber
             value={totalValue}
             decimals={2}
-            suffix=" veHYD"
+            suffix=" vePower"
           />
         </Typography>
       </Box>

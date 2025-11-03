@@ -62,7 +62,7 @@ export const VOTING_MESSAGES = {
   INVALID_ALLOCATION: "Total allocation must be ≤ 100%",
   NO_ALLOCATION: "Please allocate voting power to at least one gauge",
   CONNECT_WALLET: "Please connect your wallet",
-  NO_VOTING_POWER: "You need veHYD to vote. Lock HYD first!",
+  NO_VOTING_POWER: "You need veNFT to vote. Lock PAIMON first!",
 };
 
 // Helper functions
