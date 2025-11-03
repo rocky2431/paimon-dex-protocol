@@ -1,0 +1,39 @@
+{
+  "name": "paimon-distribution-service",
+  "version": "1.0.0",
+  "description": "Offline snapshot and Merkle tree generation service for Paimon reward distribution",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "snapshot": "ts-node src/snapshot.ts",
+    "merkle": "ts-node src/merkle.ts",
+    "validate": "ts-node src/validate.ts",
+    "distribute": "ts-node src/distribute.ts"
+  },
+  "keywords": [
+    "defi",
+    "merkle",
+    "snapshot",
+    "reward-distribution"
+  ],
+  "author": "Paimon Protocol",
+  "license": "MIT",
+  "dependencies": {
+    "@openzeppelin/merkle-tree": "^1.0.7",
+    "ethers": "^6.11.1",
+    "dotenv": "^16.4.5",
+    "csv-writer": "^1.6.0",
+    "decimal.js": "^10.4.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.24",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

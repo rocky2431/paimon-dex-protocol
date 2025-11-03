@@ -863,14 +863,15 @@
         "39"
       ],
       "estimatedHours": 30,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "backend",
         "distribution",
         "merkle",
         "automation"
       ],
-      "phase": "P1-Core"
+      "phase": "P1-Core",
+      "startedAt": "2025-11-03T08:42:34Z"
     },
     {
       "id": "41",
