@@ -2,7 +2,12 @@
 
 /**
  * Analytics Dashboard Hook
- * Uses wagmi v2 to query on-chain data (PSM, PriceOracle)
+ * Uses wagmi v2 to query on-chain data for TVL calculation
+ *
+ * Data Sources:
+ * - USDP.totalSupply() - Total USDP in circulation (replaces deprecated PSM.totalMintedHYD)
+ * - PriceOracle.getPrice("HYD") - Current HYD/USD price
+ *
  * Auto-refreshes every 5 minutes
  */
 
@@ -18,16 +23,18 @@ import {
   calculateProtocolTVL,
   ANALYTICS_REFRESH_INTERVAL,
 } from '../constants';
+import { config } from '@/config';
 
 // ==================== Contract ABIs ====================
 
 /**
- * PSM Contract ABI (totalMintedHYD function)
+ * ERC20 Contract ABI (totalSupply function)
+ * Standard ERC20 interface for querying USDP total supply
  */
-const PSM_ABI = [
+const ERC20_ABI = [
   {
     inputs: [],
-    name: 'totalMintedHYD',
+    name: 'totalSupply',
     outputs: [{ name: '', type: 'uint256' }],
     stateMutability: 'view',
     type: 'function',
@@ -50,10 +57,10 @@ const PRICE_ORACLE_ABI = [
 // ==================== Contract Addresses ====================
 
 /**
- * PSM Contract Address (Mock for Phase 1)
- * TODO (Phase 2): Replace with actual deployed address
+ * USDP Token Contract Address
+ * Retrieved from centralized config
  */
-const PSM_ADDRESS = '0x0000000000000000000000000000000000000900' as `0x${string}`;
+const USDP_ADDRESS = config.tokenConfig.usdp.address as `0x${string}`;
 
 /**
  * PriceOracle Contract Address (Mock for Phase 1)
@@ -84,7 +91,7 @@ export interface UseAnalyticsResult {
  * Analytics Dashboard Hook
  *
  * Features:
- * - Queries PSM.totalMintedHYD() for TVL calculation
+ * - Queries USDP.totalSupply() for TVL calculation
  * - Queries PriceOracle.getPrice("HYD") for current price
  * - Auto-refreshes every 5 minutes
  * - Returns aggregated analytics data
@@ -102,19 +109,19 @@ export const useAnalytics = (): UseAnalyticsResult => {
   // ==================== Contract Reads ====================
 
   /**
-   * Query PSM.totalMintedHYD()
-   * Returns total HYD minted through PSM (18 decimals)
+   * Query USDP.totalSupply()
+   * Returns total USDP in circulation (18 decimals)
    */
   const {
-    data: totalMintedHYD,
-    isLoading: isPSMLoading,
-    isError: isPSMError,
-    error: psmError,
-    refetch: refetchPSM,
+    data: totalUSDPSupply,
+    isLoading: isUSDPLoading,
+    isError: isUSDPError,
+    error: usdpError,
+    refetch: refetchUSDPSupply,
   } = useReadContract({
-    address: PSM_ADDRESS,
-    abi: PSM_ABI,
-    functionName: 'totalMintedHYD',
+    address: USDP_ADDRESS,
+    abi: ERC20_ABI,
+    functionName: 'totalSupply',
     query: {
       // Refresh every 5 minutes
       refetchInterval: ANALYTICS_REFRESH_INTERVAL,
@@ -151,19 +158,19 @@ export const useAnalytics = (): UseAnalyticsResult => {
   /**
    * Combined loading state
    */
-  const isLoading = isPSMLoading || isPriceLoading;
+  const isLoading = isUSDPLoading || isPriceLoading;
 
   /**
    * Combined error state
    */
-  const hasError = isPSMError || isPriceError;
+  const hasError = isUSDPError || isPriceError;
 
   /**
    * Combined error message
    */
   const combinedError = hasError
     ? `Failed to fetch analytics data: ${
-        psmError?.message || priceError?.message || 'Unknown error'
+        usdpError?.message || priceError?.message || 'Unknown error'
       }`
     : undefined;
 
@@ -176,11 +183,11 @@ export const useAnalytics = (): UseAnalyticsResult => {
 
   /**
    * Calculate Protocol TVL
-   * Formula: TVL = PSM minted HYD (×$1) + DEX liquidity (mock $0 for Phase 1)
+   * Formula: TVL = USDP total supply (×$1) + DEX liquidity (mock $0 for Phase 1)
    */
-  const tvl: ProtocolTVL = totalMintedHYD
+  const tvl: ProtocolTVL = totalUSDPSupply
     ? calculateProtocolTVL(
-        totalMintedHYD,
+        totalUSDPSupply,
         0n // DEX liquidity (Phase 2)
       )
     : {
@@ -217,7 +224,7 @@ export const useAnalytics = (): UseAnalyticsResult => {
    */
   const refetch = () => {
     setDashboardState(AnalyticsDashboardState.REFRESHING);
-    Promise.all([refetchPSM(), refetchPrice()]).finally(() => {
+    Promise.all([refetchUSDPSupply(), refetchPrice()]).finally(() => {
       // State will be updated by useEffect
     });
   };

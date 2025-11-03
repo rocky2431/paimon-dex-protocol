@@ -696,13 +696,15 @@
       "priority": "P0",
       "dependencies": [],
       "estimatedHours": 4,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "frontend",
         "bug-fix",
         "analytics"
       ],
-      "phase": "P0-Emergency"
+      "phase": "P0-Emergency",
+      "completedAt": "2025-11-03",
+      "notes": "Migrated analytics from PSM.totalMintedHYD() to USDP.totalSupply(). Added comprehensive 8-dimensional test coverage (8 tests, 100% pass). See commit 004df3a."
     },
     {
       "id": "34",
