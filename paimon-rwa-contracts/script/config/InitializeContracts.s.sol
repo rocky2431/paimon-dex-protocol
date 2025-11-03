@@ -6,7 +6,7 @@ import "forge-std/console.sol";
 import "../../src/core/USDP.sol";
 import "../../src/core/PAIMON.sol";
 import "../../src/core/esPaimon.sol";
-import "../../src/core/PSM.sol";
+import "../../src/core/PSMParameterized.sol";
 import "../../src/core/VotingEscrow.sol";
 import "../../src/core/USDPVault.sol";
 import "../../src/core/USDPStabilityPool.sol";

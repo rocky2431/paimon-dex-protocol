@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {PSM} from "../../../src/core/PSM.sol";
+import {PSMParameterized} from "../../../src/core/PSMParameterized.sol";
 import {USDP} from "../../../src/core/USDP.sol";
 import {MockERC20} from "../../../src/mocks/MockERC20.sol";
 
@@ -12,7 +12,7 @@ import {MockERC20} from "../../../src/mocks/MockERC20.sol";
  * @dev Handles random operations and tracks ghost variables for invariant verification
  */
 contract PSMHandler is Test {
-    PSM public psm;
+    PSMParameterized public psm;
     USDP public usdp;
     MockERC20 public usdc;
 
@@ -26,7 +26,7 @@ contract PSMHandler is Test {
     // Bounded randomness
     uint256 constant MAX_SWAP_AMOUNT = 1_000_000 * 1e6; // 1M USDC/USDP
 
-    constructor(PSM _psm, USDP _usdp, MockERC20 _usdc) {
+    constructor(PSMParameterized _psm, USDP _usdp, MockERC20 _usdc) {
         psm = _psm;
         usdp = _usdp;
         usdc = _usdc;

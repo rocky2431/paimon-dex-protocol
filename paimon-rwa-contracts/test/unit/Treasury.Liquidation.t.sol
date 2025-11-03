@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../../src/treasury/Treasury.sol";
-import "../../src/core/PSM.sol";
+import "../../src/core/PSMParameterized.sol";
 import "../../src/core/HYD.sol";
 import "../../src/oracle/RWAPriceOracle.sol";
 import "../../src/mocks/MockERC20.sol";
@@ -31,7 +31,7 @@ contract TreasuryLiquidationTest is Test {
   // ============================================================
 
   Treasury public treasury;
-  PSM public psm;
+  PSMParameterized public psm;
   RWAPriceOracle public oracle;
   MockERC20 public rwaToken;
   MockERC20 public usdcToken;

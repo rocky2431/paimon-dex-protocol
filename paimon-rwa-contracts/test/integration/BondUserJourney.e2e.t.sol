@@ -9,7 +9,7 @@ import "../../src/mocks/MockERC20.sol";
 import "../../src/mocks/MockVRFCoordinatorV2.sol";
 import "../../src/core/VotingEscrow.sol";
 import "../../src/core/HYD.sol";
-import "../../src/core/PSM.sol";
+import "../../src/core/PSMParameterized.sol";
 import "../../src/treasury/Treasury.sol";
 
 /**
@@ -25,7 +25,7 @@ contract BondUserJourneyE2ETest is Test {
     SettlementRouter public settlementRouter;
     VotingEscrow public votingEscrow;
     HYD public hyd;
-    PSM public psm;
+    PSMParameterized public psm;
     Treasury public treasury;
     MockERC20 public usdc;
     MockVRFCoordinatorV2 public vrfCoordinator;
@@ -64,7 +64,7 @@ contract BondUserJourneyE2ETest is Test {
 
         // Deploy PSM contract
         vm.prank(owner);
-        psm = new PSM(address(usdc), owner);
+        psm = new PSMParameterized(address(usdc), owner);
 
         // Deploy HYD token
         //hyd = new HYD(address(psm));

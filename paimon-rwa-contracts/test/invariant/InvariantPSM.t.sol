@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import {Test} from "forge-std/Test.sol";
 import {StdInvariant} from "forge-std/StdInvariant.sol";
 import {console} from "forge-std/console.sol";
-import {PSM} from "../../src/core/PSM.sol";
+import {PSMParameterized} from "../../src/core/PSMParameterized.sol";
 import {USDP} from "../../src/core/USDP.sol";
 import {MockERC20} from "../../src/mocks/MockERC20.sol";
 import {PSMHandler} from "./handlers/PSMHandler.sol";
@@ -26,7 +26,7 @@ import {PSMHandler} from "./handlers/PSMHandler.sol";
  * - Handler: PSMHandler (random operations)
  */
 contract InvariantPSM is StdInvariant, Test {
-    PSM public psm;
+    PSMParameterized public psm;
     USDP public usdp;
     MockERC20 public usdc;
     PSMHandler public handler;
@@ -44,7 +44,7 @@ contract InvariantPSM is StdInvariant, Test {
         usdp = new USDP();
 
         // Deploy PSM with USDP and USDC
-        psm = new PSM(address(usdp), address(usdc));
+        psm = new PSMParameterized(address(usdp), address(usdc));
 
         // Authorize PSM as USDP minter
         usdp.setAuthorizedMinter(address(psm), true);
