@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import {Math as OZMath} from "@openzeppelin/contracts/utils/math/Math.sol";
 import "../interfaces/IUSDP.sol";
 
 /**
@@ -138,23 +139,23 @@ contract PSMParameterized is ReentrancyGuard, Ownable {
         // Cache storage variables to memory (saves multiple SLOADs)
         uint256 _feeIn = feeIn;
 
-        // Calculate fee in USDC (in USDC decimals)
-        uint256 feeUSDC;
-        unchecked {
-            feeUSDC = (usdcAmount * _feeIn) / BP_DENOMINATOR;
-        }
+        // Calculate fee in USDC (in USDC decimals) using OZMath.mulDiv to prevent overflow
+        // Previously: unchecked { feeUSDC = (usdcAmount * _feeIn) / BP_DENOMINATOR }
+        // With extreme amounts (e.g., type(uint256).max), usdcAmount * _feeIn could overflow
+        // OZMath.mulDiv safely handles: (a * b) / c without intermediate overflow
+        uint256 feeUSDC = OZMath.mulDiv(usdcAmount, _feeIn, BP_DENOMINATOR);
 
-        // Calculate USDC after fee
-        uint256 usdcAfterFee;
-        unchecked {
-            usdcAfterFee = usdcAmount - feeUSDC;
-        }
+        // Calculate USDC after fee (safe subtraction, will revert on underflow)
+        uint256 usdcAfterFee = usdcAmount - feeUSDC;
 
         // Convert USDC decimals to USDP decimals dynamically
+        // Using OZMath.mulDiv for scaling to prevent overflow with extreme amounts
         if (usdcDecimals < USDP_DECIMALS) {
             // Scale up: USDC (6) → USDP (18) requires * 10^12
+            // Previously: usdpReceived = usdcAfterFee * scaleFactor
+            // With extreme amounts, this multiplication could overflow
             uint256 scaleFactor = 10 ** (USDP_DECIMALS - usdcDecimals);
-            usdpReceived = usdcAfterFee * scaleFactor;
+            usdpReceived = OZMath.mulDiv(usdcAfterFee, scaleFactor, 1);
         } else if (usdcDecimals > USDP_DECIMALS) {
             // Scale down: USDC (20) → USDP (18) requires / 10^2
             uint256 scaleFactor = 10 ** (usdcDecimals - USDP_DECIMALS);
@@ -171,10 +172,12 @@ contract PSMParameterized is ReentrancyGuard, Ownable {
         USDP.mint(msg.sender, usdpReceived);
 
         // Calculate fee in USDP decimals for event
+        // Using OZMath.mulDiv for consistency with main calculations
         uint256 feeUSDP;
         if (usdcDecimals < USDP_DECIMALS) {
             uint256 scaleFactor = 10 ** (USDP_DECIMALS - usdcDecimals);
-            feeUSDP = feeUSDC * scaleFactor;
+            // Use OZMath.mulDiv for safety, though feeUSDC is typically small
+            feeUSDP = OZMath.mulDiv(feeUSDC, scaleFactor, 1);
         } else if (usdcDecimals > USDP_DECIMALS) {
             uint256 scaleFactor = 10 ** (usdcDecimals - USDP_DECIMALS);
             feeUSDP = feeUSDC / scaleFactor;
@@ -204,21 +207,26 @@ contract PSMParameterized is ReentrancyGuard, Ownable {
     function swapUSDPForUSDC(uint256 usdpAmount) external nonReentrant returns (uint256 usdcReceived) {
         require(usdpAmount > 0, "PSM: Amount must be greater than zero");
 
-        // Calculate fee in USDP (18 decimals)
-        uint256 feeUSDP = (usdpAmount * feeOut) / BP_DENOMINATOR;
+        // Calculate fee in USDP (18 decimals) using OZMath.mulDiv to prevent overflow
+        // Previously: feeUSDP = (usdpAmount * feeOut) / BP_DENOMINATOR
+        // OZMath.mulDiv safely handles: (a * b) / c without intermediate overflow
+        uint256 feeUSDP = OZMath.mulDiv(usdpAmount, feeOut, BP_DENOMINATOR);
 
-        // Calculate USDP after fee
+        // Calculate USDP after fee (safe subtraction, will revert on underflow)
         uint256 usdpAfterFee = usdpAmount - feeUSDP;
 
         // Convert USDP decimals to USDC decimals dynamically
+        // Using OZMath.mulDiv for scaling to prevent overflow with extreme amounts
         if (usdcDecimals < USDP_DECIMALS) {
             // Scale down: USDP (18) → USDC (6) requires / 10^12
             uint256 scaleFactor = 10 ** (USDP_DECIMALS - usdcDecimals);
             usdcReceived = usdpAfterFee / scaleFactor;
         } else if (usdcDecimals > USDP_DECIMALS) {
             // Scale up: USDP (18) → USDC (20) requires * 10^2
+            // Previously: usdcReceived = usdpAfterFee * scaleFactor
+            // With extreme amounts, this multiplication could overflow
             uint256 scaleFactor = 10 ** (usdcDecimals - USDP_DECIMALS);
-            usdcReceived = usdpAfterFee * scaleFactor;
+            usdcReceived = OZMath.mulDiv(usdpAfterFee, scaleFactor, 1);
         } else {
             // Same decimals: 1:1 conversion
             usdcReceived = usdpAfterFee;
