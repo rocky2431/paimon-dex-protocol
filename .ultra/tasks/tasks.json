@@ -1167,7 +1167,7 @@
       "priority": "P0",
       "dependencies": [],
       "estimated_days": 0.75,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "security",
         "critical",
@@ -1184,7 +1184,8 @@
         "test_StabilityPool_MultiLiquidation_Balance()",
         "test_StabilityPool_AllUsersCanWithdraw()",
         "test_Vault_BurnFromPool_Permission()"
-      ]
+      ],
+      "started_at": "2025-11-03T19:39:50.729Z"
     },
     {
       "id": "P0-004",

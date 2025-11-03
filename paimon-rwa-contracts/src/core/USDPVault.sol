@@ -223,8 +223,9 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
         // Check stability pool has sufficient liquidity
         require(stabilityPool.totalDeposits() >= debtAmount, "Insufficient liquidity in pool");
 
-        // Burn USDP from liquidator
-        usdp.burnFrom(msg.sender, debtAmount);
+        // Burn USDP from stability pool (FIX: P0-003 accounting mismatch)
+        // This ensures balanceOf(pool) and _totalDeposits decrease together
+        usdp.burnFrom(address(stabilityPool), debtAmount);
 
         // Update debt
         _debts[user] -= debtAmount;
