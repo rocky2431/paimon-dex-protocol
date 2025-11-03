@@ -896,7 +896,7 @@
         "38"
       ],
       "estimatedHours": 30,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "contract",
         "stability-pool",
