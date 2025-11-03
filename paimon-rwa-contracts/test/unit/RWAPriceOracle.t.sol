@@ -562,4 +562,212 @@ contract RWAPriceOracleTest is Test {
   // Event declaration for testing
   event NAVUpdated(uint256 newNAV, uint256 timestamp);
 
+  // ============================================================
+  // P1-004: BSC/L2 NETWORK COMPATIBILITY TESTS
+  // ============================================================
+
+  /**
+   * @notice Test: BSC Mainnet (chainId 56) skips sequencer check
+   * @dev P1-004 - Compatibility dimension: BSC is L1, has no sequencer
+   */
+  function test_Oracle_BSCMainnet_SkipsSequencerCheck() public {
+    // Simulate BSC mainnet (chainId 56)
+    vm.chainId(56);
+
+    // Deploy oracle on BSC (should auto-detect L1 network)
+    vm.prank(owner);
+    RWAPriceOracle bscOracle = new RWAPriceOracle(
+      address(ethUsdFeed),
+      address(0), // No sequencer feed needed on BSC
+      trustedOracle
+    );
+
+    // Set NAV
+    vm.prank(trustedOracle);
+    bscOracle.updateNAV(INITIAL_NAV_PRICE);
+
+    // Should NOT revert even without sequencer feed
+    // (L1 networks skip sequencer check)
+    uint256 price = bscOracle.getPrice();
+    assertGt(price, 0, "Price should be available on BSC");
+  }
+
+  /**
+   * @notice Test: BSC Testnet (chainId 97) skips sequencer check
+   * @dev P1-004 - Compatibility dimension: BSC testnet is also L1
+   */
+  function test_Oracle_BSCTestnet_SkipsSequencerCheck() public {
+    // Simulate BSC testnet (chainId 97)
+    vm.chainId(97);
+
+    // Deploy oracle on BSC testnet
+    vm.prank(owner);
+    RWAPriceOracle bscTestOracle = new RWAPriceOracle(
+      address(ethUsdFeed),
+      address(0), // No sequencer feed needed on BSC testnet
+      trustedOracle
+    );
+
+    // Set NAV
+    vm.prank(trustedOracle);
+    bscTestOracle.updateNAV(INITIAL_NAV_PRICE);
+
+    // Should NOT revert
+    uint256 price = bscTestOracle.getPrice();
+    assertGt(price, 0, "Price should be available on BSC testnet");
+  }
+
+  /**
+   * @notice Test: Arbitrum (chainId 42161) enforces sequencer check
+   * @dev P1-004 - Security dimension: L2 networks must check sequencer
+   */
+  function test_Oracle_Arbitrum_EnforcesSequencerCheck() public {
+    // Simulate Arbitrum mainnet (chainId 42161)
+    vm.chainId(42161);
+
+    // Mock sequencer that is DOWN
+    MockV3Aggregator downSequencer = new MockV3Aggregator(0, 1); // 1 = down
+    downSequencer.updateRoundData(
+      1,
+      1, // answer = 1 (sequencer down)
+      block.timestamp - 100,
+      block.timestamp,
+      1
+    );
+
+    // Deploy oracle on Arbitrum (should auto-detect L2)
+    vm.prank(owner);
+    RWAPriceOracle arbOracle = new RWAPriceOracle(
+      address(ethUsdFeed),
+      address(downSequencer),
+      trustedOracle
+    );
+
+    // Set NAV
+    vm.prank(trustedOracle);
+    arbOracle.updateNAV(INITIAL_NAV_PRICE);
+
+    // Should REVERT because sequencer is down on L2
+    vm.expectRevert("Sequencer is down");
+    arbOracle.getPrice();
+  }
+
+  /**
+   * @notice Test: Optimism (chainId 10) enforces sequencer check
+   * @dev P1-004 - Security dimension: L2 networks must check sequencer
+   */
+  function test_Oracle_Optimism_EnforcesSequencerCheck() public {
+    // Simulate Optimism mainnet (chainId 10)
+    vm.chainId(10);
+
+    // Mock sequencer that recently came up (within grace period)
+    MockV3Aggregator recentSequencer = new MockV3Aggregator(0, 0); // 0 = up
+    recentSequencer.updateRoundData(
+      1,
+      0, // answer = 0 (sequencer up)
+      block.timestamp - 100, // started 100 seconds ago (< 1 hour)
+      block.timestamp,
+      1
+    );
+
+    // Deploy oracle on Optimism (should auto-detect L2)
+    vm.prank(owner);
+    RWAPriceOracle opOracle = new RWAPriceOracle(
+      address(ethUsdFeed),
+      address(recentSequencer),
+      trustedOracle
+    );
+
+    // Set NAV
+    vm.prank(trustedOracle);
+    opOracle.updateNAV(INITIAL_NAV_PRICE);
+
+    // Should REVERT because grace period not over
+    vm.expectRevert("Grace period not over");
+    opOracle.getPrice();
+  }
+
+  /**
+   * @notice Test: Chain ID auto-detection logic
+   * @dev P1-004 - Functional dimension: Verify automatic L1/L2 detection
+   */
+  function test_Oracle_ChainIdAutoDetection() public {
+    // Test BSC mainnet (56) is detected as L1
+    vm.chainId(56);
+    vm.prank(owner);
+    RWAPriceOracle bscOracle = new RWAPriceOracle(
+      address(ethUsdFeed),
+      address(0), // address(0) allowed for L1
+      trustedOracle
+    );
+    assertFalse(bscOracle.isL2Network(), "BSC mainnet should be L1");
+
+    // Test BSC testnet (97) is detected as L1
+    vm.chainId(97);
+    vm.prank(owner);
+    RWAPriceOracle bscTestOracle = new RWAPriceOracle(
+      address(ethUsdFeed),
+      address(0),
+      trustedOracle
+    );
+    assertFalse(bscTestOracle.isL2Network(), "BSC testnet should be L1");
+
+    // Test Arbitrum (42161) is detected as L2
+    vm.chainId(42161);
+    vm.prank(owner);
+    RWAPriceOracle arbOracle = new RWAPriceOracle(
+      address(ethUsdFeed),
+      address(sequencerUptimeFeed),
+      trustedOracle
+    );
+    assertTrue(arbOracle.isL2Network(), "Arbitrum should be L2");
+
+    // Test Optimism (10) is detected as L2
+    vm.chainId(10);
+    vm.prank(owner);
+    RWAPriceOracle opOracle = new RWAPriceOracle(
+      address(ethUsdFeed),
+      address(sequencerUptimeFeed),
+      trustedOracle
+    );
+    assertTrue(opOracle.isL2Network(), "Optimism should be L2");
+  }
+
+  /**
+   * @notice Test: Constructor validation for L2 networks
+   * @dev P1-004 - Exception dimension: L2 networks require sequencer feed
+   */
+  function test_RevertWhen_L2NetworkWithoutSequencerFeed() public {
+    // Simulate Arbitrum
+    vm.chainId(42161);
+
+    // Should revert when deploying on L2 without sequencer feed
+    vm.prank(owner);
+    vm.expectRevert("Invalid sequencer feed");
+    new RWAPriceOracle(
+      address(ethUsdFeed),
+      address(0), // Missing sequencer feed on L2
+      trustedOracle
+    );
+  }
+
+  /**
+   * @notice Test: Unknown chain ID defaults to L2 (safe default)
+   * @dev P1-004 - Boundary dimension: Unknown chains treated as L2 for safety
+   */
+  function test_Oracle_UnknownChainId_DefaultsToL2() public {
+    // Simulate unknown/new chain (e.g., chainId 99999)
+    vm.chainId(99999);
+
+    // Deploy oracle (should default to L2 and require sequencer check)
+    vm.prank(owner);
+    RWAPriceOracle unknownOracle = new RWAPriceOracle(
+      address(ethUsdFeed),
+      address(sequencerUptimeFeed),
+      trustedOracle
+    );
+
+    // Should default to L2 for safety
+    assertTrue(unknownOracle.isL2Network(), "Unknown chains should default to L2");
+  }
 }

@@ -1345,7 +1345,7 @@
       "priority": "P1",
       "dependencies": [],
       "estimated_days": 0.25,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "compatibility",
         "oracle",
@@ -1359,7 +1359,8 @@
         "test_Oracle_BSC_SkipSequencer()",
         "test_Oracle_Arbitrum_CheckSequencer()",
         "test_Oracle_ChainIdAutoDetect()"
-      ]
+      ],
+      "startedAt": "2025-11-03T20:18:12.329Z"
     },
     {
       "id": "P1-005",
