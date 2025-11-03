@@ -1289,7 +1289,8 @@
         "P0-002"
       ],
       "estimated_days": 0.25,
-      "status": "pending",
+      "status": "in_progress",
+      "startedAt": "2025-11-04T15:00:00Z",
       "tags": [
         "optimization",
         "emission",
