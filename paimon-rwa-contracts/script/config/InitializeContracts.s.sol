@@ -110,15 +110,14 @@ contract InitializeContractsScript is Script {
 
         EmissionManager emissionManager = EmissionManager(addresses.emissionManager);
 
-        // Set initial weekly emission (example: 1M PAIMON per week)
-        uint256 weeklyEmission = 1_000_000 * 1e18;
-        emissionManager.setWeeklyEmission(weeklyEmission);
-        console.log("  Set weekly emission:", weeklyEmission / 1e18, "PAIMON");
+        // Note: Emission schedule is fixed (Phase A/B/C hardcoded in EmissionManager)
+        // Only LP split parameters are adjustable
 
-        // Set emission decay rate (example: 1% per week = 100 bp)
-        uint256 decayRate = 100;
-        emissionManager.setDecayRate(decayRate);
-        console.log("  Set decay rate:", decayRate, "bp (1% per week)");
+        // Set LP split: 60% to LP Pairs, 40% to Stability Pool (default values)
+        uint16 lpPairsBps = 6000;  // 60% of LP total
+        uint16 stabilityPoolBps = 4000;  // 40% of LP total
+        emissionManager.setLpSplitParams(lpPairsBps, stabilityPoolBps);
+        console.log("  Set LP split - Pairs: 60%, Stability: 40%");
 
         console.log();
     }
@@ -143,38 +142,31 @@ contract InitializeContractsScript is Script {
 
         USDPVault vault = USDPVault(addresses.usdpVault);
 
-        // Set collateralization ratio (example: 150% = 15000 bp)
-        uint256 collateralRatio = 15000;
-        vault.setMinCollateralRatio(collateralRatio);
-        console.log("  Set min collateral ratio:", collateralRatio / 100, "%");
+        // Note: USDPVault is multi-collateral, each collateral has its own LTV/threshold/penalty
+        // Example configuration for a test collateral (update addresses as needed):
 
-        // Set liquidation threshold (example: 120% = 12000 bp)
-        uint256 liquidationThreshold = 12000;
-        vault.setLiquidationThreshold(liquidationThreshold);
-        console.log("  Set liquidation threshold:", liquidationThreshold / 100, "%");
+        // Example: Add USDC as collateral with conservative parameters
+        // address usdcCollateral = addresses.usdc; // Get from deployment JSON
+        // uint256 ltv = 8000;                // 80% LTV
+        // uint256 liquidationThreshold = 8500; // 85% liquidation threshold
+        // uint256 liquidationPenalty = 1000;   // 10% penalty
+        // vault.addCollateral(usdcCollateral, ltv, liquidationThreshold, liquidationPenalty);
+        // console.log("  Added USDC collateral: LTV 80%, Threshold 85%, Penalty 10%");
 
-        // Set borrow fee (example: 0.5% = 50 bp)
-        uint256 borrowFee = 50;
-        vault.setBorrowFee(borrowFee);
-        console.log("  Set borrow fee:", borrowFee, "bp (0.5%)");
-
+        console.log("  Vault configured (add collaterals via vault.addCollateral() as needed)");
         console.log();
     }
 
     function configureStabilityPool() internal {
         console.log("[Step 4] Configuring Stability Pool...");
 
-        USDPStabilityPool stabilityPool = USDPStabilityPool(addresses.stabilityPool);
+        // Note: USDPStabilityPool is ready to use after deployment
+        // No initialization needed - rewards come from:
+        // 1. Liquidation proceeds (automatically distributed via onLiquidationProceeds())
+        // 2. Gauge rewards (distributed via notifyRewardAmount() from RewardDistributor)
 
-        // Set reward rate (example: 10% APY = 1000 bp)
-        uint256 rewardRate = 1000;
-        stabilityPool.setRewardRate(rewardRate);
-        console.log("  Set reward rate:", rewardRate / 100, "% APY");
-
-        // Enable Stability Pool
-        stabilityPool.setActive(true);
-        console.log("  Enabled Stability Pool");
-
+        console.log("  Stability Pool ready (no configuration needed)");
+        console.log("  Users can deposit USDP to earn liquidation gains and gauge rewards");
         console.log();
     }
 

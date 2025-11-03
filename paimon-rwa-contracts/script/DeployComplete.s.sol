@@ -321,7 +321,7 @@ contract DeployCompleteScript is Script {
         console.log("  GaugeController deployed:", address(gaugeController));
 
         // Deploy EmissionManager (needs to be deployed before RewardDistributor)
-        emissionManager = new EmissionManager(address(paimon));
+        emissionManager = new EmissionManager(); // No parameters - emission schedule is hardcoded
         console.log("  EmissionManager deployed:", address(emissionManager));
 
         // Deploy BribeMarketplace
@@ -341,7 +341,8 @@ contract DeployCompleteScript is Script {
         console.log("  BoostStaking deployed:", address(boostStaking));
 
         // Deploy NitroPool
-        nitroPool = new NitroPool(address(paimon), address(boostStaking));
+        uint256 platformFeeBps = 500; // 5% platform fee
+        nitroPool = new NitroPool(address(votingEscrow), address(treasury), platformFeeBps);
         console.log("  NitroPool deployed:", address(nitroPool));
 
         // Deploy RewardDistributor (after BoostStaking)
@@ -365,11 +366,11 @@ contract DeployCompleteScript is Script {
         console.log("  DEXFactory deployed:", address(dexFactory));
 
         // Deploy DEXRouter
-        address usdcAddress = isTestnet ? address(usdc) : getMainnetUSDCAddress();
-        dexRouter = new DEXRouter(address(dexFactory), usdcAddress);
+        dexRouter = new DEXRouter(address(dexFactory));
         console.log("  DEXRouter deployed:", address(dexRouter));
 
         // Create USDP/USDC pair
+        address usdcAddress = isTestnet ? address(usdc) : getMainnetUSDCAddress();
         dexFactory.createPair(address(usdp), usdcAddress);
         address pairAddress = dexFactory.getPair(address(usdp), usdcAddress);
         usdpUsdcPair = DEXPair(pairAddress);
@@ -389,7 +390,8 @@ contract DeployCompleteScript is Script {
         console.log("  Treasury deployed:", address(treasury));
 
         // Deploy SavingRate
-        savingRate = new SavingRate(address(usdp), address(treasury));
+        uint256 initialAnnualRate = 500; // 5% annual rate (500 bp)
+        savingRate = new SavingRate(address(usdp), initialAnnualRate);
         console.log("  SavingRate deployed:", address(savingRate));
 
         // Deploy PriceOracle
@@ -399,7 +401,8 @@ contract DeployCompleteScript is Script {
 
         // Deploy RWAPriceOracle
         address chainlinkAddress = isTestnet ? address(mockChainlinkAggregator) : address(0);
-        rwaPriceOracle = new RWAPriceOracle(chainlinkAddress, deployer);
+        address sequencerUptimeFeed = address(0); // Not needed for testnet, use real address for mainnet
+        rwaPriceOracle = new RWAPriceOracle(chainlinkAddress, sequencerUptimeFeed, deployer);
         console.log("  RWAPriceOracle deployed:", address(rwaPriceOracle));
 
         // Update DEXFactory treasury
@@ -425,8 +428,7 @@ contract DeployCompleteScript is Script {
         // Deploy USDPStabilityPool
         stabilityPool = new USDPStabilityPool(
             address(usdp),
-            address(usdpVault),
-            address(gaugeController)
+            address(usdpVault)
         );
         console.log("  USDPStabilityPool deployed:", address(stabilityPool));
 
@@ -447,9 +449,12 @@ contract DeployCompleteScript is Script {
         console.log("  ProjectRegistry deployed:", address(projectRegistry));
 
         // Deploy IssuanceController
+        address usdcAddress = isTestnet ? address(usdc) : getMainnetUSDCAddress();
         issuanceController = new IssuanceController(
             address(projectRegistry),
-            address(treasury)
+            usdcAddress,
+            address(treasury),
+            address(votingEscrow)
         );
         console.log("  IssuanceController deployed:", address(issuanceController));
 
@@ -527,9 +532,8 @@ contract DeployCompleteScript is Script {
         paimon.grantRole(MINTER_ROLE, address(emissionManager));
         console.log("  Granted PAIMON MINTER_ROLE to EmissionManager");
 
-        // Set RewardDistributor in GaugeController
-        gaugeController.setRewardDistributor(address(rewardDistributor));
-        console.log("  Set RewardDistributor in GaugeController");
+        // Note: RewardDistributor and GaugeController work independently
+        // No explicit linking needed as they both reference VotingEscrow
 
         console.log();
     }
