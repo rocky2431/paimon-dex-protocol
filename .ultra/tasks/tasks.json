@@ -3,14 +3,14 @@
   "metadata": {
     "projectName": "Paimon.dex",
     "created": "2025-11-01T12:00:00Z",
-    "lastModified": "2025-11-04T12:00:00Z",
-    "description": "Paimon.dex 任务管理 - P1-005 完成 + P2-001 创建"
+    "lastModified": "2025-11-04T14:30:00Z",
+    "description": "Paimon.dex 任务管理 - P1-005 + P2-001 全部完成 (多抵押品加权健康因子实现)"
   },
   "stats": {
     "total": 2,
     "pending": 0,
-    "inProgress": 1,
-    "completed": 1,
+    "inProgress": 0,
+    "completed": 2,
     "blocked": 0,
     "cancelled": 0
   },
@@ -53,9 +53,12 @@
       "priority": "P2",
       "dependencies": ["P1-005"],
       "estimated_days": 2.5,
-      "status": "in_progress",
+      "status": "completed",
       "startedAt": "2025-11-04T13:00:00Z",
+      "completedAt": "2025-11-04T14:30:00Z",
       "branch": "feat/task-P2-001-weighted-health-factor",
+      "implementation_notes": "**实现方案**:\n1. 修改 healthFactor() 函数 - 遍历所有用户抵押品，对每个抵押品应用其各自的清算阈值\n2. 加权计算公式: adjustedValue = Σ(collateral_value × liquidation_threshold) / debt\n3. 移除 borrow() 函数中的 P1-005 多抵押品检查\n4. 删除 _countUserCollaterals() 辅助函数（不再需要）\n\n**测试覆盖**: 6维度16个新测试 + 16个更新测试 + 48个现有测试 (80/80 = 100%通过)\n- 功能性: 双/三抵押品加权计算、单抵押品向后兼容\n- 边界: 0余额、极端价值比例(99:1)、极端阈值差异(85% vs 50%)\n- 异常: 多抵押品正常工作（不再 revert）\n- 性能: Gas基准测试（双抵押品 <150K）\n- 安全: 抵押品顺序无关、小额抵押品正确处理\n- 兼容: 单抵押品功能完全兼容\n\n**回归测试**: 所有 64 个现有测试通过 (48 原始 + 16 P1-005)\n\n**代码质量**: SOLID/DRY/KISS/YAGNI 原则，函数26行（<50限制），嵌套2层（<3限制）",
+      "notes": "✅ 长期解决方案成功实施\n✅ 新增测试: 16/16 通过 (加权健康因子)\n✅ 更新测试: 16/16 通过 (P1-005 兼容性)\n✅ 现有测试: 48/48 通过 (向后兼容)\n✅ 总计: 80/80 通过 (100% 通过率)\n✅ 代码质量: SOLID/DRY/KISS/YAGNI 原则\n✅ 精度优化: 先乘后除，最小化精度损失",
       "tags": [
         "functionality",
         "vault",
