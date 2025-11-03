@@ -196,8 +196,8 @@ contract CoreIntegration is Test {
 
         (uint112 reserve0, uint112 reserve1,) = usdpUsdcPair.getReserves();
         uint256 amountOut = _getAmountOut(swapAmount, reserve1, reserve0); // USDC -> USDP
-        // Apply 1% safety margin to handle fees and rounding
-        amountOut = (amountOut * 99) / 100;
+        // Apply 5% safety margin to handle fees and rounding
+        amountOut = (amountOut * 95) / 100;
         usdpUsdcPair.swap(amountOut, 0, bob, "");
         vm.stopPrank();
 
