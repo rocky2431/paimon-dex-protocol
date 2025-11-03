@@ -69,6 +69,15 @@ contract USDPStabilityPool is Ownable, ReentrancyGuard {
     /// @notice User's last claimed reward checkpoint: user => collateralToken => rewardPerShareCheckpoint
     mapping(address => mapping(address => uint256)) private _userRewardCheckpoint;
 
+    /// @notice Pending gauge rewards (PAIMON/esPAIMON): user => rewardToken => amount (Task 53)
+    mapping(address => mapping(address => uint256)) private _pendingGaugeRewards;
+
+    /// @notice Gauge rewards per share: rewardToken => cumulativeRewardPerShare (scaled by 1e18) (Task 53)
+    mapping(address => uint256) private _gaugeRewardPerShare;
+
+    /// @notice User's last claimed gauge reward checkpoint: user => rewardToken => rewardPerShareCheckpoint (Task 53)
+    mapping(address => mapping(address => uint256)) private _userGaugeRewardCheckpoint;
+
     // ==================== Constants ====================
 
     uint256 private constant PRECISION = 1e18;
@@ -79,6 +88,7 @@ contract USDPStabilityPool is Ownable, ReentrancyGuard {
     event Withdrawn(address indexed user, uint256 amount, uint256 shares);
     event RewardClaimed(address indexed user, address indexed token, uint256 amount);
     event LiquidationProceeds(uint256 debtOffset, address collateralToken, uint256 collateralGain);
+    event GaugeRewardsClaimed(address indexed user, address indexed token, uint256 amount);
 
     // ==================== Constructor ====================
 
@@ -272,5 +282,85 @@ contract USDPStabilityPool is Ownable, ReentrancyGuard {
         uint256 pending = pendingCollateralGain(user, collateralToken);
         _pendingCollateralGains[user][collateralToken] = pending;
         _userRewardCheckpoint[user][collateralToken] = _collateralRewardPerShare[collateralToken];
+    }
+
+    // ==================== GAUGE REWARDS INTEGRATION (TASK 53) ====================
+
+    /**
+     * @notice Distribute gauge rewards to depositors (called by RewardDistributor)
+     * @param rewardToken Reward token address (PAIMON or esPAIMON)
+     * @param amount Amount of rewards to distribute
+     * @dev Task 53.3 - Receive and distribute gauge rewards proportionally by shares
+     *
+     * Flow:
+     * 1. RewardDistributor transfers tokens to this contract
+     * 2. This function updates reward per share accumulator
+     * 3. Users claim via claimRewards()
+     *
+     * Note: Anyone can call this to distribute received tokens
+     */
+    function notifyRewardAmount(address rewardToken, uint256 amount) external {
+        require(rewardToken != address(0), "Invalid reward token");
+        require(amount > 0, "Amount must be > 0");
+
+        // Only distribute if there are depositors
+        if (_totalShares > 0) {
+            uint256 rewardPerShare = (amount * PRECISION) / _totalShares;
+            _gaugeRewardPerShare[rewardToken] += rewardPerShare;
+        }
+    }
+
+    /**
+     * @notice Claim gauge rewards (PAIMON/esPAIMON)
+     * @param rewardToken Reward token address
+     * @dev Task 53.3 - User claims gauge rewards based on their shares
+     */
+    function claimRewards(address rewardToken) external nonReentrant {
+        // Update checkpoint first
+        _updateGaugeRewardCheckpoint(msg.sender, rewardToken);
+
+        uint256 reward = _pendingGaugeRewards[msg.sender][rewardToken];
+        require(reward > 0, "No rewards to claim");
+
+        // Reset pending rewards
+        _pendingGaugeRewards[msg.sender][rewardToken] = 0;
+
+        // Transfer rewards to user
+        IERC20(rewardToken).safeTransfer(msg.sender, reward);
+
+        emit GaugeRewardsClaimed(msg.sender, rewardToken, reward);
+    }
+
+    /**
+     * @notice Get user's pending gauge rewards
+     * @param user User address
+     * @param rewardToken Reward token address
+     * @return Pending reward amount
+     */
+    function pendingGaugeRewards(address user, address rewardToken) public view returns (uint256) {
+        if (_shares[user] == 0) return _pendingGaugeRewards[user][rewardToken];
+
+        uint256 accumulatedRewardPerShare = _gaugeRewardPerShare[rewardToken];
+        uint256 userCheckpoint = _userGaugeRewardCheckpoint[user][rewardToken];
+
+        uint256 newRewards = 0;
+        if (accumulatedRewardPerShare > userCheckpoint) {
+            uint256 rewardPerShareDelta = accumulatedRewardPerShare - userCheckpoint;
+            newRewards = (_shares[user] * rewardPerShareDelta) / PRECISION;
+        }
+
+        return _pendingGaugeRewards[user][rewardToken] + newRewards;
+    }
+
+    /**
+     * @notice Update user's gauge reward checkpoint
+     * @param user User address
+     * @param rewardToken Reward token address
+     * @dev Internal function to snapshot pending gauge rewards
+     */
+    function _updateGaugeRewardCheckpoint(address user, address rewardToken) internal {
+        uint256 pending = pendingGaugeRewards(user, rewardToken);
+        _pendingGaugeRewards[user][rewardToken] = pending;
+        _userGaugeRewardCheckpoint[user][rewardToken] = _gaugeRewardPerShare[rewardToken];
     }
 }
