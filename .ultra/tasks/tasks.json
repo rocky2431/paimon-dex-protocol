@@ -917,13 +917,15 @@
         "41"
       ],
       "estimatedHours": 25,
-      "status": "in_progress",
+      "status": "completed",
       "tags": [
         "contract",
         "integration",
         "liquidation"
       ],
-      "phase": "P2-Complete"
+      "phase": "P2-Complete",
+      "completedAt": "2025-11-03T10:46:30Z",
+      "notes": "Integrated USDPVault liquidation with StabilityPool. All 85 tests pass (12 new + 48 vault + 25 pool)."
     },
     {
       "id": "43",
@@ -1023,13 +1025,14 @@
         "39"
       ],
       "estimatedHours": 8,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "backend",
         "data",
         "emission"
       ],
-      "phase": "P1-Core"
+      "phase": "P1-Core",
+      "startedAt": "2025-11-03T10:52:00+0800"
     },
     {
       "id": "48",
