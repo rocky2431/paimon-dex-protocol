@@ -56,8 +56,11 @@ describe('BoostStakingCard Component', () => {
 
       render(<BoostStakingCard stake={unlockedStake} />);
 
-      // Should show "Ready" or unstake action
-      expect(screen.getByText(/Ready|Unstake/i)).toBeInTheDocument();
+      // Should show "Ready" status chip
+      expect(screen.getByText('Ready')).toBeInTheDocument();
+
+      // Should show unlock message
+      expect(screen.getByText(/You can now unstake your PAIMON/i)).toBeInTheDocument();
     });
   });
 
