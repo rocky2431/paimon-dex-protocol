@@ -1310,7 +1310,7 @@
       "priority": "P1",
       "dependencies": [],
       "estimated_days": 0.25,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "security",
         "access-control",
@@ -1324,7 +1324,8 @@
         "test_StabilityPool_OnlyRewardDistributor()",
         "test_StabilityPool_UnauthorizedRevert()",
         "test_StabilityPool_UpdateDistributor()"
-      ]
+      ],
+      "startedAt": "2025-11-03T20:10:58.216Z"
     },
     {
       "id": "P1-004",
