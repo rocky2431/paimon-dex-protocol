@@ -1,24 +1,81 @@
 {
-  "id": "P1-005",
-  "title": "USDPVault 多抵押品支持短期修复",
-  "description": "USDPVault 当前使用第一个抵押品进行估值，多抵押品时计算不准确。短期方案：多抵押品时 revert，长期方案：加权健康因子。\n\n**问题根源**:\n- USDPVault.sol:235,321 使用 collaterals[0] 计算总价值\n- 多抵押品时估值错误\n\n**短期方案（P1）**:\n1. getTotalCollateralValue() 检查 collaterals.length\n2. 如果 >1，revert(\"Multi-collateral not supported\")\n3. 添加文档说明当前仅支持单抵押品\n\n**长期方案（P2，单独任务）**:\n1. 实现加权健康因子计算\n2. 每个抵押品单独估值并求和\n\n**验收标准**:\n- ✅ 单抵押品正常工作\n- ✅ 多抵押品操作 revert\n- ✅ 错误信息清晰",
-  "complexity": 2,
-  "priority": "P1",
-  "dependencies": [],
-  "estimated_days": 0.25,
-  "status": "in_progress",
-  "tags": [
-    "functionality",
-    "vault",
-    "multi-collateral",
-    "phase2"
-  ],
-  "relatedFiles": [
-    "paimon-rwa-contracts/src/core/USDPVault.sol"
-  ],
-  "testRequirements": [
-    "test_Vault_SingleCollateral_Works()",
-    "test_Vault_MultiCollateral_Reverts()",
-    "test_Vault_ErrorMessage_Clear()"
+  "version": "3.1",
+  "metadata": {
+    "projectName": "Paimon.dex",
+    "created": "2025-11-01T12:00:00Z",
+    "lastModified": "2025-11-04T12:00:00Z",
+    "description": "Paimon.dex 任务管理 - P1-005 完成 + P2-001 创建"
+  },
+  "stats": {
+    "total": 2,
+    "pending": 1,
+    "inProgress": 0,
+    "completed": 1,
+    "blocked": 0,
+    "cancelled": 0
+  },
+  "tasks": [
+    {
+      "id": "P1-005",
+      "title": "USDPVault 多抵押品支持短期修复",
+      "description": "USDPVault 当前使用第一个抵押品进行估值，多抵押品时计算不准确。短期方案：多抵押品时 revert，长期方案：加权健康因子。\n\n**问题根源**:\n- USDPVault.sol:235,321 使用 collaterals[0] 计算总价值\n- 多抵押品时估值错误\n\n**短期方案（P1）**:\n1. getTotalCollateralValue() 检查 collaterals.length\n2. 如果 >1，revert(\"Multi-collateral not supported\")\n3. 添加文档说明当前仅支持单抵押品\n\n**长期方案（P2，单独任务）**:\n1. 实现加权健康因子计算\n2. 每个抵押品单独估值并求和\n\n**验收标准**:\n- ✅ 单抵押品正常工作\n- ✅ 多抵押品操作 revert\n- ✅ 错误信息清晰",
+      "complexity": 2,
+      "priority": "P1",
+      "dependencies": [],
+      "estimated_days": 0.25,
+      "status": "completed",
+      "tags": [
+        "functionality",
+        "vault",
+        "multi-collateral",
+        "phase2"
+      ],
+      "relatedFiles": [
+        "paimon-rwa-contracts/src/core/USDPVault.sol",
+        "paimon-rwa-contracts/test/core/USDPVaultMultiCollateralFix.t.sol"
+      ],
+      "testRequirements": [
+        "test_Vault_SingleCollateral_Works()",
+        "test_Vault_MultiCollateral_Reverts()",
+        "test_Vault_ErrorMessage_Clear()"
+      ],
+      "startedAt": "2025-11-04T11:00:00Z",
+      "completedAt": "2025-11-04T12:00:00Z",
+      "branch": "feat/task-P1-005-usdpvault-multi-collateral-fix",
+      "implementation_notes": "**实现方案**:\n1. 新增 _countUserCollaterals() 辅助函数 - 统计用户非零抵押品种类数量\n2. healthFactor() 函数开头添加检查 - 多抵押品时 revert\n3. borrow() 函数添加相同检查 - 防止创建有问题的仓位\n\n**测试覆盖**: 6维度16个测试 (100%通过)\n- 功能性: 单/多抵押品行为验证\n- 边界: 0/1/2种抵押品边界情况\n- 异常: 错误信息、恢复场景\n- 性能: Gas基准测试\n- 安全: 绕过尝试防护\n- 兼容: 现有功能不受影响\n\n**回归测试**: 48个现有测试全部通过\n\n**长期方案**: P2任务 - 实现加权健康因子计算",
+      "notes": "✅ 短期修复方案成功实施\n✅ 新增测试: 16/16 通过\n✅ 现有测试: 48/48 通过 (无回归)\n✅ 总计: 64/64 通过\n✅ 代码质量: SOLID/DRY/KISS/YAGNI 原则\n✅ 分支已合并并删除"
+    },
+    {
+      "id": "P2-001",
+      "title": "USDPVault 加权健康因子实现（多抵押品支持）",
+      "description": "实现 USDPVault 的加权健康因子计算，完整支持多抵押品仓位。\n\n**背景**:\nP1-005 实现了短期修复方案（多抵押品时 revert），本任务实现长期解决方案。\n\n**问题分析**:\n当前 healthFactor() 使用 collaterals[0] 的清算阈值，在多抵押品场景下不正确。\n正确做法是使用每种抵押品各自的清算阈值进行加权平均。\n\n**核心算法**:\n```solidity\n// 加权健康因子 = Σ(抵押品i价值 × 清算阈值i) / 债务\n// 示例：\n// - 抵押品A: $5000, 清算阈值 85%\n// - 抵押品B: $3000, 清算阈值 65%\n// - 债务: $6000\n// \n// adjustedValue = (5000 × 0.85) + (3000 × 0.65) = 4250 + 1950 = 6200\n// healthFactor = 6200 / 6000 = 1.033 ✅\n```\n\n**实现要点**:\n\n1. **修改 healthFactor() 函数**:\n   - 移除 P1-005 的多抵押品检查（require <= 1）\n   - 遍历所有用户抵押品\n   - 对每种抵押品：价值 × 清算阈值\n   - 汇总后除以债务\n\n2. **修改 borrow() 函数**:\n   - 移除 P1-005 的多抵押品检查\n   - borrow 前的 health check 会自动使用新的加权计算\n\n3. **修改 liquidate() 函数**:\n   - 当前使用 collaterals[0] 计算清算数量（line 236）\n   - 需要实现多抵押品清算逻辑：\n     - 按价值比例分配清算额度，或\n     - 优先清算低清算阈值抵押品\n\n4. **边界情况处理**:\n   - 单抵押品：退化为原有逻辑\n   - 某种抵押品余额为 0：跳过\n   - 所有抵押品余额为 0：返回 max health factor\n\n**验收标准**:\n- ✅ 单抵押品仓位健康因子正确（向后兼容）\n- ✅ 双抵押品仓位健康因子使用加权平均\n- ✅ 三种及以上抵押品正确计算\n- ✅ borrow() 基于新 healthFactor 正确工作\n- ✅ liquidate() 正确处理多抵押品清算\n- ✅ 所有现有测试通过（48+16=64 个测试）\n- ✅ 新增 6 维度测试覆盖多抵押品场景\n\n**测试场景** (至少 15 个测试):\n1. **功能性**:\n   - 双抵押品健康因子计算正确性\n   - 三种抵押品健康因子计算正确性\n   - 单抵押品退化行为（向后兼容）\n   - 多抵押品 borrow 正确限制\n   - 多抵押品 liquidate 正确执行\n\n2. **边界**:\n   - 某种抵押品余额为 0\n   - 不同抵押品价值比例极端（99:1）\n   - 不同清算阈值差异极端（85% vs 50%）\n\n3. **异常**:\n   - 健康因子 <1.0 时可清算\n   - 健康因子 >1.0 时无法清算\n\n4. **性能**:\n   - 多抵押品 healthFactor Gas 基准\n   - 5 种抵押品场景性能测试\n\n5. **安全**:\n   - 清算时无法操纵抵押品顺序获利\n   - 价格预言机故障不影响计算逻辑\n\n6. **兼容性**:\n   - P1-005 的 16 个测试需要更新并通过\n   - 现有 48 个单抵押品测试全部通过\n\n**技术债务清理**:\n- 删除 `_countUserCollaterals()` 辅助函数（不再需要）\n- 更新所有 TODO 注释（line 320, 235）\n- 移除 P1-005 的 require 检查",
+      "complexity": 6,
+      "priority": "P2",
+      "dependencies": ["P1-005"],
+      "estimated_days": 2.5,
+      "status": "pending",
+      "tags": [
+        "functionality",
+        "vault",
+        "multi-collateral",
+        "weighted-health-factor",
+        "phase2"
+      ],
+      "relatedFiles": [
+        "paimon-rwa-contracts/src/core/USDPVault.sol",
+        "paimon-rwa-contracts/test/core/USDPVault.t.sol",
+        "paimon-rwa-contracts/test/core/USDPVaultMultiCollateralFix.t.sol"
+      ],
+      "testRequirements": [
+        "test_Vault_WeightedHealthFactor_DualCollateral()",
+        "test_Vault_WeightedHealthFactor_TripleCollateral()",
+        "test_Vault_SingleCollateral_BackwardCompatible()",
+        "test_Vault_Borrow_MultiCollateral_CorrectLimits()",
+        "test_Vault_Liquidate_MultiCollateral_ProportionalSeizure()",
+        "test_Vault_EdgeCase_ZeroBalance()",
+        "test_Vault_EdgeCase_ExtremeRatio()",
+        "test_Vault_Performance_FiveCollaterals()"
+      ]
+    }
   ]
 }
