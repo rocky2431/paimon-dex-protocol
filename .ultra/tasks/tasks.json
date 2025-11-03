@@ -8,9 +8,9 @@
   },
   "stats": {
     "total": 74,
-    "pending": 24,
+    "pending": 23,
     "inProgress": 0,
-    "completed": 50,
+    "completed": 51,
     "blocked": 0,
     "cancelled": 0
   },
@@ -1289,8 +1289,10 @@
         "P0-002"
       ],
       "estimated_days": 0.25,
-      "status": "in_progress",
+      "status": "completed",
       "startedAt": "2025-11-04T15:00:00Z",
+      "completedAt": "2025-11-04",
+      "notes": "Added getWeeklyDust() and getTotalDust() functions to EmissionManager for dust traceability. Created comprehensive test suite with 14 tests covering 6 dimensions. All 70 EmissionManager tests passing. Total dust across 352 weeks < 1000 PAIMON. Weekly conservation verified: Σchannels = totalBudget (exact equality). Dust is deterministic and traceable for audit verification.",
       "tags": [
         "optimization",
         "emission",
