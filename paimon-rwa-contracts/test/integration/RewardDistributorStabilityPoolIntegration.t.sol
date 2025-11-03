@@ -68,6 +68,7 @@ contract RewardDistributorStabilityPoolIntegrationTest is Test {
     event GaugeWeightUpdated(address indexed gauge, uint256 weight, uint256 epoch);
     event RewardsDistributed(address indexed gauge, address indexed token, uint256 amount, uint256 epoch);
     event RewardClaimed(address indexed user, address indexed token, uint256 amount);
+    event GaugeRewardsClaimed(address indexed user, address indexed token, uint256 amount);
 
     // ==================== Setup ====================
 
@@ -146,10 +147,10 @@ contract RewardDistributorStabilityPoolIntegrationTest is Test {
         // First set gauge address
         distributor.setStabilityPoolGauge(address(stabilityPool));
 
+        // Expect event on setStabilityPoolWeight call
         vm.expectEmit(true, false, false, true);
         emit GaugeWeightUpdated(address(stabilityPool), weight, 0);
 
-        distributor.setStabilityPoolGauge(address(stabilityPool));
         distributor.setStabilityPoolWeight(weight);
 
         assertEq(distributor.stabilityPoolGauge(), address(stabilityPool), "StabilityPool gauge not set");
@@ -208,7 +209,7 @@ contract RewardDistributorStabilityPoolIntegrationTest is Test {
         // Execute: Bob claims rewards
         vm.startPrank(bob);
         vm.expectEmit(true, true, false, true);
-        emit RewardClaimed(bob, address(paimonToken), expectedReward); // 50% weight
+        emit GaugeRewardsClaimed(bob, address(paimonToken), expectedReward); // 50% weight
 
         stabilityPool.claimRewards(address(paimonToken));
         vm.stopPrank();
@@ -304,8 +305,11 @@ contract RewardDistributorStabilityPoolIntegrationTest is Test {
 
     /// @notice Test invalid gauge weight (>100%)
     function test_InvalidGaugeWeight() public {
-        vm.expectRevert("Weight exceeds maximum");
+        // First set gauge address
         distributor.setStabilityPoolGauge(address(stabilityPool));
+
+        // Then expect revert when setting invalid weight
+        vm.expectRevert("Weight exceeds maximum");
         distributor.setStabilityPoolWeight(10001); // >100%
     }
 

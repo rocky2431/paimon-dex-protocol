@@ -54,9 +54,17 @@ async function main() {
       throw new Error('REWARD_DISTRIBUTOR_ADDRESS not set');
     }
 
+    // Get reward token address (PAIMON, USDP, etc.)
+    const rewardTokenAddress = process.env.REWARD_TOKEN_ADDRESS || merkleData.token;
+    if (!rewardTokenAddress) {
+      throw new Error('REWARD_TOKEN_ADDRESS not set in environment or Merkle data');
+    }
+
+    console.log(`\n🪙 Reward Token: ${rewardTokenAddress}`);
+
     const rewardDistributorAbi = [
-      'function setMerkleRoot(bytes32 root, uint256 epoch) external',
-      'function merkleRoots(uint256) view returns (bytes32)',
+      'function setMerkleRoot(uint256 epoch, address token, bytes32 merkleRoot) external',
+      'function merkleRoots(uint256, address) view returns (bytes32)',
       'function owner() view returns (address)'
     ];
 
@@ -76,9 +84,9 @@ async function main() {
     }
 
     // Check if root already set
-    const existingRoot = await rewardDistributor.merkleRoots(epoch);
+    const existingRoot = await rewardDistributor.merkleRoots(epoch, rewardTokenAddress);
     if (existingRoot !== ethers.ZeroHash) {
-      console.log(`\n⚠️  Warning: Merkle root already set for epoch ${epoch}`);
+      console.log(`\n⚠️  Warning: Merkle root already set for epoch ${epoch} and token ${rewardTokenAddress}`);
       console.log(`   Existing Root: ${existingRoot}`);
 
       // Ask for confirmation (in production, add interactive prompt)
@@ -89,7 +97,7 @@ async function main() {
 
     // Submit transaction
     console.log('\n📤 Submitting transaction...');
-    const tx = await rewardDistributor.setMerkleRoot(merkleRoot, epoch);
+    const tx = await rewardDistributor.setMerkleRoot(epoch, rewardTokenAddress, merkleRoot);
 
     console.log(`   Transaction Hash: ${tx.hash}`);
     console.log('   ⏳ Waiting for confirmation...');
@@ -101,8 +109,9 @@ async function main() {
 
     // Verify on-chain
     console.log('\n🔍 Verifying on-chain state...');
-    const onChainRoot = await rewardDistributor.merkleRoots(epoch);
+    const onChainRoot = await rewardDistributor.merkleRoots(epoch, rewardTokenAddress);
     console.log(`   On-Chain Root: ${onChainRoot}`);
+    console.log(`   Expected Root: ${merkleRoot}`);
 
     if (onChainRoot !== merkleRoot) {
       throw new Error('On-chain root does not match submitted root');
