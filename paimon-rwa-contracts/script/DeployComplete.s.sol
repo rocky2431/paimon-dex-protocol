@@ -8,7 +8,7 @@ import "forge-std/console.sol";
 import "../src/core/USDP.sol";
 import "../src/core/PAIMON.sol";
 import "../src/core/esPaimon.sol";
-import "../src/core/PSM.sol";
+import "../src/core/PSMParameterized.sol";
 import "../src/core/VotingEscrow.sol";
 import "../src/core/VotingEscrowPaimon.sol";
 import "../src/core/USDPVault.sol";
@@ -84,7 +84,7 @@ contract DeployCompleteScript is Script {
     USDP public usdp;
     PAIMON public paimon;
     esPaimon public esPaimonToken;
-    PSM public psm;
+    PSMParameterized public psm;
     VotingEscrow public votingEscrow;
     VotingEscrowPaimon public votingEscrowPaimon;
     USDPVault public usdpVault;
@@ -282,8 +282,9 @@ contract DeployCompleteScript is Script {
 
         // Deploy PSM
         address usdcAddress = isTestnet ? address(usdc) : getMainnetUSDCAddress();
-        psm = new PSM(address(usdp), usdcAddress);
-        console.log("  PSM deployed:", address(psm));
+        psm = new PSMParameterized(address(usdp), usdcAddress);
+        console.log("  PSMParameterized deployed:", address(psm));
+        console.log("  USDC decimals detected:", psm.usdcDecimals());
 
         // Grant minter role to PSM
         usdp.setAuthorizedMinter(address(psm), true);
