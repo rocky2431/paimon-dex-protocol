@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "../core/VotingEscrow.sol";
 import "../incentives/BoostStaking.sol";
+import "../core/esPaimon.sol";
 
 /**
  * @title RewardDistributor
@@ -50,6 +51,15 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
 
     /// @notice Treasury address for protocol fees
     address public treasury;
+
+    /// @notice esPaimon contract for vesting distribution
+    address public esPaimonAddress;
+
+    /// @notice Token address for PAIMON (for es vesting check)
+    address public paimonToken;
+
+    /// @notice Use es vesting mode for PAIMON rewards (default: true)
+    bool public useEsVesting = true;
 
     /// @notice Epoch duration (7 days, aligned with GaugeController)
     uint256 public constant EPOCH_DURATION = 7 days;
@@ -146,8 +156,15 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
         // Emit BoostApplied event
         emit BoostApplied(msg.sender, amount, boostMultiplier, actualReward);
 
-        // Transfer boosted rewards
-        IERC20(token).safeTransfer(msg.sender, actualReward);
+        // Distribute rewards: es vesting or direct transfer
+        if (useEsVesting && token == paimonToken && esPaimonAddress != address(0)) {
+            // Es vesting mode: vest rewards for user
+            IERC20(token).approve(esPaimonAddress, actualReward);
+            esPaimon(esPaimonAddress).vestFor(msg.sender, actualReward);
+        } else {
+            // Direct transfer mode: transfer rewards immediately
+            IERC20(token).safeTransfer(msg.sender, actualReward);
+        }
 
         emit RewardClaimed(epoch, msg.sender, token, actualReward);
     }
@@ -199,5 +216,35 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
     function setTreasury(address _treasury) external onlyOwner {
         require(_treasury != address(0), "Invalid treasury");
         treasury = _treasury;
+    }
+
+    /**
+     * @notice Set esPaimon contract address (owner only)
+     * @param _esPaimon esPaimon contract address
+     * @dev Required for es vesting distribution mode
+     */
+    function setEsPaimon(address _esPaimon) external onlyOwner {
+        require(_esPaimon != address(0), "esPaimon not configured");
+        esPaimonAddress = _esPaimon;
+    }
+
+    /**
+     * @notice Set PAIMON token address (owner only)
+     * @param _paimonToken PAIMON token address
+     * @dev Required to identify PAIMON rewards for es vesting
+     */
+    function setPaimonToken(address _paimonToken) external onlyOwner {
+        require(_paimonToken != address(0), "Invalid paimonToken");
+        paimonToken = _paimonToken;
+    }
+
+    /**
+     * @notice Toggle es vesting mode (owner only)
+     * @param _useEsVesting True to enable es vesting, false for direct transfer
+     * @dev When enabled, PAIMON rewards are vested via esPaimon.vestFor()
+     *      When disabled, PAIMON rewards are transferred directly
+     */
+    function setUseEsVesting(bool _useEsVesting) external onlyOwner {
+        useEsVesting = _useEsVesting;
     }
 }
