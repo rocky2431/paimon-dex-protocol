@@ -1,0 +1,42 @@
+{
+  "command": "ultra-status",
+  "timestamp": "2025-11-03T03:35:00Z",
+  "estimatedTokens": 3800,
+  "filesReadTopN": [
+    ".ultra/tasks/tasks.json"
+  ],
+  "triggeredSkills": [
+    "workflow-guide"
+  ],
+  "summary": {
+    "progressPct": 0.871,
+    "totalTasks": 31,
+    "completed": 27,
+    "inProgress": 0,
+    "pending": 4,
+    "blocked": 0,
+    "byPriority": {
+      "P0": {
+        "completed": 13,
+        "pending": 2
+      },
+      "P1": {
+        "completed": 14,
+        "pending": 2
+      }
+    },
+    "velocity": 9.6,
+    "estimatedDaysRemaining": 0.4,
+    "readyToStart": [
+      "30",
+      "28"
+    ],
+    "recommendedNext": "30",
+    "riskLevel": "low"
+  },
+  "recommendations": [
+    "Start Task 30 (P0 - Deploy scripts)",
+    "Or start Task 28 (P1 - Frontend unit tests)",
+    "Both tasks have all dependencies satisfied"
+  ]
+}
