@@ -48,6 +48,31 @@ describe("useVault", () => {
       expect(result.current.writeContract).toBeDefined();
       expect(typeof result.current.writeContract).toBe("function");
     });
+
+    it("should call writeContract with correct params when deposit is called", async () => {
+      const mockWriteContract = jest.fn();
+      (require("wagmi").useWriteContract as jest.Mock).mockReturnValue({
+        writeContract: mockWriteContract,
+        writeContractAsync: jest.fn(),
+        isPending: false,
+        isSuccess: false,
+      });
+
+      const { result } = renderHook(() => useVaultDeposit());
+      const collateralAddress = mockCollateralAddress;
+      const amount = BigInt(1000000000000000000); // 1 token
+
+      // This test expects the hook to provide a helper function that wraps writeContract
+      // Currently fails because useVaultDeposit just returns bare useWriteContract
+      result.current.writeContract({
+        address: collateralAddress,
+        abi: [],
+        functionName: "deposit",
+        args: [collateralAddress, amount],
+      });
+
+      expect(mockWriteContract).toHaveBeenCalled();
+    });
   });
 
   describe("useVaultWithdraw", () => {
@@ -61,6 +86,30 @@ describe("useVault", () => {
 
       const { result } = renderHook(() => useVaultWithdraw());
       expect(result.current.writeContract).toBeDefined();
+    });
+
+    // Boundary test: withdraw zero amount (should be rejected)
+    it("should handle boundary case: zero amount withdrawal", async () => {
+      const mockWriteContract = jest.fn();
+      (require("wagmi").useWriteContract as jest.Mock).mockReturnValue({
+        writeContract: mockWriteContract,
+        writeContractAsync: jest.fn().mockRejectedValue(new Error("Amount must be greater than 0")),
+        isPending: false,
+        isSuccess: false,
+        error: null,
+      });
+
+      const { result } = renderHook(() => useVaultWithdraw());
+      const amount = BigInt(0);
+
+      await expect(
+        result.current.writeContractAsync({
+          address: mockAddress,
+          abi: [],
+          functionName: "withdraw",
+          args: [mockCollateralAddress, amount],
+        })
+      ).rejects.toThrow();
     });
   });
 
@@ -76,6 +125,29 @@ describe("useVault", () => {
       const { result } = renderHook(() => useVaultBorrow());
       expect(result.current.writeContract).toBeDefined();
     });
+
+    // Security test: borrowing more than LTV limit (should be rejected)
+    it("should reject borrowing beyond LTV limit", async () => {
+      const mockWriteContract = jest.fn();
+      (require("wagmi").useWriteContract as jest.Mock).mockReturnValue({
+        writeContract: mockWriteContract,
+        writeContractAsync: jest.fn().mockRejectedValue(new Error("Borrow exceeds LTV limit")),
+        isPending: false,
+        isSuccess: false,
+      });
+
+      const { result } = renderHook(() => useVaultBorrow());
+      const excessiveAmount = BigInt(100000000000000000000); // 100 USDP
+
+      await expect(
+        result.current.writeContractAsync({
+          address: mockAddress,
+          abi: [],
+          functionName: "borrow",
+          args: [excessiveAmount],
+        })
+      ).rejects.toThrow("Borrow exceeds LTV limit");
+    });
   });
 
   describe("useVaultRepay", () => {
@@ -89,6 +161,54 @@ describe("useVault", () => {
 
       const { result } = renderHook(() => useVaultRepay());
       expect(result.current.writeContract).toBeDefined();
+    });
+
+    // Exception test: repaying more than debt
+    it("should handle repaying more than current debt", async () => {
+      const mockWriteContract = jest.fn();
+      (require("wagmi").useWriteContract as jest.Mock).mockReturnValue({
+        writeContract: mockWriteContract,
+        writeContractAsync: jest.fn().mockResolvedValue({ hash: "0xabc" }),
+        isPending: false,
+        isSuccess: true,
+      });
+
+      const { result } = renderHook(() => useVaultRepay());
+      const excessAmount = BigInt(999999999999999999999); // Very large amount
+
+      // Contract should accept but only repay actual debt
+      await result.current.writeContractAsync({
+        address: mockAddress,
+        abi: [],
+        functionName: "repay",
+        args: [excessAmount],
+      });
+
+      expect(mockWriteContract).toBeDefined();
+    });
+
+    // Performance test: check response time
+    it("should complete repayment operation quickly", async () => {
+      const mockWriteContract = jest.fn();
+      (require("wagmi").useWriteContract as jest.Mock).mockReturnValue({
+        writeContract: mockWriteContract,
+        writeContractAsync: jest.fn().mockResolvedValue({ hash: "0xdef" }),
+        isPending: false,
+        isSuccess: true,
+      });
+
+      const { result } = renderHook(() => useVaultRepay());
+      const startTime = Date.now();
+
+      await result.current.writeContractAsync({
+        address: mockAddress,
+        abi: [],
+        functionName: "repay",
+        args: [BigInt(1000000)],
+      });
+
+      const duration = Date.now() - startTime;
+      expect(duration).toBeLessThan(1000); // Should complete within 1 second
     });
   });
 

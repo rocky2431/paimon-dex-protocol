@@ -1075,7 +1075,7 @@
         "38"
       ],
       "estimatedHours": 24,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "frontend",
         "vault",
