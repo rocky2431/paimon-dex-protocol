@@ -661,12 +661,13 @@
         "51"
       ],
       "estimated_days": 2,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "deployment",
         "script",
         "initialization"
-      ]
+      ],
+      "startedAt": "2025-11-03T13:44:21Z"
     },
     {
       "id": "31",

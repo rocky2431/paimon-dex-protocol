@@ -3,24 +3,11 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "../interfaces/AggregatorV3Interface.sol";
 
 // ============================================================
 // INTERFACES
 // ============================================================
-
-interface AggregatorV3Interface {
-    function decimals() external view returns (uint8);
-    function latestRoundData()
-        external
-        view
-        returns (
-            uint80 roundId,
-            int256 answer,
-            uint256 startedAt,
-            uint256 updatedAt,
-            uint80 answeredInRound
-        );
-}
 
 interface IPyth {
     struct Price {
