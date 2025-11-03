@@ -3,7 +3,7 @@
   "metadata": {
     "projectName": "Paimon.dex",
     "created": "2025-11-01T12:00:00Z",
-    "lastModified": "2025-11-03T11:18:05.847Z",
+    "lastModified": "2025-11-03T12:04:20Z",
     "description": "Paimon 协议改造：HYD→USDP + ve33 治理 + Boost 激励 + 系统改进计划"
   },
   "stats": {
@@ -1116,13 +1116,14 @@
         "36"
       ],
       "estimatedHours": 10,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "frontend",
         "es-paimon",
         "vesting"
       ],
-      "phase": "P1-Core"
+      "phase": "P1-Core",
+      "startedAt": "2025-11-03T12:04:20Z"
     },
     {
       "id": "51",

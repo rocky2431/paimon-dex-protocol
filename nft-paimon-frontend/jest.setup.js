@@ -104,36 +104,54 @@ jest.mock('@/config', () => ({
 
 // Mock wagmi hooks
 jest.mock('wagmi', () => ({
-  useAccount: () => ({
+  useAccount: jest.fn(() => ({
     address: undefined,
     isConnected: false,
     isDisconnected: true,
-  }),
-  useConnect: () => ({
+  })),
+  useConnect: jest.fn(() => ({
     connect: jest.fn(),
     connectors: [],
     isLoading: false,
-  }),
-  useDisconnect: () => ({
+  })),
+  useDisconnect: jest.fn(() => ({
     disconnect: jest.fn(),
-  }),
-  useContractRead: () => ({
+  })),
+  // Legacy v1 hooks
+  useContractRead: jest.fn(() => ({
     data: undefined,
     isLoading: false,
     isError: false,
-  }),
-  useContractWrite: () => ({
+  })),
+  useContractWrite: jest.fn(() => ({
     write: jest.fn(),
     isLoading: false,
     isSuccess: false,
-  }),
-  usePrepareContractWrite: () => ({
+  })),
+  usePrepareContractWrite: jest.fn(() => ({
     config: {},
-  }),
-  useWaitForTransaction: () => ({
+  })),
+  useWaitForTransaction: jest.fn(() => ({
     isLoading: false,
     isSuccess: false,
-  }),
+  })),
+  // New v2 hooks
+  useReadContract: jest.fn(() => ({
+    data: undefined,
+    isLoading: false,
+    isError: false,
+    error: null,
+  })),
+  useWriteContract: jest.fn(() => ({
+    writeContract: jest.fn(),
+    isPending: false,
+    isSuccess: false,
+    error: null,
+  })),
+  useWaitForTransactionReceipt: jest.fn(() => ({
+    isLoading: false,
+    isSuccess: false,
+  })),
 }))
 
 // Suppress console errors in tests
