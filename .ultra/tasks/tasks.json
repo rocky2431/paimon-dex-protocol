@@ -1094,7 +1094,7 @@
         "35"
       ],
       "estimatedHours": 6,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "frontend",
         "saving-rate",

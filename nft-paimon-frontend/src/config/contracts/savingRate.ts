@@ -27,6 +27,27 @@ export const SAVINGRATE_ABI = [
   },
   {
     type: "function",
+    name: "totalFunded",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "lastRateUpdateTime",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "weekStartRate",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "BPS_DENOMINATOR",
     inputs: [],
     outputs: [{ name: "", type: "uint256" }],
@@ -138,6 +159,14 @@ export const SAVINGRATE_ABI = [
     inputs: [
       { name: "oldRate", type: "uint256", indexed: false },
       { name: "newRate", type: "uint256", indexed: false },
+    ],
+  },
+  {
+    type: "event",
+    name: "TreasuryFunded",
+    inputs: [
+      { name: "funder", type: "address", indexed: true },
+      { name: "amount", type: "uint256", indexed: false },
     ],
   },
 ] as const;
