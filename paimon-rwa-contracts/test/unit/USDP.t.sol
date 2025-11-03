@@ -45,6 +45,7 @@ contract USDPTest is Test {
     event IndexAccumulated(uint256 indexed newIndex, uint256 indexed timestamp);
     event DistributorUpdated(address indexed newDistributor);
     event Transfer(address indexed from, address indexed to, uint256 value);
+    event AccrualPausedUpdated(bool paused);
 
     // ==================== Setup ====================
 
@@ -131,6 +132,10 @@ contract USDPTest is Test {
         vm.prank(treasury);
         usdp.mint(user1, 1000 * 1e18);
 
+        // Unpause accrual
+        vm.prank(owner);
+        usdp.setAccrualPaused(false);
+
         // Accumulate 2% yield (index 1.0 → 1.02)
         uint256 newIndex = 1.02e18;
 
@@ -170,6 +175,10 @@ contract USDPTest is Test {
         // Mint to user1
         vm.prank(treasury);
         usdp.mint(user1, 1000 * 1e18);
+
+        // Unpause accrual
+        vm.prank(owner);
+        usdp.setAccrualPaused(false);
 
         // Accumulate 5% yield
         vm.warp(block.timestamp + ONE_DAY);
@@ -221,6 +230,68 @@ contract USDPTest is Test {
         usdp.permit(alice, user1, amount, deadline, v, r, s);
 
         assertEq(usdp.allowance(alice, user1), amount, "Allowance should be set via permit");
+    }
+
+    function test_Functional_AccrualPausedDefaultState() public view {
+        // accrualPaused should be true by default
+        assertTrue(usdp.accrualPaused(), "Accrual should be paused by default");
+    }
+
+    function test_Functional_AccrualBlockedWhenPaused() public {
+        // Mint some tokens
+        vm.prank(treasury);
+        usdp.mint(user1, 1000 * 1e18);
+
+        // Verify accrual is paused
+        assertTrue(usdp.accrualPaused(), "Accrual should be paused");
+
+        // Try to accumulate - should revert
+        vm.warp(block.timestamp + ONE_DAY);
+        vm.prank(distributor);
+        vm.expectRevert("USDP: Accrual is paused");
+        usdp.accumulate(1.02e18);
+    }
+
+    function test_Functional_AccrualWorksWhenUnpaused() public {
+        // Mint some tokens
+        vm.prank(treasury);
+        usdp.mint(user1, 1000 * 1e18);
+
+        // Unpause accrual
+        vm.prank(owner);
+        vm.expectEmit(true, false, false, true);
+        emit AccrualPausedUpdated(false);
+        usdp.setAccrualPaused(false);
+
+        // Verify state
+        assertFalse(usdp.accrualPaused(), "Accrual should be unpaused");
+
+        // Accumulate should work now
+        vm.warp(block.timestamp + ONE_DAY);
+        vm.prank(distributor);
+        usdp.accumulate(1.02e18);
+
+        assertEq(usdp.accrualIndex(), 1.02e18, "Index should be updated");
+        assertEq(usdp.balanceOf(user1), 1020 * 1e18, "Balance should reflect yield");
+    }
+
+    function test_Functional_SetAccrualPausedToggle() public {
+        // Initial state: paused
+        assertTrue(usdp.accrualPaused(), "Should start paused");
+
+        // Unpause
+        vm.prank(owner);
+        vm.expectEmit(true, false, false, true);
+        emit AccrualPausedUpdated(false);
+        usdp.setAccrualPaused(false);
+        assertFalse(usdp.accrualPaused(), "Should be unpaused");
+
+        // Pause again
+        vm.prank(owner);
+        vm.expectEmit(true, false, false, true);
+        emit AccrualPausedUpdated(true);
+        usdp.setAccrualPaused(true);
+        assertTrue(usdp.accrualPaused(), "Should be paused again");
     }
 
     // ==================== 2. BOUNDARY TESTS ====================
@@ -284,6 +355,10 @@ contract USDPTest is Test {
         vm.prank(treasury);
         usdp.mint(user1, 1000 * 1e18);
 
+        // Unpause accrual
+        vm.prank(owner);
+        usdp.setAccrualPaused(false);
+
         uint256 currentIndex = usdp.accrualIndex();
 
         vm.warp(block.timestamp + ONE_DAY);
@@ -296,6 +371,10 @@ contract USDPTest is Test {
         vm.prank(treasury);
         usdp.mint(user1, 1000 * 1e18);
 
+        // Unpause accrual
+        vm.prank(owner);
+        usdp.setAccrualPaused(false);
+
         vm.warp(block.timestamp + ONE_DAY);
         vm.prank(distributor);
         vm.expectRevert("USDP: Index must increase");
@@ -305,6 +384,10 @@ contract USDPTest is Test {
     function test_Boundary_AccumulateTooSoon() public {
         vm.prank(treasury);
         usdp.mint(user1, 1000 * 1e18);
+
+        // Unpause accrual
+        vm.prank(owner);
+        usdp.setAccrualPaused(false);
 
         // USDP contract does not enforce time-based restrictions at contract level.
         // Distribution frequency should be controlled by the RewardDistributor contract.
@@ -386,6 +469,31 @@ contract USDPTest is Test {
         usdp.transferFrom(user1, user2, 200 * 1e18);
     }
 
+    function test_Exception_SetAccrualPausedNonOwner() public {
+        vm.prank(attacker);
+        vm.expectRevert();
+        usdp.setAccrualPaused(false);
+    }
+
+    function test_Exception_AccrualPausedPreventsAccumulation() public {
+        // Ensure paused state
+        assertTrue(usdp.accrualPaused(), "Should be paused");
+
+        // Mint tokens
+        vm.prank(treasury);
+        usdp.mint(user1, 1000 * 1e18);
+
+        // Try to accumulate while paused
+        vm.warp(block.timestamp + ONE_DAY);
+        vm.prank(distributor);
+        vm.expectRevert("USDP: Accrual is paused");
+        usdp.accumulate(1.05e18);
+
+        // Balance should not change
+        assertEq(usdp.balanceOf(user1), 1000 * 1e18, "Balance should not change");
+        assertEq(usdp.accrualIndex(), INITIAL_INDEX, "Index should not change");
+    }
+
     // ==================== 4. PERFORMANCE TESTS ====================
     // Test gas consumption, batch operations
 
@@ -419,6 +527,10 @@ contract USDPTest is Test {
     function test_Performance_AccumulateGas() public {
         vm.prank(treasury);
         usdp.mint(user1, 1000 * 1e18);
+
+        // Unpause accrual
+        vm.prank(owner);
+        usdp.setAccrualPaused(false);
 
         vm.warp(block.timestamp + ONE_DAY);
 
@@ -454,12 +566,28 @@ contract USDPTest is Test {
         assertLt(avgGasPerMint, 100_000, "Avg mint gas should be < 100K");
     }
 
+    function test_Performance_SetAccrualPausedGas() public {
+        uint256 gasBefore = gasleft();
+
+        vm.prank(owner);
+        usdp.setAccrualPaused(false);
+
+        uint256 gasUsed = gasBefore - gasleft();
+
+        // setAccrualPaused should cost < 50K gas
+        assertLt(gasUsed, 50_000, "setAccrualPaused gas should be < 50K");
+    }
+
     // ==================== 5. SECURITY TESTS ====================
     // Test for reentrancy, overflow, precision attacks
 
     function test_Security_NoOverflowOnLargeAccumulation() public {
         vm.prank(treasury);
         usdp.mint(user1, 1_000_000 * 1e18);
+
+        // Unpause accrual
+        vm.prank(owner);
+        usdp.setAccrualPaused(false);
 
         // Accumulate large index (10x)
         vm.warp(block.timestamp + ONE_DAY);
@@ -475,6 +603,10 @@ contract USDPTest is Test {
         // Test with small amounts to check precision
         vm.prank(treasury);
         usdp.mint(user1, 1); // 1 wei
+
+        // Unpause accrual
+        vm.prank(owner);
+        usdp.setAccrualPaused(false);
 
         vm.warp(block.timestamp + ONE_DAY);
         vm.prank(distributor);
@@ -498,6 +630,10 @@ contract USDPTest is Test {
         uint256 totalShares = usdp.totalShares();
 
         assertEq(sharesUser1 + sharesUser2, totalShares, "Shares invariant violated");
+
+        // Unpause accrual
+        vm.prank(owner);
+        usdp.setAccrualPaused(false);
 
         // Accumulate
         vm.warp(block.timestamp + ONE_DAY);
@@ -526,6 +662,10 @@ contract USDPTest is Test {
         vm.prank(treasury);
         usdp.mint(attacker, 1000 * 1e18);
 
+        // Unpause accrual
+        vm.prank(owner);
+        usdp.setAccrualPaused(false);
+
         // Accumulate happens
         vm.prank(distributor);
         usdp.accumulate(1.1e18);
@@ -552,13 +692,59 @@ contract USDPTest is Test {
         vm.expectRevert("USDP: Not authorized minter");
         usdp.mint(distributor, 1000 * 1e18);
 
-        // Distributor can only call accumulate
+        // Distributor can only call accumulate (when unpaused)
+        vm.prank(owner);
+        usdp.setAccrualPaused(false);
+
         vm.warp(block.timestamp + ONE_DAY);
         vm.prank(distributor);
         usdp.accumulate(1.01e18);
 
         // Distributor balance should be 0
         assertEq(usdp.balanceOf(distributor), 0, "Distributor should have no balance");
+    }
+
+    function test_Security_AccrualPausedPreventsAccidentalDistribution() public {
+        // Scenario: Protocol just launched, accrual should be paused by default
+        // to prevent accidental yield distribution before SavingRate is ready
+
+        vm.prank(treasury);
+        usdp.mint(user1, 1000 * 1e18);
+
+        // Verify paused by default
+        assertTrue(usdp.accrualPaused(), "Should be paused by default");
+
+        // Even if distributor tries to accumulate, it should fail
+        vm.warp(block.timestamp + ONE_DAY);
+        vm.prank(distributor);
+        vm.expectRevert("USDP: Accrual is paused");
+        usdp.accumulate(1.02e18);
+
+        // User balance unchanged
+        assertEq(usdp.balanceOf(user1), 1000 * 1e18, "Balance should not change");
+    }
+
+    function test_Security_OnlyOwnerCanUnpause() public {
+        // Attacker tries to unpause
+        vm.prank(attacker);
+        vm.expectRevert();
+        usdp.setAccrualPaused(false);
+
+        // Still paused
+        assertTrue(usdp.accrualPaused(), "Should still be paused");
+
+        // Distributor tries to unpause
+        vm.prank(distributor);
+        vm.expectRevert();
+        usdp.setAccrualPaused(false);
+
+        // Still paused
+        assertTrue(usdp.accrualPaused(), "Should still be paused");
+
+        // Only owner can unpause
+        vm.prank(owner);
+        usdp.setAccrualPaused(false);
+        assertFalse(usdp.accrualPaused(), "Should be unpaused by owner");
     }
 
     // ==================== 6. COMPATIBILITY TESTS ====================
@@ -627,6 +813,10 @@ contract USDPTest is Test {
     function test_Compatibility_MultipleAccumulations() public {
         vm.prank(treasury);
         usdp.mint(user1, 1000 * 1e18);
+
+        // Unpause accrual
+        vm.prank(owner);
+        usdp.setAccrualPaused(false);
 
         // Day 1: 2% yield
         vm.warp(block.timestamp + ONE_DAY);
