@@ -1104,6 +1104,46 @@
         "vesting"
       ],
       "phase": "P1-Core"
+    },
+    {
+      "id": "52",
+      "title": "【前端】StabilityPool 页面 - 存取款与清算奖励展示",
+      "description": "开发稳定池前端页面，支持 USDP 存取款、清算奖励查看与领取。\n\n实现内容：\n1. 稳定池概览卡片：总存款量、用户份额占比、年化收益（基于清算频率预估）\n2. 存款/取款表单：输入框、余额显示、份额预览、交易按钮\n3. 清算奖励面板：按抵押品类型分类显示待领取资产（USDC、RWA等）\n4. 历史清算记录：时间、债务抵消量、获得抵押品、份额变化\n5. 健康度指标：池子流动性、最大可承接清算规模\n6. 集成 useStabilityPool hook（Task 43）\n7. 响应式设计：移动端适配\n8. 国际化：中英文翻译\n\n页面路径：/stability-pool\n组件结构：\n- StabilityPoolOverview（概览）\n- DepositWithdrawForm（存取款表单）\n- LiquidationRewardsPanel（清算奖励面板）\n- LiquidationHistory（历史记录）",
+      "complexity": 5,
+      "priority": "P1",
+      "dependencies": [
+        "41",
+        "43"
+      ],
+      "estimatedHours": 16,
+      "status": "pending",
+      "tags": [
+        "frontend",
+        "stability-pool",
+        "ui",
+        "lending"
+      ]
+    },
+    {
+      "id": "53",
+      "title": "RewardDistributor 与 StabilityPool 集成（LP通道Gauge分配）",
+      "description": "将 StabilityPool 纳入 RewardDistributor 的 LP 通道内部 Gauge 系统，按份额参与权重分配。\n\n实现内容：\n1. RewardDistributor.sol 扩展：\n   - 新增 stabilityPoolGauge 状态变量\n   - 新增 setStabilityPoolWeight() 函数（Owner-only）\n   - 修改 distributeRewards() 逻辑：LP 通道内部按 Gauge 权重分配给常规 LP 和稳定池\n2. 权重分配逻辑：\n   - LP 通道总配额 → 按 gaugeWeight 分配给常规 LP Pairs 和 StabilityPool\n   - 稳定池内部：按 userShares/totalShares 比例分配给存款用户\n3. 奖励领取集成：\n   - StabilityPool 用户通过 claimRewards() 领取 PAIMON/esPAIMON 奖励\n   - 与清算奖励（collateral gains）分开跟踪\n4. 事件完整：GaugeWeightUpdated、RewardsDistributed\n5. 单元测试：权重分配、奖励领取、边界情况\n6. 集成测试：完整奖励流（Distributor → StabilityPool → 用户）\n\n前端更新（可选，可拆分为单独任务）：\n- 稳定池页面显示 PAIMON/esPAIMON 奖励 APR\n- 领取按钮（同时领取清算资产 + 激励奖励）",
+      "complexity": 7,
+      "priority": "P1",
+      "dependencies": [
+        "37",
+        "41"
+      ],
+      "estimatedHours": 20,
+      "status": "pending",
+      "tags": [
+        "contract",
+        "integration",
+        "rewards",
+        "distributor",
+        "stability-pool"
+      ],
+      "phase": "P2-Complete"
     }
   ]
 }
