@@ -20,10 +20,10 @@ export function useSavingAnnualRate() {
 }
 
 /**
- * Hook to read user deposit
- * 读取用户存款的Hook
+ * Hook to read user deposit info
+ * 读取用户存款信息的Hook
  */
-export function useSavingDeposit(address?: `0x${string}`) {
+export function useSavingDepositInfo(address?: `0x${string}`) {
   const { address: userAddress } = useAccount();
   const targetAddress = address || userAddress;
 

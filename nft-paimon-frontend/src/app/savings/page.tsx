@@ -6,8 +6,10 @@ import { Navigation } from '@/components/layout/Navigation';
 import { SavingsRateCard } from '@/components/savings/SavingsRateCard';
 import { SavingsDepositModal } from '@/components/savings/SavingsDepositModal';
 import { InterestChart, ChartDataPoint } from '@/components/savings/InterestChart';
+import { SavingRateCard } from '@/components/saving';
 import { useAccount } from 'wagmi';
 import { useSavingPrincipal, useSavingAccruedInterest } from '@/hooks/useSavingRate';
+import { useSavingRateStats } from '@/hooks/useSavingRateStats';
 
 /**
  * Savings Page
@@ -25,6 +27,9 @@ export default function SavingsPage() {
   // Read user data for chart
   const { data: principal } = useSavingPrincipal(address);
   const { data: accruedInterest } = useSavingAccruedInterest(address);
+
+  // Read SavingRate funding stats
+  const savingRateStats = useSavingRateStats();
 
   // Generate mock historical data (TODO: Replace with real API call)
   const historicalData = useMemo<ChartDataPoint[]>(() => {
@@ -120,13 +125,26 @@ export default function SavingsPage() {
 
         {/* Main Content Grid */}
         <Grid container spacing={3}>
-          {/* Savings Rate Card */}
+          {/* Savings Rate Card (User Deposits) */}
           <Grid item xs={12} md={6}>
             <SavingsRateCard locale="en" onDepositClick={handleDepositClick} />
           </Grid>
 
-          {/* Interest Chart */}
+          {/* Saving Rate Card (Treasury Funding Status) */}
           <Grid item xs={12} md={6}>
+            <SavingRateCard
+              stats={{
+                totalFunded: savingRateStats.totalFunded,
+                annualRate: savingRateStats.annualRate,
+                lastRateUpdateTime: savingRateStats.lastRateUpdateTime,
+                weekStartRate: savingRateStats.weekStartRate,
+              }}
+              isLoading={savingRateStats.isLoading}
+            />
+          </Grid>
+
+          {/* Interest Chart */}
+          <Grid item xs={12}>
             <InterestChart data={historicalData} locale="en" />
           </Grid>
         </Grid>
