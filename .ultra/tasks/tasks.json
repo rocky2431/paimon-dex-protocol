@@ -1258,7 +1258,7 @@
         "P0-002"
       ],
       "estimated_days": 0.75,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "optimization",
         "emission",
@@ -1274,7 +1274,8 @@
         "test_PhaseB_Week100_Accuracy()",
         "test_PhaseB_Week248_End()",
         "test_PhaseB_Gas_Constant()"
-      ]
+      ],
+      "startedAt": "2025-11-03T21:12:51Z"
     },
     {
       "id": "P1-002",
