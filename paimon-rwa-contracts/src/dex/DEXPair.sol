@@ -252,9 +252,11 @@ contract DEXPair is ERC20, ReentrancyGuard {
         }
 
         // Verify K invariant (adjusted for fees)
+        // Note: Fees are already accumulated in voterFeesX and treasuryFeesX,
+        // so we only subtract them once from balance, not from amountIn again
         {
-            uint256 balance0Adjusted = (balance0 - voterFees0 - treasuryFees0) * FEE_DENOMINATOR - (amount0In * TOTAL_FEE);
-            uint256 balance1Adjusted = (balance1 - voterFees1 - treasuryFees1) * FEE_DENOMINATOR - (amount1In * TOTAL_FEE);
+            uint256 balance0Adjusted = balance0 * FEE_DENOMINATOR - (amount0In * TOTAL_FEE);
+            uint256 balance1Adjusted = balance1 * FEE_DENOMINATOR - (amount1In * TOTAL_FEE);
             require(
                 balance0Adjusted * balance1Adjusted >= uint256(_reserve0) * uint256(_reserve1) * (FEE_DENOMINATOR ** 2),
                 "K"
