@@ -3,7 +3,7 @@
   "metadata": {
     "projectName": "Paimon.dex",
     "created": "2025-11-01T12:00:00Z",
-    "lastModified": "2025-11-03T11:18:05.847Z",
+    "lastModified": "2025-11-03T12:04:20Z",
     "description": "Paimon 协议改造：HYD→USDP + ve33 治理 + Boost 激励 + 系统改进计划"
   },
   "stats": {
@@ -1116,13 +1116,16 @@
         "36"
       ],
       "estimatedHours": 10,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "frontend",
         "es-paimon",
         "vesting"
       ],
-      "phase": "P1-Core"
+      "phase": "P1-Core",
+      "startedAt": "2025-11-03T12:04:20Z",
+      "completedAt": "2025-11-03T12:12:13Z",
+      "implementationNotes": "实现了 esPaimon 归属进度展示功能，包括: useVestingPosition hook (14 tests)、VestingProgressBar 组件 (5 tests)、ClaimVestedButton 组件 (6 tests)、convert 页面集成。所有测试通过，Material Design 3 规范，warm color palette。"
     },
     {
       "id": "51",
