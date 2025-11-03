@@ -3,15 +3,16 @@
   "metadata": {
     "projectName": "Paimon.dex",
     "created": "2025-11-01T12:00:00Z",
-    "lastModified": "2025-11-03T08:23:27Z",
+    "lastModified": "2025-11-03T10:03:40Z",
     "description": "Paimon 协议改造：HYD→USDP + ve33 治理 + Boost 激励 + 系统改进计划"
   },
   "stats": {
     "total": 51,
-    "pending": 16,
+    "pending": 11,
     "inProgress": 0,
-    "completed": 32,
-    "blocked": 0
+    "completed": 37,
+    "blocked": 0,
+    "cancelled": 3
   },
   "tasks": [
     {
@@ -625,9 +626,9 @@
     },
     {
       "id": "29",
-      "title": "前端 E2E 测试（chrome-devtools）",
-      "description": "使用 chrome-devtools MCP 编写前端端到端测试，验证完整用户交互流程（Boost 质押、Nitro 参与、储蓄存取）。\n\n**测试场景**：\n1. 连接钱包 → 质押 esPaimon → 查看 Boost 倍数\n2. 浏览 Nitro 池 → 参与 → 领取奖励\n3. 存入 USDP → 查看利息 → 取出\n4. PSM 兑换 USDC↔USDP\n5. 锁仓 vePaimon → 投票 Gauge\n\n**验收标准**：\n- ✅ 所有 E2E 测试通过\n- ✅ 无 UI 阻塞或错误\n- ✅ Core Web Vitals 达标",
-      "complexity": 4,
+      "title": "【完整E2E测试】前端+合约+后端集成验证",
+      "description": "使用 chrome-devtools MCP 和 Playwright 进行完整的端到端测试，验证所有功能的前后端集成。\n\n**测试范围**：\n- 前端UI完整流程测试\n- 合约交互测试\n- 后端服务集成测试\n- 用户完整业务流程验证\n- 性能测试（Core Web Vitals）\n- 跨浏览器兼容性测试\n\n**验收标准**：\n- ✅ 所有核心用户流程测试通过\n- ✅ 前后端集成无错误\n- ✅ Core Web Vitals 达标（LCP<2.5s, INP<200ms, CLS<0.1）\n- ✅ E2E测试报告完成",
+      "complexity": 6,
       "priority": "P1",
       "dependencies": [
         "28"
@@ -643,11 +644,18 @@
     {
       "id": "30",
       "title": "编写部署脚本和初始化配置",
-      "description": "编写完整的部署脚本（5 个阶段），配置初始化参数（Oracle、Treasury、PSM、GaugeController 等）。\n\n**部署阶段**：\n- Phase 0: HYD → Oracle → Treasury\n- Phase 1: USDP → PSM\n- Phase 2: Paimon → esPaimon → vePaimon\n- Phase 3: DEXFactory/Pair → DEXRouter\n- Phase 4: GaugeController → BribeMarketplace\n- Phase 5: BoostStaking → RewardDistributor → NitroPool → SavingRate\n\n**验收标准**：\n- ✅ 部署脚本完整（script/DeployFull.s.sol）\n- ✅ 初始化配置验证（所有权限、白名单、参数）\n- ✅ 测试网部署成功（BSC Testnet）",
+      "description": "编写完整的部署脚本和初始化配置，准备测试网部署。\n\n**内容**：\n- 部署脚本编写（Deploy.s.sol）\n- 合约初始化配置\n- 参数验证脚本\n- 部署检查清单\n\n**依赖**：所有P0开发任务完成\n\n**验收标准**：\n- ✅ 部署脚本可成功执行\n- ✅ 初始化配置完整\n- ✅ 参数验证通过",
       "complexity": 6,
-      "priority": "P0",
+      "priority": "P1",
       "dependencies": [
-        "27"
+        "41",
+        "42",
+        "43",
+        "47",
+        "48",
+        "49",
+        "50",
+        "51"
       ],
       "estimated_days": 2,
       "status": "pending",
@@ -662,7 +670,7 @@
       "title": "测试网部署验证和主网准备",
       "description": "在 BSC 测试网部署完整协议，进行全流程验证。准备主网部署清单（多签、Timelock、审计报告、应急预案）。\n\n**验证项**：\n1. 所有合约部署成功\n2. 初始化参数正确\n3. 前端连接测试网正常\n4. 完整用户流程测试（从 RWA 存入到奖励领取）\n5. PSM 套利机制验证\n6. Boost/Nitro/储蓄率功能正常\n\n**主网准备**：\n- ✅ 多签钱包配置（3-of-5 Treasury、4-of-7 Emergency）\n- ✅ Timelock 配置（48 小时）\n- ✅ 安全审计报告（如有）\n- ✅ 应急暂停预案\n- ✅ 部署检查清单\n\n**验收标准**：\n- ✅ 测试网验证通过（所有流程正常）\n- ✅ 主网部署清单完成\n- ✅ 性能达标（Core Web Vitals）\n- ✅ 无高危安全漏洞",
       "complexity": 7,
-      "priority": "P0",
+      "priority": "P1",
       "dependencies": [
         "30"
       ],
@@ -883,7 +891,7 @@
       "title": "USDPStabilityPool.sol - 实现稳定池合约",
       "description": "新增 USDPStabilityPool 合约，支持 USDP 存取、奖励分配、清算承接，作为 LP 通道内部的二级配额参与者。\n\n实现内容：\n1. 核心状态：用户 shares 映射、totalShares、totalDeposits\n2. 核心函数：deposit/withdraw/claim/onLiquidationProceeds\n3. 清算分配逻辑：按 userShares/totalShares 比例分配资产或 USDC\n4. 与 Vault 集成：清算路径回调稳定池\n5. 与 Distributor 集成：作为 LP 通道内部 Gauge 参与权重分配\n6. 事件完整：Deposited/Withdrawn/RewardClaimed/LiquidationProceeds\n7. 单元测试：存取/奖励/清算承接完整流程\n8. 前端：稳定池页面 + hooks（useStabilityPool）",
       "complexity": 6,
-      "priority": "P2",
+      "priority": "P0",
       "dependencies": [
         "38"
       ],
@@ -901,7 +909,7 @@
       "title": "Vault 清算与稳定池集成",
       "description": "将 USDPVault 的清算逻辑与 USDPStabilityPool 集成，清算时自动调用稳定池承接资产。\n\n实现内容：\n1. 修改 USDPVault.liquidate：计算清算金额与罚金，将抵押品转入稳定池\n2. 稳定池承接：若资产为 USDC 直接分配，若为其他资产记录待分配资产\n3. 集成测试：完整清算流程（Vault → StabilityPool → 用户领取）\n4. 前端：稳定池页面显示待领取的清算资产",
       "complexity": 5,
-      "priority": "P2",
+      "priority": "P0",
       "dependencies": [
         "38",
         "41"
@@ -920,7 +928,7 @@
       "title": "前端完整 Hooks 开发",
       "description": "开发缺失的前端 hooks：useVault、useStabilityPool、useDistributorClaim、useEmissionBudget，支持完整的用户交互。\n\n实现内容：\n1. useVault：deposit/withdraw/borrow/repay 函数，debtOf/healthFactor 查询\n2. useStabilityPool：deposit/withdraw/claim 函数，userShares/totalShares 查询，待领取的清算资产\n3. useDistributorClaim：claim 函数（Merkle 验证），可领取奖励查询，Boost 乘数显示\n4. useEmissionBudget：getWeeklyBudget 查询，当前周/预算/通道分布，历史排放数据\n5. ABI 配置：更新 src/config/contracts/ 添加新合约 ABI\n6. 地址配置：更新 src/config/chains/testnet.ts 添加新合约地址\n7. 单元测试：每个 hook 的测试覆盖",
       "complexity": 6,
-      "priority": "P2",
+      "priority": "P0",
       "dependencies": [
         "38",
         "39",
@@ -950,13 +958,14 @@
         "37"
       ],
       "estimatedHours": 16,
-      "status": "pending",
+      "status": "cancelled",
       "tags": [
         "testing",
         "qa",
         "validation"
       ],
-      "phase": "P0-Validation"
+      "phase": "P0-Validation",
+      "notes": "❌ 已取消 - 策略优化：不做碎片化阶段测试，统一进行完整E2E测试"
     },
     {
       "id": "45",
@@ -970,14 +979,15 @@
         "40"
       ],
       "estimatedHours": 30,
-      "status": "pending",
+      "status": "cancelled",
       "tags": [
         "testing",
         "qa",
         "validation",
         "integration"
       ],
-      "phase": "P1-Validation"
+      "phase": "P1-Validation",
+      "notes": "❌ 已取消 - 策略优化：不做碎片化阶段测试，统一进行完整E2E测试"
     },
     {
       "id": "46",
@@ -991,21 +1001,22 @@
         "43"
       ],
       "estimatedHours": 25,
-      "status": "pending",
+      "status": "cancelled",
       "tags": [
         "testing",
         "qa",
         "validation",
         "delivery"
       ],
-      "phase": "P2-Validation"
+      "phase": "P2-Validation",
+      "notes": "❌ 已取消 - 策略优化：不做碎片化阶段测试，统一进行完整E2E测试"
     },
     {
       "id": "47",
       "title": "生成 352 周排放计划 JSON",
       "description": "生成完整的 352 周排放计划 JSON 文件，用于对账和前端可视化。\n\n实现内容：\n1. 脚本：根据白皮书公式计算 352 周预算\n2. 输出：.ultra/docs/emission-schedule.json\n3. 格式：包含每周详细预算（total/debt/lpPairs/stabilityPool/eco）和阶段汇总\n4. 验证：守恒校验（阶段累计 == 阶段预算）\n5. 前端：Emission 可视化页面加载此 JSON",
       "complexity": 3,
-      "priority": "P1",
+      "priority": "P0",
       "dependencies": [
         "39"
       ],
@@ -1023,7 +1034,7 @@
       "title": "【前端】USDPVault - Borrow/Repay 完整功能实现",
       "description": "为 USDPVault 合约实现完整的前端借贷界面，包括抵押、借款、还款、健康度监控等核心功能。\n\n实现内容：\n1. 页面创建：\n   - app/vault/page.tsx - Vault 主页（抵押品管理）\n   - app/vault/borrow/page.tsx - 借款页面\n   - app/vault/repay/page.tsx - 还款页面\n2. Hooks 开发：\n   - hooks/vault/useVault.ts - Vault 核心操作\n   - hooks/vault/useVaultPosition.ts - 用户仓位查询\n   - hooks/vault/useHealthFactor.ts - 健康度计算\n   - hooks/vault/useCollateralPrice.ts - 抵押品价格查询\n3. 组件开发：\n   - components/vault/DepositCollateral.tsx - 存入抵押品\n   - components/vault/WithdrawCollateral.tsx - 提取抵押品\n   - components/vault/BorrowUSDPForm.tsx - 借款表单\n   - components/vault/RepayUSDPForm.tsx - 还款表单\n   - components/vault/HealthFactorIndicator.tsx - 健康度指示器\n   - components/vault/CollateralCard.tsx - 抵押品卡片\n4. 功能要求：\n   - 实时显示用户抵押品余额、债务、健康度\n   - 支持多种抵押品类型切换\n   - LTV 实时计算和警告（80% 警告，85% 危险）\n   - 健康度低于 1.0 时清算风险提示\n   - 最大借款/还款金额自动计算\n   - 交易确认前的详细预览\n5. UI/UX 设计：\n   - Material Design 3 规范\n   - 暖色调主题（红橙黄褐）\n   - 响应式布局（移动端 + 桌面端）\n   - 中英文双语支持\n   - 加载状态和错误处理\n6. 测试覆盖：\n   - 单元测试：Hooks 逻辑测试\n   - 组件测试：UI 交互测试\n   - E2E 测试：完整借贷流程\n\n依赖合约：\n- USDPVault.sol (Task 38 已完成)\n- USDP.sol\n- RWAPriceOracle.sol\n\n验收标准：\n- ✅ 用户可以存入/提取抵押品\n- ✅ 用户可以借出 USDP（不超过 LTV）\n- ✅ 用户可以偿还债务\n- ✅ 健康度实时显示且准确\n- ✅ 清算风险警告正常工作\n- ✅ 所有测试通过（覆盖率 ≥80%）",
       "complexity": 8,
-      "priority": "P1",
+      "priority": "P0",
       "dependencies": [
         "38"
       ],
@@ -1042,7 +1053,7 @@
       "title": "【前端】SavingRate - 系统注资状态显示",
       "description": "在前端显示 SavingRate 合约的系统注资状态，让用户了解收益来源和资金池健康度。\n\n实现内容：\n1. Hooks 开发：\n   - hooks/saving/useSavingRateStats.ts\n     - totalFunded: 累计注资金额\n     - annualRate: 当前年化利率\n     - lastRateUpdateTime: 上次更新时间\n     - weekStartRate: 本周起始利率\n2. 组件开发：\n   - components/saving/SavingRateCard.tsx\n     - 显示年化收益率\n     - 显示累计注资金额\n     - 显示资金池状态（健康/警告）\n     - 显示下次利率更新时间\n   - components/analytics/TreasuryFundingChart.tsx\n     - 历史注资趋势图表\n     - 收益率变化曲线\n3. 页面集成：\n   - app/analytics/page.tsx 增加注资模块\n   - app/stake/page.tsx 显示当前收益率\n4. 功能要求：\n   - 实时读取 totalFunded 和 annualRate\n   - 只读显示，无需交互（onlyOwner 函数）\n   - 历史数据通过事件索引获取\n5. UI 设计：\n   - 信息卡片样式\n   - 清晰的数据可视化\n   - 响应式布局\n\n依赖合约：\n- SavingRate.sol (Task 35 已完成)\n\n验收标准：\n- ✅ 正确显示 totalFunded 和 annualRate\n- ✅ 图表展示历史注资趋势\n- ✅ 响应式设计良好\n- ✅ 单元测试通过",
       "complexity": 3,
-      "priority": "P2",
+      "priority": "P0",
       "dependencies": [
         "35"
       ],
@@ -1060,7 +1071,7 @@
       "title": "【前端】esPaimon Convert 页面 - 归属进度显示",
       "description": "更新 esPaimon Convert 页面，集成 vestFor 函数后的归属进度查询和展示功能。\n\n实现内容：\n1. Hooks 更新：\n   - hooks/espaimon/useVestingPosition.ts\n     - totalVested: 总归属金额\n     - vested: 已解锁金额\n     - locked: 仍锁定金额\n     - claimable: 可领取金额\n     - vestingProgress: 归属进度百分比\n     - remainingDays: 剩余天数\n2. 组件更新：\n   - components/convert/VestingProgressBar.tsx\n     - 365 天线性进度条\n     - 已解锁/锁定金额显示\n     - 剩余时间倒计时\n   - components/convert/VestingDetails.tsx\n     - 归属历史记录（VestedFor 事件）\n     - 来源标记（RewardDistributor/Treasury）\n     - 早退罚则说明\n   - components/convert/ClaimVestedButton.tsx\n     - 领取已解锁代币\n     - 早退选项（带罚则警告）\n3. 页面更新：\n   - app/convert/page.tsx 集成新组件\n4. 功能要求：\n   - 实时查询归属状态\n   - 支持多笔归属记录合并显示\n   - 早退罚则清晰提示（50% 惩罚）\n   - 交易确认详情\n5. UI 优化：\n   - 进度条动画效果\n   - 时间轴展示归属历史\n   - Material Design 3 规范\n\n依赖合约：\n- esPaimon.sol (Task 36 已完成)\n\n验收标准：\n- ✅ 正确显示归属进度和可领取金额\n- ✅ 早退罚则警告清晰\n- ✅ Claim 功能正常工作\n- ✅ 历史记录正确显示\n- ✅ 单元测试和组件测试通过",
       "complexity": 5,
-      "priority": "P2",
+      "priority": "P0",
       "dependencies": [
         "36"
       ],
@@ -1078,7 +1089,7 @@
       "title": "【前端】RewardDistributor 领取页面 - 归属化标记",
       "description": "更新 Rewards 领取页面，增加 es 归属化模式的标识和说明，让用户清楚奖励发放方式。\n\n实现内容：\n1. Hooks 更新：\n   - hooks/rewards/useRewardDistributor.ts\n     - useEsVesting: 是否启用归属化\n     - esPaimonAddress: esPaimon 合约地址\n     - boostMultiplier: Boost 乘数\n     - actualReward: 实际奖励（含 Boost）\n2. 组件开发：\n   - components/rewards/VestingModeIndicator.tsx\n     - 显示当前模式（归属化/直接发放）\n     - 模式说明（365 天归属 vs 即时到账）\n     - 优劣对比\n   - components/rewards/RewardBreakdown.tsx\n     - 基础奖励\n     - Boost 乘数加成\n     - 实际奖励（= 基础 × Boost）\n     - 归属方式标注\n3. 页面更新：\n   - app/rewards/page.tsx 集成新组件\n4. 功能要求：\n   - 实时读取 useEsVesting 配置\n   - 清晰展示奖励计算公式\n   - 归属化模式下链接到 Convert 页面\n   - Boost 乘数来源说明（BoostStaking）\n5. UI 设计：\n   - 信息提示卡片\n   - 徽章样式标记（归属/直接）\n   - 响应式布局\n\n依赖合约：\n- RewardDistributor.sol (Task 37 已完成)\n- esPaimon.sol (Task 36 已完成)\n\n验收标准：\n- ✅ 正确显示归属化模式状态\n- ✅ 奖励计算公式展示清晰\n- ✅ Boost 乘数正确显示\n- ✅ 用户体验流畅\n- ✅ 单元测试通过",
       "complexity": 4,
-      "priority": "P2",
+      "priority": "P0",
       "dependencies": [
         "36",
         "37"
