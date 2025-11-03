@@ -3,12 +3,12 @@
   "metadata": {
     "projectName": "Paimon.dex",
     "created": "2025-11-01T12:00:00Z",
-    "lastModified": "2025-11-03T03:16:41.882135Z",
+    "lastModified": "2025-11-03T04:46:14.787464+00:00",
     "description": "Paimon 协议改造：HYD→USDP + ve33 治理 + Boost 激励 + 系统改进计划"
   },
   "stats": {
     "total": 47,
-    "pending": 20,
+    "pending": 15,
     "inProgress": 1,
     "completed": 22,
     "blocked": 0
@@ -752,13 +752,14 @@
       "priority": "P0",
       "dependencies": [],
       "estimatedHours": 8,
-      "status": "pending",
+      "status": "inProgress",
       "tags": [
         "contract",
         "tokenomics",
         "es-paimon"
       ],
-      "phase": "P0-Security"
+      "phase": "P0-Security",
+      "startedAt": "2025-11-03T04:46:14.787358+00:00"
     },
     {
       "id": "37",
