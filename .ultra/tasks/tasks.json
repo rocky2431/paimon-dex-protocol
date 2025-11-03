@@ -1116,14 +1116,16 @@
         "36"
       ],
       "estimatedHours": 10,
-      "status": "in_progress",
+      "status": "completed",
       "tags": [
         "frontend",
         "es-paimon",
         "vesting"
       ],
       "phase": "P1-Core",
-      "startedAt": "2025-11-03T12:04:20Z"
+      "startedAt": "2025-11-03T12:04:20Z",
+      "completedAt": "2025-11-03T12:12:13Z",
+      "implementationNotes": "实现了 esPaimon 归属进度展示功能，包括: useVestingPosition hook (14 tests)、VestingProgressBar 组件 (5 tests)、ClaimVestedButton 组件 (6 tests)、convert 页面集成。所有测试通过，Material Design 3 规范，warm color palette。"
     },
     {
       "id": "51",
