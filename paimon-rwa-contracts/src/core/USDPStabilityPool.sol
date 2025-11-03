@@ -103,6 +103,11 @@ contract USDPStabilityPool is Ownable, ReentrancyGuard {
 
         usdp = USDP(_usdp);
         vault = USDPVault(_vault);
+
+        // FIX: P0-003 - Grant Vault permission to burn USDP from this pool
+        // This is required for liquidation: Vault calls burnFrom(pool, debtAmount)
+        // Using max approval for gas efficiency (no repeated approvals needed)
+        usdp.approve(_vault, type(uint256).max);
     }
 
     // ==================== External Functions ====================

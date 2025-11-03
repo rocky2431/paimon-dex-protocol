@@ -476,4 +476,214 @@ contract VaultStabilityPoolLiquidationTest is Test {
         uint256 remainingDebt = vault.debtOf(borrower);
         assertEq(remainingDebt, 60000 ether - 30000 ether - 1000 ether, "Repay should work after liquidation");
     }
+
+    // ==================== TASK P0-003: Accounting Mismatch Bug Tests ====================
+
+    /**
+     * @notice Test P0-003: Verify accounting consistency before and after liquidation
+     * @dev CRITICAL: This test demonstrates the accounting mismatch bug
+     * Expected behavior: balanceOf(pool) should ALWAYS equal _totalDeposits
+     * Current bug: After liquidation, balanceOf(pool) > _totalDeposits
+     */
+    function test_StabilityPool_Liquidation_Accounting() public {
+        // Step 1: Stability provider deposits USDP
+        vm.prank(stabilityProvider1);
+        stabilityPool.deposit(100000 ether);
+
+        // Verify initial accounting consistency
+        uint256 poolBalanceBefore = usdp.balanceOf(address(stabilityPool));
+        uint256 totalDepositsBefore = stabilityPool.totalDeposits();
+        assertEq(poolBalanceBefore, totalDepositsBefore, "Initial: balanceOf(pool) must equal totalDeposits");
+
+        // Step 2: Borrower deposits and borrows
+        vm.startPrank(borrower);
+        vault.deposit(address(collateralToken), 1000 ether); // $100,000
+        vault.borrow(60000 ether);
+        vm.stopPrank();
+
+        // Step 3: Price drops, position becomes unhealthy
+        chainlinkFeed.setLatestAnswer(70e8); // $70
+        vm.prank(trustedOracle);
+        oracle.updateNAV(70 ether);
+
+        // Step 4: Liquidate
+        uint256 debtToRepay = 30000 ether;
+        vm.prank(liquidator);
+        vault.liquidate(borrower, debtToRepay);
+
+        // Step 5: CRITICAL CHECK - Verify accounting consistency after liquidation
+        uint256 poolBalanceAfter = usdp.balanceOf(address(stabilityPool));
+        uint256 totalDepositsAfter = stabilityPool.totalDeposits();
+
+        // This assertion WILL FAIL with current buggy implementation
+        // Bug: poolBalanceAfter = 100000 ether (unchanged)
+        // Bug: totalDepositsAfter = 70000 ether (reduced by debtToRepay)
+        // Expected: Both should be 70000 ether
+        assertEq(
+            poolBalanceAfter,
+            totalDepositsAfter,
+            "CRITICAL BUG: balanceOf(pool) > totalDeposits after liquidation"
+        );
+
+        // Additional verification
+        assertEq(
+            totalDepositsAfter,
+            totalDepositsBefore - debtToRepay,
+            "totalDeposits should decrease by liquidation amount"
+        );
+        assertEq(
+            poolBalanceAfter,
+            poolBalanceBefore - debtToRepay,
+            "Pool balance should decrease by liquidation amount"
+        );
+    }
+
+    /**
+     * @notice Test P0-003: Multiple liquidations maintain accounting consistency
+     * @dev This test verifies that accounting remains consistent after multiple liquidations
+     */
+    function test_StabilityPool_MultiLiquidation_Balance() public {
+        // Setup: Multiple providers deposit
+        vm.prank(stabilityProvider1);
+        stabilityPool.deposit(80000 ether);
+
+        vm.prank(stabilityProvider2);
+        stabilityPool.deposit(40000 ether);
+
+        // Create multiple borrower positions
+        address borrower2 = makeAddr("borrower2");
+        collateralToken.mint(borrower2, INITIAL_COLLATERAL);
+
+        vm.prank(borrower2);
+        collateralToken.approve(address(vault), type(uint256).max);
+        vm.prank(borrower2);
+        usdp.approve(address(vault), type(uint256).max);
+
+        // Borrower 1 position
+        vm.startPrank(borrower);
+        vault.deposit(address(collateralToken), 1000 ether);
+        vault.borrow(60000 ether);
+        vm.stopPrank();
+
+        // Borrower 2 position
+        vm.startPrank(borrower2);
+        vault.deposit(address(collateralToken), 800 ether);
+        vault.borrow(48000 ether);
+        vm.stopPrank();
+
+        // Price drop
+        chainlinkFeed.setLatestAnswer(70e8);
+        vm.prank(trustedOracle);
+        oracle.updateNAV(70 ether);
+
+        // First liquidation
+        vm.prank(liquidator);
+        vault.liquidate(borrower, 30000 ether);
+
+        // Verify accounting after first liquidation
+        uint256 poolBalance1 = usdp.balanceOf(address(stabilityPool));
+        uint256 totalDeposits1 = stabilityPool.totalDeposits();
+        assertEq(poolBalance1, totalDeposits1, "Accounting mismatch after 1st liquidation");
+
+        // Second liquidation
+        vm.prank(liquidator);
+        vault.liquidate(borrower2, 24000 ether);
+
+        // Verify accounting after second liquidation
+        uint256 poolBalance2 = usdp.balanceOf(address(stabilityPool));
+        uint256 totalDeposits2 = stabilityPool.totalDeposits();
+        assertEq(poolBalance2, totalDeposits2, "Accounting mismatch after 2nd liquidation");
+
+        // Final verification
+        assertEq(
+            totalDeposits2,
+            120000 ether - 30000 ether - 24000 ether,
+            "Total deposits should reflect both liquidations"
+        );
+    }
+
+    /**
+     * @notice Test P0-003: All users can withdraw after liquidations
+     * @dev CRITICAL: This test verifies the most severe consequence of the bug
+     * With accounting mismatch, the last user cannot withdraw
+     */
+    function test_StabilityPool_AllUsersCanWithdraw() public {
+        // Setup: Multiple providers
+        vm.prank(stabilityProvider1);
+        stabilityPool.deposit(60000 ether);
+
+        vm.prank(stabilityProvider2);
+        stabilityPool.deposit(40000 ether);
+
+        // Borrower position
+        vm.startPrank(borrower);
+        vault.deposit(address(collateralToken), 1000 ether);
+        vault.borrow(60000 ether);
+        vm.stopPrank();
+
+        // Price drop and liquidate
+        chainlinkFeed.setLatestAnswer(70e8);
+        vm.prank(trustedOracle);
+        oracle.updateNAV(70 ether);
+
+        vm.prank(liquidator);
+        vault.liquidate(borrower, 30000 ether);
+
+        // Provider 1 withdraws their remaining balance
+        uint256 provider1Balance = stabilityPool.balanceOf(stabilityProvider1);
+        vm.prank(stabilityProvider1);
+        stabilityPool.withdraw(provider1Balance);
+
+        // Provider 2 MUST be able to withdraw (this will FAIL with buggy implementation)
+        uint256 provider2Balance = stabilityPool.balanceOf(stabilityProvider2);
+        vm.prank(stabilityProvider2);
+        stabilityPool.withdraw(provider2Balance);
+
+        // Verify all withdrawals succeeded
+        assertEq(stabilityPool.totalDeposits(), 0, "Pool should be empty after all withdrawals");
+        assertEq(stabilityPool.totalShares(), 0, "No shares should remain");
+
+        // Verify users received their funds
+        assertTrue(usdp.balanceOf(stabilityProvider1) > 0, "Provider 1 should receive USDP");
+        assertTrue(usdp.balanceOf(stabilityProvider2) > 0, "Provider 2 should receive USDP");
+    }
+
+    /**
+     * @notice Test P0-003: Verify Vault has permission to burn USDP from StabilityPool
+     * @dev This test checks the fix implementation requires proper approval
+     * After fix: Vault should be able to burn USDP from pool address
+     */
+    function test_Vault_BurnFromPool_Permission() public {
+        // Setup pool with USDP
+        vm.prank(stabilityProvider1);
+        stabilityPool.deposit(100000 ether);
+
+        // Verify pool has USDP
+        uint256 poolBalance = usdp.balanceOf(address(stabilityPool));
+        assertEq(poolBalance, 100000 ether, "Pool should have USDP");
+
+        // Setup borrower
+        vm.startPrank(borrower);
+        vault.deposit(address(collateralToken), 1000 ether);
+        vault.borrow(60000 ether);
+        vm.stopPrank();
+
+        // Price drop
+        chainlinkFeed.setLatestAnswer(70e8);
+        vm.prank(trustedOracle);
+        oracle.updateNAV(70 ether);
+
+        // CRITICAL: Liquidation should succeed (requires pool approval for Vault)
+        // After fix, Vault burns from pool address instead of liquidator
+        vm.prank(liquidator);
+        vault.liquidate(borrower, 30000 ether);
+
+        // Verify USDP was burned from pool
+        uint256 poolBalanceAfter = usdp.balanceOf(address(stabilityPool));
+        assertEq(
+            poolBalanceAfter,
+            poolBalance - 30000 ether,
+            "USDP should be burned from pool, not from liquidator"
+        );
+    }
 }
