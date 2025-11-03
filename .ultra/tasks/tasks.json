@@ -1167,7 +1167,7 @@
       "priority": "P0",
       "dependencies": [],
       "estimated_days": 0.75,
-      "status": "in_progress",
+      "status": "completed",
       "tags": [
         "security",
         "critical",
@@ -1185,7 +1185,9 @@
         "test_StabilityPool_AllUsersCanWithdraw()",
         "test_Vault_BurnFromPool_Permission()"
       ],
-      "started_at": "2025-11-03T19:39:50.729Z"
+      "started_at": "2025-11-03T19:39:50.729Z",
+      "completed_at": "2025-11-03T19:44:42.419Z",
+      "implementation_notes": "Fixed accounting mismatch by changing Vault to burn USDP from stabilityPool address instead of liquidator. Added StabilityPool approval for Vault in constructor. All 89 tests pass with zero regression."
     },
     {
       "id": "P0-004",
