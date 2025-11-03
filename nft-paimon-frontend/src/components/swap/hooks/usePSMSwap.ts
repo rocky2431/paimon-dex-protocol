@@ -18,15 +18,19 @@ import {
   MESSAGES,
 } from '../constants';
 
-// PSM ABI (simplified for swap functionality)
+// PSM ABI (correct functions for USDC ↔ USDP swaps)
 const PSM_ABI = [
   {
-    inputs: [
-      { name: 'amountIn', type: 'uint256' },
-      { name: 'minAmountOut', type: 'uint256' },
-    ],
-    name: 'swap',
-    outputs: [{ name: 'amountOut', type: 'uint256' }],
+    inputs: [{ name: 'usdcAmount', type: 'uint256' }],
+    name: 'swapUSDCForUSDP',
+    outputs: [{ name: 'usdpReceived', type: 'uint256' }],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [{ name: 'usdpAmount', type: 'uint256' }],
+    name: 'swapUSDPForUSDC',
+    outputs: [{ name: 'usdcReceived', type: 'uint256' }],
     stateMutability: 'nonpayable',
     type: 'function',
   },
@@ -58,13 +62,45 @@ const ERC20_ABI = [
 
 /**
  * usePSMSwap Hook
- * Handles USDC ↔ USDP 1:1 swap via PSM contract
+ * Handles USDC ↔ USDP 1:1 swap via PSM (Peg Stability Module) contract
  *
  * Features:
  * - 1:1 exchange rate with 0.1% fee
- * - Automatic allowance checking
- * - Swap state management
- * - Balance validation
+ * - Bidirectional swaps using correct PSM functions:
+ *   - USDC → USDP: calls swapUSDCForUSDP(usdcAmount)
+ *   - USDP → USDC: calls swapUSDPForUSDC(usdpAmount)
+ * - Automatic allowance checking and approval
+ * - Swap state management with error handling
+ * - Real-time balance validation
+ *
+ * @returns {Object} Hook methods and state
+ * @property {SwapFormData} formData - Current swap form state
+ * @property {TokenBalance} inputBalance - User's input token balance
+ * @property {TokenBalance} outputBalance - User's output token balance
+ * @property {SwapCalculation} calculation - Calculated swap output and fees
+ * @property {SwapValidation} validation - Swap validation result
+ * @property {SwapState} swapState - Current swap execution state
+ * @property {string} errorMessage - Error message if swap fails
+ * @property {Function} handleInputAmountChange - Update input amount
+ * @property {Function} handleSwitchTokens - Switch USDC ↔ USDP direction
+ * @property {Function} handleMaxClick - Set input to max balance
+ * @property {Function} handleSwap - Execute the swap transaction
+ *
+ * @example
+ * ```tsx
+ * const {
+ *   formData,
+ *   calculation,
+ *   handleInputAmountChange,
+ *   handleSwap,
+ * } = usePSMSwap();
+ *
+ * // Set swap amount
+ * handleInputAmountChange('100');
+ *
+ * // Execute swap (USDC → USDP)
+ * await handleSwap();
+ * ```
  */
 export const usePSMSwap = () => {
   const { address, isConnected } = useAccount();
@@ -250,12 +286,16 @@ export const usePSMSwap = () => {
 
       setSwapState(SwapState.SWAPPING);
 
-      // Execute swap (minAmountOut = 0 for now, can add slippage later)
+      // Execute swap based on direction
+      // USDC → USDP: call swapUSDCForUSDP(usdcAmount)
+      // USDP → USDC: call swapUSDPForUSDC(usdpAmount)
+      const isUSDCtoUSDP = formData.inputToken === Token.USDC;
+
       await writeContractAsync({
         address: CONTRACT_ADDRESSES.PSM,
         abi: PSM_ABI,
-        functionName: 'swap',
-        args: [calculation.inputAmount, BigInt(0)],
+        functionName: isUSDCtoUSDP ? 'swapUSDCForUSDP' : 'swapUSDPForUSDC',
+        args: [calculation.inputAmount],
       });
 
       setSwapState(SwapState.SUCCESS);

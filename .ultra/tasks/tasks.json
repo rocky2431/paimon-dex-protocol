@@ -3,12 +3,12 @@
   "metadata": {
     "projectName": "Paimon.dex",
     "created": "2025-11-01T12:00:00Z",
-    "lastModified": "2025-11-02T08:20:51.244Z",
-    "description": "Paimon 协议改造：HYD→USDP + ve33 治理 + Boost 激励"
+    "lastModified": "2025-11-03T03:16:41.882135Z",
+    "description": "Paimon 协议改造：HYD→USDP + ve33 治理 + Boost 激励 + 系统改进计划"
   },
   "stats": {
-    "total": 31,
-    "pending": 8,
+    "total": 47,
+    "pending": 20,
     "inProgress": 1,
     "completed": 22,
     "blocked": 0
@@ -668,6 +668,303 @@
         "mainnet",
         "verification"
       ]
+    },
+    {
+      "id": "32",
+      "title": "【紧急修复】前端 PSM Swap Hook ABI 错误修复",
+      "description": "修复 usePSMSwap.ts 中使用错误 ABI 的问题。当前调用不存在的 swap 函数，导致 PSM Swap 功能完全无法使用。\n\n问题证据：src/components/swap/hooks/usePSMSwap.ts:22-33\n错误：调用 swap 函数（不存在）\n正确：应调用 swapUSDCForUSDP 和 swapUSDPForUSDC",
+      "complexity": 3,
+      "priority": "P0",
+      "dependencies": [],
+      "estimatedHours": 8,
+      "status": "completed",
+      "tags": [
+        "frontend",
+        "bug-fix",
+        "critical",
+        "psm"
+      ],
+      "phase": "P0-Emergency",
+      "completedAt": "2025-11-03",
+      "notes": "Fixed PSM swap ABI to use correct functions: swapUSDCForUSDP and swapUSDPForUSDC. Added comprehensive 6-dimensional test coverage (9 tests, 100% pass). See commit d6e8bbf."
+    },
+    {
+      "id": "33",
+      "title": "【紧急修复】前端 Analytics totalMintedHYD 数据源修复",
+      "description": "修复 useAnalytics.ts 中读取不存在的 totalMintedHYD 导致 TVL 数据无法显示的问题。\n\n问题证据：src/components/analytics/hooks/useAnalytics.ts:27,116-118\n错误：读取 totalMintedHYD（HYD 已改名为 USDP）\n正确：应读取 USDP.totalSupply()",
+      "complexity": 2,
+      "priority": "P0",
+      "dependencies": [],
+      "estimatedHours": 4,
+      "status": "pending",
+      "tags": [
+        "frontend",
+        "bug-fix",
+        "analytics"
+      ],
+      "phase": "P0-Emergency"
+    },
+    {
+      "id": "34",
+      "title": "USDP.sol - 新增 accrualPaused 安全开关",
+      "description": "在 USDP 合约中新增 accrualPaused 安全开关，防止意外的收益分配。默认关闭指数分红，仅 SavingRate 承接收益。\n\n实现内容：\n1. 新增状态变量：bool public accrualPaused = true\n2. 在 accumulate 函数前添加检查\n3. 新增管理函数：setAccrualPaused(bool) external onlyOwner\n4. 添加事件：AccrualPausedUpdated(bool paused)\n5. 单元测试覆盖所有分支",
+      "complexity": 3,
+      "priority": "P0",
+      "dependencies": [],
+      "estimatedHours": 6,
+      "status": "pending",
+      "tags": [
+        "contract",
+        "security",
+        "usdp"
+      ],
+      "phase": "P0-Security"
+    },
+    {
+      "id": "35",
+      "title": "SavingRate.sol - 新增 fund 注资函数",
+      "description": "在 SavingRate 合约中新增 fund(uint256) 注资函数，建立 USDC→PSM→USDP→fund 闭环，确保利息支付仅来自国库注资。\n\n实现内容：\n1. 新增函数：fund(uint256 amount) external onlyOwner\n2. 逻辑：假设 USDP 已先转入合约，仅记账与触发事件\n3. 更新内部记账：totalFunded += amount\n4. 触发事件：TreasuryFunded(msg.sender, amount)\n5. 单元测试：fund 成功、onlyOwner 限制、事件触发\n6. 前端：增加系统注资只读标识位",
+      "complexity": 3,
+      "priority": "P0",
+      "dependencies": [],
+      "estimatedHours": 6,
+      "status": "pending",
+      "tags": [
+        "contract",
+        "treasury",
+        "saving-rate"
+      ],
+      "phase": "P0-Security"
+    },
+    {
+      "id": "36",
+      "title": "esPaimon.sol - 新增 vestFor 归属化发放函数",
+      "description": "在 esPaimon 合约中新增 vestFor(address user, uint256 amount) 函数，供 RewardDistributor 或 Treasury 进行归属化发放。\n\n实现内容：\n1. 新增函数：vestFor(address user, uint256 amount) external\n2. 权限控制：仅 Distributor/Treasury 可调用\n3. 逻辑：从调用方拉取 PAIMON 或记账来源、合并到用户的归属仓位\n4. 沿用现有 365 天线性归属与早退罚则\n5. 添加事件：VestedFor(address indexed user, uint256 amount, address indexed by)\n6. 单元测试：vestFor/claim/earlyExit 组合测试\n7. 前端：Convert 页面调用 claim 显示归属进度",
+      "complexity": 4,
+      "priority": "P0",
+      "dependencies": [],
+      "estimatedHours": 8,
+      "status": "pending",
+      "tags": [
+        "contract",
+        "tokenomics",
+        "es-paimon"
+      ],
+      "phase": "P0-Security"
+    },
+    {
+      "id": "37",
+      "title": "RewardDistributor.sol - 新增 es 归属化分发分支",
+      "description": "在 RewardDistributor 合约中新增 es 模式分支，支持归属化发放（调用 esPaimon.vestFor）与直接发放两种模式，集成 BoostStaking 乘数。\n\n实现内容：\n1. 新增状态变量：address public esPaimon\n2. 新增配置：bool public useEsVesting = true\n3. 修改 claim() 函数：验证 Merkle → 计算 actualReward = baseReward * boostMultiplier / 10000 → 调用 esPaimon.vestFor 或 safeTransfer\n4. 保持现有 BoostStaking 集成\n5. 单元测试：双分支、Boost 乘数、Merkle 验证\n6. 前端：领取页面增加归属化标记",
+      "complexity": 5,
+      "priority": "P0",
+      "dependencies": [
+        "36"
+      ],
+      "estimatedHours": 10,
+      "status": "pending",
+      "tags": [
+        "contract",
+        "rewards",
+        "distributor"
+      ],
+      "phase": "P0-Security"
+    },
+    {
+      "id": "38",
+      "title": "USDPVault.sol - 实现抵押借款核心合约",
+      "description": "新增 USDPVault 合约，实现标准化的抵押/借款/还款/清算接口，支持 LTV 分层、双源预言机、清算机制。\n\n实现内容：\n1. 核心状态：用户抵押品映射、债务映射、LTV 配置\n2. 核心函数：deposit/withdraw/borrow/repay/liquidate/debtOf\n3. 健康度计算：HF = collateralUSD / (debtUSD * threshold)\n4. 预言机集成：RWAPriceOracle（双源 + 断路器）\n5. 清算逻辑：调用 StabilityPool.onLiquidationProceeds\n6. 授权 USDP：setAuthorizedMinter(vault, true)\n7. 事件完整：Borrow/Repay/DebtUpdated/Liquidated\n8. 单元测试：抵押/借/还/清算完整流程\n9. 前端：Borrow/Repay 页面 + hooks（useVault）",
+      "complexity": 8,
+      "priority": "P1",
+      "dependencies": [
+        "34",
+        "35"
+      ],
+      "estimatedHours": 40,
+      "status": "pending",
+      "tags": [
+        "contract",
+        "vault",
+        "lending",
+        "core"
+      ],
+      "phase": "P1-Core"
+    },
+    {
+      "id": "39",
+      "title": "EmissionManager.sol - 实现逐周预算管理合约",
+      "description": "新增 EmissionManager 合约，按三阶段逐周查表输出四通道预算（debt/lpPairs/stabilityPool/eco），支持 LP 二级分流治理。\n\n实现内容：\n1. 存储 Phase-B 衰减数组：uint256[236] E_B（预计算或公式）\n2. 核心函数：getWeeklyBudget(uint256 w) returns (debt, lpPairs, stabilityPool, eco)\n3. 三阶段逻辑：w ∈ [1,12] 固定 37.5M，w ∈ [13,248] 衰减，w ∈ [249,352] 固定 4.327M\n4. LP 二级分流：lpPairsBps/stabilityPoolBps（治理可调，Timelock）\n5. 治理函数：setLpSplitParams(uint16 pairs, uint16 stability) onlyOwner\n6. 事件：WeekBudgetEmitted（可选）\n7. 单元测试：逐周预算、LP 分流、阶段末补差\n8. 脚本：生成 352 周 JSON 用于对账\n9. 前端：Emission 可视化页面",
+      "complexity": 7,
+      "priority": "P1",
+      "dependencies": [],
+      "estimatedHours": 35,
+      "status": "pending",
+      "tags": [
+        "contract",
+        "emission",
+        "tokenomics"
+      ],
+      "phase": "P1-Core"
+    },
+    {
+      "id": "40",
+      "title": "分发整合 - 离线快照与 Merkle 生成服务",
+      "description": "实现离线快照服务，生成债务/LP/稳定池的 TWAD 权重，生成 Merkle 树，配置 RewardDistributor。\n\n实现内容：\n1. 快照脚本/服务（Node.js/Python）：读取 USDPVault.debtOf、LP 池份额、StabilityPool shares、GaugeController 权重\n2. 权重计算：债务/LP/稳定池按 TWAD\n3. Merkle 生成：使用 OpenZeppelin MerkleTree 库\n4. 输出：CSV/JSON（快照、权重、奖励清单）\n5. 配置：调用 RewardDistributor.setMerkleRoot(root, epoch)\n6. 校验工具：验证 Σ奖励 ≤ 周预算\n7. CI/CD：每周自动快照 + Merkle 生成\n8. 文档：操作手册 + 回归测试流程",
+      "complexity": 6,
+      "priority": "P1",
+      "dependencies": [
+        "38",
+        "39"
+      ],
+      "estimatedHours": 30,
+      "status": "pending",
+      "tags": [
+        "backend",
+        "distribution",
+        "merkle",
+        "automation"
+      ],
+      "phase": "P1-Core"
+    },
+    {
+      "id": "41",
+      "title": "USDPStabilityPool.sol - 实现稳定池合约",
+      "description": "新增 USDPStabilityPool 合约，支持 USDP 存取、奖励分配、清算承接，作为 LP 通道内部的二级配额参与者。\n\n实现内容：\n1. 核心状态：用户 shares 映射、totalShares、totalDeposits\n2. 核心函数：deposit/withdraw/claim/onLiquidationProceeds\n3. 清算分配逻辑：按 userShares/totalShares 比例分配资产或 USDC\n4. 与 Vault 集成：清算路径回调稳定池\n5. 与 Distributor 集成：作为 LP 通道内部 Gauge 参与权重分配\n6. 事件完整：Deposited/Withdrawn/RewardClaimed/LiquidationProceeds\n7. 单元测试：存取/奖励/清算承接完整流程\n8. 前端：稳定池页面 + hooks（useStabilityPool）",
+      "complexity": 6,
+      "priority": "P2",
+      "dependencies": [
+        "38"
+      ],
+      "estimatedHours": 30,
+      "status": "pending",
+      "tags": [
+        "contract",
+        "stability-pool",
+        "lending"
+      ],
+      "phase": "P2-Complete"
+    },
+    {
+      "id": "42",
+      "title": "Vault 清算与稳定池集成",
+      "description": "将 USDPVault 的清算逻辑与 USDPStabilityPool 集成，清算时自动调用稳定池承接资产。\n\n实现内容：\n1. 修改 USDPVault.liquidate：计算清算金额与罚金，将抵押品转入稳定池\n2. 稳定池承接：若资产为 USDC 直接分配，若为其他资产记录待分配资产\n3. 集成测试：完整清算流程（Vault → StabilityPool → 用户领取）\n4. 前端：稳定池页面显示待领取的清算资产",
+      "complexity": 5,
+      "priority": "P2",
+      "dependencies": [
+        "38",
+        "41"
+      ],
+      "estimatedHours": 25,
+      "status": "pending",
+      "tags": [
+        "contract",
+        "integration",
+        "liquidation"
+      ],
+      "phase": "P2-Complete"
+    },
+    {
+      "id": "43",
+      "title": "前端完整 Hooks 开发",
+      "description": "开发缺失的前端 hooks：useVault、useStabilityPool、useDistributorClaim、useEmissionBudget，支持完整的用户交互。\n\n实现内容：\n1. useVault：deposit/withdraw/borrow/repay 函数，debtOf/healthFactor 查询\n2. useStabilityPool：deposit/withdraw/claim 函数，userShares/totalShares 查询，待领取的清算资产\n3. useDistributorClaim：claim 函数（Merkle 验证），可领取奖励查询，Boost 乘数显示\n4. useEmissionBudget：getWeeklyBudget 查询，当前周/预算/通道分布，历史排放数据\n5. ABI 配置：更新 src/config/contracts/ 添加新合约 ABI\n6. 地址配置：更新 src/config/chains/testnet.ts 添加新合约地址\n7. 单元测试：每个 hook 的测试覆盖",
+      "complexity": 6,
+      "priority": "P2",
+      "dependencies": [
+        "38",
+        "39",
+        "41"
+      ],
+      "estimatedHours": 30,
+      "status": "pending",
+      "tags": [
+        "frontend",
+        "hooks",
+        "integration"
+      ],
+      "phase": "P2-Complete"
+    },
+    {
+      "id": "44",
+      "title": "P0 阶段验收测试",
+      "description": "执行 P0 阶段（紧急修复 + 基础安全）的完整验收测试，确保所有功能正常且符合白皮书规范。\n\n测试内容：\n1. 单元测试：所有 P0 合约修改的单测通过\n2. 集成测试：USDP/SavingRate/esPaimon/Distributor 完整流程\n3. 前端测试：PSM Swap USDC↔USDP 成功，Analytics TVL 数据正确\n4. 手动测试（测试网）：完整用户流程验证，边界条件测试\n5. 文档：测试报告 + 已知问题清单",
+      "complexity": 4,
+      "priority": "P0",
+      "dependencies": [
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37"
+      ],
+      "estimatedHours": 16,
+      "status": "pending",
+      "tags": [
+        "testing",
+        "qa",
+        "validation"
+      ],
+      "phase": "P0-Validation"
+    },
+    {
+      "id": "45",
+      "title": "P1 阶段验收测试",
+      "description": "执行 P1 阶段（核心债务与预算）的完整验收测试，验证 Vault、EmissionManager、分发整合的正确性。\n\n测试内容：\n1. 单元测试：Vault/EmissionManager 单测通过\n2. 集成测试：完整 DeFi 流程（RWA → USDP → vePaimon → Gauge → LP → 奖励），债务挖矿/LP 奖励/清算流程\n3. EmissionManager 验证：逐周预算正确（352 周），LP 二级分流，守恒校验\n4. 前端测试：Borrow/Repay 页面，Emission 可视化页面\n5. 手动测试（测试网）：完整流程验证\n6. 文档：测试报告 + 性能指标",
+      "complexity": 6,
+      "priority": "P1",
+      "dependencies": [
+        "38",
+        "39",
+        "40"
+      ],
+      "estimatedHours": 30,
+      "status": "pending",
+      "tags": [
+        "testing",
+        "qa",
+        "validation",
+        "integration"
+      ],
+      "phase": "P1-Validation"
+    },
+    {
+      "id": "46",
+      "title": "P2 阶段验收测试与最终交付",
+      "description": "执行 P2 阶段（稳定池闭环）的完整验收测试，并准备最终交付文档。\n\n测试内容：\n1. 单元测试：StabilityPool 单测通过\n2. 集成测试：完整清算流程（Vault → 稳定池 → 用户领取），稳定池奖励分配\n3. 端到端测试：完整 DeFi 流程（含稳定池），清算压力测试\n4. 前端测试：稳定池页面，所有新 hooks\n5. 性能测试：Core Web Vitals 对比基线\n6. 安全审计：合约安全检查\n7. 文档：最终测试报告、部署手册、用户手册、API 文档",
+      "complexity": 5,
+      "priority": "P2",
+      "dependencies": [
+        "41",
+        "42",
+        "43"
+      ],
+      "estimatedHours": 25,
+      "status": "pending",
+      "tags": [
+        "testing",
+        "qa",
+        "validation",
+        "delivery"
+      ],
+      "phase": "P2-Validation"
+    },
+    {
+      "id": "47",
+      "title": "生成 352 周排放计划 JSON",
+      "description": "生成完整的 352 周排放计划 JSON 文件，用于对账和前端可视化。\n\n实现内容：\n1. 脚本：根据白皮书公式计算 352 周预算\n2. 输出：.ultra/docs/emission-schedule.json\n3. 格式：包含每周详细预算（total/debt/lpPairs/stabilityPool/eco）和阶段汇总\n4. 验证：守恒校验（阶段累计 == 阶段预算）\n5. 前端：Emission 可视化页面加载此 JSON",
+      "complexity": 3,
+      "priority": "P1",
+      "dependencies": [
+        "39"
+      ],
+      "estimatedHours": 8,
+      "status": "pending",
+      "tags": [
+        "backend",
+        "data",
+        "emission"
+      ],
+      "phase": "P1-Core"
     }
   ]
 }
