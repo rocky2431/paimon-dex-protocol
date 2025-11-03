@@ -435,12 +435,10 @@ contract EmissionManager is Ownable {
         debt = (totalBudget * debtBps) / BASIS_POINTS;
         eco = (totalBudget * ecoBps) / BASIS_POINTS;
 
-        // LP total with phase-specific ratio
-        uint256 lpTotal = (totalBudget * lpBps) / BASIS_POINTS;
-
         // LP secondary split (governance-adjustable)
-        lpPairs = (lpTotal * lpPairsBps) / BASIS_POINTS;
-        stabilityPool = (lpTotal * stabilityPoolBps) / BASIS_POINTS;
+        // Task P2-001: Fix precision loss - combine multiplications before division
+        lpPairs = (totalBudget * lpBps * lpPairsBps) / (BASIS_POINTS * BASIS_POINTS);
+        stabilityPool = (totalBudget * lpBps * stabilityPoolBps) / (BASIS_POINTS * BASIS_POINTS);
 
         // Dust collection: Add any rounding error to debt channel
         uint256 allocated = debt + lpPairs + stabilityPool + eco;

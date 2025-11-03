@@ -328,10 +328,8 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
 
             if (balance > 0) {
                 CollateralConfig memory config = collateralConfigs[collateral];
-                // Calculate USD value of this collateral
-                uint256 collateralValueUSD = (balance * price) / PRICE_PRECISION;
-                // Apply liquidation threshold for this specific collateral
-                adjustedCollateralValue += (collateralValueUSD * config.liquidationThreshold) / BASIS_POINTS;
+                // Task P2-001: Fix precision loss - combine multiplications before divisions
+                adjustedCollateralValue += (balance * price * config.liquidationThreshold) / (PRICE_PRECISION * BASIS_POINTS);
             }
         }
 
@@ -356,8 +354,8 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
 
             if (balance > 0) {
                 CollateralConfig memory config = collateralConfigs[collateral];
-                uint256 collateralValue = (balance * price) / PRICE_PRECISION;
-                totalBorrowPower += (collateralValue * config.ltv) / BASIS_POINTS;
+                // Task P2-001: Fix precision loss - combine multiplications before divisions
+                totalBorrowPower += (balance * price * config.ltv) / (PRICE_PRECISION * BASIS_POINTS);
             }
         }
 
