@@ -1,0 +1,136 @@
+name: Weekly Reward Distribution
+
+on:
+  schedule:
+    # Run every Monday at 00:00 UTC (weekly)
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+    inputs:
+      epoch:
+        description: 'Epoch number'
+        required: true
+        type: number
+
+jobs:
+  generate-distribution:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: distribution-service/package-lock.json
+
+      - name: Install dependencies
+        working-directory: distribution-service
+        run: npm ci
+
+      - name: Run tests
+        working-directory: distribution-service
+        run: npm test
+
+      - name: Fetch eligible users
+        id: fetch-users
+        working-directory: distribution-service
+        run: |
+          # TODO: Implement user fetching from subgraph or events
+          # For now, create a dummy users file
+          echo '["0x0000000000000000000000000000000000000001"]' > users.json
+          echo "users_count=$(cat users.json | jq 'length')" >> $GITHUB_OUTPUT
+
+      - name: Calculate epoch
+        id: calc-epoch
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "epoch=${{ github.event.inputs.epoch }}" >> $GITHUB_OUTPUT
+          else
+            # Calculate epoch from current timestamp
+            # Assuming epoch 0 starts at 2025-01-01 00:00:00 UTC (1704067200)
+            EPOCH_START=1704067200
+            EPOCH_DURATION=604800  # 1 week in seconds
+            CURRENT_TIME=$(date +%s)
+            EPOCH=$(( ($CURRENT_TIME - $EPOCH_START) / $EPOCH_DURATION ))
+            echo "epoch=$EPOCH" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate snapshot and Merkle tree
+        working-directory: distribution-service
+        env:
+          RPC_URL: ${{ secrets.BSC_RPC_URL }}
+          USDP_VAULT_ADDRESS: ${{ secrets.USDP_VAULT_ADDRESS }}
+          STABILITY_POOL_ADDRESS: ${{ secrets.STABILITY_POOL_ADDRESS }}
+          GAUGE_CONTROLLER_ADDRESS: ${{ secrets.GAUGE_CONTROLLER_ADDRESS }}
+          REWARD_DISTRIBUTOR_ADDRESS: ${{ secrets.REWARD_DISTRIBUTOR_ADDRESS }}
+          EMISSION_MANAGER_ADDRESS: ${{ secrets.EMISSION_MANAGER_ADDRESS }}
+          LP_TOKEN_ADDRESSES: ${{ secrets.LP_TOKEN_ADDRESSES }}
+        run: |
+          npm run snapshot ${{ steps.calc-epoch.outputs.epoch }} users.json
+
+      - name: Validate distribution
+        working-directory: distribution-service
+        run: |
+          npm run validate output/merkle.json
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: distribution-epoch-${{ steps.calc-epoch.outputs.epoch }}
+          path: distribution-service/output/
+          retention-days: 90
+
+      - name: Create summary
+        working-directory: distribution-service
+        run: |
+          echo "# Weekly Distribution - Epoch ${{ steps.calc-epoch.outputs.epoch }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Summary" >> $GITHUB_STEP_SUMMARY
+          cat output/summary.txt >> $GITHUB_STEP_SUMMARY
+
+  submit-merkle-root:
+    needs: generate-distribution
+    runs-on: ubuntu-latest
+    environment: production
+    # Require manual approval before submitting to blockchain
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: distribution-service/package-lock.json
+
+      - name: Install dependencies
+        working-directory: distribution-service
+        run: npm ci
+
+      - name: Download distribution artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: distribution-epoch-${{ github.event.inputs.epoch }}
+          path: distribution-service/output/
+
+      - name: Submit Merkle root
+        working-directory: distribution-service
+        env:
+          RPC_URL: ${{ secrets.BSC_RPC_URL }}
+          REWARD_DISTRIBUTOR_ADDRESS: ${{ secrets.REWARD_DISTRIBUTOR_ADDRESS }}
+          ADMIN_PRIVATE_KEY: ${{ secrets.ADMIN_PRIVATE_KEY }}
+        run: |
+          npm run distribute output/merkle.json
+
+      - name: Create deployment summary
+        run: |
+          echo "# Merkle Root Submitted - Epoch ${{ github.event.inputs.epoch }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Distribution successfully deployed to BSC mainnet" >> $GITHUB_STEP_SUMMARY
