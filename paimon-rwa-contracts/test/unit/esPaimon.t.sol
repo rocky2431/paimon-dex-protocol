@@ -652,7 +652,7 @@ contract esPaimonTest is Test {
         vm.stopPrank();
 
         // Get initial position state
-        (uint256 initialTotal, uint256 initialClaimed, uint256 initialStartTime,) = token.vestingPositions(user1);
+        (,, uint256 initialStartTime,) = token.vestingPositions(user1);
 
         // Advance time and partial vest
         vm.warp(block.timestamp + 100 days);

@@ -174,7 +174,7 @@ contract TreasuryLiquidationTest is Test {
    */
   function test_Liquidate_Undercollateralized_Success() public {
     // Create position with HF = 105% (just enough for full liquidation with 5% penalty)
-    (uint256 rwaAmount, uint256 hydDebt) = _createUndercollateralizedPosition(105);
+    (, uint256 hydDebt) = _createUndercollateralizedPosition(105);
 
     // Verify position is liquidatable
     uint256 healthFactorBefore = treasury.getHealthFactor(user);

@@ -579,7 +579,6 @@ contract SavingRateTest is Test {
         savingRate.accrueInterest(user1);
 
         // Interest should still accrue (no total precision loss)
-        uint256 interest = savingRate.accruedInterestOf(user1);
 
         // Even tiny amounts should earn something
         // (May be 0 due to precision limits, but should not revert)
@@ -895,7 +894,6 @@ contract SavingRateTest is Test {
         // Test that checkUpkeep returns true after 24 hours
 
         uint256 lastUpdateTime = block.timestamp;
-
         // Warp 23 hours (should not trigger)
         vm.warp(block.timestamp + 23 hours);
         (bool upkeepNeeded,) = savingRate.checkUpkeep("");

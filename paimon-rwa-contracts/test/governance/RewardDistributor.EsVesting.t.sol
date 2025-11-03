@@ -156,7 +156,7 @@ contract RewardDistributorEsVestingTest is Test {
         // Assert: Reward should be transferred directly, not vested
         assertEq(paimonToken.balanceOf(alice), 100_000e18 + BASE_REWARD, "Alice should receive direct PAIMON");
 
-        (uint256 totalAmount, uint256 claimedAmount,,) = esPaimonContract.vestingPositions(alice);
+        (uint256 totalAmount,,,) = esPaimonContract.vestingPositions(alice);
         assertEq(totalAmount, 0, "Alice should have no vesting position");
     }
 
@@ -190,7 +190,7 @@ contract RewardDistributorEsVestingTest is Test {
         // Assert: Boosted amount should be vested (100 * 1.1 = 110)
         uint256 expectedVestedAmount = (BASE_REWARD * boostMultiplier) / 10000;
 
-        (uint256 totalAmount, uint256 claimedAmount,,) = esPaimonContract.vestingPositions(bob);
+        (uint256 totalAmount,,,) = esPaimonContract.vestingPositions(bob);
         assertEq(totalAmount, expectedVestedAmount, "Bob should have boosted vesting position");
         assertEq(totalAmount, 110e18, "Vested amount should be 110 PAIMON");
     }
@@ -234,7 +234,7 @@ contract RewardDistributorEsVestingTest is Test {
         distributor.claim(0, address(paimonToken), BASE_REWARD, aliceProof);
 
         // Assert: Base reward vested (no boost)
-        (uint256 totalAmount, uint256 claimedAmount,,) = esPaimonContract.vestingPositions(alice);
+        (uint256 totalAmount,,,) = esPaimonContract.vestingPositions(alice);
         assertEq(totalAmount, BASE_REWARD);
     }
 
@@ -264,7 +264,7 @@ contract RewardDistributorEsVestingTest is Test {
         distributor.claim(0, address(paimonToken), BASE_REWARD, aliceProof);
 
         // Assert: Max boosted reward vested (100 * 1.5 = 150)
-        (uint256 totalAmount, uint256 claimedAmount,,) = esPaimonContract.vestingPositions(alice);
+        (uint256 totalAmount,,,) = esPaimonContract.vestingPositions(alice);
         assertEq(totalAmount, 150e18);
     }
 
@@ -290,7 +290,7 @@ contract RewardDistributorEsVestingTest is Test {
         distributor.claim(0, address(paimonToken), maxReward, aliceProof);
 
         // Assert
-        (uint256 totalAmount, uint256 claimedAmount,,) = esPaimonContract.vestingPositions(alice);
+        (uint256 totalAmount,,,) = esPaimonContract.vestingPositions(alice);
         assertEq(totalAmount, maxReward);
     }
 
@@ -443,7 +443,7 @@ contract RewardDistributorEsVestingTest is Test {
         vm.prank(alice);
         distributor.claim(0, address(paimonToken), BASE_REWARD, aliceProof);
 
-        (uint256 aliceTotalAmount, uint256 aliceClaimedAmount,,) = esPaimonContract.vestingPositions(alice);
+        (uint256 aliceTotalAmount,,,) = esPaimonContract.vestingPositions(alice);
         assertEq(aliceTotalAmount, BASE_REWARD);
 
         // Switch to direct transfer mode
@@ -459,7 +459,7 @@ contract RewardDistributorEsVestingTest is Test {
         // Bob should receive direct transfer, not vesting
         assertEq(paimonToken.balanceOf(bob), 100_000e18 + BASE_REWARD);
 
-        (uint256 bobTotalAmount, uint256 bobClaimedAmount,,) = esPaimonContract.vestingPositions(bob);
+        (uint256 bobTotalAmount,,,) = esPaimonContract.vestingPositions(bob);
         assertEq(bobTotalAmount, 0);
     }
 
@@ -478,7 +478,7 @@ contract RewardDistributorEsVestingTest is Test {
         vm.prank(alice);
         distributor.claim(0, address(paimonToken), BASE_REWARD, aliceProof);
 
-        (uint256 totalAmount, uint256 claimedAmount,,) = esPaimonContract.vestingPositions(alice);
+        (uint256 totalAmount,,,) = esPaimonContract.vestingPositions(alice);
         assertEq(totalAmount, BASE_REWARD);
 
         // Invalid proof should fail

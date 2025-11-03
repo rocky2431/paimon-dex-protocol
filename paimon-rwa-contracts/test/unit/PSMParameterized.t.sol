@@ -398,7 +398,6 @@ contract PSMParameterizedTest is Test {
 
         // Step 2: USDP -> USDC
         usdp.approve(address(psm6), usdpReceived);
-        uint256 usdcReturned = psm6.swapUSDPForUSDC(usdpReceived);
 
         uint256 finalBalance = usdc6.balanceOf(alice);
 

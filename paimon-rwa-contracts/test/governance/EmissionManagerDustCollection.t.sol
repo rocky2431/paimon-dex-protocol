@@ -159,7 +159,6 @@ contract EmissionManagerDustCollectionTest is Test {
             (uint256 debt, uint256 lpPairs, uint256 stabilityPool, uint256 eco) =
                 emissionManager.getWeeklyBudget(week);
 
-            uint256 totalBudget = debt + lpPairs + stabilityPool + eco;
 
             // Dust should be deterministic for each week
             // Calling getWeeklyBudget multiple times should give same result
