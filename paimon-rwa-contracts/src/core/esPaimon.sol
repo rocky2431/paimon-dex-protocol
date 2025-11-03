@@ -54,6 +54,9 @@ contract esPaimon is Ownable, ReentrancyGuard {
     /// @notice Authorized bribe market
     address public bribeMarket;
 
+    /// @notice Authorized treasury
+    address public treasury;
+
     /// @notice Current week number (for emission tracking)
     uint256 public currentWeek;
 
@@ -65,6 +68,8 @@ contract esPaimon is Ownable, ReentrancyGuard {
     event WeeklyEmissionUpdated(uint256 indexed week, uint256 decayedAmount);
     event DistributorUpdated(address indexed oldDistributor, address indexed newDistributor);
     event BribeMarketUpdated(address indexed oldBribeMarket, address indexed newBribeMarket);
+    event TreasuryUpdated(address indexed oldTreasury, address indexed newTreasury);
+    event VestedFor(address indexed user, uint256 amount, address indexed by);
 
     // ==================== Constructor ====================
 
@@ -115,6 +120,49 @@ contract esPaimon is Ownable, ReentrancyGuard {
         position.totalAmount += amount;
 
         emit Vested(msg.sender, amount, block.timestamp + VESTING_PERIOD);
+    }
+
+    /**
+     * @notice Vest PAIMON tokens for a user (called by Distributor or Treasury)
+     * @param user User address to vest tokens for
+     * @param amount Amount to vest
+     * @dev Only callable by distributor or treasury
+     */
+    function vestFor(address user, uint256 amount) external nonReentrant {
+        require(msg.sender == distributor || msg.sender == treasury, "esPaimon: Not authorized");
+        require(user != address(0), "esPaimon: Zero address");
+        require(amount > 0, "esPaimon: Cannot vest zero");
+
+        VestingPosition storage position = vestingPositions[user];
+
+        // Check if this is a new position BEFORE claiming
+        bool isNewPosition = position.totalAmount == 0;
+
+        // If existing position, claim if there's anything to claim
+        if (!isNewPosition) {
+            uint256 elapsed = block.timestamp - position.startTime;
+            uint256 vestedAmount = _calculateVestedAmount(position.totalAmount, elapsed);
+            uint256 claimable = vestedAmount - position.claimedAmount;
+
+            if (claimable > 0) {
+                _claimInternal(user);
+            }
+        }
+
+        // Transfer PAIMON from caller (distributor or treasury)
+        require(
+            paimonToken.transferFrom(msg.sender, address(this), amount), "esPaimon: Transfer failed"
+        );
+
+        // Update position - only set timestamps for new positions
+        if (isNewPosition) {
+            position.startTime = block.timestamp;
+            position.lastClaimTime = block.timestamp;
+        }
+
+        position.totalAmount += amount;
+
+        emit VestedFor(user, amount, msg.sender);
     }
 
     /**
@@ -234,6 +282,17 @@ contract esPaimon is Ownable, ReentrancyGuard {
         address oldBribeMarket = bribeMarket;
         bribeMarket = _bribeMarket;
         emit BribeMarketUpdated(oldBribeMarket, _bribeMarket);
+    }
+
+    /**
+     * @notice Set treasury address
+     * @param _treasury New treasury address
+     */
+    function setTreasury(address _treasury) external onlyOwner {
+        require(_treasury != address(0), "esPaimon: Zero address");
+        address oldTreasury = treasury;
+        treasury = _treasury;
+        emit TreasuryUpdated(oldTreasury, _treasury);
     }
 
     // ==================== Internal Functions ====================
