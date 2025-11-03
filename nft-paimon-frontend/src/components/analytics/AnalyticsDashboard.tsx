@@ -11,7 +11,9 @@ import { useAnalytics } from './hooks/useAnalytics';
 import { TVLCard } from './TVLCard';
 import { PriceChart } from './PriceChart';
 import { APRCalculator } from './APRCalculator';
+import { TreasuryFundingChart } from './TreasuryFundingChart';
 import { AnalyticsDashboardState } from './types';
+import { useSavingRateStats } from '@/hooks/useSavingRateStats';
 
 // ==================== Component ====================
 
@@ -31,6 +33,7 @@ export const AnalyticsDashboard: React.FC = () => {
   // ==================== Data Fetching ====================
 
   const { summary, isLoading, error } = useAnalytics();
+  const savingRateStats = useSavingRateStats();
 
   // ==================== Loading State ====================
 
@@ -79,8 +82,19 @@ export const AnalyticsDashboard: React.FC = () => {
           <PriceChart currentPrice={summary.hydPrice} isLoading={false} />
         </Grid>
 
+        {/* Row 2: Treasury Funding Chart */}
+        <Grid item xs={12} md={6}>
+          <TreasuryFundingChart
+            stats={{
+              totalFunded: savingRateStats.totalFunded,
+              annualRate: savingRateStats.annualRate,
+            }}
+            isLoading={savingRateStats.isLoading}
+          />
+        </Grid>
+
         {/* Row 2: APR Calculator */}
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6}>
           <APRCalculator
             totalLockedHYD={100_000n * 10n ** 18n} // Mock: 100K HYD locked
           />
