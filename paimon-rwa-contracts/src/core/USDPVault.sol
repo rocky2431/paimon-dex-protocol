@@ -161,9 +161,13 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
     /**
      * @notice Borrow USDP against collateral
      * @param amount Amount of USDP to borrow
+     * @dev Task P1-005: Multi-collateral positions must be rejected
      */
     function borrow(uint256 amount) external nonReentrant whenNotPaused {
         require(amount > 0, "Amount must be greater than 0");
+
+        // P1-005: Reject multi-collateral positions (same as healthFactor check)
+        require(_countUserCollaterals(msg.sender) <= 1, "Multi-collateral not supported");
 
         // Calculate max borrowable amount
         uint256 maxBorrow = _calculateMaxBorrow(msg.sender);
@@ -308,8 +312,14 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
      * @notice Calculate health factor for a user
      * @param user User address
      * @return Health factor (18 decimals, 1.0 = 1e18)
+     * @dev Task P1-005: Multi-collateral positions revert until weighted health factor is implemented
      */
     function healthFactor(address user) public view returns (uint256) {
+        // P1-005: Short-term fix - reject multi-collateral positions
+        // Check this FIRST to ensure consistent behavior regardless of debt status
+        // Long-term: implement weighted average liquidation threshold (P2 task)
+        require(_countUserCollaterals(user) <= 1, "Multi-collateral not supported");
+
         uint256 debt = _debts[user];
         if (debt == 0) {
             return type(uint256).max;
@@ -326,6 +336,22 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
     }
 
     // ==================== Internal Functions ====================
+
+    /**
+     * @notice Count how many different collateral types a user has deposited
+     * @param user User address
+     * @return Number of collateral types with non-zero balance
+     * @dev Task P1-005: Helper function for multi-collateral detection
+     */
+    function _countUserCollaterals(address user) private view returns (uint256) {
+        uint256 count = 0;
+        for (uint256 i = 0; i < supportedCollaterals.length; i++) {
+            if (_collateralBalances[user][supportedCollaterals[i]] > 0) {
+                count++;
+            }
+        }
+        return count;
+    }
 
     /**
      * @notice Calculate maximum borrowable amount for a user
