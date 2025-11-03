@@ -105,9 +105,6 @@ contract USDPStabilityPool is Ownable, ReentrancyGuard {
     function deposit(uint256 amount) external nonReentrant {
         require(amount > 0, "Amount must be greater than 0");
 
-        // Update pending rewards before changing shares
-        _updatePendingRewards(msg.sender);
-
         // Calculate shares to mint
         uint256 sharesToMint;
         if (_totalShares == 0 || _totalDeposits == 0) {
@@ -117,6 +114,8 @@ contract USDPStabilityPool is Ownable, ReentrancyGuard {
             // Subsequent deposits: proportional to pool size
             sharesToMint = (amount * _totalShares) / _totalDeposits;
         }
+
+        require(sharesToMint > 0, "Shares must be greater than 0");
 
         // Update state
         _shares[msg.sender] += sharesToMint;
@@ -138,12 +137,10 @@ contract USDPStabilityPool is Ownable, ReentrancyGuard {
         require(amount > 0, "Amount must be greater than 0");
         require(balanceOf(msg.sender) >= amount, "Insufficient balance");
 
-        // Update pending rewards before changing shares
-        _updatePendingRewards(msg.sender);
-
         // Calculate shares to burn
         uint256 sharesToBurn = (amount * _totalShares) / _totalDeposits;
         require(_shares[msg.sender] >= sharesToBurn, "Insufficient shares");
+        require(sharesToBurn > 0, "Shares must be greater than 0");
 
         // Update state
         _shares[msg.sender] -= sharesToBurn;
@@ -266,21 +263,10 @@ contract USDPStabilityPool is Ownable, ReentrancyGuard {
     // ==================== Internal Functions ====================
 
     /**
-     * @notice Update user's pending collateral rewards before share changes
-     * @param user User address
-     * @dev Must be called before any operation that changes user's shares
-     */
-    function _updatePendingRewards(address user) internal view {
-        if (_shares[user] == 0) return;
-
-        // Update all tracked collaterals (this is simplified, production would need collateral tracking)
-        // For now, we'll update on-demand when user interacts with specific collateral
-    }
-
-    /**
      * @notice Update user's reward checkpoint for specific collateral
      * @param user User address
      * @param collateralToken Collateral token address
+     * @dev Snapshots pending rewards and updates checkpoint to current reward per share
      */
     function _updateRewardCheckpoint(address user, address collateralToken) internal {
         uint256 pending = pendingCollateralGain(user, collateralToken);
