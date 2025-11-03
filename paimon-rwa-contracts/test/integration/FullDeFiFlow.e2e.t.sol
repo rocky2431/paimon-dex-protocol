@@ -16,16 +16,17 @@ import {SavingRate} from "../../src/treasury/SavingRate.sol";
 import {BoostStaking} from "../../src/incentives/BoostStaking.sol";
 import {EmissionManager} from "../../src/governance/EmissionManager.sol";
 import {RewardDistributor} from "../../src/governance/RewardDistributor.sol";
+import {RWAPriceOracle} from "../../src/oracle/RWAPriceOracle.sol";
 
 // Mocks
 import {MockERC20} from "../../src/mocks/MockERC20.sol";
-import {MockRWAToken} from "../../src/mocks/MockRWAToken.sol";
+import {MockV3Aggregator} from "../../src/mocks/MockV3Aggregator.sol";
 
 /**
  * @title FullDeFiFlow E2E Test
  * @notice Comprehensive end-to-end test for Task 27
- * @dev Tests complete user journey: RWA deposit → USDP mint → vePaimon lock →
- *      LP farming → Boost rewards → Savings → all integrated scenarios
+ * @dev Tests complete user journey: RWA deposit -> USDP mint -> vePaimon lock ->
+ *      LP farming -> Boost rewards -> Savings -> all integrated scenarios
  */
 contract FullDeFiFlowE2ETest is Test {
     // ==================== Contracts ====================
@@ -41,7 +42,13 @@ contract FullDeFiFlowE2ETest is Test {
     BoostStaking public boostStaking;
     EmissionManager public emissionManager;
     RewardDistributor public rewardDistributor;
-    MockRWAToken public rwaToken;
+    MockERC20 public rwaToken;
+    RWAPriceOracle public oracle;
+    MockV3Aggregator public mockChainlinkFeed;
+    MockV3Aggregator public mockSequencerFeed;
+
+    // Trusted oracle address
+    address public mockTrustedOracle = address(0x777);
 
     // ==================== Test Accounts ====================
 
@@ -64,25 +71,41 @@ contract FullDeFiFlowE2ETest is Test {
         // Deploy tokens
         usdc = new MockERC20("USD Coin", "USDC", USDC_DECIMALS);
         paimon = new MockERC20("Paimon", "PAIMON", 18);
-        rwaToken = new MockRWAToken("RWA Token", "RWA", 18);
+        rwaToken = new MockERC20("RWA Token", "RWA", 18);
+
+        // Deploy mock Chainlink aggregators
+        mockChainlinkFeed = new MockV3Aggregator(8, 1e8); // $1.00 with 8 decimals
+        mockSequencerFeed = new MockV3Aggregator(8, 0); // Sequencer is up (0 = up)
 
         // Deploy core
         usdp = new USDP();
         esPaimonToken = new esPaimon(address(paimon));
         vePaimon = new VotingEscrowPaimon(address(paimon));
         psm = new PSM(address(usdp), address(usdc));
-        vault = new USDPVault(address(usdp));
         savingRate = new SavingRate(address(usdp), 200); // 2% APR
         boostStaking = new BoostStaking(address(paimon));
 
+        // Deploy oracle (with mock aggregators)
+        oracle = new RWAPriceOracle(address(mockChainlinkFeed), address(mockSequencerFeed), mockTrustedOracle);
+
+        // Deploy vault with oracle
+        vault = new USDPVault(address(usdp), address(oracle), address(savingRate));
+
         // Deploy governance & rewards
-        emissionManager = new EmissionManager(address(paimon), WEEKLY_EMISSION);
-        rewardDistributor = new RewardDistributor(address(paimon));
+        emissionManager = new EmissionManager();
+        rewardDistributor = new RewardDistributor(address(vePaimon), address(boostStaking), treasury);
+
+        // Configure oracle with NAV price
+        vm.prank(mockTrustedOracle);
+        oracle.updateNAV(1 ether); // $1 per RWA token (18 decimals)
+
+        // Wait for sequencer grace period (1 hour)
+        vm.warp(block.timestamp + 3601);
 
         // Configure
         usdp.setAuthorizedMinter(address(psm), true);
         usdp.setAuthorizedMinter(address(vault), true);
-        vault.addCollateral(address(rwaToken), 8000); // 80% LTV
+        vault.addCollateral(address(rwaToken), 8000, 8500, 500); // 80% LTV, 85% threshold, 5% penalty
 
         // Fund accounts
         usdc.mint(alice, INITIAL_BALANCE / (10 ** (18 - USDC_DECIMALS)));
@@ -107,7 +130,7 @@ contract FullDeFiFlowE2ETest is Test {
     }
 
     // ==================================================================
-    // TEST 1: Complete DeFi Flow - RWA → USDP → vePaimon → Boost → Savings
+    // TEST 1: Complete DeFi Flow - RWA -> USDP -> vePaimon -> Boost -> Savings
     // ==================================================================
 
     function test_E2E_CompleteDeFiFlow() public {
@@ -122,7 +145,7 @@ contract FullDeFiFlowE2ETest is Test {
         uint256 rwaAmount = 10_000 ether;
         vm.startPrank(alice);
         rwaToken.approve(address(vault), rwaAmount);
-        vault.depositCollateral(address(rwaToken), rwaAmount);
+        vault.deposit(address(rwaToken), rwaAmount);
 
         // Mint USDP (80% LTV)
         uint256 usdpToMint = (rwaAmount * 8000) / 10000; // 8,000 USDP
@@ -134,7 +157,7 @@ contract FullDeFiFlowE2ETest is Test {
         assertGt(aliceUSDP, 0);
         assertEq(vault.debtOf(alice), usdpToMint);
         console.log("  Alice debt:", vault.debtOf(alice) / 1 ether);
-        console.log("  ✅ Step 1 Complete\n");
+        console.log("  [PASS] Step 1 Complete\n");
 
         // ===== STEP 2: Alice locks PAIMON for vePaimon =====
         console.log("STEP 2: Alice locks 5,000 PAIMON for 1 year");
@@ -150,7 +173,7 @@ contract FullDeFiFlowE2ETest is Test {
         console.log("  Token ID:", tokenId);
         console.log("  Voting Power:", votingPower);
         assertGt(votingPower, 0);
-        console.log("  ✅ Step 2 Complete\n");
+        console.log("  [PASS] Step 2 Complete\n");
 
         // ===== STEP 3: Alice stakes for Boost multiplier =====
         console.log("STEP 3: Alice stakes 3,000 PAIMON for Boost");
@@ -167,7 +190,7 @@ contract FullDeFiFlowE2ETest is Test {
         console.log("  Staked:", stakeAmount / 1 ether, "PAIMON");
         console.log("  Boost Multiplier:", boostMultiplier, "/ 10000");
         assertGe(boostMultiplier, 10000); // >= 1.0x
-        console.log("  ✅ Step 3 Complete\n");
+        console.log("  [PASS] Step 3 Complete\n");
 
         // ===== STEP 4: Alice deposits into Savings =====
         console.log("STEP 4: Alice deposits 3,000 USDP into Savings");
@@ -181,7 +204,7 @@ contract FullDeFiFlowE2ETest is Test {
 
         assertEq(savingRate.balanceOf(alice), savingsDeposit);
         console.log("  Deposited:", savingsDeposit / 1 ether, "USDP");
-        console.log("  ✅ Step 4 Complete\n");
+        console.log("  [PASS] Step 4 Complete\n");
 
         // ===== STEP 5: Wait 30 days and check interest =====
         console.log("STEP 5: Wait 30 days and verify interest accrual");
@@ -196,7 +219,7 @@ contract FullDeFiFlowE2ETest is Test {
         console.log("  Accrued Interest:", interest);
         console.log("  Expected Interest:", expectedInterest);
         assertApproxEqRel(interest, expectedInterest, 0.01e18); // 1% tolerance
-        console.log("  ✅ Step 5 Complete\n");
+        console.log("  [PASS] Step 5 Complete\n");
 
         // ===== FINAL SUMMARY =====
         console.log("========================================");
@@ -209,7 +232,7 @@ contract FullDeFiFlowE2ETest is Test {
         console.log("  - Boost Multiplier:", boostMultiplier, "/ 10000");
         console.log("  - Savings Balance:", savingRate.balanceOf(alice) / 1 ether);
         console.log("  - Accrued Interest:", interest);
-        console.log("\n✅ TEST 1 PASSED: Complete DeFi Flow\n");
+        console.log("\n[PASS] TEST 1 PASSED: Complete DeFi Flow\n");
     }
 
     // ==================================================================
@@ -229,7 +252,7 @@ contract FullDeFiFlowE2ETest is Test {
         // Simulate arbitrage
         uint256 usdcAmount = 100_000 * (10 ** USDC_DECIMALS); // 100K USDC
 
-        console.log("STEP 1: Arbitrageur swaps USDC → USDP");
+        console.log("STEP 1: Arbitrageur swaps USDC -> USDP");
         vm.startPrank(alice);
         usdc.approve(address(psm), usdcAmount);
         psm.swapUSDCForUSDP(usdcAmount);
@@ -243,7 +266,7 @@ contract FullDeFiFlowE2ETest is Test {
         uint256 expectedUSDP = (usdcAmount * (10 ** (18 - USDC_DECIMALS)) * 999) / 1000;
         assertApproxEqRel(usdpReceived, expectedUSDP, 0.01e18);
 
-        console.log("\nSTEP 2: Arbitrageur swaps USDP → USDC");
+        console.log("\nSTEP 2: Arbitrageur swaps USDP -> USDC");
         vm.startPrank(alice);
         usdp.approve(address(psm), usdpReceived);
         psm.swapUSDPForUSDC(usdpReceived);
@@ -256,7 +279,7 @@ contract FullDeFiFlowE2ETest is Test {
         // Should receive ~99,800 USDC (2 fees: 0.1% each way)
         assertGt(usdcRedeemed, usdcAmount * 998 / 1000);
 
-        console.log("\n✅ TEST 2 PASSED: PSM Arbitrage verified\n");
+        console.log("\n[PASS] TEST 2 PASSED: PSM Arbitrage verified\n");
     }
 
     // ==================================================================
@@ -276,32 +299,40 @@ contract FullDeFiFlowE2ETest is Test {
 
         paimon.mint(charlie, INITIAL_BALANCE);
 
+        // Test each user at the same snapshot time to avoid stake expiry issues
+        uint256 snapshotTime = block.timestamp;
+
+        // Stake all users first
         for (uint256 i = 0; i < 3; i++) {
-            address user = users[i];
-            uint256 stakeAmount = stakes[i];
+            vm.warp(snapshotTime);
 
-            vm.startPrank(user);
-            paimon.approve(address(boostStaking), stakeAmount);
-            boostStaking.stake(stakeAmount);
+            vm.startPrank(users[i]);
+            paimon.approve(address(boostStaking), stakes[i]);
+            boostStaking.stake(stakes[i]);
             vm.stopPrank();
+        }
 
-            vm.warp(block.timestamp + 7 days + 1);
+        // Wait minimum duration and check all multipliers
+        vm.warp(snapshotTime + 7 days + 1);
 
-            uint256 multiplier = boostStaking.getBoostMultiplier(user);
-            console.log("  Stake:", stakeAmount / 1 ether, "PAIMON");
-            console.log("    Multiplier:", multiplier, "/ 10000");
-            console.log("    Effective:", (multiplier * 100) / 10000, "% boost\n");
+        uint256[3] memory multipliers;
+        for (uint256 i = 0; i < 3; i++) {
+            multipliers[i] = boostStaking.getBoostMultiplier(users[i]);
 
-            assertGe(multiplier, 10000);
-            assertLe(multiplier, 25000); // Max 2.5x
+            console.log("  Stake:", stakes[i] / 1 ether, "PAIMON");
+            console.log("    Multiplier:", multipliers[i], "/ 10000");
+            console.log("    Effective:", (multipliers[i] * 100) / 10000, "% boost\n");
 
+            assertGe(multipliers[i], 10000, "Multiplier should be >= 1.0x");
+            assertLe(multipliers[i], 25000, "Multiplier should be <= 2.5x");
+
+            // Higher stake should give higher or equal boost
             if (i > 0) {
-                uint256 prevMultiplier = boostStaking.getBoostMultiplier(users[i-1]);
-                assertGe(multiplier, prevMultiplier, "Higher stake should have higher boost");
+                assertGe(multipliers[i], multipliers[i-1], "Higher stake should have higher boost");
             }
         }
 
-        console.log("✅ TEST 3 PASSED: Boost scaling verified\n");
+        console.log("[PASS] TEST 3 PASSED: Boost scaling verified\n");
     }
 
     // ==================================================================
@@ -320,7 +351,7 @@ contract FullDeFiFlowE2ETest is Test {
         vm.startPrank(alice);
         rwaToken.approve(address(vault), 1_000 ether);
         gasBefore = gasleft();
-        vault.depositCollateral(address(rwaToken), 1_000 ether);
+        vault.deposit(address(rwaToken), 1_000 ether);
         gasAfter = gasleft();
         console.log("  RWA Deposit gas:", gasBefore - gasAfter);
         vm.stopPrank();
@@ -353,13 +384,14 @@ contract FullDeFiFlowE2ETest is Test {
 
         // Benchmark 5: Savings Deposit
         vm.startPrank(alice);
-        usdp.approve(address(savingRate), 1_000 ether);
+        uint256 aliceBalance = usdp.balanceOf(alice);
+        usdp.approve(address(savingRate), aliceBalance);
         gasBefore = gasleft();
-        savingRate.deposit(1_000 ether);
+        savingRate.deposit(aliceBalance);
         gasAfter = gasleft();
         console.log("  Savings Deposit gas:", gasBefore - gasAfter);
         vm.stopPrank();
 
-        console.log("\n✅ TEST 4 PASSED: Gas benchmarks recorded\n");
+        console.log("\n[PASS] TEST 4 PASSED: Gas benchmarks recorded\n");
     }
 }
