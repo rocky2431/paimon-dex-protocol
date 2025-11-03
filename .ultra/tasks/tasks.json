@@ -634,12 +634,13 @@
         "28"
       ],
       "estimated_days": 1.5,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "testing",
         "e2e",
         "chrome-devtools"
-      ]
+      ],
+      "startedAt": "2025-11-03T13:28:03Z"
     },
     {
       "id": "30",

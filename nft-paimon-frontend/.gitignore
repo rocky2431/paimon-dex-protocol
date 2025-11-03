@@ -36,3 +36,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .spec-workflow
+# E2E test artifacts
+/test-results/
+/playwright-report/
+/playwright/.cache/
