@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./USDP.sol";
+import "./USDPStabilityPool.sol";
 import "../oracle/RWAPriceOracle.sol";
 import "../treasury/SavingRate.sol";
 
@@ -47,6 +48,9 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
 
     /// @notice Saving rate contract for yield distribution
     SavingRate public immutable savingRate;
+
+    /// @notice Stability pool for liquidation proceeds
+    USDPStabilityPool public stabilityPool;
 
     /// @notice User collateral balances: user => collateral => amount
     mapping(address => mapping(address => uint256)) private _collateralBalances;
@@ -91,6 +95,7 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
     );
     event CollateralAdded(address indexed collateral, uint256 ltv, uint256 threshold, uint256 penalty);
     event CollateralUpdated(address indexed collateral, uint256 ltv, uint256 threshold, uint256 penalty);
+    event StabilityPoolSet(address indexed stabilityPool);
 
     // ==================== Constructor ====================
 
@@ -204,14 +209,19 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
      * @notice Liquidate unhealthy position
      * @param user User to liquidate
      * @param debtAmount Amount of debt to repay
+     * @dev Collateral is transferred to StabilityPool for distribution to depositors
      */
     function liquidate(address user, uint256 debtAmount) external nonReentrant {
         require(debtAmount > 0, "Amount must be greater than 0");
         require(_debts[user] > 0, "No debt to liquidate");
         require(healthFactor(user) < PRICE_PRECISION, "Position is healthy");
+        require(address(stabilityPool) != address(0), "StabilityPool not set");
 
         uint256 maxRepay = _debts[user] / 2; // Max 50% of debt in single liquidation
         require(debtAmount <= maxRepay, "Exceeds max liquidation amount");
+
+        // Check stability pool has sufficient liquidity
+        require(stabilityPool.totalDeposits() >= debtAmount, "Insufficient liquidity in pool");
 
         // Burn USDP from liquidator
         usdp.burnFrom(msg.sender, debtAmount);
@@ -231,9 +241,14 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
         uint256 penalty = (collateralAmount * config.liquidationPenalty) / BASIS_POINTS;
         uint256 totalSeized = collateralAmount + penalty;
 
-        // Transfer collateral to liquidator
+        // Reduce user's collateral balance
         _collateralBalances[user][collateral] -= totalSeized;
-        _collateralBalances[msg.sender][collateral] += totalSeized;
+
+        // Transfer collateral to StabilityPool
+        IERC20(collateral).safeTransfer(address(stabilityPool), totalSeized);
+
+        // Notify StabilityPool of liquidation proceeds
+        stabilityPool.onLiquidationProceeds(debtAmount, collateral, totalSeized);
 
         emit Liquidated(user, msg.sender, debtAmount, collateral, totalSeized);
     }
@@ -390,6 +405,16 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
         collateralConfigs[collateral].liquidationPenalty = liquidationPenalty;
 
         emit CollateralUpdated(collateral, ltv, liquidationThreshold, liquidationPenalty);
+    }
+
+    /**
+     * @notice Set stability pool address
+     * @param _stabilityPool Address of the stability pool contract
+     */
+    function setStabilityPool(address _stabilityPool) external onlyOwner {
+        require(_stabilityPool != address(0), "Invalid stability pool address");
+        stabilityPool = USDPStabilityPool(_stabilityPool);
+        emit StabilityPoolSet(_stabilityPool);
     }
 
     /**
