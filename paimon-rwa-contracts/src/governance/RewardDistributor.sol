@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "../core/VotingEscrow.sol";
 import "../incentives/BoostStaking.sol";
 import "../core/esPaimon.sol";
+import "../interfaces/IStabilityPoolGauge.sol";
 
 /**
  * @title RewardDistributor
@@ -61,6 +62,16 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
     /// @notice Use es vesting mode for PAIMON rewards (default: true)
     bool public useEsVesting = true;
 
+    /// @notice StabilityPool gauge address (Task 53)
+    address public stabilityPoolGauge;
+
+    /// @notice Gauge weight for StabilityPool (Task 53)
+    /// @dev Weight is in basis points (10000 = 100%)
+    uint256 public stabilityPoolWeight;
+
+    /// @notice Gauge weight precision (100% = 10000 basis points)
+    uint256 public constant GAUGE_WEIGHT_PRECISION = 10000;
+
     /// @notice Epoch duration (7 days, aligned with GaugeController)
     uint256 public constant EPOCH_DURATION = 7 days;
 
@@ -89,6 +100,12 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
 
     /// @notice Emitted when epoch advances
     event EpochAdvanced(uint256 indexed newEpoch, uint256 timestamp);
+
+    /// @notice Emitted when StabilityPool gauge weight is updated (Task 53)
+    event GaugeWeightUpdated(address indexed gauge, uint256 weight, uint256 epoch);
+
+    /// @notice Emitted when rewards are distributed to a gauge (Task 53)
+    event RewardsDistributed(address indexed gauge, address indexed token, uint256 amount, uint256 epoch);
 
     /**
      * @notice Constructor
@@ -246,5 +263,88 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
      */
     function setUseEsVesting(bool _useEsVesting) external onlyOwner {
         useEsVesting = _useEsVesting;
+    }
+
+    // ==================== STABILITY POOL GAUGE INTEGRATION (TASK 53) ====================
+
+    /**
+     * @notice Set StabilityPool gauge weight (owner only)
+     * @param weight Weight in basis points (10000 = 100%)
+     * @dev Task 53.1 - StabilityPool Gauge weight management
+     */
+    function setStabilityPoolWeight(uint256 weight) external onlyOwner {
+        require(weight <= GAUGE_WEIGHT_PRECISION, "Weight exceeds maximum");
+
+        stabilityPoolWeight = weight;
+
+        // Set gauge address on first weight update
+        if (stabilityPoolGauge == address(0) && weight > 0) {
+            // StabilityPool address will be set externally
+            // For now, we store the weight and emit event
+        }
+
+        uint256 currentEpochNumber = (block.timestamp - epochStartTime) / EPOCH_DURATION;
+        emit GaugeWeightUpdated(stabilityPoolGauge, weight, currentEpochNumber);
+    }
+
+    /**
+     * @notice Set StabilityPool gauge address (owner only)
+     * @param _stabilityPoolGauge StabilityPool contract address
+     * @dev Task 53.1 - Required before distributing rewards
+     */
+    function setStabilityPoolGauge(address _stabilityPoolGauge) external onlyOwner {
+        require(_stabilityPoolGauge != address(0), "Invalid gauge address");
+        stabilityPoolGauge = _stabilityPoolGauge;
+    }
+
+    /**
+     * @notice Get gauge weight for a gauge address
+     * @param gauge Gauge address
+     * @return Weight in basis points
+     * @dev Task 53.1 - Query gauge weight
+     */
+    function getGaugeWeight(address gauge) external view returns (uint256) {
+        if (gauge == stabilityPoolGauge) {
+            return stabilityPoolWeight;
+        }
+        return 0;
+    }
+
+    /**
+     * @notice Distribute rewards to StabilityPool based on gauge weight
+     * @param token Reward token address
+     * @param totalAmount Total rewards to distribute
+     * @dev Task 53.2 - Distribute rewards proportionally by gauge weight
+     *
+     * Flow:
+     * 1. Calculate StabilityPool share: totalAmount * weight / GAUGE_WEIGHT_PRECISION
+     * 2. Transfer tokens to StabilityPool
+     * 3. Call StabilityPool.notifyRewardAmount() to distribute to depositors
+     */
+    function distributeRewards(address token, uint256 totalAmount) external onlyOwner nonReentrant {
+        require(token != address(0), "Invalid token");
+        require(totalAmount > 0, "Amount must be > 0");
+
+        uint256 currentEpochNumber = (block.timestamp - epochStartTime) / EPOCH_DURATION;
+
+        // Distribute to StabilityPool if weight > 0 and gauge is set
+        if (stabilityPoolWeight > 0 && stabilityPoolGauge != address(0)) {
+            // Calculate StabilityPool reward amount
+            uint256 stabilityPoolReward = (totalAmount * stabilityPoolWeight) / GAUGE_WEIGHT_PRECISION;
+
+            if (stabilityPoolReward > 0) {
+                // Transfer tokens to StabilityPool
+                IERC20(token).safeTransfer(stabilityPoolGauge, stabilityPoolReward);
+
+                // Notify StabilityPool to distribute rewards to depositors
+                IStabilityPoolGauge(stabilityPoolGauge).notifyRewardAmount(token, stabilityPoolReward);
+
+                // Emit event
+                emit RewardsDistributed(stabilityPoolGauge, token, stabilityPoolReward, currentEpochNumber);
+            }
+        }
+
+        // Remaining rewards stay in distributor for veNFT claims via Merkle tree
+        // This maintains backward compatibility with existing claim() function
     }
 }
