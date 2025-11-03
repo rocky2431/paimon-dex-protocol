@@ -50,15 +50,13 @@ contract EmissionManager is Ownable {
     // ==================== Constants ====================
 
     /// @notice Phase A fixed weekly emission (Week 1-12)
-    /// @dev Calibrated to achieve 10B total emission over 352 weeks
-    ///      Original spec: 37.5M, scaled by 1.7088x to reach 10B target
+    /// @dev Per whitepaper specification
     ///      Maintains original ratio: Phase A / Phase C ≈ 8.67
-    uint256 public constant PHASE_A_WEEKLY = 64_080_000 * 1e18; // 64.08M PAIMON
+    uint256 public constant PHASE_A_WEEKLY = 37_500_000 * 1e18; // 37.5M PAIMON
 
     /// @notice Phase C fixed weekly emission (Week 249-352)
-    /// @dev Calibrated to achieve 10B total emission over 352 weeks
-    ///      Original spec: 4.327M, scaled by 1.7088x to reach 10B target
-    uint256 public constant PHASE_C_WEEKLY = 7_390_000 * 1e18; // 7.39M PAIMON
+    /// @dev Per whitepaper specification
+    uint256 public constant PHASE_C_WEEKLY = 4_326_923 * 1e18; // 4.327M PAIMON
 
     /// @notice Last week of Phase A
     uint256 public constant PHASE_A_END = 12;
@@ -72,14 +70,23 @@ contract EmissionManager is Ownable {
     /// @notice Basis points denominator (100% = 10000 bps)
     uint256 public constant BASIS_POINTS = 10000;
 
-    /// @notice Debt channel allocation (10% of total budget)
-    uint256 public constant DEBT_BPS = 1000; // 10%
+    /// @notice Exponential decay rate for Phase-B (0.985 = 98.5%)
+    uint256 public constant DECAY_RATE_BPS = 9850; // 0.985 in basis points
 
-    /// @notice LP total allocation (70% of total budget)
-    uint256 public constant LP_TOTAL_BPS = 7000; // 70%
+    // Phase-A channel allocation (Week 1-12): 30% debt, 60% LP, 10% eco
+    uint256 private constant PHASE_A_DEBT_BPS = 3000; // 30%
+    uint256 private constant PHASE_A_LP_BPS = 6000; // 60%
+    uint256 private constant PHASE_A_ECO_BPS = 1000; // 10%
 
-    /// @notice Eco channel allocation (20% of total budget)
-    uint256 public constant ECO_BPS = 2000; // 20%
+    // Phase-B channel allocation (Week 13-248): 50% debt, 37.5% LP, 12.5% eco
+    uint256 private constant PHASE_B_DEBT_BPS = 5000; // 50%
+    uint256 private constant PHASE_B_LP_BPS = 3750; // 37.5%
+    uint256 private constant PHASE_B_ECO_BPS = 1250; // 12.5%
+
+    // Phase-C channel allocation (Week 249-352): 55% debt, 35% LP, 10% eco
+    uint256 private constant PHASE_C_DEBT_BPS = 5500; // 55%
+    uint256 private constant PHASE_C_LP_BPS = 3500; // 35%
+    uint256 private constant PHASE_C_ECO_BPS = 1000; // 10%
 
     /// @notice Precision multiplier for decay calculations (to avoid floating point)
     uint256 private constant PRECISION = 1e18;
@@ -138,8 +145,25 @@ contract EmissionManager is Ownable {
             totalBudget = PHASE_C_WEEKLY;
         }
 
-        // Allocate to four channels
-        (debt, lpPairs, stabilityPool, eco) = _allocateBudget(totalBudget);
+        // Allocate to four channels with phase-specific ratios
+        (debt, lpPairs, stabilityPool, eco) = _allocateBudget(totalBudget, week);
+    }
+
+    /**
+     * @notice Calculate total PAIMON emission across all 352 weeks
+     * @return totalEmission Total emission amount (~3.29B PAIMON)
+     * @dev Computes sum of all weekly budgets from Week 1 to Week 352.
+     *      Result depends on current lpPairsBps and stabilityPoolBps settings.
+     *      Expected total: ~3,292,945,267 PAIMON (with exponential decay r=0.985)
+     *
+     *      Gas cost: ~1.2M gas (calls getWeeklyBudget 352 times)
+     *      Use this function for validation and monitoring, not for frequent queries.
+     */
+    function getTotalEmission() external view returns (uint256 totalEmission) {
+        for (uint256 week = 1; week <= PHASE_C_END; week++) {
+            (uint256 debt, uint256 lpPairs, uint256 stabilityPool, uint256 eco) = this.getWeeklyBudget(week);
+            totalEmission += (debt + lpPairs + stabilityPool + eco);
+        }
     }
 
     /**
@@ -166,78 +190,121 @@ contract EmissionManager is Ownable {
      * @notice Calculate Phase B emission using exponential decay formula
      * @param week Week number (must be in [13, 248])
      * @return emission Weekly emission amount
-     * @dev Formula: E(w) = E_A * (decay_rate)^(w - 12)
-     *      where decay_rate = (E_C / E_A)^(1/236)
+     * @dev Formula: E(w) = E_A * (0.985)^(w - 12)
+     *      Uses fast exponentiation (exponentiation by squaring) for efficiency and precision.
      *
-     * Implementation:
-     * - Use logarithmic approach to avoid overflow in exponentiation
-     * - E(w) = E_A * exp(ln(decay_rate) * (w - 12))
-     * - ln(decay_rate) = ln(E_C / E_A) / 236 = (ln(E_C) - ln(E_A)) / 236
-     *
-     * Approximation:
-     * - For production: Use pre-calculated decay values or library
-     * - For this implementation: Use simplified linear interpolation
-     *   (accurate enough for test purposes, replace with ABDKMath64x64 for production)
+     * Implementation notes:
+     * - Decay rate: 0.985 = 9850 / 10000
+     * - Exponent: n = week - 12 (ranges from 1 to 236)
+     * - Uses fixed-point arithmetic with 1e18 precision
+     * - Fast exponentiation reduces computation from O(n) to O(log n)
      */
     function _calculatePhaseBEmission(uint256 week) private pure returns (uint256) {
         require(week > PHASE_A_END && week <= PHASE_B_END, "Week not in Phase B");
 
-        // Number of decay weeks elapsed (0 to 235)
-        uint256 decayWeeks = week - PHASE_A_END;
+        // Number of decay periods elapsed (1 to 236)
+        uint256 exponent = week - PHASE_A_END;
 
-        // Total decay weeks in Phase B
-        uint256 totalDecayWeeks = PHASE_B_END - PHASE_A_END; // 236 weeks
+        // Calculate (0.985)^exponent using fast exponentiation
+        // decay_rate = 9850 / 10000 = 0.985
+        uint256 decayPower = _fastPower(DECAY_RATE_BPS, BASIS_POINTS, exponent);
 
-        // Linear interpolation between Phase A and Phase C
-        // E(w) = E_A - (E_A - E_C) * (decayWeeks / totalDecayWeeks)
-        //      = E_A * (1 - (1 - E_C/E_A) * (decayWeeks / totalDecayWeeks))
-        //      = E_A * (1 - decay_factor * progress)
-        //
-        // where decay_factor = (E_A - E_C) / E_A ≈ 0.8846
-        //       progress = decayWeeks / totalDecayWeeks
-
-        uint256 decayAmount = PHASE_A_WEEKLY - PHASE_C_WEEKLY; // ~33.173M
-
-        // Calculate: PHASE_A_WEEKLY - (decayAmount * decayWeeks / totalDecayWeeks)
-        uint256 emission = PHASE_A_WEEKLY - ((decayAmount * decayWeeks) / totalDecayWeeks);
+        // E(w) = PHASE_A_WEEKLY * decayPower / PRECISION
+        uint256 emission = (PHASE_A_WEEKLY * decayPower) / PRECISION;
 
         return emission;
     }
 
     /**
-     * @notice Allocate total budget to four channels
-     * @param totalBudget Total weekly budget to allocate
-     * @return debt Debt channel allocation (10%)
-     * @return lpPairs LP Pairs channel allocation (governance-adjustable, default 42%)
-     * @return stabilityPool Stability Pool channel allocation (governance-adjustable, default 28%)
-     * @return eco Eco channel allocation (20%)
-     * @dev Allocation formula:
-     *      - debt = totalBudget * 10%
-     *      - LP_total = totalBudget * 70%
-     *        - lpPairs = LP_total * lpPairsBps / 10000
-     *        - stabilityPool = LP_total * stabilityPoolBps / 10000
-     *      - eco = totalBudget * 20%
+     * @notice Fast exponentiation (exponentiation by squaring)
+     * @param base Base value in basis points (e.g., 9850 for 0.985)
+     * @param denominator Denominator for fixed-point (e.g., 10000 for basis points)
+     * @param exponent Exponent value
+     * @return result (base/denominator)^exponent scaled by PRECISION (1e18)
+     * @dev Computes (base/denominator)^exponent with fixed-point precision.
+     *      Uses binary exponentiation for O(log n) complexity.
+     *      Example: _fastPower(9850, 10000, 5) returns 0.985^5 * 1e18 ≈ 0.927 * 1e18
      */
-    function _allocateBudget(uint256 totalBudget)
+    function _fastPower(uint256 base, uint256 denominator, uint256 exponent) private pure returns (uint256) {
+        if (exponent == 0) {
+            return PRECISION; // x^0 = 1
+        }
+
+        uint256 result = PRECISION; // Start with 1.0 in fixed-point
+        uint256 currentBase = (base * PRECISION) / denominator; // Convert base to fixed-point
+
+        while (exponent > 0) {
+            if (exponent % 2 == 1) {
+                // If exponent is odd, multiply result by current base
+                result = (result * currentBase) / PRECISION;
+            }
+            // Square the base
+            currentBase = (currentBase * currentBase) / PRECISION;
+            // Halve the exponent
+            exponent /= 2;
+        }
+
+        return result;
+    }
+
+    /**
+     * @notice Allocate total budget to four channels with phase-specific ratios
+     * @param totalBudget Total weekly budget to allocate
+     * @param week Week number to determine phase-specific allocation
+     * @return debt Debt channel allocation (phase-dependent: 30%/50%/55%)
+     * @return lpPairs LP Pairs channel allocation (governance-adjustable split)
+     * @return stabilityPool Stability Pool channel allocation (governance-adjustable split)
+     * @return eco Eco channel allocation (phase-dependent: 10%/12.5%/10%)
+     * @dev Phase-specific allocation:
+     *      Phase-A (Week 1-12): 30% debt, 60% LP, 10% eco
+     *      Phase-B (Week 13-248): 50% debt, 37.5% LP, 12.5% eco
+     *      Phase-C (Week 249-352): 55% debt, 35% LP, 10% eco
+     *
+     *      LP total is further split between lpPairs and stabilityPool using governance-adjustable parameters.
+     *      Dust collection: Any rounding error is added to debt channel to ensure exact conservation.
+     */
+    function _allocateBudget(uint256 totalBudget, uint256 week)
         private
         view
         returns (uint256 debt, uint256 lpPairs, uint256 stabilityPool, uint256 eco)
     {
-        // Debt channel: 10% of total
-        debt = (totalBudget * DEBT_BPS) / BASIS_POINTS;
+        uint256 debtBps;
+        uint256 lpBps;
+        uint256 ecoBps;
 
-        // Eco channel: 20% of total
-        eco = (totalBudget * ECO_BPS) / BASIS_POINTS;
+        // Determine phase-specific allocation ratios
+        if (week <= PHASE_A_END) {
+            // Phase-A: 30% debt, 60% LP, 10% eco
+            debtBps = PHASE_A_DEBT_BPS;
+            lpBps = PHASE_A_LP_BPS;
+            ecoBps = PHASE_A_ECO_BPS;
+        } else if (week <= PHASE_B_END) {
+            // Phase-B: 50% debt, 37.5% LP, 12.5% eco
+            debtBps = PHASE_B_DEBT_BPS;
+            lpBps = PHASE_B_LP_BPS;
+            ecoBps = PHASE_B_ECO_BPS;
+        } else {
+            // Phase-C: 55% debt, 35% LP, 10% eco
+            debtBps = PHASE_C_DEBT_BPS;
+            lpBps = PHASE_C_LP_BPS;
+            ecoBps = PHASE_C_ECO_BPS;
+        }
 
-        // LP total: 70% of total
-        uint256 lpTotal = (totalBudget * LP_TOTAL_BPS) / BASIS_POINTS;
+        // Calculate channel allocations
+        debt = (totalBudget * debtBps) / BASIS_POINTS;
+        eco = (totalBudget * ecoBps) / BASIS_POINTS;
+
+        // LP total with phase-specific ratio
+        uint256 lpTotal = (totalBudget * lpBps) / BASIS_POINTS;
 
         // LP secondary split (governance-adjustable)
         lpPairs = (lpTotal * lpPairsBps) / BASIS_POINTS;
         stabilityPool = (lpTotal * stabilityPoolBps) / BASIS_POINTS;
 
-        // Note: Due to integer division, there might be small dust (<1 wei)
-        // In production, consider: debt + lpPairs + stabilityPool + eco + dust = totalBudget
-        // For simplicity, we accept this negligible rounding error
+        // Dust collection: Add any rounding error to debt channel
+        uint256 allocated = debt + lpPairs + stabilityPool + eco;
+        if (allocated < totalBudget) {
+            debt += (totalBudget - allocated);
+        }
     }
 }
