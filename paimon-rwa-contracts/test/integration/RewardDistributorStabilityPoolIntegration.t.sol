@@ -202,16 +202,18 @@ contract RewardDistributorStabilityPoolIntegrationTest is Test {
         // Setup: Distribute rewards to StabilityPool
         distributor.distributeRewards(address(paimonToken), REWARD_AMOUNT);
 
+        // Calculate expected reward (50% of total due to 50% gauge weight)
+        uint256 expectedReward = (REWARD_AMOUNT * 5000) / GAUGE_WEIGHT_PRECISION;
+
         // Execute: Bob claims rewards
         vm.startPrank(bob);
         vm.expectEmit(true, true, false, true);
-        emit GaugeRewardsClaimed(bob, address(paimonToken), expectedReward); // 50% weight
+        emit RewardClaimed(bob, address(paimonToken), expectedReward); // 50% weight
 
         stabilityPool.claimRewards(address(paimonToken));
         vm.stopPrank();
 
         // Assert: Bob received rewards
-        uint256 expectedReward = (REWARD_AMOUNT * 5000) / GAUGE_WEIGHT_PRECISION;
         assertEq(paimonToken.balanceOf(bob), expectedReward, "Bob did not receive correct rewards");
     }
 
