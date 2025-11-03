@@ -207,7 +207,7 @@ contract RemintControllerTest is Test {
             uint8 diceType,
             uint8 rollsThisWeek,
             uint256 lastRollTimestamp,
-            uint256 totalRemintEarned,
+            ,
             uint256 lastWeekNumber
         ) = remintController.getDiceData(1);
 
@@ -762,7 +762,6 @@ contract RemintControllerTest is Test {
         vm.prank(user1);
         uint256 requestId = remintController.rollDice(1);
 
-        // Attacker tries to front-run with same requestId (should fail)
         vm.expectRevert("RemintController: caller is not NFT owner");
         vm.prank(attacker);
         remintController.rollDice(1);

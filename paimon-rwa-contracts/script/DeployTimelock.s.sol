@@ -196,10 +196,9 @@ contract DeployTimelock is Script {
         console.log("    timelock.execute(", treasuryAddress, ", 0, <data>, 0x0, <salt>)");
 
         // Step 6: Admin renounces role (IMPORTANT for production)
-        bytes32 DEFAULT_ADMIN_ROLE = 0x00;
         console.log("\nRenouncing admin role (recommended for production)...");
         // Uncomment in production after verifying everything is correct:
-        // timelock.renounceRole(DEFAULT_ADMIN_ROLE, admin);
+        // timelock.renounceRole(0x00, admin); // 0x00 is DEFAULT_ADMIN_ROLE
         // console.log("  - Admin role renounced");
 
         console.log("\n[!] IMPORTANT: Admin role NOT renounced in this script");

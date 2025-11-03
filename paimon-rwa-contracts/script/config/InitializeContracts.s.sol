@@ -125,7 +125,6 @@ contract InitializeContractsScript is Script {
     function setupGauges() internal {
         console.log("[Step 2] Setting up Initial Gauges...");
 
-        GaugeController gaugeController = GaugeController(addresses.gaugeController);
 
         // Add USDP/USDC pair gauge (already added in deployment)
         console.log("  USDP/USDC gauge already added during deployment");
@@ -141,7 +140,6 @@ contract InitializeContractsScript is Script {
         console.log("[Step 3] Configuring Vault Parameters...");
 
         USDPVault vault = USDPVault(addresses.usdpVault);
-
         // Note: USDPVault is multi-collateral, each collateral has its own LTV/threshold/penalty
         // Example configuration for a test collateral (update addresses as needed):
 
