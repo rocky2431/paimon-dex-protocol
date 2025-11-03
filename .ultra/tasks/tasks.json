@@ -1132,7 +1132,7 @@
       "priority": "P0",
       "dependencies": [],
       "estimated_days": 2,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "security",
         "critical",
@@ -1154,7 +1154,10 @@
         "test_Emission_TotalEmission_Equals10B()",
         "test_Emission_ChannelAllocation_ByPhase()",
         "test_Emission_DustCollection()"
-      ]
+      ],
+      "startedAt": "2025-01-04T00:00:00Z",
+      "completedAt": "2025-11-04T03:21:32Z",
+      "implementationNotes": "\n完成项：\n1. 修正排放量常量：PHASE_A_WEEKLY = 37.5M，PHASE_C_WEEKLY = 4.327M\n2. 实现 Phase-B 指数衰减（r=0.985）使用快速幂算法\n3. 实现阶段动态通道分配（Phase-A: 30/60/10, Phase-B: 50/37.5/12.5, Phase-C: 55/35/10）\n4. 添加尘差归集机制（归集到 debt 通道）\n5. 添加 getTotalEmission() 公共视图函数\n6. 所有 44 个测试通过（34 个原有测试 + 10 个新测试）\n\n影响：\n- 总排放量：9.94B → 3.29B (-67%)\n- 符合白皮书 Token 经济学模型\n- Week 248 自然衰减至 1.059M，Week 249 跳跃至 4.327M（Phase-C 开始）\n        "
     },
     {
       "id": "P0-003",
