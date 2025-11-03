@@ -406,8 +406,8 @@ contract SavingRate is Ownable, ReentrancyGuard {
         if (timeElapsed == 0) return 0;
 
         // Interest = principal × annualRate × timeElapsed / SECONDS_PER_YEAR / BASIS_POINTS
-        // Multiply before divide to preserve precision
-        uint256 interest = (principal * annualRate * timeElapsed) / SECONDS_PER_YEAR / BASIS_POINTS;
+        // Task P2-001: Fix precision loss - combine divisions
+        uint256 interest = (principal * annualRate * timeElapsed) / (SECONDS_PER_YEAR * BASIS_POINTS);
 
         return interest;
     }

@@ -1504,7 +1504,7 @@
       "priority": "P2",
       "dependencies": [],
       "estimated_days": 0.5,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "optimization",
         "precision",
@@ -1520,7 +1520,8 @@
         "test_Precision_MultiplyBeforeDivide()",
         "test_Precision_SmallValues_NotZero()",
         "test_Precision_Gas_Impact()"
-      ]
+      ],
+      "startedAt": "2025-11-03T23:48:47.715307+00:00"
     },
     {
       "id": "P2-002",
