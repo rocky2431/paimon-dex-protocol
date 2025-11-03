@@ -161,13 +161,10 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
     /**
      * @notice Borrow USDP against collateral
      * @param amount Amount of USDP to borrow
-     * @dev Task P1-005: Multi-collateral positions must be rejected
+     * @dev Task P2-001: Multi-collateral positions now supported via weighted health factor
      */
     function borrow(uint256 amount) external nonReentrant whenNotPaused {
         require(amount > 0, "Amount must be greater than 0");
-
-        // P1-005: Reject multi-collateral positions (same as healthFactor check)
-        require(_countUserCollaterals(msg.sender) <= 1, "Multi-collateral not supported");
 
         // Calculate max borrowable amount
         uint256 maxBorrow = _calculateMaxBorrow(msg.sender);
@@ -312,46 +309,37 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
      * @notice Calculate health factor for a user
      * @param user User address
      * @return Health factor (18 decimals, 1.0 = 1e18)
-     * @dev Task P1-005: Multi-collateral positions revert until weighted health factor is implemented
+     * @dev Task P2-001: Weighted health factor supporting multi-collateral positions
      */
     function healthFactor(address user) public view returns (uint256) {
-        // P1-005: Short-term fix - reject multi-collateral positions
-        // Check this FIRST to ensure consistent behavior regardless of debt status
-        // Long-term: implement weighted average liquidation threshold (P2 task)
-        require(_countUserCollaterals(user) <= 1, "Multi-collateral not supported");
-
         uint256 debt = _debts[user];
         if (debt == 0) {
             return type(uint256).max;
         }
 
-        uint256 collateralValue = getCollateralValueUSD(user);
+        // P2-001: Weighted health factor calculation
+        // Iterate through all collaterals and apply their respective liquidation thresholds
+        uint256 adjustedCollateralValue = 0;
+        uint256 price = oracle.getPrice();
 
-        // TODO: Use weighted average liquidation threshold across collaterals
-        // Simplified: use first collateral's threshold
-        uint256 threshold = collateralConfigs[supportedCollaterals[0]].liquidationThreshold;
+        for (uint256 i = 0; i < supportedCollaterals.length; i++) {
+            address collateral = supportedCollaterals[i];
+            uint256 balance = _collateralBalances[user][collateral];
 
-        uint256 adjustedCollateralValue = (collateralValue * threshold) / BASIS_POINTS;
+            if (balance > 0) {
+                CollateralConfig memory config = collateralConfigs[collateral];
+                // Calculate USD value of this collateral
+                uint256 collateralValueUSD = (balance * price) / PRICE_PRECISION;
+                // Apply liquidation threshold for this specific collateral
+                adjustedCollateralValue += (collateralValueUSD * config.liquidationThreshold) / BASIS_POINTS;
+            }
+        }
+
+        // Return health factor: adjustedValue / debt
         return (adjustedCollateralValue * PRICE_PRECISION) / debt;
     }
 
     // ==================== Internal Functions ====================
-
-    /**
-     * @notice Count how many different collateral types a user has deposited
-     * @param user User address
-     * @return Number of collateral types with non-zero balance
-     * @dev Task P1-005: Helper function for multi-collateral detection
-     */
-    function _countUserCollaterals(address user) private view returns (uint256) {
-        uint256 count = 0;
-        for (uint256 i = 0; i < supportedCollaterals.length; i++) {
-            if (_collateralBalances[user][supportedCollaterals[i]] > 0) {
-                count++;
-            }
-        }
-        return count;
-    }
 
     /**
      * @notice Calculate maximum borrowable amount for a user
