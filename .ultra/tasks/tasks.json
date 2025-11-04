@@ -8,10 +8,10 @@
   },
   "stats": {
     "totalTasks": 74,
-    "completed": 62,
-    "inProgress": 1,
+    "completed": 63,
+    "inProgress": 0,
     "pending": 12,
-    "progressPercentage": 83.8
+    "progressPercentage": 85.1
   },
   "tasks": [
     {
@@ -1674,7 +1674,7 @@
       "priority": "P2",
       "dependencies": [],
       "estimated_days": 0.5,
-      "status": "in_progress",
+      "status": "completed",
       "tags": [
         "frontend",
         "performance",
@@ -1683,14 +1683,18 @@
       ],
       "relatedFiles": [
         "nft-paimon-frontend/src/app/layout.tsx",
-        "nft-paimon-frontend/src/lib/vitals.ts"
+        "nft-paimon-frontend/src/lib/webVitals.ts",
+        "nft-paimon-frontend/src/components/WebVitalsMonitor.tsx"
       ],
       "testRequirements": [
         "test_Vitals_LCP_Measurement()",
         "test_Vitals_INP_Measurement()",
         "test_Vitals_CLS_Measurement()",
         "test_Vitals_ThresholdAlert()"
-      ]
+      ],
+      "startedAt": "2025-11-04T07:30:00Z",
+      "completedAt": "2025-11-04T08:45:00Z",
+      "notes": "✅ Core Web Vitals 监控已完成实现：\n\n**实现内容**:\n1. 创建 src/lib/webVitals.ts - 核心监控工具\n   - 集成 web-vitals 库的 onLCP, onINP, onCLS 钩子\n   - 阈值检测：LCP<2.5s, INP<200ms, CLS<0.1\n   - 超阈值控制台警告输出\n   - 后端 API 上报（仅生产环境）\n2. 创建 src/components/WebVitalsMonitor.tsx - React 客户端组件\n   - useEffect 钩子初始化监控\n   - 集成到 app/layout.tsx 全局加载\n3. 添加 web-vitals@4.2.4 依赖到 package.json\n\n**副产物修复**（解决预存在构建错误）:\n- 修复 src/app/convert/page.tsx 未转义撇号 (don't → don&apos;t)\n- 修复 src/components/nitro/NitroParticipateModal.tsx 条件调用 React hooks 错误（将 useCallback/useMemo 移至组件顶层）\n- 更新 src/components/layout/Navigation.tsx NavPage 类型（添加 'boost' 和 'vault'）\n- 修复 src/app/nitro/page.tsx 缺失 activePage 属性\n\n**验证状态**:\n- ✅ 实时收集性能数据（通过 web-vitals 库）\n- ✅ 超阈值告警（控制台 console.warn）\n- ✅ 后端上报机制（/api/analytics/web-vitals）\n- ⏸️  性能对比分析需等待生产环境数据积累\n\n**提交**: commit b4c6f47 - 11 files changed, 216 insertions(+), 71 deletions(-)"
     },
     {
       "id": "P2-008",
