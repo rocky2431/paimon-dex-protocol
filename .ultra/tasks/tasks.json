@@ -1981,7 +1981,7 @@
       "priority": "P0",
       "dependencies": [],
       "estimated_days": 0.25,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "contract",
         "E2E",
@@ -1996,7 +1996,10 @@
         "src/presale/RWABondNFT.sol",
         "src/presale/RemintController.sol"
       ],
-      "failureCount": 1
+      "failureCount": 1,
+      "startedAt": "2025-11-04T18:27:09.333516",
+      "completedAt": "2025-11-04T18:30:00",
+      "implementationNotes": "修复完成!\n\n问题根源:\n- PSM 部署时传入错误参数 (usdc, owner) 而不是 (hyd, usdc)\n- 导致构造函数试图对 owner 地址调用 decimals() 函数失败\n- HYD 部署顺序在 PSM 之后，导致参数传递错误\n\n修复方案:\n1. 将 HYD 部署移到 PSM 之前（第 66-67 行）\n2. 修正 PSM 构造函数参数: new PSMParameterized(address(hyd), address(usdc))\n\n测试结果:\n- test_E2E_AliceJourney_CashRedemption() PASS\n- test_E2E_BobJourney_VeNFTConversion() PASS\n- test_E2E_MultiUserCompetition() PASS\n- 100% 通过率 (3/3 tests)\n\nGit: feat/task-78-bond-setup-fix (commit caf199a)"
     },
     {
       "id": "79",
