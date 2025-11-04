@@ -33,7 +33,7 @@ export const SETTLEMENT_CONSTANTS = {
   MAX_LOCK_DURATION_DAYS: 1460, // 4 years
   MIN_LOCK_DURATION_MONTHS: 3,
   MAX_LOCK_DURATION_MONTHS: 48,
-  USDC_TO_HYD_RATIO: 1, // 1:1 ratio
+  USDC_TO_USDP_RATIO: 1, // 1:1 ratio
 } as const;
 
 /**
@@ -45,7 +45,7 @@ export interface VeNFTSettlementOption {
   lockDurationMonths: number;
 
   // Calculated
-  hydAmount: number; // HYD tokens to be locked (1:1 with USDC)
+  usdpAmount: number; // USDP tokens to be locked (1:1 with USDC)
   votingPower: number; // Estimated voting power based on lock duration
   estimatedAPY: number; // Estimated APY from fees/bribes
   lockEndDate: Date; // When the lock expires
@@ -94,11 +94,11 @@ export interface SettlementTransaction {
 
 /**
  * Helper function to calculate voting power
- * Formula: votingPower = hydAmount * (lockDurationDays / MAX_LOCK_DURATION_DAYS)
+ * Formula: votingPower = usdpAmount * (lockDurationDays / MAX_LOCK_DURATION_DAYS)
  */
-export function calculateVotingPower(hydAmount: number, lockDurationDays: number): number {
+export function calculateVotingPower(usdpAmount: number, lockDurationDays: number): number {
   const maxDuration = SETTLEMENT_CONSTANTS.MAX_LOCK_DURATION_DAYS;
-  return hydAmount * (lockDurationDays / maxDuration);
+  return usdpAmount * (lockDurationDays / maxDuration);
 }
 
 /**
@@ -146,13 +146,13 @@ export function createVeNFTOption(
   lockDurationDays: number
 ): VeNFTSettlementOption {
   const totalUSDC = bond.principal + bond.totalYield;
-  const hydAmount = totalUSDC; // 1:1 ratio
+  const usdpAmount = totalUSDC; // 1:1 ratio
 
   return {
     lockDurationDays,
     lockDurationMonths: daysToMonths(lockDurationDays),
-    hydAmount,
-    votingPower: calculateVotingPower(hydAmount, lockDurationDays),
+    usdpAmount,
+    votingPower: calculateVotingPower(usdpAmount, lockDurationDays),
     estimatedAPY: calculateEstimatedAPY(lockDurationDays),
     lockEndDate: calculateLockEndDate(lockDurationDays),
     ongoingRewards: true,
@@ -196,7 +196,7 @@ export function generateComparisonMetrics(
   return [
     {
       label: 'Amount Received',
-      veNFTValue: `${veNFTOption.hydAmount.toFixed(2)} HYD`,
+      veNFTValue: `${veNFTOption.usdpAmount.toFixed(2)} USDP`,
       cashValue: `${cashOption.totalAmount.toFixed(2)} USDC`,
       veNFTHighlight: false,
     },

@@ -19,13 +19,9 @@ describe('Token Enum - Functional Tests', () => {
     expect(Token.USDP).toBe('USDP');
   });
 
-  it('should include HYD token', () => {
-    expect(Token.HYD).toBe('HYD');
-  });
-
-  it('should have exactly 3 tokens', () => {
+  it('should have exactly 2 tokens', () => {
     const tokens = Object.values(Token);
-    expect(tokens).toHaveLength(3);
+    expect(tokens).toHaveLength(2);
   });
 });
 

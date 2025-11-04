@@ -65,7 +65,7 @@ export const useSwap = () => {
     inputAmount: '',
     outputAmount: '',
     inputToken: Token.USDC,
-    outputToken: Token.HYD,
+    outputToken: Token.USDP,
   });
 
   // Swap state

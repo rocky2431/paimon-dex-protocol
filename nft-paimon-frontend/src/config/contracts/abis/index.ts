@@ -5,7 +5,7 @@
 
 // Protocol contract ABIs
 export { TREASURY_ABI } from "./treasury";
-export { HYD_TOKEN_ABI, PAIMON_TOKEN_ABI, VE_NFT_ABI } from "./tokens";
+export { USDP_TOKEN_ABI, PAIMON_TOKEN_ABI, VE_NFT_ABI } from "./tokens";
 // export { LAUNCHPAD_ABI } from './launchpad';
 // export { GOVERNANCE_ABI } from './governance';
 

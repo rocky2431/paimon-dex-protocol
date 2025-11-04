@@ -3,8 +3,8 @@
  * Protocol-specific token interfaces
  */
 
-// HYD Token ABI (ERC20 with additional functions)
-export const HYD_TOKEN_ABI = [
+// USDP Token ABI (ERC20 with additional functions)
+export const USDP_TOKEN_ABI = [
   // Standard ERC20 functions
   {
     inputs: [
@@ -62,7 +62,7 @@ export const HYD_TOKEN_ABI = [
     type: 'function',
   },
 
-  // HYD-specific functions
+  // USDP-specific functions
   {
     inputs: [{ name: 'to', type: 'address' }],
     name: 'mint',

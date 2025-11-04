@@ -21,8 +21,8 @@ export const VOTING_CONFIG = {
 export const MOCK_GAUGES: Gauge[] = [
   {
     address: "0x1111111111111111111111111111111111111111" as `0x${string}`,
-    name: "HYD/USDC Pool",
-    token0: "HYD",
+    name: "USDP/USDC Pool",
+    token0: "USDP",
     token1: "USDC",
     tvl: "$1,200,000",
     apr: "25%",
@@ -30,8 +30,8 @@ export const MOCK_GAUGES: Gauge[] = [
   },
   {
     address: "0x2222222222222222222222222222222222222222" as `0x${string}`,
-    name: "HYD/ETH Pool",
-    token0: "HYD",
+    name: "USDP/ETH Pool",
+    token0: "USDP",
     token1: "ETH",
     tvl: "$800,000",
     apr: "18%",

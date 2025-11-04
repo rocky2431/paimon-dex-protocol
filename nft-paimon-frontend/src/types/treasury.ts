@@ -24,13 +24,13 @@ export interface RWAAsset {
 export interface UserPosition {
   rwaAsset: string;
   rwaAmount: bigint;
-  hydMinted: bigint;
+  usdpMinted: bigint;
   depositTime: bigint;
 }
 
 export interface DepositPreview {
   rwaValue: bigint; // RWA value in USD (18 decimals)
-  hydMintAmount: bigint; // HYD amount to mint (18 decimals)
+  usdpMintAmount: bigint; // USDP amount to mint (18 decimals)
   ltvRatio: number; // LTV ratio percentage
   healthFactor: number; // Health factor percentage
   mintDiscount: number; // Mint discount percentage
