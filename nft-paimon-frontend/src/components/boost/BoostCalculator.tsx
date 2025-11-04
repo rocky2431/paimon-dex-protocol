@@ -44,9 +44,10 @@ export function BoostCalculator({
   const amountNum = parseFloat(amount) || 0;
 
   // Calculate current staked amount from multiplier
-  // Formula: multiplier = 10000 + (amount / 1000) * 100
-  // Reverse: amount = (multiplier - 10000) * 1000 / 100 = (multiplier - 10000) * 10
-  const currentStakedNum = ((currentMultiplier - 10000) * 10) || 0;
+  // ✅ FIX (Task 84): Updated reverse formula to match corrected boost calculation
+  // Formula: multiplier = 10000 + amount (1:1 ratio)
+  // Reverse: amount = multiplier - 10000
+  const currentStakedNum = (currentMultiplier - 10000) || 0;
 
   // Calculate total after adding
   const totalAfterStaking = currentStakedNum + amountNum;
