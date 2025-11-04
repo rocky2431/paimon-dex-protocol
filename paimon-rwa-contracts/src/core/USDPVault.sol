@@ -91,7 +91,9 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
         address indexed liquidator,
         uint256 debtRepaid,
         address collateral,
-        uint256 collateralSeized
+        uint256 collateralSeized,
+        uint256 healthFactorBefore,
+        uint256 healthFactorAfter
     );
     event CollateralAdded(address indexed collateral, uint256 ltv, uint256 threshold, uint256 penalty);
     event CollateralUpdated(address indexed collateral, uint256 ltv, uint256 threshold, uint256 penalty);
@@ -215,7 +217,9 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
     function liquidate(address user, uint256 debtAmount) external nonReentrant {
         require(debtAmount > 0, "Amount must be greater than 0");
         require(_debts[user] > 0, "No debt to liquidate");
-        require(healthFactor(user) < PRICE_PRECISION, "Position is healthy");
+        // Capture health factor before liquidation (P3-001: monitoring enhancement)
+        uint256 healthFactorBefore = healthFactor(user);
+        require(healthFactorBefore < PRICE_PRECISION, "Position is healthy");
         require(address(stabilityPool) != address(0), "StabilityPool not set");
 
         uint256 maxRepay = _debts[user] / 2; // Max 50% of debt in single liquidation
@@ -231,6 +235,9 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
         // Update debt
         _debts[user] -= debtAmount;
         _totalDebt -= debtAmount;
+
+        // Capture health factor after partial debt repayment (P3-001: monitoring enhancement)
+        uint256 healthFactorAfter = healthFactor(user);
 
         // Calculate collateral to seize (with liquidation penalty)
         // TODO: Implement multi-collateral liquidation logic
@@ -252,7 +259,8 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
         // Notify StabilityPool of liquidation proceeds
         stabilityPool.onLiquidationProceeds(debtAmount, collateral, totalSeized);
 
-        emit Liquidated(user, msg.sender, debtAmount, collateral, totalSeized);
+        // Emit enhanced event with health factors (P3-001: monitoring enhancement)
+        emit Liquidated(user, msg.sender, debtAmount, collateral, totalSeized, healthFactorBefore, healthFactorAfter);
     }
 
     // ==================== View Functions ====================

@@ -92,12 +92,16 @@ contract GaugeController is IGaugeControllerForBribes, Ownable, ReentrancyGuard 
     /// @param gaugeId Gauge ID
     /// @param weight Vote weight (basis points)
     /// @param epoch Epoch number
+    /// @param oldWeight Previous vote weight for this gauge (P3-001: monitoring enhancement)
+    /// @param votingPower veNFT voting power at time of vote (P3-001: monitoring enhancement)
     event Voted(
         address indexed user,
         uint256 indexed tokenId,
         uint256 indexed gaugeId,
         uint256 weight,
-        uint256 epoch
+        uint256 epoch,
+        uint256 oldWeight,
+        uint256 votingPower
     );
 
     /// @notice Emitted when user batch votes
@@ -244,7 +248,8 @@ contract GaugeController is IGaugeControllerForBribes, Ownable, ReentrancyGuard 
         // Update user total allocation
         userTotalAllocation[_tokenId][epoch] = newTotalAllocation;
 
-        emit Voted(msg.sender, _tokenId, _gaugeId, _weight, epoch);
+        // Emit enhanced event with old weight and voting power (P3-001: monitoring enhancement)
+        emit Voted(msg.sender, _tokenId, _gaugeId, _weight, epoch, oldWeight, votingPower);
     }
 
     /**
