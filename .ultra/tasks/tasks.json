@@ -2091,7 +2091,7 @@
         "75"
       ],
       "estimated_days": 0.25,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "contract",
         "gas-optimization",
