@@ -38,10 +38,10 @@
 
 ### 核心特性 / Core Features
 
-- **RWA 代币化** / **RWA Tokenization**: 多层级资产担保（T1/T2/T3）/ Multi-tier asset collateralization
-- **国库系统** / **Treasury System**: 超额抵押铸造 HYD 合成资产 / Over-collateralized HYD minting
-- **ve33 DEX**: Uniswap V2 分叉，定制化费用结构 / Uniswap V2 fork with custom fee structure
-- **治理 NFT** / **Governance NFT**: 锁定 PAIMON 获取 vePAIMON 投票权 / Lock PAIMON for vePAIMON voting power
+- **RWA 代币化** / **RWA Tokenization**: 多层级资产担保（T1/T2/T3）/ Multi-tier asset collateralization (T1/T2/T3)
+- **国库系统** / **Treasury System**: 通过 RWA 资产超额抵押铸造 USDP 稳定币 / Mint USDP stablecoin over-collateralized by RWA assets
+- **veNFT 治理 DEX** / **veNFT Governance DEX**: Uniswap V2 分叉 + 投票托管 NFT 治理 / Uniswap V2 fork with vote-escrowed NFT governance
+- **投票权 NFT** / **Voting Power NFT**: 锁定 PAIMON 获取 vePAIMON 投票权 / Lock PAIMON for vePAIMON voting power
 - **Launchpad**: RWA 项目发行和社区治理 / RWA project issuance and community governance
 - **预售系统** / **Presale System**: 游戏化债券 NFT + 骰子掷奖励 / Gamified bond NFT + dice roll rewards
 
