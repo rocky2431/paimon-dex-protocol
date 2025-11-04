@@ -122,6 +122,10 @@ contract RewardDistributorStabilityPoolIntegrationTest is Test {
             treasury
         );
 
+        // ✅ FIX (Task 75): Authorize RewardDistributor to call StabilityPool.notifyRewardAmount()
+        // Without this, all tests fail with "Only reward distributor can call"
+        stabilityPool.setRewardDistributor(address(distributor));
+
         // Fund distributor with reward tokens
         paimonToken.transfer(address(distributor), REWARD_AMOUNT * 10);
         esPaimonToken.transfer(address(distributor), REWARD_AMOUNT * 10);
