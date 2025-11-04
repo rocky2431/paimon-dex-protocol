@@ -34,6 +34,15 @@ export const RWA_ASSETS: RWAAsset[] = [
     mintDiscount: 0,
     isActive: true,
   },
+  {
+    address: '0x0000000000000000000000000000000000000004',
+    name: 'HYD Real World Asset Token',
+    symbol: 'HYD',
+    tier: 1,
+    ltvRatio: 60, // 60% LTV for T1 (high-quality RWA)
+    mintDiscount: 0,
+    isActive: true,
+  },
 ];
 
 // Treasury Configuration
