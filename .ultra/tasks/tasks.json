@@ -2119,7 +2119,7 @@
         "76"
       ],
       "estimated_days": 0.125,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "contract",
         "gas-optimization",
@@ -2131,9 +2131,12 @@
         "test/unit/PSMParameterized.t.sol"
       ],
       "contractFiles": [
-        "src/treasury/PSM.sol"
+        "src/core/PSMParameterized.sol"
       ],
-      "failureCount": 1
+      "failureCount": 0,
+      "startedAt": "2025-11-04T21:05:00Z",
+      "completedAt": "2025-11-04T21:20:00Z",
+      "implementationNotes": "✅ 优化完成！\n\n核心改进:\n1. **Direct Multiplication 优化**\n   - 替换 3 处 `OZMath.mulDiv(a, b, 1)` 为 `unchecked { a * b }`\n   - Line 160: Scale up USDC to USDP\n   - Line 184: Fee conversion to USDP decimals\n   - Line 234: Scale up USDP to USDC\n\n2. **Gas 节省**\n   - 优化前: 106,349 gas\n   - 优化后: 106,129 gas\n   - 节省: 220 gas (0.21% 减少)\n\n3. **安全性分析**\n   - Max USDC amount: 1e18 (6 decimals) × 1e12 = 1e30\n   - Well below uint256.max ≈ 1.15e77\n   - Fee amounts even smaller (max 0.1%)\n   - Unchecked arithmetic safe for all practical cases\n\n4. **保留 OZMath.mulDiv 用于费用计算**\n   - Lines 148, 215 仍使用 mulDiv (除以 BP_DENOMINATOR)\n   - 这些是合理的使用场景，安全性优先\n\n测试结果:\n✅ 所有 24 个 PSMParameterized 测试通过\n✅ Gas 在合理阈值内 (90K-110K)\n✅ 精度保持不变\n✅ 无功能变化\n\n技术说明:\n除以 1 的 mulDiv 是低效的，直接乘法结合 unchecked 块更高效。\n通过溢出分析确认安全性。\n\nGit: feat/task-83-psm-muldiv-gas (commit 3008621, merged to main)"
     },
     {
       "id": "84",
