@@ -1916,7 +1916,7 @@
       "priority": "P0",
       "dependencies": [],
       "estimated_days": 0.25,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "contract",
         "PSM",
@@ -1930,7 +1930,15 @@
       "contractFiles": [
         "src/treasury/PSM.sol"
       ],
-      "failureCount": 2
+      "failureCount": 2,
+      "startedAt": "2025-11-04T18:11:34.997868",
+      "completedAt": "2025-11-04T18:14:53.493730",
+      "notes": [
+        {
+          "timestamp": "2025-11-04T18:14:53.493735",
+          "content": "✅ 修复完成 - 所有2个测试通过\n\n根本原因: PSMParameterized.sol 事件签名更新（P3-001监控增强）添加了 scaleFactor 参数，但测试文件未同步更新\n\n修复内容:\n- 更新测试文件事件声明，添加 scaleFactor 参数\n- 在两个 emit 语句中添加 scaleFactor = 1e12\n- scaleFactor = 10^(18-6) = 1e12 (USDP decimals - USDC decimals)\n\n测试结果:\n- 修复前: 0 passed, 2 failed\n- 修复后: 2 passed, 0 failed (100% pass rate)\n\n提交: feat/task-76-psm-event-fix (306edb2)\n"
+        }
+      ]
     },
     {
       "id": "77",
