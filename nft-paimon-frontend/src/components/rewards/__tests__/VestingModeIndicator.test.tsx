@@ -20,24 +20,32 @@ describe('VestingModeIndicator Component Tests', () => {
     it('should render vesting mode when enabled', () => {
       render(<VestingModeIndicator useEsVesting={true} loading={false} />);
 
-      expect(screen.getByText(/vesting.mode.enabled/i)).toBeInTheDocument();
+      // ✅ FIX (Task 84): Text appears in both Chip and Table Cell, use getAllByText
+      const modeMatches = screen.getAllByText(/vesting.mode.enabled/i);
+      expect(modeMatches.length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText(/vesting.description.365days/i)).toBeInTheDocument();
     });
 
     it('should render direct mode when vesting is disabled', () => {
       render(<VestingModeIndicator useEsVesting={false} loading={false} />);
 
-      expect(screen.getByText(/vesting.mode.disabled/i)).toBeInTheDocument();
+      // ✅ FIX (Task 84): Text appears in both Chip and Table Cell, use getAllByText
+      const modeMatches = screen.getAllByText(/vesting.mode.disabled/i);
+      expect(modeMatches.length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText(/vesting.description.immediate/i)).toBeInTheDocument();
     });
 
     it('should display mode comparison table', () => {
       render(<VestingModeIndicator useEsVesting={true} loading={false} />);
 
+      // ✅ FIX (Task 84): "vesting.mode" appears multiple times (headers + cells), use getAllByText
       // Check for comparison headers
-      expect(screen.getByText(/vesting.mode/i)).toBeInTheDocument();
-      expect(screen.getByText(/vesting.pros/i)).toBeInTheDocument();
-      expect(screen.getByText(/vesting.cons/i)).toBeInTheDocument();
+      const modeMatches = screen.getAllByText(/vesting.mode/i);
+      expect(modeMatches.length).toBeGreaterThanOrEqual(1);
+      const prosMatches = screen.getAllByText(/vesting.pros/i);
+      expect(prosMatches.length).toBeGreaterThanOrEqual(1);
+      const consMatches = screen.getAllByText(/vesting.cons/i);
+      expect(consMatches.length).toBeGreaterThanOrEqual(1);
     });
 
     it('should show link to Convert page when vesting is enabled', () => {
