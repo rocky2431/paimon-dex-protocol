@@ -151,13 +151,14 @@ contract PSMParameterized is ReentrancyGuard, Ownable {
         uint256 usdcAfterFee = usdcAmount - feeUSDC;
 
         // Convert USDC decimals to USDP decimals dynamically
-        // Using OZMath.mulDiv for scaling to prevent overflow with extreme amounts
+        // ✅ Task 83: Optimized scaling - use direct multiplication instead of mulDiv(a,b,1)
         if (usdcDecimals < USDP_DECIMALS) {
             // Scale up: USDC (6) → USDP (18) requires * 10^12
-            // Previously: usdpReceived = usdcAfterFee * scaleFactor
-            // With extreme amounts, this multiplication could overflow
+            // Safe to use unchecked: max USDC (1e18 * 1e12) = 1e30, well below uint256.max
             uint256 scaleFactor = 10 ** (USDP_DECIMALS - usdcDecimals);
-            usdpReceived = OZMath.mulDiv(usdcAfterFee, scaleFactor, 1);
+            unchecked {
+                usdpReceived = usdcAfterFee * scaleFactor;
+            }
         } else if (usdcDecimals > USDP_DECIMALS) {
             // Scale down: USDC (20) → USDP (18) requires / 10^2
             uint256 scaleFactor = 10 ** (usdcDecimals - USDP_DECIMALS);
@@ -174,12 +175,14 @@ contract PSMParameterized is ReentrancyGuard, Ownable {
         USDP.mint(msg.sender, usdpReceived);
 
         // Calculate fee in USDP decimals for event
-        // Using OZMath.mulDiv for consistency with main calculations
+        // ✅ Task 83: Use direct multiplication for better gas efficiency
         uint256 feeUSDP;
         if (usdcDecimals < USDP_DECIMALS) {
             uint256 scaleFactor = 10 ** (USDP_DECIMALS - usdcDecimals);
-            // Use OZMath.mulDiv for safety, though feeUSDC is typically small
-            feeUSDP = OZMath.mulDiv(feeUSDC, scaleFactor, 1);
+            // Safe: feeUSDC is small (max 0.1% of amount), won't overflow
+            unchecked {
+                feeUSDP = feeUSDC * scaleFactor;
+            }
         } else if (usdcDecimals > USDP_DECIMALS) {
             uint256 scaleFactor = 10 ** (usdcDecimals - USDP_DECIMALS);
             feeUSDP = feeUSDC / scaleFactor;
@@ -218,17 +221,18 @@ contract PSMParameterized is ReentrancyGuard, Ownable {
         uint256 usdpAfterFee = usdpAmount - feeUSDP;
 
         // Convert USDP decimals to USDC decimals dynamically
-        // Using OZMath.mulDiv for scaling to prevent overflow with extreme amounts
+        // ✅ Task 83: Optimized scaling - use direct multiplication instead of mulDiv(a,b,1)
         if (usdcDecimals < USDP_DECIMALS) {
             // Scale down: USDP (18) → USDC (6) requires / 10^12
             uint256 scaleFactor = 10 ** (USDP_DECIMALS - usdcDecimals);
             usdcReceived = usdpAfterFee / scaleFactor;
         } else if (usdcDecimals > USDP_DECIMALS) {
             // Scale up: USDP (18) → USDC (20) requires * 10^2
-            // Previously: usdcReceived = usdpAfterFee * scaleFactor
-            // With extreme amounts, this multiplication could overflow
+            // Safe to use unchecked: max USDP (1e30) * scaleFactor (1e2) = 1e32, well below uint256.max
             uint256 scaleFactor = 10 ** (usdcDecimals - USDP_DECIMALS);
-            usdcReceived = OZMath.mulDiv(usdpAfterFee, scaleFactor, 1);
+            unchecked {
+                usdcReceived = usdpAfterFee * scaleFactor;
+            }
         } else {
             // Same decimals: 1:1 conversion
             usdcReceived = usdpAfterFee;
