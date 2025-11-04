@@ -72,7 +72,7 @@ export default function NitroPage() {
 
   return (
     <>
-      <Navigation />
+      <Navigation activePage="rewards" />
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Page Header */}
         <Box sx={{ mb: 4 }}>

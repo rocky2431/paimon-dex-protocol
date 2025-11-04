@@ -92,7 +92,7 @@ export const tokenConfig = {
   usdc: {
     symbol: "USDC" as const,
     name: "USD Coin",
-    decimals: 18, // BSC USDC uses 18 decimals
+    decimals: 6, // BSC Testnet USDC uses 6 decimals (verified on-chain)
     address: tokens.usdc,
     icon: "/tokens/usdc.svg",
   },

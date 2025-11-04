@@ -6,7 +6,7 @@ import "../treasury/Treasury.sol";
 import "./RWABondNFT.sol";
 import "./RemintController.sol";
 import "../core/HYD.sol";
-import "../core/PSM.sol";
+import "../core/PSMParameterized.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -37,7 +37,7 @@ contract SettlementRouter is ReentrancyGuard {
     VotingEscrow public immutable votingEscrow;
     Treasury public immutable treasury;
     HYD public immutable hyd;
-    PSM public immutable psm;
+    PSMParameterized public immutable psm;
     IERC20 public immutable usdc;
 
     uint256 public constant BOND_PRINCIPAL = 100 * 1e6; // 100 USDC
@@ -85,7 +85,7 @@ contract SettlementRouter is ReentrancyGuard {
         votingEscrow = VotingEscrow(_votingEscrow);
         treasury = Treasury(payable(_treasury));
         hyd = HYD(_hyd);
-        psm = PSM(_psm);
+        psm = PSMParameterized(_psm);
         usdc = IERC20(_usdc);
     }
 

@@ -51,6 +51,9 @@ contract SavingRate is Ownable, ReentrancyGuard {
     /// @notice Total USDP funded by Treasury for interest payments
     uint256 public totalFunded;
 
+    /// @notice Total accrued interest across all users (for fund coverage check)
+    uint256 public totalAccruedInterest;
+
     /// @notice User principal balances
     mapping(address => uint256) private _balances;
 
@@ -102,6 +105,7 @@ contract SavingRate is Ownable, ReentrancyGuard {
     event RWARateSourceUpdated(uint256 annualYield, uint256 allocationRatio);
     event DEXFeeRateUpdated(uint256 dailyFees, uint256 totalTVL);
     event RateSmoothed(uint256 proposedRate, uint256 cappedRate, uint256 timestamp);
+    event FundCoverageWarning(uint256 shortfall, uint256 totalObligations, uint256 availableBalance);
 
     // ==================== Constructor ====================
 
@@ -168,6 +172,7 @@ contract SavingRate is Ownable, ReentrancyGuard {
 
     /**
      * @notice Claim all accrued interest
+     * @dev Task P1-008: Decrease totalAccruedInterest when interest is claimed
      */
     function claimInterest() external nonReentrant {
         // Accrue latest interest
@@ -178,6 +183,7 @@ contract SavingRate is Ownable, ReentrancyGuard {
 
         // Reset accrued interest
         _accruedInterest[msg.sender] = 0;
+        totalAccruedInterest -= interest; // Task P1-008: Update global counter
 
         // Transfer interest to user
         usdp.safeTransfer(msg.sender, interest);
@@ -351,6 +357,7 @@ contract SavingRate is Ownable, ReentrancyGuard {
     /**
      * @notice Internal function to accrue interest for a user
      * @param user User address
+     * @dev Task P1-008: Added fund coverage check to ensure sufficient USDP balance
      */
     function _accrueInterestInternal(address user) internal {
         uint256 principal = _balances[user];
@@ -364,7 +371,19 @@ contract SavingRate is Ownable, ReentrancyGuard {
 
         if (pendingInterest > 0) {
             _accruedInterest[user] += pendingInterest;
+            totalAccruedInterest += pendingInterest;
             emit InterestAccrued(user, pendingInterest, block.timestamp);
+        }
+
+        // Task P1-008: Check fund coverage
+        // Total obligations = total principal deposits + total accrued interest
+        uint256 totalObligations = totalDeposits + totalAccruedInterest;
+        uint256 availableBalance = usdp.balanceOf(address(this));
+
+        if (availableBalance < totalObligations) {
+            uint256 shortfall = totalObligations - availableBalance;
+            emit FundCoverageWarning(shortfall, totalObligations, availableBalance);
+            revert("Insufficient fund coverage");
         }
 
         // Update last accrual time
@@ -387,8 +406,8 @@ contract SavingRate is Ownable, ReentrancyGuard {
         if (timeElapsed == 0) return 0;
 
         // Interest = principal × annualRate × timeElapsed / SECONDS_PER_YEAR / BASIS_POINTS
-        // Multiply before divide to preserve precision
-        uint256 interest = (principal * annualRate * timeElapsed) / SECONDS_PER_YEAR / BASIS_POINTS;
+        // Task P2-001: Fix precision loss - combine divisions
+        uint256 interest = (principal * annualRate * timeElapsed) / (SECONDS_PER_YEAR * BASIS_POINTS);
 
         return interest;
     }

@@ -44,6 +44,10 @@ contract RWAPriceOracle is Ownable, ReentrancyGuard, Pausable {
   /// @notice Trusted oracle address for NAV updates
   address public trustedOracle;
 
+  /// @notice Whether this is an L2 network (requires sequencer check)
+  /// @dev P1-004: Auto-detected from chainId in constructor
+  bool public immutable isL2Network;
+
   /// @notice Latest NAV price (18 decimals)
   uint256 public latestNAV;
 
@@ -79,8 +83,14 @@ contract RWAPriceOracle is Ownable, ReentrancyGuard, Pausable {
   /**
    * @notice Initialize RWAPriceOracle
    * @param _chainlinkFeed Chainlink Price Feed address
-   * @param _sequencerUptimeFeed L2 Sequencer Uptime Feed address
+   * @param _sequencerUptimeFeed L2 Sequencer Uptime Feed address (can be address(0) for L1 networks)
    * @param _trustedOracle Trusted oracle address for NAV updates
+   * @dev P1-004: Auto-detects L1/L2 network based on block.chainid
+   *
+   * Supported Networks:
+   * - L1: BSC Mainnet (56), BSC Testnet (97)
+   * - L2: Arbitrum (42161), Optimism (10), Base (8453)
+   * - Default: L2 (safe default for unknown chains)
    */
   constructor(
     address _chainlinkFeed,
@@ -88,8 +98,21 @@ contract RWAPriceOracle is Ownable, ReentrancyGuard, Pausable {
     address _trustedOracle
   ) Ownable(msg.sender) {
     require(_chainlinkFeed != address(0), "Invalid Chainlink feed");
-    require(_sequencerUptimeFeed != address(0), "Invalid sequencer feed");
     require(_trustedOracle != address(0), "Invalid trusted oracle");
+
+    // Auto-detect L1/L2 network from chain ID
+    uint256 chainId = block.chainid;
+    if (chainId == 56 || chainId == 97) {
+      // BSC Mainnet (56) or BSC Testnet (97) - L1 networks
+      isL2Network = false;
+      // Sequencer feed not required for L1, but can be provided
+      // (will be ignored in _checkSequencerUptime)
+    } else {
+      // All other chains (Arbitrum 42161, Optimism 10, Base 8453, etc.)
+      // Default to L2 for safety (unknown chains assumed L2)
+      isL2Network = true;
+      require(_sequencerUptimeFeed != address(0), "Invalid sequencer feed");
+    }
 
     chainlinkFeed = _chainlinkFeed;
     sequencerUptimeFeed = _sequencerUptimeFeed;
@@ -190,9 +213,16 @@ contract RWAPriceOracle is Ownable, ReentrancyGuard, Pausable {
 
   /**
    * @notice Check L2 Sequencer Uptime
-   * @dev Reverts if sequencer is down or grace period not over
+   * @dev P1-004: Skips check for L1 networks (BSC), enforces for L2 networks
+   * @dev Reverts if sequencer is down or grace period not over (L2 only)
    */
   function _checkSequencerUptime() internal view {
+    // Skip sequencer check for L1 networks (e.g., BSC)
+    if (!isL2Network) {
+      return;
+    }
+
+    // L2 networks must check sequencer status
     AggregatorV3Interface sequencer = AggregatorV3Interface(sequencerUptimeFeed);
 
     (

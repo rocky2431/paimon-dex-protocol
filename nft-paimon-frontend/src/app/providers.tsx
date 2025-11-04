@@ -5,11 +5,56 @@ import { WagmiProvider } from 'wagmi';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import { Box, CircularProgress } from '@mui/material';
 import { config } from '@/config/wagmi';
 import { theme } from '@/config/theme';
+import { useConfigValidation } from '@/hooks/useConfigValidation';
+import { ConfigErrorPage } from '@/components/common';
 import '@rainbow-me/rainbowkit/styles.css';
 
 const queryClient = new QueryClient();
+
+/**
+ * ConfigValidator Component
+ * Validates configuration before rendering app content
+ * 配置验证组件
+ */
+function ConfigValidator({ children }: { children: React.ReactNode }) {
+  const validation = useConfigValidation();
+
+  // Show loading spinner while validating
+  if (validation.isLoading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+          backgroundColor: '#FFF5E6',
+        }}
+      >
+        <CircularProgress size={60} sx={{ color: '#FF6F00' }} />
+      </Box>
+    );
+  }
+
+  // Show error page if validation fails
+  if (!validation.isValid) {
+    return (
+      <ConfigErrorPage
+        error={validation.error || 'Unknown configuration error'}
+        usdcDecimals={validation.usdcDecimals}
+        psmUsdcDecimals={validation.psmUsdcDecimals}
+        expectedScale={validation.expectedScale}
+        psmScale={validation.psmScale}
+      />
+    );
+  }
+
+  // Validation passed, render app content
+  return <>{children}</>;
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -18,7 +63,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <RainbowKitProvider>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            {children}
+            <ConfigValidator>{children}</ConfigValidator>
           </ThemeProvider>
         </RainbowKitProvider>
       </QueryClientProvider>

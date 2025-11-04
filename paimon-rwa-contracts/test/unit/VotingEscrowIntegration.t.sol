@@ -6,7 +6,7 @@ import "../../src/core/VotingEscrow.sol";
 import "../../src/treasury/Treasury.sol";
 import "../../src/presale/RWABondNFT.sol";
 import "../../src/core/HYD.sol";
-import "../../src/core/PSM.sol";
+import "../../src/core/PSMParameterized.sol";
 import "../../src/mocks/MockERC20.sol";
 
 /**
@@ -26,7 +26,7 @@ contract VotingEscrowIntegrationTest is Test {
     Treasury public treasury;
     RWABondNFT public bondNFT;
     HYD public hyd;
-    PSM public psm;
+    PSMParameterized public psm;
     MockERC20 public usdc;
 
     // ==================== Test Accounts ====================
@@ -56,7 +56,7 @@ contract VotingEscrowIntegrationTest is Test {
         hyd.initTempPsm(address(owner));
 
         // Deploy PSM
-        psm = new PSM(address(hyd), address(usdc));
+        psm = new PSMParameterized(address(hyd), address(usdc));
 
         // Redeploy HYD with correct PSM address
         //hyd = new HYD(address(psm));
@@ -64,7 +64,7 @@ contract VotingEscrowIntegrationTest is Test {
         hyd.initTempPsm(address(psm));
 
         // Redeploy PSM with final HYD address
-        psm = new PSM(address(hyd), address(usdc));
+        psm = new PSMParameterized(address(hyd), address(usdc));
 
         // Final HYD deployment
         //hyd = new HYD(address(psm));

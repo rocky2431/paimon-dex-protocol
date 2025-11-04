@@ -91,7 +91,9 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
         address indexed liquidator,
         uint256 debtRepaid,
         address collateral,
-        uint256 collateralSeized
+        uint256 collateralSeized,
+        uint256 healthFactorBefore,
+        uint256 healthFactorAfter
     );
     event CollateralAdded(address indexed collateral, uint256 ltv, uint256 threshold, uint256 penalty);
     event CollateralUpdated(address indexed collateral, uint256 ltv, uint256 threshold, uint256 penalty);
@@ -161,6 +163,7 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
     /**
      * @notice Borrow USDP against collateral
      * @param amount Amount of USDP to borrow
+     * @dev Task P2-001: Multi-collateral positions now supported via weighted health factor
      */
     function borrow(uint256 amount) external nonReentrant whenNotPaused {
         require(amount > 0, "Amount must be greater than 0");
@@ -214,7 +217,9 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
     function liquidate(address user, uint256 debtAmount) external nonReentrant {
         require(debtAmount > 0, "Amount must be greater than 0");
         require(_debts[user] > 0, "No debt to liquidate");
-        require(healthFactor(user) < PRICE_PRECISION, "Position is healthy");
+        // Capture health factor before liquidation (P3-001: monitoring enhancement)
+        uint256 healthFactorBefore = healthFactor(user);
+        require(healthFactorBefore < PRICE_PRECISION, "Position is healthy");
         require(address(stabilityPool) != address(0), "StabilityPool not set");
 
         uint256 maxRepay = _debts[user] / 2; // Max 50% of debt in single liquidation
@@ -223,12 +228,16 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
         // Check stability pool has sufficient liquidity
         require(stabilityPool.totalDeposits() >= debtAmount, "Insufficient liquidity in pool");
 
-        // Burn USDP from liquidator
-        usdp.burnFrom(msg.sender, debtAmount);
+        // Burn USDP from stability pool (FIX: P0-003 accounting mismatch)
+        // This ensures balanceOf(pool) and _totalDeposits decrease together
+        usdp.burnFrom(address(stabilityPool), debtAmount);
 
         // Update debt
         _debts[user] -= debtAmount;
         _totalDebt -= debtAmount;
+
+        // Capture health factor after partial debt repayment (P3-001: monitoring enhancement)
+        uint256 healthFactorAfter = healthFactor(user);
 
         // Calculate collateral to seize (with liquidation penalty)
         // TODO: Implement multi-collateral liquidation logic
@@ -250,7 +259,8 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
         // Notify StabilityPool of liquidation proceeds
         stabilityPool.onLiquidationProceeds(debtAmount, collateral, totalSeized);
 
-        emit Liquidated(user, msg.sender, debtAmount, collateral, totalSeized);
+        // Emit enhanced event with health factors (P3-001: monitoring enhancement)
+        emit Liquidated(user, msg.sender, debtAmount, collateral, totalSeized, healthFactorBefore, healthFactorAfter);
     }
 
     // ==================== View Functions ====================
@@ -307,6 +317,7 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
      * @notice Calculate health factor for a user
      * @param user User address
      * @return Health factor (18 decimals, 1.0 = 1e18)
+     * @dev Task P2-001: Weighted health factor supporting multi-collateral positions
      */
     function healthFactor(address user) public view returns (uint256) {
         uint256 debt = _debts[user];
@@ -314,13 +325,23 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
             return type(uint256).max;
         }
 
-        uint256 collateralValue = getCollateralValueUSD(user);
+        // P2-001: Weighted health factor calculation
+        // Iterate through all collaterals and apply their respective liquidation thresholds
+        uint256 adjustedCollateralValue = 0;
+        uint256 price = oracle.getPrice();
 
-        // TODO: Use weighted average liquidation threshold across collaterals
-        // Simplified: use first collateral's threshold
-        uint256 threshold = collateralConfigs[supportedCollaterals[0]].liquidationThreshold;
+        for (uint256 i = 0; i < supportedCollaterals.length; i++) {
+            address collateral = supportedCollaterals[i];
+            uint256 balance = _collateralBalances[user][collateral];
 
-        uint256 adjustedCollateralValue = (collateralValue * threshold) / BASIS_POINTS;
+            if (balance > 0) {
+                CollateralConfig memory config = collateralConfigs[collateral];
+                // Task P2-001: Fix precision loss - combine multiplications before divisions
+                adjustedCollateralValue += (balance * price * config.liquidationThreshold) / (PRICE_PRECISION * BASIS_POINTS);
+            }
+        }
+
+        // Return health factor: adjustedValue / debt
         return (adjustedCollateralValue * PRICE_PRECISION) / debt;
     }
 
@@ -341,8 +362,8 @@ contract USDPVault is Ownable, ReentrancyGuard, Pausable {
 
             if (balance > 0) {
                 CollateralConfig memory config = collateralConfigs[collateral];
-                uint256 collateralValue = (balance * price) / PRICE_PRECISION;
-                totalBorrowPower += (collateralValue * config.ltv) / BASIS_POINTS;
+                // Task P2-001: Fix precision loss - combine multiplications before divisions
+                totalBorrowPower += (balance * price * config.ltv) / (PRICE_PRECISION * BASIS_POINTS);
             }
         }
 

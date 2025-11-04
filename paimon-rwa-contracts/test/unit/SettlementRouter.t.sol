@@ -8,7 +8,7 @@ import "../../src/presale/RemintController.sol";
 import "../../src/core/VotingEscrow.sol";
 import "../../src/treasury/Treasury.sol";
 import "../../src/core/HYD.sol";
-import "../../src/core/PSM.sol";
+import "../../src/core/PSMParameterized.sol";
 import "../../src/mocks/MockERC20.sol";
 import "../../src/mocks/MockVRFCoordinatorV2.sol";
 
@@ -31,7 +31,7 @@ contract SettlementRouterTest is Test {
     VotingEscrow public votingEscrow;
     Treasury public treasury;
     HYD public hyd;
-    PSM public psm;
+    PSMParameterized public psm;
     MockERC20 public usdc;
     MockVRFCoordinatorV2 public vrfCoordinator;
 
@@ -66,11 +66,11 @@ contract SettlementRouterTest is Test {
        // hyd = new HYD(address(this));
           hyd=new HYD();
         hyd.initTempPsm(address(owner));
-        psm = new PSM(address(hyd), address(usdc));
+        psm = new PSMParameterized(address(hyd), address(usdc));
        // hyd = new HYD(address(psm));
           hyd=new HYD();
         hyd.initTempPsm(address(psm));
-        psm = new PSM(address(hyd), address(usdc));
+        psm = new PSMParameterized(address(hyd), address(usdc));
         //hyd = new HYD(address(psm));
            hyd=new HYD();
         hyd.initTempPsm(address(psm));

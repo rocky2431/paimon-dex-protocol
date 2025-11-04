@@ -163,27 +163,97 @@ contract PAIMON is ERC20, Ownable {
 }
 ```
 
-### 3.2 PSM (Peg Stability Module)
-
+#### EmissionManager.sol (Emission Schedule)
 ```solidity
-contract PSM is ReentrancyGuard, Ownable, Pausable {
-    using SafeERC20 for IERC20;
+contract EmissionManager is Ownable {
+    // Phase constants
+    uint256 public constant PHASE_A_WEEKLY = 37_500_000 * 1e18; // 37.5M PAIMON
+    uint256 public constant PHASE_C_WEEKLY = 4_326_923 * 1e18;  // 4.327M PAIMON
+    uint256 public constant PHASE_A_END = 12;
+    uint256 public constant PHASE_B_END = 248;
+    uint256 public constant PHASE_C_END = 352;
+    uint256 public constant DECAY_RATE_BPS = 9850; // 0.985 = 98.5%
 
-    // Core functionality
-    function swapUSDCForHYD(uint256 usdcAmount) external nonReentrant whenNotPaused;
-    function swapHYDForUSDC(uint256 hydAmount) external nonReentrant whenNotPaused;
+    // Phase-B lookup table (236 weeks, gas-optimized)
+    uint256[236] private PHASE_B_EMISSIONS; // Pre-computed exponential decay
 
-    // Fee structure
-    uint256 public feeIn = 10;  // 0.1% on USDC → HYD
-    uint256 public feeOut = 10; // 0.1% on HYD → USDC
+    // Get weekly budget for all channels
+    function getWeeklyBudget(uint256 week) external view returns (
+        uint256 debt,
+        uint256 lpPairs,
+        uint256 stabilityPool,
+        uint256 eco
+    );
+
+    // LP split governance (default: lpPairs 60%, stabilityPool 40%)
+    function setLPSplit(uint256 pairsBps, uint256 poolBps) external onlyOwner;
 }
 ```
 
+**Emission Schedule** (Task P0-002 Fixed):
+- **Phase A** (Week 1-12): Fixed 37.5M PAIMON/week
+- **Phase B** (Week 13-248): Exponential decay 0.985^t (37.5M → 4.327M)
+  - Uses pre-computed lookup table for O(1) gas optimization
+  - Formula: E_B(t) = 37,500,000 * 0.985^t
+- **Phase C** (Week 249-352): Fixed 4.327M PAIMON/week
+- **Total Emission**: ~10B PAIMON over 352 weeks (6.77 years)
+
+**Channel Allocation** (phase-dynamic):
+| Phase | Debt | LP Total | Eco | Notes |
+|-------|------|----------|-----|-------|
+| Phase A (Week 1-12) | 30% | 60% | 10% | Bootstrap liquidity |
+| Phase B (Week 13-248) | 50% | 37.5% | 12.5% | Transition to debt focus |
+| Phase C (Week 249-352) | 55% | 35% | 10% | Sustainable long-term |
+
+**LP Secondary Split** (governance-adjustable):
+- Default: LP Pairs 60%, Stability Pool 40%
+- Adjustable by owner via `setLPSplit()` with 1% granularity
+- Must sum to exactly 100% (validated on-chain)
+
+**Design Rationale**:
+- **Gas Efficiency**: Phase B uses 236-element lookup table instead of on-the-fly exponential calculation
+- **Determinism**: Same week always returns same budget (no external dependencies)
+- **Flexibility**: LP split adjustable to optimize between trading liquidity and stability pool depth
+- **Anti-Inflation**: Exponential decay prevents excessive supply growth
+- **Dust Collection**: Precision-optimized allocation ensures no rounding waste
+
+### 3.2 PSM (Peg Stability Module)
+
+**Implementation**: `PSMParameterized.sol` (Task P2-003: Parameterized Decimals Support)
+
+```solidity
+contract PSMParameterized is ReentrancyGuard, Ownable {
+    using SafeERC20 for IERC20;
+
+    // Token configuration
+    IUSDP public immutable USDP;           // Minted/burned via PSM
+    IERC20 public immutable USDC;          // Reserve asset
+    uint8 public immutable usdcDecimals;   // Dynamically queried (6 or 18)
+    uint8 public constant USDP_DECIMALS = 18;
+
+    // Core functionality
+    function swapUSDCForUSDP(uint256 usdcAmount) external nonReentrant;
+    function swapUSDPForUSDC(uint256 usdpAmount) external nonReentrant;
+
+    // Fee structure
+    uint256 public feeIn;   // 0.1% on USDC → USDP
+    uint256 public feeOut;  // 0.1% on USDP → USDC
+}
+```
+
+**Decimal Handling** (Task P2-003):
+- **USDP**: Always 18 decimals (standard ERC20)
+- **USDC Mainnet** (BSC): 18 decimals (0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d)
+- **USDC Testnet** (BSC): 6 decimals (0xaa3F4B0cEF6F8f4C584cc6fD3A5e79E68dAa13b2)
+- **Auto-detection**: PSM queries `IERC20Metadata.decimals()` on construction
+- **Scale factor**: Dynamically calculates conversion (e.g., 1e12 for 6→18, 1 for 18→18)
+- **Gas optimization**: Decimals cached as `immutable` to avoid repeated queries
+
 **Design Decisions**:
-- 1:1 peg maintenance
+- 1:1 peg maintenance (with decimal normalization)
 - Low fees (0.1%) for high capital efficiency
 - Separate fee control for each direction
-- Emergency pause mechanism
+- Cross-network compatibility (mainnet/testnet)
 
 ### 3.3 DEX Core (Uniswap V2 Fork)
 
@@ -286,6 +356,43 @@ contract Treasury is ReentrancyGuard, Ownable, Pausable {
 - Liquidation threshold: LTV > tier max + 5%
 - Liquidation penalty: 5% to liquidator, 2% to protocol
 - Partial or full liquidation supported
+
+**Multi-Collateral Support** (Task P1-005, P2-008):
+The Treasury and USDPVault support multi-collateral positions with weighted health factor calculation:
+
+```solidity
+// Individual collateral valuation
+for each collateral i in user position:
+    value_i = amount_i × price_i × ltv_i
+
+// Aggregated health factor
+totalCollateralValue = Σ value_i
+healthFactor = totalCollateralValue / totalDebt
+
+// Liquidation trigger
+if (healthFactor < 1.0) → position undercollateralized
+```
+
+**Key Features**:
+- **Weighted valuation**: Each collateral contributes proportionally to total health
+- **Tier-aware**: Different LTV ratios applied per asset tier (T1: 80%, T2: 65%, T3: 50%)
+- **Backward compatible**: Single-collateral positions work identically
+- **Gas optimized**: Batch calculations minimize storage reads
+
+**Example**:
+```
+User deposits:
+  - 100,000 USDC (T1, LTV 80%) → value = 80,000
+  - 50,000 tokenized bonds (T2, LTV 65%) → value = 32,500
+  Total collateral value = 112,500
+
+User mints: 100,000 HYD (debt)
+Health factor = 112,500 / 100,000 = 1.125 ✅ Healthy
+
+If bond price drops 20%:
+  New collateral value = 80,000 + 26,000 = 106,000
+  Health factor = 106,000 / 100,000 = 1.06 ⚠️ Warning
+```
 
 ### 3.6 RWA Launchpad
 

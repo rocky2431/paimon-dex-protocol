@@ -3,24 +3,11 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "../interfaces/AggregatorV3Interface.sol";
 
 // ============================================================
 // INTERFACES
 // ============================================================
-
-interface AggregatorV3Interface {
-    function decimals() external view returns (uint8);
-    function latestRoundData()
-        external
-        view
-        returns (
-            uint80 roundId,
-            int256 answer,
-            uint256 startedAt,
-            uint256 updatedAt,
-            uint80 answeredInRound
-        );
-}
 
 interface IPyth {
     struct Price {
@@ -30,8 +17,20 @@ interface IPyth {
         uint256 publishTime;
     }
 
-    function getPrice(bytes32 id) external view returns (Price memory price); // Deprecated
+    /// @notice Get price (deprecated - use getPriceUnsafe or getPriceNoOlderThan)
+    /// @param id Price feed ID
+    /// @return price Price struct containing price, confidence, expo, and publish time
+    function getPrice(bytes32 id) external view returns (Price memory price);
+
+    /// @notice Get latest price without staleness check
+    /// @param id Price feed ID
+    /// @return price Price struct containing price, confidence, expo, and publish time
     function getPriceUnsafe(bytes32 id) external view returns (Price memory price);
+
+    /// @notice Get price with maximum age constraint
+    /// @param id Price feed ID
+    /// @param age Maximum age in seconds
+    /// @return price Price struct containing price, confidence, expo, and publish time
     function getPriceNoOlderThan(bytes32 id, uint256 age) external view returns (Price memory price);
 }
 

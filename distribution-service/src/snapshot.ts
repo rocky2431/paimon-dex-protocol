@@ -155,10 +155,8 @@ export class SnapshotFetcher {
 
       totalStabilityPoolShares += userSnapshot.stabilityPoolShares;
 
-      // Check for overflow
-      if (totalDebt < userSnapshot.debt) {
-        throw new Error('Overflow');
-      }
+      // Note: BigInt does not overflow like Solidity uint256.
+      // BigInt can represent arbitrarily large integers without overflow.
     }
 
     return {

@@ -2,17 +2,18 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import "../../src/core/PSM.sol";
+import "../../src/core/PSMParameterized.sol";
 import "../../src/core/USDP.sol";
 import "../../src/mocks/MockERC20.sol";
 
 /**
- * @title PSM Test Suite (USDP Version)
- * @notice Comprehensive TDD tests for PSM contract with 6-dimensional coverage
+ * @title PSMParameterized Test Suite (USDP Version)
+ * @notice Comprehensive TDD tests for PSMParameterized contract with 6-dimensional coverage
  * @dev Test dimensions: Functional, Boundary, Exception, Performance, Security, Compatibility
  *
- * PSM Key Features:
+ * PSMParameterized Key Features:
  * - Facilitates 1:1 USDC ↔ USDP swaps
+ * - Dynamic USDC decimals detection (supports 6, 18, or any decimals)
  * - 0.1% fee on both directions (configurable)
  * - No mint cap tracking (removed from HYD version)
  * - USDC reserve must cover all burn operations
@@ -22,7 +23,7 @@ import "../../src/mocks/MockERC20.sol";
 contract PSMTest is Test {
     // ==================== Contracts ====================
 
-    PSM public psm;
+    PSMParameterized public psm;
     USDP public usdp;
     MockERC20 public usdc;
 
@@ -59,7 +60,7 @@ contract PSMTest is Test {
         usdp = new USDP();
 
         // Deploy PSM
-        psm = new PSM(address(usdp), address(usdc));
+        psm = new PSMParameterized(address(usdp), address(usdc));
 
         // Authorize PSM as USDP minter
         usdp.setAuthorizedMinter(address(psm), true);

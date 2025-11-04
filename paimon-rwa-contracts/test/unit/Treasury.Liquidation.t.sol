@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../../src/treasury/Treasury.sol";
-import "../../src/core/PSM.sol";
+import "../../src/core/PSMParameterized.sol";
 import "../../src/core/HYD.sol";
 import "../../src/oracle/RWAPriceOracle.sol";
 import "../../src/mocks/MockERC20.sol";
@@ -31,7 +31,7 @@ contract TreasuryLiquidationTest is Test {
   // ============================================================
 
   Treasury public treasury;
-  PSM public psm;
+  PSMParameterized public psm;
   RWAPriceOracle public oracle;
   MockERC20 public rwaToken;
   MockERC20 public usdcToken;
@@ -174,7 +174,7 @@ contract TreasuryLiquidationTest is Test {
    */
   function test_Liquidate_Undercollateralized_Success() public {
     // Create position with HF = 105% (just enough for full liquidation with 5% penalty)
-    (uint256 rwaAmount, uint256 hydDebt) = _createUndercollateralizedPosition(105);
+    (, uint256 hydDebt) = _createUndercollateralizedPosition(105);
 
     // Verify position is liquidatable
     uint256 healthFactorBefore = treasury.getHealthFactor(user);

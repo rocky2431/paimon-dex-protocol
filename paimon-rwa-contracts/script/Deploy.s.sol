@@ -5,7 +5,7 @@ import "forge-std/Script.sol";
 import "forge-std/console.sol";
 import "../src/core/HYD.sol";
 import "../src/core/PAIMON.sol";
-import "../src/core/PSM.sol";
+import "../src/core/PSMParameterized.sol";
 import "../src/core/VotingEscrow.sol";
 import "../src/governance/GaugeController.sol";
 import "../src/governance/RewardDistributor.sol";
@@ -36,7 +36,7 @@ contract DeployScript is Script {
     // Core Contracts
     HYD public hyd;
     PAIMON public paimon;
-    PSM public psm;
+    PSMParameterized public psm;
 
     // Governance Contracts
     VotingEscrow public votingEscrow;
@@ -153,11 +153,11 @@ contract DeployScript is Script {
      * @notice Deploy PSM (Peg Stability Module)
      */
     function deployPSM() internal {
-        console.log("\n[Step 3] Deploying PSM...");
+        console.log("\n[Step 3] Deploying PSMParameterized...");
 
-        // Deploy PSM with temp HYD
-        psm = new PSM(address(hyd), address(usdc));
-        console.log("  PSM (temp) deployed:", address(psm));
+        // Deploy PSMParameterized with temp HYD
+        psm = new PSMParameterized(address(hyd), address(usdc));
+        console.log("  PSMParameterized (temp) deployed:", address(psm));
 
         // Redeploy HYD with correct PSM address
         hyd = new HYD();
@@ -165,9 +165,10 @@ contract DeployScript is Script {
         hyd.authorizeMinter(address(psm));
         console.log("  HYD (final) deployed:", address(hyd));
 
-        // Redeploy PSM with correct HYD address
-        psm = new PSM(address(hyd), address(usdc));
-        console.log("  PSM (final) deployed:", address(psm));
+        // Redeploy PSMParameterized with correct HYD address
+        psm = new PSMParameterized(address(hyd), address(usdc));
+        console.log("  PSMParameterized (final) deployed:", address(psm));
+        console.log("  USDC decimals detected:", psm.usdcDecimals());
 
         // Fund PSM with initial USDC reserve (1M USDC for testnet)
         usdc.transfer(address(psm), 1_000_000 * 1e6);

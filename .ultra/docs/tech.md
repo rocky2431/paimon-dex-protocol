@@ -7,7 +7,12 @@
 ## 二、代币经济模型
 
 - **Paimon 与 esPaimon 双代币设计**：Paimon 为主代币，可锁仓获取 **vePaimon** 参与治理；esPaimon 为激励代币，仅用于流动性激励和 Bribe 投票，不具备治理权。两者总量合计 100 亿。Paimon 初始流通数量可设为项目方预留（如 15%）、团队激励（10%）、社区基金（20%）、空投用户（5%）、DAO 储备（20%）、LP/流动性激励（30%）等（具体比例可根据社区共识调整）。
-- **esPaimon 排放机制**：采用**每秒线性释放**模型，初始排放速率根据治理计划设定（例如前期速率最高），每日释放上限用于控制通胀；排放量每周按照设定的衰减率递减（例如每周衰减 1-2%），并在指定窗口线性解锁释放给激励池。此模型类似于许多流动性挖矿方案，可激励早期参与并逐步减少激励。[paxos.com](https://www.paxos.com/newsroom/yield-bearing-stablecoin-lift-dollar-usdl-launches-on-arbitrum#:~:text=USDL%20gives%20eligible%20users%20direct,reserve%E2%80%99s%20assets%20are%20held%20in)
+- **PAIMON 三阶段排放机制**：
+  - **Phase-A (周1-12)**：固定排放 37,500,000 PAIMON/周，通道分配为 Debt 30% / LP 60% / Eco 10%
+  - **Phase-B (周13-248)**：指数衰减，初始E0_B ≈ 55,584,000，衰减率r=0.985 (每周1.5%衰减)，通道分配为 Debt 50% / LP 37.5% / Eco 12.5%
+  - **Phase-C (周249-352)**：固定排放 4,326,923 PAIMON/周，通道分配为 Debt 55% / LP 35% / Eco 10%
+  - LP内部二级分流：AMM Pairs 60% / Stability Pool 40% (治理可调)
+  - 352周总排放约10B PAIMON，其中社区排放100%归属化(esPaimon)，365天线性解锁
 - **锁仓规则和权重**：用户可以锁定 Paimon 代币获得 vePaimon。根据 Vote-Escrow 模型，锁仓期限越长，获得的 ve 权重越高；最短锁仓周期 1 周，最长可达 2 年（104 周）。例如，锁 1 Paimon 12 个月可获得一定 vePaimon 权重，锁 48 个月可获得更高权重。vePaimon 不可转移，仅用于治理投票和收益分配。
 - **代币用途**：
     - *esPaimon*：可质押获得 **Paimon Boost**，增加用户在流动性挖矿中的收益，且可用于 Bribe 投票（通过支持某个流动池赚取额外奖励），但 esPaimon 本身不具备治理权。
@@ -16,7 +21,7 @@
 
 ## 三、激励路径与参与者分配
 
-- **USDP 持有者（稳定币用户）**：对持有或储备 USDP 的用户，协议需设计利息或分红机制以保持稳定币价值。通过 **accrualIndex 累积票息**机制，将协议利润或 RWA 收益分配给 USDP 持有者。参考 Paxos 的 USDL 模式，将储备中的现金收益每日分配给用户账户[paxos.com](https://www.paxos.com/newsroom/yield-bearing-stablecoin-lift-dollar-usdl-launches-on-arbitrum#:~:text=USDL%20gives%20eligible%20users%20direct,reserve%E2%80%99s%20assets%20are%20held%20in)；当协议整体资产收益增加时，USDP 持有者持币帐户余额会逐日增长，从而在赎回时获得超出1:1美元的价值[paxos.com](https://www.paxos.com/newsroom/yield-bearing-stablecoin-lift-dollar-usdl-launches-on-arbitrum#:~:text=USDL%20gives%20eligible%20users%20direct,reserve%E2%80%99s%20assets%20are%20held%20in)。建议从 Paimon 排放中预留约 15%-25% 用于向 USDP 持有者分红，以提升稳定币吸引力。
+- **USDP 持有者（稳定币用户）**：USDP稳定币**默认不被动生息**（accrualPaused=true），储蓄收益由**SavingRate独立模块**承接。用户需**主动将USDP存入SavingRate合约**才能赚取利息（2-3% APR），利息来源于国库通过fund()注资。这一设计确保稳定币本身的简洁性和安全性，同时为寻求收益的用户提供独立的储蓄通道。SavingRate的利息由RWA收益和协议盈余支持，通过国库定期注资实现可持续分配。
 - **RWA 抵押者（资产提供者）**：用户将真实世界资产（如股票、债券等）或 tokenized RWA 提供给协议作为抵押，可铸造 USDP 并参与收益。RWA 抵押者将从 USDP 铸造产生的利息或协议分红中获益。推荐将约 20%-30% 的 Paimon 排放用于奖励 RWA 抵押者（作为“债权质押池”回报），以鼓励优质资产的引入和贡献。
 - **DEX 做市者（LP）**：为 DEX 流动性池提供流动性的用户将获得 Paimon 代币奖励。建议将最高比例（如 30%-40%）的代币排放用于流动性挖矿，涵盖主流交易对（如 USDP/BUSD, Paimon/USDP 等）。其中，部分流动性奖池应特别支持 RWA 相关池，为 RWA 项目提供初始流动性。
 - **Bribe 激励**：协议专门预留一定比例（如 10%）的代币用于 **Bribe 机制**。其他协议或 RWA 项目可向 vePaimon 持有人提供 bribe（额外奖励），以诱导投票选择其目标流动池或提案。Cube Exchange 的说明指出，bribe 是向投票参与者支付的激励，用于赢得对某一流动池(或提案)的选票。通过公开合约发放透明的贿选激励，可以有效引导社区向特定方向分配流动性。
@@ -37,7 +42,7 @@
 
 ## 六、清算与稳定机制
 
-- **accrualIndex 累积票息**：协议设置 USDP 利息累积分配机制（accrualIndex），将协议收到的 RWA 利息、平台手续费等按比例计入指数并返还给持币者。如同 Paxos USDL 模式，用户持有的 USDP 余额会每日增加来反映收益分配[paxos.com](https://www.paxos.com/newsroom/yield-bearing-stablecoin-lift-dollar-usdl-launches-on-arbitrum#:~:text=USDL%20gives%20eligible%20users%20direct,reserve%E2%80%99s%20assets%20are%20held%20in)。这提高了 USDP 的赎回价值，并激励用户锁定稳定币以获利。
+- **USDP稳定性设计**：USDP采用share-based会计模型，通过accrualIndex管理账户余额（balanceOf = shares × accrualIndex / 1e18）。但**accrualIndex默认暂停累积**（accrualPaused=true），USDP本身不被动生息。用户若需赚取利息，需主动将USDP存入**SavingRate储蓄合约**，由国库定期fund()注资，提供2-3%年化收益。这种设计分离了稳定币的交易属性和储蓄属性，确保USDP核心功能的简洁和安全。
 - **分层 RWA 健康度监控**：针对不同类别的 RWA（股票、债券、基金等），设置多级风险等级和健康度指标。协议根据市场价、流动性和监管要求设定各资产的借款价值（LTV）和清算阈值。若单项资产价值跌破预设安全线，触发**单体清算**：通过协议准备的清算路径（如通过套利合约或拍卖合约）对该资产进行清算，锁定部分储备回收损失。
 - **全局 LTV 监控与拍卖**：协议实时监控所有 USDP 发行对应的总抵押价值（含全部 RWA 及其他抵押物）与市场价比值。当**全局抵押率 (全局 LTV)** 超过安全阈值时，启动 DAO 投票决定是否进行**紧急拍卖**或增发 USDP、动用稳定基金。拍卖可调用指定合约，将部分 RWA 资产在去中心化市场上出售，以补充储备并恢复平衡。
 - **稳定基金来源**：协议建立稳定基金用于吸收系统风险，资金来源包括：违约或清算罚没的 RWA 抵押物价值、USDP 铸造过程中的息差收益、流动性交易中收取的手续费、Bribe 平台收取的手续费等。收集的稳定基金可用于在紧急情况下回购USDP、补充损失或奖励长期用户。

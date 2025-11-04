@@ -329,7 +329,6 @@ contract IssuanceControllerTest is Test {
 
         // Participate
         uint256 participationAmount = 10_000 * 1e6; // 10K USDC
-        uint256 expectedRwaTokens = participationAmount / RWA_TOKEN_PRICE;
 
         vm.prank(participant1);
         controller.participate(projectId, participationAmount);

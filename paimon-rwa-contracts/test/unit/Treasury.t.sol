@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../../src/treasury/Treasury.sol";
-import "../../src/core/PSM.sol";
+import "../../src/core/PSMParameterized.sol";
 import "../../src/dex/DEXFactory.sol";
 import "../../src/dex/DEXPair.sol";
 import "../../src/mocks/MockERC20.sol";
@@ -17,7 +17,7 @@ contract TreasuryTest is Test {
     // ==================== Contracts ====================
 
     Treasury public treasury;
-    PSM public psm;
+    PSMParameterized public psm;
     DEXFactory public factory;
     DEXPair public pair;
     HYD public hyd;
@@ -55,7 +55,7 @@ contract TreasuryTest is Test {
         hyd.initTempPsm(address(owner));
 
         // 2. Deploy PSM with HYD address
-        psm = new PSM(address(hyd), address(usdc));
+        psm = new PSMParameterized(address(hyd), address(usdc));
 
         // 3. Redeploy HYD with PSM address - now HYD.PSM points to correct PSM
         //hyd = new HYD(address(psm));
@@ -64,7 +64,7 @@ contract TreasuryTest is Test {
 
         // 4. Redeploy PSM with new HYD address - now PSM.HYD points to new HYD
         // But now HYD.PSM points to OLD PSM address! Need one more step.
-        psm = new PSM(address(hyd), address(usdc));
+        psm = new PSMParameterized(address(hyd), address(usdc));
 
         // 5. Final step: Redeploy HYD one more time with final PSM address
         //hyd = new HYD(address(psm));

@@ -69,9 +69,32 @@ contract USDPStabilityPool is Ownable, ReentrancyGuard {
     /// @notice User's last claimed reward checkpoint: user => collateralToken => rewardPerShareCheckpoint
     mapping(address => mapping(address => uint256)) private _userRewardCheckpoint;
 
+    /// @notice Pending gauge rewards (PAIMON/esPAIMON): user => rewardToken => amount (Task 53)
+    mapping(address => mapping(address => uint256)) private _pendingGaugeRewards;
+
+    /// @notice Gauge rewards per share: rewardToken => cumulativeRewardPerShare (scaled by 1e18) (Task 53)
+    mapping(address => uint256) private _gaugeRewardPerShare;
+
+    /// @notice User's last claimed gauge reward checkpoint: user => rewardToken => rewardPerShareCheckpoint (Task 53)
+    mapping(address => mapping(address => uint256)) private _userGaugeRewardCheckpoint;
+
+    /// @notice Authorized reward distributor address (Task P1-003)
+    address public rewardDistributor;
+
     // ==================== Constants ====================
 
     uint256 private constant PRECISION = 1e18;
+
+    // ==================== Modifiers ====================
+
+    /**
+     * @notice Restricts function access to only the authorized reward distributor
+     * @dev Task P1-003 - Prevents unauthorized addresses from calling notifyRewardAmount()
+     */
+    modifier onlyRewardDistributor() {
+        require(msg.sender == rewardDistributor, "Only reward distributor can call");
+        _;
+    }
 
     // ==================== Events ====================
 
@@ -79,6 +102,8 @@ contract USDPStabilityPool is Ownable, ReentrancyGuard {
     event Withdrawn(address indexed user, uint256 amount, uint256 shares);
     event RewardClaimed(address indexed user, address indexed token, uint256 amount);
     event LiquidationProceeds(uint256 debtOffset, address collateralToken, uint256 collateralGain);
+    event GaugeRewardsClaimed(address indexed user, address indexed token, uint256 amount);
+    event RewardDistributorUpdated(address indexed oldDistributor, address indexed newDistributor);
 
     // ==================== Constructor ====================
 
@@ -93,6 +118,11 @@ contract USDPStabilityPool is Ownable, ReentrancyGuard {
 
         usdp = USDP(_usdp);
         vault = USDPVault(_vault);
+
+        // FIX: P0-003 - Grant Vault permission to burn USDP from this pool
+        // This is required for liquidation: Vault calls burnFrom(pool, debtAmount)
+        // Using max approval for gas efficiency (no repeated approvals needed)
+        usdp.approve(_vault, type(uint256).max);
     }
 
     // ==================== External Functions ====================
@@ -272,5 +302,107 @@ contract USDPStabilityPool is Ownable, ReentrancyGuard {
         uint256 pending = pendingCollateralGain(user, collateralToken);
         _pendingCollateralGains[user][collateralToken] = pending;
         _userRewardCheckpoint[user][collateralToken] = _collateralRewardPerShare[collateralToken];
+    }
+
+    // ==================== GAUGE REWARDS INTEGRATION (TASK 53) ====================
+
+    /**
+     * @notice Distribute gauge rewards to depositors (called by RewardDistributor)
+     * @param rewardToken Reward token address (PAIMON or esPAIMON)
+     * @param amount Amount of rewards to distribute
+     * @dev Task 53.3 - Receive and distribute gauge rewards proportionally by shares
+     * @dev Task P1-003 - Added access control: only rewardDistributor can call
+     *
+     * Flow:
+     * 1. RewardDistributor transfers tokens to this contract
+     * 2. This function updates reward per share accumulator
+     * 3. Users claim via claimRewards()
+     *
+     * Security: Only authorized reward distributor can call (prevents DoS and reward manipulation)
+     */
+    function notifyRewardAmount(address rewardToken, uint256 amount) external onlyRewardDistributor {
+        require(rewardToken != address(0), "Invalid reward token");
+        require(amount > 0, "Amount must be > 0");
+
+        // Only distribute if there are depositors
+        if (_totalShares > 0) {
+            uint256 rewardPerShare = (amount * PRECISION) / _totalShares;
+            _gaugeRewardPerShare[rewardToken] += rewardPerShare;
+        }
+    }
+
+    /**
+     * @notice Claim gauge rewards (PAIMON/esPAIMON)
+     * @param rewardToken Reward token address
+     * @dev Task 53.3 - User claims gauge rewards based on their shares
+     */
+    function claimRewards(address rewardToken) external nonReentrant {
+        // Update checkpoint first
+        _updateGaugeRewardCheckpoint(msg.sender, rewardToken);
+
+        uint256 reward = _pendingGaugeRewards[msg.sender][rewardToken];
+        require(reward > 0, "No rewards to claim");
+
+        // Reset pending rewards
+        _pendingGaugeRewards[msg.sender][rewardToken] = 0;
+
+        // Transfer rewards to user
+        IERC20(rewardToken).safeTransfer(msg.sender, reward);
+
+        emit GaugeRewardsClaimed(msg.sender, rewardToken, reward);
+    }
+
+    /**
+     * @notice Get user's pending gauge rewards
+     * @param user User address
+     * @param rewardToken Reward token address
+     * @return Pending reward amount
+     */
+    function pendingGaugeRewards(address user, address rewardToken) public view returns (uint256) {
+        if (_shares[user] == 0) return _pendingGaugeRewards[user][rewardToken];
+
+        uint256 accumulatedRewardPerShare = _gaugeRewardPerShare[rewardToken];
+        uint256 userCheckpoint = _userGaugeRewardCheckpoint[user][rewardToken];
+
+        uint256 newRewards = 0;
+        if (accumulatedRewardPerShare > userCheckpoint) {
+            uint256 rewardPerShareDelta = accumulatedRewardPerShare - userCheckpoint;
+            newRewards = (_shares[user] * rewardPerShareDelta) / PRECISION;
+        }
+
+        return _pendingGaugeRewards[user][rewardToken] + newRewards;
+    }
+
+    /**
+     * @notice Update user's gauge reward checkpoint
+     * @param user User address
+     * @param rewardToken Reward token address
+     * @dev Internal function to snapshot pending gauge rewards
+     */
+    function _updateGaugeRewardCheckpoint(address user, address rewardToken) internal {
+        uint256 pending = pendingGaugeRewards(user, rewardToken);
+        _pendingGaugeRewards[user][rewardToken] = pending;
+        _userGaugeRewardCheckpoint[user][rewardToken] = _gaugeRewardPerShare[rewardToken];
+    }
+
+    // ==================== GOVERNANCE FUNCTIONS (TASK P1-003) ====================
+
+    /**
+     * @notice Set the authorized reward distributor address
+     * @param _rewardDistributor Address of the reward distributor contract
+     * @dev Task P1-003 - Only owner can update the reward distributor
+     *
+     * Security Rationale:
+     * - Prevents unauthorized addresses from manipulating reward distribution
+     * - Protects against DoS attacks via spam calls to notifyRewardAmount()
+     * - Ensures accountability: only vetted distributor contract can allocate rewards
+     *
+     * @custom:security-consideration Must not be zero address to prevent locking the function
+     */
+    function setRewardDistributor(address _rewardDistributor) external onlyOwner {
+        require(_rewardDistributor != address(0), "Invalid reward distributor");
+        address oldDistributor = rewardDistributor;
+        rewardDistributor = _rewardDistributor;
+        emit RewardDistributorUpdated(oldDistributor, _rewardDistributor);
     }
 }

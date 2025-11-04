@@ -502,5 +502,7 @@ contract IssuanceController is Ownable, ReentrancyGuard {
 // ==================== Interface for ERC20 Metadata ====================
 
 interface IERC20WithDecimals {
+    /// @notice Get token decimals
+    /// @return Number of decimals for token precision
     function decimals() external view returns (uint8);
 }

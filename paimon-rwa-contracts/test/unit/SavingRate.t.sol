@@ -493,8 +493,9 @@ contract SavingRateTest is Test {
         savingRate.accrueInterest(user1);
         uint256 gasUsed = gasBefore - gasleft();
 
-        // Target: < 50K gas
-        assertLt(gasUsed, 50_000, "Accrue interest gas too high");
+        // Target: < 55K gas (updated from 50K due to P1-008 fund coverage check)
+        // Fund coverage check adds: balanceOf call, state update, arithmetic
+        assertLt(gasUsed, 55_000, "Accrue interest gas too high");
         emit log_named_uint("Accrue interest gas used", gasUsed);
     }
 
@@ -578,7 +579,6 @@ contract SavingRateTest is Test {
         savingRate.accrueInterest(user1);
 
         // Interest should still accrue (no total precision loss)
-        uint256 interest = savingRate.accruedInterestOf(user1);
 
         // Even tiny amounts should earn something
         // (May be 0 due to precision limits, but should not revert)
@@ -894,7 +894,6 @@ contract SavingRateTest is Test {
         // Test that checkUpkeep returns true after 24 hours
 
         uint256 lastUpdateTime = block.timestamp;
-
         // Warp 23 hours (should not trigger)
         vm.warp(block.timestamp + 23 hours);
         (bool upkeepNeeded,) = savingRate.checkUpkeep("");
@@ -989,5 +988,131 @@ contract SavingRateTest is Test {
         // Target: < 150K gas for Keeper operations
         assertLt(gasUsed, 150_000, "Keeper upkeep gas too high");
         emit log_named_uint("Keeper upkeep gas used", gasUsed);
+    }
+
+    // ==================== Task P1-008: Fund Coverage Tests ====================
+
+    /**
+     * @notice Test that interest accrues normally when contract has sufficient funds
+     * @dev Acceptance criteria 1: Normal accrual when funded
+     */
+    function test_FundCoverage_SufficientFunds_AccruesNormally() public {
+        // Setup: User deposits and waits for interest to accrue
+        vm.startPrank(user1);
+        usdp.approve(address(savingRate), 1000 * 1e18);
+        savingRate.deposit(1000 * 1e18);
+        vm.stopPrank();
+
+        // Fast forward 30 days
+        vm.warp(block.timestamp + 30 days);
+
+        // Expected interest: (principal × rate × time) / SECONDS_PER_YEAR / BASIS_POINTS
+        // = (1000 USDP × 200 bps × 30 days) / 365 days / 10000
+        uint256 principal = 1000 * 1e18;
+        uint256 timeElapsed = 30 days;
+        uint256 expectedInterest = (principal * INITIAL_ANNUAL_RATE * timeElapsed) / ONE_YEAR / BASIS_POINTS;
+
+        // Trigger accrual (should succeed with sufficient funds)
+        savingRate.accrueInterest(user1);
+
+        // Verify interest was accrued correctly
+        uint256 accruedInterest = savingRate.accruedInterestOf(user1);
+        assertApproxEqAbs(accruedInterest, expectedInterest, 1e10, "Interest accrual failed with sufficient funds");
+    }
+
+    /**
+     * @notice Test that accrual reverts when contract has insufficient funds
+     * @dev Acceptance criteria 2: Revert when funds insufficient
+     */
+    function test_FundCoverage_InsufficientFunds_Reverts() public {
+        // Setup: Drain most of the contract's USDP balance
+        // Current balance: 100,000 USDP (from setUp)
+        // We'll transfer 99,900 USDP out, leaving only 100 USDP
+        vm.prank(address(savingRate));
+        usdp.transfer(treasury, 99_900 * 1e18);
+
+        // User deposits 1000 USDP
+        vm.startPrank(user1);
+        usdp.approve(address(savingRate), 1000 * 1e18);
+        savingRate.deposit(1000 * 1e18);
+        vm.stopPrank();
+
+        // Now balance = 100 + 1000 = 1100 USDP
+        // Total obligations = 1000 USDP (principal) + interest
+        // After 30 days, interest ≈ 1.6438 USDP
+        // Total = 1001.6438 USDP < 1100 USDP (should still be OK)
+
+        // Fast forward 365 days to accumulate significant interest
+        vm.warp(block.timestamp + 365 days);
+        // Interest after 1 year: 1000 * 200 / 10000 = 20 USDP
+        // Total obligations = 1000 + 20 = 1020 USDP < 1100 USDP (still OK)
+
+        // Let's create a scenario where obligations exceed balance
+        // Have another user deposit, then drain more funds
+        vm.prank(treasury);
+        usdp.mint(user2, 5000 * 1e18);
+
+        vm.startPrank(user2);
+        usdp.approve(address(savingRate), 5000 * 1e18);
+        savingRate.deposit(5000 * 1e18);
+        vm.stopPrank();
+
+        // Now obligations = 6000 USDP (principals)
+        // Balance = 1100 + 5000 = 6100 USDP
+        // After 1 year: interest = 6000 * 200 / 10000 = 120 USDP
+        // Total obligations = 6000 + 120 = 6120 USDP > 6100 USDP (INSUFFICIENT!)
+
+        // Drain 50 more USDP to create shortfall
+        vm.prank(address(savingRate));
+        usdp.transfer(treasury, 50 * 1e18);
+
+        // Fast forward to accumulate more interest
+        vm.warp(block.timestamp + 365 days);
+
+        // Now both users have pending interest:
+        // User1: 1000 * 200 / 10000 * (365 + 365) / 365 = 40 USDP (2 years total)
+        // User2: 5000 * 200 / 10000 = 100 USDP (1 year)
+        // Total interest: 140 USDP
+        // Total obligations = 6000 + 140 = 6140 USDP
+        // Available balance = 6050 USDP
+        // Shortfall = 90 USDP
+
+        // Accrue for user2 first to trigger the coverage check
+        vm.expectRevert("Insufficient fund coverage");
+        savingRate.accrueInterest(user2);
+    }
+
+    /**
+     * @notice Test that owner can emergency fund the contract
+     * @dev Acceptance criteria 3: Owner can emergency funding
+     */
+    function test_FundCoverage_EmergencyFunding_ByOwner() public {
+        // Setup: Create underfunded state
+        vm.prank(address(savingRate));
+        usdp.transfer(treasury, 99_900 * 1e18);
+
+        // User deposits
+        vm.startPrank(user1);
+        usdp.approve(address(savingRate), 1000 * 1e18);
+        savingRate.deposit(1000 * 1e18);
+        vm.stopPrank();
+
+        // Fast forward to accumulate interest
+        vm.warp(block.timestamp + 365 days);
+
+        // At this point, balance might be insufficient
+        // Owner performs emergency funding
+        vm.prank(treasury);
+        usdp.mint(address(savingRate), 100_000 * 1e18);
+
+        vm.prank(owner);
+        savingRate.fund(100_000 * 1e18);
+
+        // Now accrual should work
+        savingRate.accrueInterest(user1);
+
+        // Verify interest was accrued
+        uint256 accruedInterest = savingRate.accruedInterestOf(user1);
+        assertGt(accruedInterest, 0, "Interest should be accrued after emergency funding");
     }
 }

@@ -1,6 +1,6 @@
 /**
  * Treasury Deposit Page
- * RWA collateral deposit interface with HYD minting preview
+ * RWA collateral deposit interface with USDP minting preview
  */
 
 'use client';
@@ -57,7 +57,7 @@ export default function TreasuryDepositPage() {
               fontSize: { xs: '1rem', sm: '1.125rem' },
             }}
           >
-            Deposit RWA collateral to mint HYD stablecoins
+            Deposit RWA collateral to mint USDP stablecoins
           </Typography>
         </Box>
 
@@ -95,7 +95,7 @@ export default function TreasuryDepositPage() {
               <strong>Step 3:</strong> Approve the Treasury contract to spend your RWA tokens
             </Typography>
             <Typography component="li" variant="body2" sx={{ mb: 1, color: TREASURY_THEME.SUBTITLE }}>
-              <strong>Step 4:</strong> Deposit your RWA tokens and receive HYD stablecoins
+              <strong>Step 4:</strong> Deposit your RWA tokens and receive USDP stablecoins
             </Typography>
           </Box>
 

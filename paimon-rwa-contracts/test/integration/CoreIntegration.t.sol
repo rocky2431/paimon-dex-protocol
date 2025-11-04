@@ -8,7 +8,7 @@ import {console} from "forge-std/console.sol";
 import {USDP} from "../../src/core/USDP.sol";
 import {esPaimon} from "../../src/core/esPaimon.sol";
 import {VotingEscrowPaimon} from "../../src/core/VotingEscrowPaimon.sol";
-import {PSM} from "../../src/core/PSM.sol";
+import {PSMParameterized} from "../../src/core/PSMParameterized.sol";
 
 // Treasury
 import {SavingRate} from "../../src/treasury/SavingRate.sol";
@@ -40,7 +40,7 @@ contract CoreIntegration is Test {
     MockERC20 public usdc;
     esPaimon public esPaimonToken;
     VotingEscrowPaimon public vePaimon;
-    PSM public psm;
+    PSMParameterized public psm;
     SavingRate public savingRate;
     DEXFactory public factory;
     DEXPair public usdpUsdcPair;
@@ -65,7 +65,7 @@ contract CoreIntegration is Test {
         usdp = new USDP();
         esPaimonToken = new esPaimon(address(paimon));
         vePaimon = new VotingEscrowPaimon(address(paimon));
-        psm = new PSM(address(usdp), address(usdc));
+        psm = new PSMParameterized(address(usdp), address(usdc));
         savingRate = new SavingRate(address(usdp), 200); // 2% APR
         boostStaking = new BoostStaking(address(paimon));
 

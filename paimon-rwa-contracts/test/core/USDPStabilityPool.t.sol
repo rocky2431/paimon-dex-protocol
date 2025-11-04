@@ -549,4 +549,141 @@ contract USDPStabilityPoolTest is Test {
         // Charlie should receive ~30% of collateral gain
         assertApproxEqRel(charlieGain, (collateralGain * 30) / 100, 0.01e18, "Charlie's share incorrect");
     }
+
+    // ==================== SECURITY TESTS - P1-003: REWARD DISTRIBUTOR ACCESS CONTROL ====================
+
+    /**
+     * @notice Test that only authorized reward distributor can call notifyRewardAmount()
+     * @dev P1-003 - Security dimension: Access control enforcement
+     */
+    function test_OnlyRewardDistributorCanNotifyRewards() public {
+        address distributor = makeAddr("distributor");
+        MockERC20 rewardToken = new MockERC20("Reward Token", "REWARD", 18);
+        rewardToken.mint(distributor, 1000 ether);
+
+        // Alice deposits into pool to have shares
+        vm.prank(alice);
+        usdp.approve(address(stabilityPool), 10000 ether);
+        vm.prank(alice);
+        stabilityPool.deposit(10000 ether);
+
+        // Owner sets the reward distributor
+        stabilityPool.setRewardDistributor(distributor);
+
+        // Distributor should be able to call notifyRewardAmount
+        vm.prank(distributor);
+        rewardToken.transfer(address(stabilityPool), 100 ether);
+        vm.prank(distributor);
+        stabilityPool.notifyRewardAmount(address(rewardToken), 100 ether);
+
+        // Verify rewards were distributed
+        assertGt(stabilityPool.pendingGaugeRewards(alice, address(rewardToken)), 0, "Rewards not distributed");
+    }
+
+    /**
+     * @notice Test that unauthorized addresses cannot call notifyRewardAmount()
+     * @dev P1-003 - Exception dimension: Unauthorized access should revert
+     */
+    function test_RevertWhen_UnauthorizedCallsNotifyRewards() public {
+        address attacker = makeAddr("attacker");
+        MockERC20 rewardToken = new MockERC20("Reward Token", "REWARD", 18);
+        rewardToken.mint(attacker, 1000 ether);
+
+        // Set a valid distributor (not the attacker)
+        address distributor = makeAddr("distributor");
+        stabilityPool.setRewardDistributor(distributor);
+
+        // Attacker tries to call notifyRewardAmount - should revert
+        vm.prank(attacker);
+        rewardToken.transfer(address(stabilityPool), 100 ether);
+        vm.prank(attacker);
+        vm.expectRevert("Only reward distributor can call");
+        stabilityPool.notifyRewardAmount(address(rewardToken), 100 ether);
+    }
+
+    /**
+     * @notice Test that owner can update reward distributor
+     * @dev P1-003 - Functional dimension: Governance function works correctly
+     */
+    function test_OwnerCanUpdateRewardDistributor() public {
+        address distributor1 = makeAddr("distributor1");
+        address distributor2 = makeAddr("distributor2");
+
+        // Owner sets initial distributor
+        stabilityPool.setRewardDistributor(distributor1);
+        assertEq(stabilityPool.rewardDistributor(), distributor1, "Initial distributor not set");
+
+        // Owner updates to new distributor
+        stabilityPool.setRewardDistributor(distributor2);
+        assertEq(stabilityPool.rewardDistributor(), distributor2, "Distributor not updated");
+
+        // Old distributor should no longer work
+        MockERC20 rewardToken = new MockERC20("Reward Token", "REWARD", 18);
+        rewardToken.mint(distributor1, 1000 ether);
+        vm.prank(distributor1);
+        rewardToken.transfer(address(stabilityPool), 100 ether);
+        vm.prank(distributor1);
+        vm.expectRevert("Only reward distributor can call");
+        stabilityPool.notifyRewardAmount(address(rewardToken), 100 ether);
+
+        // New distributor should work
+        rewardToken.mint(distributor2, 1000 ether);
+        vm.prank(distributor2);
+        rewardToken.transfer(address(stabilityPool), 100 ether);
+        vm.prank(distributor2);
+        stabilityPool.notifyRewardAmount(address(rewardToken), 100 ether);
+    }
+
+    /**
+     * @notice Test that setting reward distributor to zero address reverts
+     * @dev P1-003 - Boundary dimension: Invalid address should be rejected
+     */
+    function test_RevertWhen_SetRewardDistributorToZeroAddress() public {
+        vm.expectRevert("Invalid reward distributor");
+        stabilityPool.setRewardDistributor(address(0));
+    }
+
+    /**
+     * @notice Test that non-owner cannot set reward distributor
+     * @dev P1-003 - Security dimension: Governance protection
+     */
+    function test_RevertWhen_NonOwnerSetsRewardDistributor() public {
+        address attacker = makeAddr("attacker");
+        address distributor = makeAddr("distributor");
+
+        // Attacker tries to set reward distributor - should revert
+        vm.prank(attacker);
+        vm.expectRevert(); // OwnableUnauthorizedAccount error from OpenZeppelin
+        stabilityPool.setRewardDistributor(distributor);
+    }
+
+    /**
+     * @notice Test notifyRewardAmount reverts before distributor is set
+     * @dev P1-003 - Exception dimension: Must set distributor before use
+     */
+    function test_RevertWhen_NotifyRewardsBeforeDistributorSet() public {
+        MockERC20 rewardToken = new MockERC20("Reward Token", "REWARD", 18);
+        rewardToken.mint(address(this), 1000 ether);
+        rewardToken.transfer(address(stabilityPool), 100 ether);
+
+        // Should revert because no distributor has been set (defaults to address(0))
+        vm.expectRevert("Only reward distributor can call");
+        stabilityPool.notifyRewardAmount(address(rewardToken), 100 ether);
+    }
+
+    /**
+     * @notice Test that setting same distributor twice works (idempotent)
+     * @dev P1-003 - Boundary dimension: Duplicate operations should not fail
+     */
+    function test_SetSameDistributorTwice() public {
+        address distributor = makeAddr("distributor");
+
+        // Set distributor
+        stabilityPool.setRewardDistributor(distributor);
+        assertEq(stabilityPool.rewardDistributor(), distributor);
+
+        // Set same distributor again - should not revert
+        stabilityPool.setRewardDistributor(distributor);
+        assertEq(stabilityPool.rewardDistributor(), distributor);
+    }
 }

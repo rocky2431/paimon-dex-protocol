@@ -46,6 +46,8 @@ contract USDPTest is Test {
     event DistributorUpdated(address indexed newDistributor);
     event Transfer(address indexed from, address indexed to, uint256 value);
     event AccrualPausedUpdated(bool paused);
+    event Paused(address account);
+    event Unpaused(address account);
 
     // ==================== Setup ====================
 
@@ -831,5 +833,132 @@ contract USDPTest is Test {
 
         uint256 expectedBalance = 1000 * 1e18 * 1.0506e18 / 1e18;
         assertApproxEqRel(usdp.balanceOf(user1), expectedBalance, 0.01e18, "Balance after day 2 (1% tolerance)");
+    }
+
+    // ==================== 7. PAUSE/UNPAUSE TESTS (P2-006) ====================
+    // Test recoverable pause mechanism replacing irreversible emergencyPause
+
+    /**
+     * @notice Test P2-006: Owner can pause and unpause contract
+     * Acceptance: pause() and unpause() functions work correctly with events
+     */
+    function test_USDP_Pause_Unpause() public {
+        // Contract should start unpaused (only accrual is paused by default)
+        assertFalse(usdp.paused(), "Contract should start unpaused");
+
+        // Owner pauses the contract
+        vm.prank(owner);
+        vm.expectEmit(true, false, false, false);
+        emit Paused(owner);
+        usdp.pause();
+
+        // Verify paused state
+        assertTrue(usdp.paused(), "Contract should be paused");
+
+        // Owner unpauses the contract
+        vm.prank(owner);
+        vm.expectEmit(true, false, false, false);
+        emit Unpaused(owner);
+        usdp.unpause();
+
+        // Verify unpaused state
+        assertFalse(usdp.paused(), "Contract should be unpaused");
+
+        // Verify owner is still set (not renounced)
+        assertEq(usdp.owner(), owner, "Owner should still be set");
+    }
+
+    /**
+     * @notice Test P2-006: Operations revert when contract is paused
+     * Acceptance: transfer, transferFrom, mint, burnFrom all revert when paused
+     */
+    function test_USDP_Paused_Reverts() public {
+        // Mint tokens to user1 while unpaused
+        vm.prank(treasury);
+        usdp.mint(user1, 1000 * 1e18);
+
+        // Approve treasury for burnFrom
+        vm.prank(user1);
+        usdp.approve(treasury, 500 * 1e18);
+
+        // Pause the contract
+        vm.prank(owner);
+        usdp.pause();
+
+        // Test transfer reverts
+        vm.prank(user1);
+        vm.expectRevert();
+        usdp.transfer(user2, 100 * 1e18);
+
+        // Test transferFrom reverts
+        vm.prank(user1);
+        usdp.approve(user2, 200 * 1e18);
+
+        vm.prank(user2);
+        vm.expectRevert();
+        usdp.transferFrom(user1, user2, 100 * 1e18);
+
+        // Test mint reverts
+        vm.prank(treasury);
+        vm.expectRevert();
+        usdp.mint(user2, 500 * 1e18);
+
+        // Test burnFrom reverts
+        vm.prank(treasury);
+        vm.expectRevert();
+        usdp.burnFrom(user1, 100 * 1e18);
+
+        // Verify balances unchanged
+        assertEq(usdp.balanceOf(user1), 1000 * 1e18, "User1 balance should be unchanged");
+        assertEq(usdp.balanceOf(user2), 0, "User2 balance should be 0");
+    }
+
+    /**
+     * @notice Test P2-006: Operations work correctly after unpause
+     * Acceptance: All operations (transfer, mint, burn) resume after unpause
+     */
+    function test_USDP_Unpaused_Works() public {
+        // Mint tokens while unpaused
+        vm.prank(treasury);
+        usdp.mint(user1, 1000 * 1e18);
+
+        // Pause
+        vm.prank(owner);
+        usdp.pause();
+
+        // Unpause
+        vm.prank(owner);
+        usdp.unpause();
+
+        // Test transfer works
+        vm.prank(user1);
+        usdp.transfer(user2, 200 * 1e18);
+        assertEq(usdp.balanceOf(user1), 800 * 1e18, "User1 should have 800 USDP");
+        assertEq(usdp.balanceOf(user2), 200 * 1e18, "User2 should have 200 USDP");
+
+        // Test mint works
+        vm.prank(treasury);
+        usdp.mint(user2, 300 * 1e18);
+        assertEq(usdp.balanceOf(user2), 500 * 1e18, "User2 should have 500 USDP");
+
+        // Test burnFrom works
+        vm.prank(user1);
+        usdp.approve(treasury, 400 * 1e18);
+
+        vm.prank(treasury);
+        usdp.burnFrom(user1, 400 * 1e18);
+        assertEq(usdp.balanceOf(user1), 400 * 1e18, "User1 should have 400 USDP left");
+
+        // Test transferFrom works
+        vm.prank(user2);
+        usdp.approve(user1, 100 * 1e18);
+
+        vm.prank(user1);
+        usdp.transferFrom(user2, user1, 100 * 1e18);
+        assertEq(usdp.balanceOf(user1), 500 * 1e18, "User1 should have 500 USDP");
+        assertEq(usdp.balanceOf(user2), 400 * 1e18, "User2 should have 400 USDP");
+
+        // Verify total supply is correct
+        assertEq(usdp.totalSupply(), 900 * 1e18, "Total supply should be 900 USDP");
     }
 }
