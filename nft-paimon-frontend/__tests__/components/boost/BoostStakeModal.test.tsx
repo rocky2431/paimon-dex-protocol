@@ -37,7 +37,8 @@ describe('BoostStakeModal Component', () => {
         />
       );
 
-      expect(screen.getByText(/Stake PAIMON/i)).toBeInTheDocument();
+      // ✅ FIX (Task 84): Use exact text to avoid multiple matches
+      expect(screen.getByText('Stake PAIMON to Boost Rewards')).toBeInTheDocument();
     });
 
     it('does not render when open is false', () => {
