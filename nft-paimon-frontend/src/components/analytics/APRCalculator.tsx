@@ -29,8 +29,8 @@ import {
  * APRCalculator component props
  */
 export interface APRCalculatorProps {
-  /** Total HYD locked in VotingEscrow (18 decimals) */
-  totalLockedHYD: bigint;
+  /** Total USDP locked in VotingEscrow (18 decimals) */
+  totalLockedUSDP: bigint;
 }
 
 // ==================== Constants ====================
@@ -70,7 +70,7 @@ const MAX_LOCK_WEEKS = 208; // 4 years
  * @returns APR calculator component
  */
 export const APRCalculator: React.FC<APRCalculatorProps> = ({
-  totalLockedHYD,
+  totalLockedUSDP,
 }) => {
   // ==================== State ====================
 
@@ -101,7 +101,7 @@ export const APRCalculator: React.FC<APRCalculatorProps> = ({
   const aprResult = calculateVeNFTAPR(
     lockAmount,
     lockDuration,
-    totalLockedHYD || 100_000n * 10n ** 18n // Default: 100K HYD locked
+    totalLockedUSDP || 100_000n * 10n ** 18n // Default: 100K USDP locked
   );
 
   // ==================== Event Handlers ====================
@@ -305,7 +305,7 @@ export const APRCalculator: React.FC<APRCalculatorProps> = ({
                   color: '#FF9800',
                 }}
               >
-                {parseFloat(aprResult.votingPowerFormatted).toFixed(2)} veHYD
+                {parseFloat(aprResult.votingPowerFormatted).toFixed(2)} veUSDP
               </Typography>
             </Box>
 

@@ -12,7 +12,7 @@ export interface ProtocolTVL {
   total: bigint;
   /** Total TVL formatted */
   totalFormatted: string;
-  /** PSM total minted HYD (USD value, assuming $1) */
+  /** PSM total minted USDP (USD value, assuming $1) */
   psmMinted: bigint;
   /** PSM total minted formatted */
   psmMintedFormatted: string;
@@ -23,7 +23,7 @@ export interface ProtocolTVL {
 }
 
 /**
- * HYD price data point
+ * USDP price data point
  */
 export interface PriceDataPoint {
   /** Timestamp */

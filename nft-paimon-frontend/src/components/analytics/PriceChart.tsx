@@ -3,7 +3,7 @@
 /**
  * USDP Price Chart Component
  * Line chart with time range selector
- * Shows HYD price trend with $1.00 target reference line
+ * Shows USDP price trend with $1.00 target reference line
  */
 
 import React, { useState } from 'react';
@@ -51,7 +51,7 @@ export interface PriceChartProps {
  * USDP Price Chart Component
  *
  * Features:
- * - Line chart showing HYD price trend
+ * - Line chart showing USDP price trend
  * - Reference line at $1.00 target price
  * - Time range selector (24H/7D/30D/ALL)
  * - Responsive design

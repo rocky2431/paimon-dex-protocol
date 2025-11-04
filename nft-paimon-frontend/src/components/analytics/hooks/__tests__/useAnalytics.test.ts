@@ -124,9 +124,9 @@ describe('useAnalytics - Functional: USDP.totalSupply() Integration', () => {
 
   /**
    * CRITICAL TEST: Should use ERC20 totalSupply() function
-   * This test WILL FAIL with current implementation (calls totalMintedHYD)
+   * This test WILL FAIL with current implementation (calls totalMintedUSDP)
    */
-  test('should call totalSupply() instead of totalMintedHYD()', () => {
+  test('should call totalSupply() instead of totalMintedUSDP()', () => {
     mockUseReadContract.mockImplementation((params: any) => {
       return {
         data: params?.functionName === 'totalSupply' ? BigInt('1000000000000000000000') : BigInt('100000000'),
@@ -167,7 +167,7 @@ describe('useAnalytics - Functional: USDP.totalSupply() Integration', () => {
 
     expect(totalSupplyCall).toBeDefined();
     expect(totalSupplyCall![0].functionName).toBe('totalSupply');
-    expect(totalSupplyCall![0].functionName).not.toBe('totalMintedHYD');
+    expect(totalSupplyCall![0].functionName).not.toBe('totalMintedUSDP');
   });
 
   /**

@@ -13,7 +13,7 @@ import { ProtocolTVL, APRCalculation } from './types';
 export const ANALYTICS_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes in ms
 
 /**
- * HYD target price ($1.00 USD)
+ * * USDP target price ($1.00 USD)
  */
 export const USDP_TARGET_PRICE = 1.0;
 
@@ -45,9 +45,9 @@ export const ANALYTICS_DESIGN_TOKENS = {
 
 /**
  * Calculate protocol TVL
- * Formula: TVL = PSM minted HYD (×$1) + DEX liquidity (USD)
+ * Formula: TVL = PSM minted USDP (×$1) + DEX liquidity (USD)
  *
- * @param psmMinted - Total HYD minted by PSM (18 decimals)
+ * @param psmMinted - Total USDP minted by PSM (18 decimals)
  * @param dexLiquidity - Total DEX liquidity in USD (18 decimals)
  * @returns Protocol TVL breakdown
  */
@@ -97,23 +97,23 @@ export const formatLargeNumber = (value: number): string => {
  * - Assume average daily volume = $100K → annual volume = $36.5M
  * - Swap fee = 0.25% → annual fees = $36.5M × 0.0025 = $91,250
  * - veNFT share = 70% → annual rewards = $91,250 × 0.7 = $63,875
- * - If 100K HYD locked → APR = ($63,875 / $100,000) × 100% = 63.88%
+ * - If 100K USDP locked → APR = ($63,875 / $100,000) × 100% = 63.88%
  *
  * TODO (Phase 2): Use real protocol fee data from The Graph
  *
- * @param lockAmount - Amount of HYD locked (18 decimals)
+ * @param lockAmount - Amount of USDP locked (18 decimals)
  * @param lockDuration - Lock duration in seconds
- * @param totalLockedHYD - Total HYD locked in VotingEscrow (18 decimals)
+ * @param totalLockedUSDP - Total USDP locked in VotingEscrow (18 decimals)
  * @param annualProtocolFees - Annual protocol fees in USD (18 decimals)
  * @returns APR calculation result
  */
 export const calculateVeNFTAPR = (
   lockAmount: bigint,
   lockDuration: bigint,
-  totalLockedHYD: bigint,
+  totalLockedUSDP: bigint,
   annualProtocolFees: bigint = 63_875n * 10n ** 18n // Default: $63,875 (estimated)
 ): APRCalculation => {
-  if (lockAmount === 0n || totalLockedHYD === 0n) {
+  if (lockAmount === 0n || totalLockedUSDP === 0n) {
     return {
       apr: '0%',
       annualRewards: 0n,
@@ -129,8 +129,8 @@ export const calculateVeNFTAPR = (
 
   // Calculate user's share of annual rewards
   // User share = (user voting power / total voting power) × annual fees
-  // Simplified: assume total voting power ≈ total locked HYD (average lock time)
-  const userShare = (votingPower * annualProtocolFees) / totalLockedHYD;
+  // Simplified: assume total voting power ≈ total locked USDP (average lock time)
+  const userShare = (votingPower * annualProtocolFees) / totalLockedUSDP;
 
   // Calculate APR
   // APR = (annual rewards / lock amount) × 100%
@@ -160,7 +160,7 @@ export const calculateLockWeeks = (lockDuration: bigint): number => {
 // ==================== Chart Helpers ====================
 
 /**
- * Generate mock HYD price data (Phase 1)
+ * Generate mock USDP price data (Phase 1)
  * TODO (Phase 2): Fetch real price data from The Graph
  *
  * @param dataPoints - Number of data points to generate

@@ -5,8 +5,8 @@
  * Uses wagmi v2 to query on-chain data for TVL calculation
  *
  * Data Sources:
- * - USDP.totalSupply() - Total USDP in circulation (replaces deprecated PSM.totalMintedHYD)
- * - PriceOracle.getPrice("USDP") - Current HYD/USD price
+ * - USDP.totalSupply() - Total USDP in circulation (replaces deprecated PSM.totalMintedUSDP)
+ * - PriceOracle.getPrice("USDP") - Current USDP/USD price
  *
  * Auto-refreshes every 5 minutes
  */
@@ -132,7 +132,7 @@ export const useAnalytics = (): UseAnalyticsResult => {
 
   /**
    * Query PriceOracle.getPrice("USDP")
-   * Returns HYD price in USD (8 decimals, Chainlink format)
+   * Returns USDP price in USD (8 decimals, Chainlink format)
    */
   const {
     data: hydPriceRaw,
@@ -175,7 +175,7 @@ export const useAnalytics = (): UseAnalyticsResult => {
     : undefined;
 
   /**
-   * Parse HYD price (8 decimals → number)
+   * Parse USDP price (8 decimals → number)
    */
   const hydPrice = hydPriceRaw
     ? Number(formatUnits(hydPriceRaw, 8))

@@ -96,7 +96,7 @@ export const AnalyticsDashboard: React.FC = () => {
         {/* Row 2: APR Calculator */}
         <Grid item xs={12} md={6}>
           <APRCalculator
-            totalLockedHYD={100_000n * 10n ** 18n} // Mock: 100K HYD locked
+            totalLockedUSDP={100_000n * 10n ** 18n} // Mock: 100K USDP locked
           />
         </Grid>
       </Grid>
