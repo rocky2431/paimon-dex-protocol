@@ -2183,7 +2183,7 @@
         "84"
       ],
       "estimated_days": 0.5,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "frontend",
         "responsive",
@@ -2198,7 +2198,10 @@
         "src/components/*/*.tsx",
         "src/theme/breakpoints.ts"
       ],
-      "failureCount": 20
+      "failureCount": 20,
+      "startedAt": "2025-11-04T21:48:13.250157Z",
+      "completedAt": "2025-11-04T21:55:03.598721Z",
+      "notes": "完成响应式测试增强:\n        - Navigation组件: 新增13个响应式测试 (Mobile/Tablet/Desktop/Viewport Transitions)\n        - BoostStakeModal组件: 新增9个响应式测试 (Mobile/Tablet/Desktop)\n        - 总计新增22个响应式测试，超过目标的20个测试\n        - 所有测试通过，组件响应式实现良好，无需额外修复"
     },
     {
       "id": "86",

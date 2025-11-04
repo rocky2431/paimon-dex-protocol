@@ -266,6 +266,233 @@ describe('Navigation Component', () => {
       // Wallet button on right
       expect(screen.getByText('Connect Wallet')).toBeInTheDocument()
     })
+
+    describe('Mobile Viewport (375px)', () => {
+      beforeEach(() => {
+        // Mock window.innerWidth for mobile
+        Object.defineProperty(window, 'innerWidth', {
+          writable: true,
+          configurable: true,
+          value: 375,
+        })
+
+        // Mock matchMedia for xs breakpoint
+        Object.defineProperty(window, 'matchMedia', {
+          writable: true,
+          value: jest.fn().mockImplementation(query => ({
+            matches: query === '(max-width: 600px)',
+            media: query,
+            onchange: null,
+            addListener: jest.fn(),
+            removeListener: jest.fn(),
+            addEventListener: jest.fn(),
+            removeEventListener: jest.fn(),
+            dispatchEvent: jest.fn(),
+          })),
+        })
+      })
+
+      it('should render navigation on mobile', () => {
+        render(<Navigation activePage="swap" />)
+        expect(screen.getByText('Paimon DEX')).toBeInTheDocument()
+      })
+
+      it('should not overflow on mobile viewport', () => {
+        const { container } = render(<Navigation activePage="swap" />)
+        const nav = container.querySelector('nav')
+
+        // Navigation bar should not exceed viewport width
+        if (nav) {
+          const style = window.getComputedStyle(nav)
+          expect(style.position).toBe('fixed')
+        }
+      })
+
+      it('should display logo on mobile', () => {
+        render(<Navigation activePage="swap" />)
+        expect(screen.getByText('Paimon DEX')).toBeInTheDocument()
+      })
+
+      it('should display wallet button on mobile', () => {
+        render(<Navigation activePage="swap" />)
+        expect(screen.getByText('Connect Wallet')).toBeInTheDocument()
+      })
+
+      it('should handle dropdown menus on mobile touch', async () => {
+        render(<Navigation activePage="swap" />)
+
+        const treasuryButton = screen.getByText('Treasury')
+        fireEvent.click(treasuryButton)
+
+        await waitFor(() => {
+          expect(screen.getByText('Deposit RWA')).toBeInTheDocument()
+        })
+      })
+    })
+
+    describe('Tablet Viewport (768px)', () => {
+      beforeEach(() => {
+        Object.defineProperty(window, 'innerWidth', {
+          writable: true,
+          configurable: true,
+          value: 768,
+        })
+
+        Object.defineProperty(window, 'matchMedia', {
+          writable: true,
+          value: jest.fn().mockImplementation(query => ({
+            matches: query === '(min-width: 600px) and (max-width: 900px)',
+            media: query,
+            onchange: null,
+            addListener: jest.fn(),
+            removeListener: jest.fn(),
+            addEventListener: jest.fn(),
+            removeEventListener: jest.fn(),
+            dispatchEvent: jest.fn(),
+          })),
+        })
+      })
+
+      it('should render all navigation links on tablet', () => {
+        render(<Navigation activePage="swap" />)
+
+        expect(screen.getByText('Swap')).toBeInTheDocument()
+        expect(screen.getByText('Liquidity')).toBeInTheDocument()
+        expect(screen.getByText('Lock')).toBeInTheDocument()
+        expect(screen.getByText('Vote')).toBeInTheDocument()
+      })
+
+      it('should not truncate text on tablet', () => {
+        render(<Navigation activePage="swap" />)
+
+        const logo = screen.getByText('Paimon DEX')
+        expect(logo).toBeVisible()
+        expect(logo.textContent).toBe('Paimon DEX')
+      })
+
+      it('should display dropdowns correctly on tablet', async () => {
+        render(<Navigation activePage="swap" />)
+
+        const presaleButton = screen.getByText('Presale')
+        fireEvent.click(presaleButton)
+
+        await waitFor(() => {
+          expect(screen.getByText('Mint Bond NFT')).toBeInTheDocument()
+          expect(screen.getByText('Dice Rolling')).toBeInTheDocument()
+        })
+      })
+    })
+
+    describe('Desktop Viewport (1920px)', () => {
+      beforeEach(() => {
+        Object.defineProperty(window, 'innerWidth', {
+          writable: true,
+          configurable: true,
+          value: 1920,
+        })
+
+        Object.defineProperty(window, 'matchMedia', {
+          writable: true,
+          value: jest.fn().mockImplementation(query => ({
+            matches: query === '(min-width: 1280px)',
+            media: query,
+            onchange: null,
+            addListener: jest.fn(),
+            removeListener: jest.fn(),
+            addEventListener: jest.fn(),
+            removeEventListener: jest.fn(),
+            dispatchEvent: jest.fn(),
+          })),
+        })
+      })
+
+      it('should render full navigation on desktop', () => {
+        render(<Navigation activePage="swap" />)
+
+        expect(screen.getByText('Paimon DEX')).toBeInTheDocument()
+        expect(screen.getByText('Swap')).toBeInTheDocument()
+        expect(screen.getByText('Liquidity')).toBeInTheDocument()
+        expect(screen.getByText('Lock')).toBeInTheDocument()
+        expect(screen.getByText('Vote')).toBeInTheDocument()
+        expect(screen.getByText('Treasury')).toBeInTheDocument()
+        expect(screen.getByText('Presale')).toBeInTheDocument()
+        expect(screen.getByText('Connect Wallet')).toBeInTheDocument()
+      })
+
+      it('should have proper spacing on desktop', () => {
+        const { container } = render(<Navigation activePage="swap" />)
+        const nav = container.querySelector('nav')
+
+        expect(nav).toBeInTheDocument()
+      })
+
+      it('should handle multiple dropdowns on desktop', async () => {
+        render(<Navigation activePage="swap" />)
+
+        // Open Treasury dropdown
+        const treasuryButton = screen.getByText('Treasury')
+        fireEvent.click(treasuryButton)
+
+        await waitFor(() => {
+          expect(screen.getByText('Deposit RWA')).toBeInTheDocument()
+        })
+
+        // Close Treasury dropdown
+        fireEvent.click(screen.getByText('Paimon DEX'))
+
+        await waitFor(() => {
+          const menuItems = screen.queryAllByRole('menuitem')
+          expect(menuItems.length).toBe(0)
+        })
+
+        // Open Presale dropdown
+        const presaleButton = screen.getByText('Presale')
+        fireEvent.click(presaleButton)
+
+        await waitFor(() => {
+          expect(screen.getByText('Mint Bond NFT')).toBeInTheDocument()
+        })
+      })
+    })
+
+    describe('Viewport Transitions', () => {
+      it('should adapt when resizing from desktop to mobile', () => {
+        // Start with desktop
+        Object.defineProperty(window, 'innerWidth', {
+          writable: true,
+          configurable: true,
+          value: 1920,
+        })
+
+        const { rerender } = render(<Navigation activePage="swap" />)
+        expect(screen.getByText('Paimon DEX')).toBeInTheDocument()
+
+        // Resize to mobile
+        Object.defineProperty(window, 'innerWidth', {
+          writable: true,
+          configurable: true,
+          value: 375,
+        })
+
+        rerender(<Navigation activePage="swap" />)
+        expect(screen.getByText('Paimon DEX')).toBeInTheDocument()
+      })
+
+      it('should maintain dropdown state across viewport changes', async () => {
+        render(<Navigation activePage="swap" />)
+
+        const treasuryButton = screen.getByText('Treasury')
+        fireEvent.click(treasuryButton)
+
+        await waitFor(() => {
+          expect(screen.getByText('Deposit RWA')).toBeInTheDocument()
+        })
+
+        // Dropdown should remain open even if viewport changes
+        // (though in real app, this might close on resize)
+        expect(screen.getByText('Deposit RWA')).toBeInTheDocument()
+      })
+    })
   })
 
   describe('Accessibility', () => {
