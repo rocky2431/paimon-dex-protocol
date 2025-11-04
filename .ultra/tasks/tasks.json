@@ -1534,7 +1534,7 @@
       "priority": "P2",
       "dependencies": [],
       "estimated_days": 0.5,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "optimization",
         "gas",
@@ -1550,7 +1550,8 @@
         "test_Treasury_Gas_SingleAsset()",
         "test_Treasury_Gas_10Assets()",
         "test_Treasury_ResultConsistency()"
-      ]
+      ],
+      "startedAt": "2025-11-04T08:15:00Z"
     },
     {
       "id": "P2-003",
