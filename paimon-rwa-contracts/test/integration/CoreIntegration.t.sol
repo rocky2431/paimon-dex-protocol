@@ -195,10 +195,14 @@ contract CoreIntegration is Test {
         usdc.transfer(address(usdpUsdcPair), swapAmount);
 
         (uint112 reserve0, uint112 reserve1,) = usdpUsdcPair.getReserves();
-        uint256 amountOut = _getAmountOut(swapAmount, reserve1, reserve0); // USDC -> USDP
+        // ✅ FIX (Task 77): Correct parameter order for USDC->USDP swap
+        // token0=USDC (reserve0), token1=USDP (reserve1)
+        // Swapping token0 in, so reserveIn=reserve0, reserveOut=reserve1
+        uint256 amountOut = _getAmountOut(swapAmount, reserve0, reserve1); // USDC -> USDP
         // Apply 5% safety margin to handle fees and rounding
         amountOut = (amountOut * 95) / 100;
-        usdpUsdcPair.swap(amountOut, 0, bob, "");
+        // ✅ FIX (Task 77): Output token1 (USDP), so amount1Out=amountOut
+        usdpUsdcPair.swap(0, amountOut, bob, "");
         vm.stopPrank();
 
         uint256 bobUSDPBalance = usdp.balanceOf(bob);

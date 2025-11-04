@@ -1948,7 +1948,7 @@
       "priority": "P0",
       "dependencies": [],
       "estimated_days": 0.25,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "contract",
         "DEX",
@@ -1963,7 +1963,15 @@
         "src/dex/DEXRouter.sol",
         "src/dex/DEXPair.sol"
       ],
-      "failureCount": 1
+      "failureCount": 1,
+      "startedAt": "2025-11-04T18:17:22.896656",
+      "completedAt": "2025-11-04T18:20:13.060732",
+      "notes": [
+        {
+          "timestamp": "2025-11-04T18:20:13.060736",
+          "content": "✅ 修复完成 - 测试通过\n\n根本原因: DEX swap 参数顺序错误（两处）\n\n修复内容:\n1. _getAmountOut() 参数顺序修正：reserve0, reserve1（之前反了）\n2. swap() 输出参数位置修正：swap(0, amountOut, ...)（之前是 swap(amountOut, 0, ...)）\n\nToken 顺序:\n- token0 = USDC (reserve0)\n- token1 = USDP (reserve1)\n\n测试结果:\n- 修复前: FAIL - INSUFFICIENT_OUTPUT_AMOUNT\n- 修复后: PASS - Bob 用 1,000 USDC 换到 861 USDP\n\n提交: feat/task-77-dex-swap-fix (e13be87)\n"
+        }
+      ]
     },
     {
       "id": "78",
