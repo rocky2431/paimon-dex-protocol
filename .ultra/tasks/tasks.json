@@ -1883,7 +1883,7 @@
       "priority": "P0",
       "dependencies": [],
       "estimated_days": 0.5,
-      "status": "in_progress",
+      "status": "completed",
       "tags": [
         "contract",
         "integration",
@@ -1899,7 +1899,14 @@
         "src/rewards/RewardDistributor.sol"
       ],
       "failureCount": 11,
-      "startedAt": "2025-11-04T18:05:19.711433Z"
+      "startedAt": "2025-11-04T18:05:19.711433Z",
+      "completedAt": "2025-11-04T18:09:38.426769",
+      "notes": [
+        {
+          "timestamp": "2025-11-04T18:09:38.426773",
+          "content": "✅ 修复完成 - 所有16个测试通过\n\n根本原因: 测试 setUp() 中缺少 RewardDistributor 授权调用\n\n修复内容:\n- 在 setUp() 中添加 stabilityPool.setRewardDistributor(address(distributor))\n- 授权后所有访问控制检查通过\n\n测试结果:\n- 修复前: 0 passed, 16 failed\n- 修复后: 16 passed, 0 failed (100% pass rate)\n\n提交: feat/task-75-rewarddistributor-fix (9536a63)\n"
+        }
+      ]
     },
     {
       "id": "76",
