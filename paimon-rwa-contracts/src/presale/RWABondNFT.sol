@@ -124,32 +124,50 @@ contract RWABondNFT is ERC721, ERC721URIStorage, ERC721Enumerable, Ownable2Step,
      */
     function mint(uint256 quantity) external whenNotPaused nonReentrant {
         require(quantity > 0, "RWABondNFT: quantity must be > 0");
-        require(_tokenIdCounter + quantity <= maxSupply, "RWABondNFT: exceeds max supply");
+
+        // ✅ Task 81: Cache _tokenIdCounter to reduce SLOAD operations
+        uint256 tokenIdCache = _tokenIdCounter;
+        require(tokenIdCache + quantity <= maxSupply, "RWABondNFT: exceeds max supply");
 
         uint256 totalCost = mintPrice * quantity;
 
         // Transfer USDC from minter to treasury
         USDC.safeTransferFrom(msg.sender, treasury, totalCost);
 
+        // ✅ Task 81: Cache timestamp and maturity to avoid repeated calculations
+        uint64 currentTime = uint64(block.timestamp);
+        uint64 maturity = uint64(block.timestamp + maturityDays * 1 days);
+        uint128 principal128 = uint128(mintPrice);
+
         // Mint NFTs
-        for (uint256 i = 0; i < quantity; i++) {
-            _tokenIdCounter++;
-            uint256 newTokenId = _tokenIdCounter;
+        // ✅ Task 81: Use unchecked block for loop increment (overflow impossible with maxSupply=5000)
+        for (uint256 i = 0; i < quantity;) {
+            unchecked {
+                tokenIdCache++;
+            }
+            uint256 newTokenId = tokenIdCache;
 
             _safeMint(msg.sender, newTokenId);
 
             // Initialize bond info
             _bondInfo[newTokenId] = BondInfo({
-                principal: uint128(mintPrice),
-                mintTime: uint64(block.timestamp),
-                maturityDate: uint64(block.timestamp + maturityDays * 1 days),
+                principal: principal128,
+                mintTime: currentTime,
+                maturityDate: maturity,
                 accumulatedRemint: 0,
                 diceType: 0, // Normal dice
                 weeklyRollsLeft: 1 // 1 free roll per week
             });
+
+            unchecked {
+                i++;
+            }
         }
 
-        emit NFTMinted(msg.sender, _tokenIdCounter - quantity + 1, quantity, totalCost);
+        // ✅ Task 81: Write back cached counter once at end
+        _tokenIdCounter = tokenIdCache;
+
+        emit NFTMinted(msg.sender, tokenIdCache - quantity + 1, quantity, totalCost);
     }
 
     // ==================== Yield Calculation Functions ====================
@@ -465,9 +483,11 @@ contract RWABondNFT is ERC721, ERC721URIStorage, ERC721Enumerable, Ownable2Step,
         // Calculate dice result and reward
         (uint256 diceResult, uint256 remintReward) = _calculateDiceReward(diceType, randomWords[0]);
 
-        // Add Remint reward to bond
+        // ✅ Task 81: Use unchecked for reward addition (max reward 2 USDC, max total 8 USDC threshold)
         uint128 oldRemint = bond.accumulatedRemint;
-        bond.accumulatedRemint += uint128(remintReward);
+        unchecked {
+            bond.accumulatedRemint = oldRemint + uint128(remintReward);
+        }
 
         // Check if rarity tier upgraded
         string memory oldRarity = _getRarityTierFromRemint(oldRemint);
