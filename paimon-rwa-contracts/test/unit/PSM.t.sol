@@ -44,8 +44,9 @@ contract PSMTest is Test {
 
     // ==================== Events ====================
 
-    event SwapUSDCForUSDP(address indexed user, uint256 usdcIn, uint256 usdpOut, uint256 fee);
-    event SwapUSDPForUSDC(address indexed user, uint256 usdpIn, uint256 usdcOut, uint256 fee);
+    // ✅ FIX (Task 76): Updated event signatures to include scaleFactor parameter
+    event SwapUSDCForUSDP(address indexed user, uint256 usdcIn, uint256 usdpOut, uint256 fee, uint256 scaleFactor);
+    event SwapUSDPForUSDC(address indexed user, uint256 usdpIn, uint256 usdcOut, uint256 fee, uint256 scaleFactor);
     event FeeUpdated(string feeType, uint256 newFee);
 
     // ==================== Setup ====================
@@ -112,7 +113,8 @@ contract PSMTest is Test {
         // Swap
         vm.prank(user1);
         vm.expectEmit(true, false, false, true);
-        emit SwapUSDCForUSDP(user1, usdcAmount, expectedUSDP, feeUSDC * 1e12);
+        // ✅ FIX (Task 76): Add scaleFactor parameter (1e12 = 10^(18-6))
+        emit SwapUSDCForUSDP(user1, usdcAmount, expectedUSDP, feeUSDC * 1e12, 1e12);
         uint256 usdpReceived = psm.swapUSDCForUSDP(usdcAmount);
 
         // Assertions
@@ -142,7 +144,8 @@ contract PSMTest is Test {
         // Swap
         vm.prank(user1);
         vm.expectEmit(true, false, false, true);
-        emit SwapUSDPForUSDC(user1, usdpAmount, expectedUSDC, feeUSDP);
+        // ✅ FIX (Task 76): Add scaleFactor parameter (1e12 = 10^(18-6))
+        emit SwapUSDPForUSDC(user1, usdpAmount, expectedUSDC, feeUSDP, 1e12);
         uint256 usdcReceived = psm.swapUSDPForUSDC(usdpAmount);
 
         // Assertions
