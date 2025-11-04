@@ -2247,7 +2247,7 @@
         "86"
       ],
       "estimated_days": 0.5,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "frontend",
         "E2E",

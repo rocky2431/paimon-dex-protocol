@@ -14,14 +14,15 @@ export const tokens = {
   // Protocol contracts
   treasury: "0x0000000000000000000000000000000000000000" as const, // TODO: Update after deployment
   hyd: "0x0000000000000000000000000000000000000001" as const, // TODO: Update after deployment
-  paimon: "0x0000000000000000000000000000000000000002" as const, // TODO: Update after deployment
-  venft: "0x0000000000000000000000000000000000000003" as const, // TODO: Update after deployment
-  launchpad: "0x0000000000000000000000000000000000000004" as const, // TODO: Update after deployment
-  governance: "0x0000000000000000000000000000000000000005" as const, // TODO: Update after deployment
-  psm: "0x0000000000000000000000000000000000000006" as const, // TODO: Update after deployment
-  votingEscrow: "0x0000000000000000000000000000000000000007" as const, // TODO: Update after deployment
-  remintController: "0x0000000000000000000000000000000000000008" as const, // TODO: Update after deployment
-  bondNft: "0x0000000000000000000000000000000000000009" as const, // TODO: Update after deployment
+  usdp: "0x0000000000000000000000000000000000000002" as const, // TODO: Update after deployment
+  paimon: "0x0000000000000000000000000000000000000003" as const, // TODO: Update after deployment
+  venft: "0x0000000000000000000000000000000000000004" as const, // TODO: Update after deployment
+  launchpad: "0x0000000000000000000000000000000000000005" as const, // TODO: Update after deployment
+  governance: "0x0000000000000000000000000000000000000006" as const, // TODO: Update after deployment
+  psm: "0x0000000000000000000000000000000000000007" as const, // TODO: Update after deployment
+  votingEscrow: "0x0000000000000000000000000000000000000008" as const, // TODO: Update after deployment
+  remintController: "0x0000000000000000000000000000000000000009" as const, // TODO: Update after deployment
+  bondNft: "0x000000000000000000000000000000000000000a" as const, // TODO: Update after deployment
 
   // External tokens
   usdc: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d" as const,
@@ -85,6 +86,13 @@ export const tokenConfig = {
     decimals: 18, // BSC USDC uses 18 decimals
     address: tokens.usdc,
     icon: "/tokens/usdc.svg",
+  },
+  usdp: {
+    symbol: "USDP" as const,
+    name: "USD Paimon",
+    decimals: 18,
+    address: tokens.usdp,
+    icon: "/tokens/usdp.svg",
   },
   hyd: {
     symbol: "HYD" as const,
