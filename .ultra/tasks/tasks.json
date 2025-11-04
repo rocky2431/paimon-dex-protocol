@@ -1590,7 +1590,7 @@
       "priority": "P2",
       "dependencies": [],
       "estimated_days": 0.5,
-      "status": "in_progress",
+      "status": "completed",
       "tags": [
         "quality",
         "events",
@@ -1605,7 +1605,9 @@
         "test_Events_IndexedFields()",
         "test_Events_Emit_Verification()"
       ],
-      "startedAt": "2025-11-04T00:11:53.322403Z"
+      "startedAt": "2025-11-04T00:11:53.322403Z",
+      "completedAt": "2025-11-04T00:22:40.195683Z",
+      "implementationNotes": "Added Treasury.updateRWAAsset() function with RWAAssetUpdated event emission. Most other events mentioned in task description (EmissionManager.LpSplitParamsUpdated, PSM.FeeUpdated, SavingRate.AnnualRateUpdated) were already implemented. Added 8 comprehensive tests covering functional, boundary, exception, and event emission dimensions. All tests passing."
     },
     {
       "id": "P2-005",
