@@ -45,6 +45,16 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * - RewardDistributor: Calls getWeeklyBudget for veNFT holder rewards
  * - Treasury: Calls getWeeklyBudget for eco fund allocation
  * - LiquidationManager: Calls getWeeklyBudget for liquidation incentives
+ *
+ * Monitoring (P3-001):
+ * - EmissionManager is a pure calculation contract with no state-changing functions
+ * - Actual emission allocation tracking is delegated to consuming contracts:
+ *   • GaugeController emits distribution events for LP rewards
+ *   • RewardDistributor emits distribution events for veNFT rewards
+ *   • Treasury emits deposit/withdrawal events for eco fund
+ *   • LiquidationManager emits liquidation events with reward amounts
+ * - This design avoids redundant event emissions and ensures accountability
+ *   at the point of actual token distribution, not budget calculation
  */
 contract EmissionManager is Ownable {
     // ==================== Constants ====================

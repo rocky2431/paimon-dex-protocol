@@ -74,14 +74,16 @@ contract PSMParameterized is ReentrancyGuard, Ownable {
     /// @param usdcIn Amount of USDC deposited (in USDC decimals)
     /// @param usdpOut Amount of USDP minted (18 decimals)
     /// @param fee Fee charged in USDP (18 decimals)
-    event SwapUSDCForUSDP(address indexed user, uint256 usdcIn, uint256 usdpOut, uint256 fee);
+    /// @param scaleFactor Exchange rate scale factor (P3-001: monitoring enhancement)
+    event SwapUSDCForUSDP(address indexed user, uint256 usdcIn, uint256 usdpOut, uint256 fee, uint256 scaleFactor);
 
     /// @notice Emitted when USDP is swapped for USDC
     /// @param user Address that performed the swap
     /// @param usdpIn Amount of USDP burned (18 decimals)
     /// @param usdcOut Amount of USDC returned (in USDC decimals)
     /// @param fee Fee charged in USDP (18 decimals)
-    event SwapUSDPForUSDC(address indexed user, uint256 usdpIn, uint256 usdcOut, uint256 fee);
+    /// @param scaleFactor Exchange rate scale factor (P3-001: monitoring enhancement)
+    event SwapUSDPForUSDC(address indexed user, uint256 usdpIn, uint256 usdcOut, uint256 fee, uint256 scaleFactor);
 
     /// @notice Emitted when fee parameters are updated
     /// @param feeType Type of fee updated ("feeIn" or "feeOut")
@@ -185,8 +187,8 @@ contract PSMParameterized is ReentrancyGuard, Ownable {
             feeUSDP = feeUSDC;
         }
 
-        // Emit event
-        emit SwapUSDCForUSDP(msg.sender, usdcAmount, usdpReceived, feeUSDP);
+        // Emit enhanced event with scale factor (P3-001: monitoring enhancement)
+        emit SwapUSDCForUSDP(msg.sender, usdcAmount, usdpReceived, feeUSDP, getScaleFactor());
     }
 
     /**
@@ -241,8 +243,8 @@ contract PSMParameterized is ReentrancyGuard, Ownable {
         // Transfer USDC to user
         USDC.safeTransfer(msg.sender, usdcReceived);
 
-        // Emit event
-        emit SwapUSDPForUSDC(msg.sender, usdpAmount, usdcReceived, feeUSDP);
+        // Emit enhanced event with scale factor (P3-001: monitoring enhancement)
+        emit SwapUSDPForUSDC(msg.sender, usdpAmount, usdcReceived, feeUSDP, getScaleFactor());
     }
 
     // ==================== Admin Functions ====================
@@ -287,7 +289,7 @@ contract PSMParameterized is ReentrancyGuard, Ownable {
      *      - If USDC=18, USDP=18: returns 1 (no scaling)
      *      - If USDC=20, USDP=18: returns 100 (1e2, used as divisor)
      */
-    function getScaleFactor() external view returns (uint256) {
+    function getScaleFactor() public view returns (uint256) {
         if (usdcDecimals < USDP_DECIMALS) {
             return 10 ** (USDP_DECIMALS - usdcDecimals);
         } else if (usdcDecimals > USDP_DECIMALS) {
