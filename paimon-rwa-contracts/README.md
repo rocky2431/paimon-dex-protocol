@@ -77,7 +77,16 @@ Reinforces Cycle ↺
 
 ### PAIMON (Platform Token)
 - **Purpose**: Ecosystem incentives, fee discounts, governance participation
-- **Emissions**: Tied to ve voting results + actual trading volume (anti-farming)
+- **Total Supply**: ~10B PAIMON over 352 weeks (6.77 years)
+- **Emissions Schedule**:
+  - **Phase A** (Week 1-12): Fixed 37.5M PAIMON/week
+  - **Phase B** (Week 13-248): Exponential decay 0.985^t (37.5M → 4.327M)
+  - **Phase C** (Week 249-352): Fixed 4.327M PAIMON/week
+- **Channel Allocation** (phase-dynamic):
+  - Phase A: Debt 30%, LP 60%, Eco 10%
+  - Phase B: Debt 50%, LP 37.5%, Eco 12.5%
+  - Phase C: Debt 55%, LP 35%, Eco 10%
+- **Distribution**: LP rewards controlled by veNFT voting (gauge weights)
 - **Value Capture**: 20% of protocol revenue → buyback & burn
 
 ### veNFT (Governance NFT)
