@@ -1,6 +1,6 @@
 # Paimon.dex
 
-**RWA Launchpad + ve33 DEX + Treasury + HYD Synthetic Asset Protocol**
+**RWA Launchpad + veNFT Governance DEX + Treasury + USDP Synthetic Asset Protocol**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-3.2.0-orange.svg)](https://github.com/yourusername/paimon-dex)
@@ -11,7 +11,7 @@
 
 ## 🌟 Overview
 
-Paimon.dex is an integrated DeFi protocol that combines **Real World Asset (RWA)** issuance, **ve33 DEX** liquidity provision, and **treasury-backed synthetic assets** into a unified governance flywheel.
+Paimon.dex is an integrated DeFi protocol that combines **Real World Asset (RWA)** issuance, **veNFT Governance DEX** liquidity provision, and **treasury-backed synthetic assets** into a unified governance flywheel.
 
 **"面向 RWA 的发行、流动性与治理一体化协议"**
 
@@ -20,20 +20,20 @@ Paimon.dex is an integrated DeFi protocol that combines **Real World Asset (RWA)
 | Component | Description |
 |-----------|-------------|
 | **🚀 RWA Launchpad** | Compliant issuance platform for tokenized real-world assets |
-| **💱 ve33 DEX** | Velodrome-style AMM with vote-escrowed governance |
-| **🏦 Treasury System** | Collateralized vault backing HYD synthetic asset |
-| **💎 HYD Token** | Low-volatility synthetic asset backed by RWA treasury holdings |
-| **🎫 veNFT Governance** | Unified voting mechanism across all protocol components |
-| **🪙 PAIMON Token** | Platform utility token for incentives and governance |
+| **💱 veNFT Governance DEX** | Velodrome-style AMM with vote-escrowed governance |
+| **🏦 Treasury System** | Collateralized vault backing USDP synthetic stablecoin |
+| **💎 USDP Token** | Synthetic stablecoin backed by RWA treasury holdings |
+| **🎫 vePAIMON NFT** | Vote-escrowed NFT from locking PAIMON for governance |
+| **🪙 PAIMON Token** | Governance token for incentives and veNFT locking |
 
 ---
 
 ## 🎯 Core Value Proposition
 
-- **Lower Barriers**: Mint HYD against RWA deposits instead of buying full-priced assets
-- **Higher Capital Efficiency**: Use HYD in DeFi while retaining RWA exposure
-- **Governance Flywheel**: ve voting controls Launchpad listings, Treasury whitelist, and DEX incentives
-- **Revenue → Growth Loop**: Protocol fees → Treasury → HYD backing → ve rewards → More activity
+- **Lower Barriers**: Mint USDP against RWA deposits instead of buying full-priced assets
+- **Higher Capital Efficiency**: Use USDP in DeFi while retaining RWA exposure
+- **Governance Flywheel**: vePAIMON NFT voting controls Launchpad listings, Treasury whitelist, and DEX incentives
+- **Revenue → Growth Loop**: Protocol fees → Treasury → USDP backing → ve rewards → More activity
 
 ---
 
@@ -44,9 +44,9 @@ Quality RWA Projects (Launchpad)
            ↓
 Users Purchase/Hold RWA
            ↓
-Deposit RWA → Treasury → Mint HYD
+Deposit RWA → Treasury → Mint USDP
            ↓
-Lock HYD → Receive veNFT (Governance Rights)
+Lock PAIMON → Receive vePAIMON NFT (Governance Rights)
            ↓
 veNFT Voting:
   • DEX liquidity incentives
@@ -59,7 +59,7 @@ Revenue Distribution:
   • 40% ve incentive pools
   • 25% Treasury risk buffer
   • 20% PAIMON buyback/burn
-  • 10% HYD stabilizer
+  • 10% USDP stabilizer
   • 5% Operations
            ↓
 Reinforces Cycle ↺
@@ -69,14 +69,14 @@ Reinforces Cycle ↺
 
 ## 🪙 Protocol Tokens
 
-### HYD (Synthetic Asset)
-- **Type**: Low-volatility synthetic asset (NOT a stablecoin)
+### USDP (Synthetic Stablecoin)
+- **Type**: Treasury-backed synthetic stablecoin
 - **Backing**: Treasury RWA holdings (US Treasuries, investment-grade credit, RWA revenue pools)
 - **Minting**: Deposit RWA at LTV ratios (T1: 80%, T2: 65%, T3: 50%)
-- **Use Cases**: DEX trading, collateral, locked into veNFT for governance
+- **Use Cases**: DEX trading, collateral, 1:1 swap with USDC via PSM
 
-### PAIMON (Platform Token)
-- **Purpose**: Ecosystem incentives, fee discounts, governance participation
+### PAIMON (Governance Token)
+- **Purpose**: Governance participation (lock for vePAIMON NFT), ecosystem incentives
 - **Total Supply**: ~10B PAIMON over 352 weeks (6.77 years)
 - **Emissions Schedule**:
   - **Phase A** (Week 1-12): Fixed 37.5M PAIMON/week
@@ -89,8 +89,8 @@ Reinforces Cycle ↺
 - **Distribution**: LP rewards controlled by veNFT voting (gauge weights)
 - **Value Capture**: 20% of protocol revenue → buyback & burn
 
-### veNFT (Governance NFT)
-- **Mechanism**: Lock HYD for 1 week ~ 4 years → receive voting power
+### vePAIMON NFT (Governance NFT)
+- **Mechanism**: Lock PAIMON for 1 week ~ 4 years → receive voting power
 - **Voting Weight**: Linear decay (4 years = 2.00x, 1 year = 1.00x, 1 week = 0.05x)
 - **Benefits**: Protocol fee share, incentive allocation control, whitelist voting rights
 
@@ -171,16 +171,16 @@ paimon-dex/
 │
 ├── contracts/                  # Smart contracts (Solidity)
 │   ├── core/
-│   │   ├── HYD.sol           # Synthetic asset token
-│   │   ├── PAIMON.sol        # Platform utility token
-│   │   └── VotingEscrow.sol  # Vote-escrowed NFT (veNFT)
+│   │   ├── USDP.sol          # Synthetic stablecoin token
+│   │   ├── PAIMON.sol        # Governance token
+│   │   └── VotingEscrow.sol  # Vote-escrowed NFT (vePAIMON)
 │   ├── treasury/
 │   │   ├── Treasury.sol      # Main vault
 │   │   ├── RWAPriceOracle.sol
 │   │   └── Liquidator.sol
 │   ├── dex/
 │   │   ├── DEX.sol           # AMM core
-│   │   ├── VotingEpoch.sol   # ve33 voting
+│   │   ├── VotingEpoch.sol   # veNFT governance voting
 │   │   └── BribeMarket.sol
 │   ├── launchpad/
 │   │   ├── ProjectRegistry.sol      # ✅ RWA project governance (26/26 tests)
@@ -249,7 +249,7 @@ paimon-dex/
 
 ### Maturity Options (Choose One)
 
-1. **Convert to veNFT**: Lock HYD (principal + yield) → Governance rights + fee share
+1. **Convert to vePAIMON NFT**: Lock PAIMON (principal + yield) → Governance rights + fee share
 2. **Redeem PAIMON**: Receive PAIMON tokens @ conversion rate → Ecosystem utility
 3. **Cash Redemption**: Withdraw principal + accrued yield → Stable exit
 
@@ -519,7 +519,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 **Inspired by**:
-- **Velodrome Finance** (ve33 DEX model)
+- **Velodrome Finance** (veNFT Governance DEX model)
 - **MakerDAO** (CDP collateral system)
 - **Ondo Finance** (RWA tokenization)
 - **Curve Finance** (veToken governance)

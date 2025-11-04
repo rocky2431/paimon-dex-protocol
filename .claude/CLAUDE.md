@@ -4,15 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Paimon.dex** is a DeFi protocol combining RWA (Real World Asset) tokenization, ve33 DEX, and treasury-backed synthetic assets. This is a **monorepo** with two main components:
+**Paimon.dex** is a DeFi protocol combining RWA (Real World Asset) tokenization, veNFT Governance DEX, and treasury-backed synthetic assets. This is a **monorepo** with two main components:
 
 - `paimon-rwa-contracts/` - Solidity smart contracts (Foundry-based)
 - `nft-paimon-frontend/` - Next.js 14 frontend (TypeScript)
 
 **Key tokens:**
-- **HYD**: Synthetic asset backed by treasury RWA holdings (T1/T2/T3 tiers)
-- **PAIMON**: Platform utility token for governance
-- **veNFT**: Vote-escrowed NFT for governance rights (1 week ~ 4 years lock)
+- **USDP**: Synthetic stablecoin backed by treasury RWA holdings (T1/T2/T3 tiers)
+- **PAIMON**: Governance token (lock for vePAIMON NFT)
+- **HYD**: RWA collateral asset token (Tier 1, 60% LTV)
+- **vePAIMON NFT**: Vote-escrowed NFT from locking PAIMON (1 week ~ 4 years lock)
 
 ## Common Development Commands
 
@@ -79,8 +80,8 @@ npm run lint
 ### Smart Contract Layer
 
 **Contract organization** (in `paimon-rwa-contracts/src/`):
-- `core/` - HYD.sol, PAIMON.sol, VotingEscrow.sol (veNFT)
-- `treasury/` - Treasury.sol (RWA collateral vault), PSM.sol (USDC↔HYD 1:1 swap)
+- `core/` - USDP.sol, PAIMON.sol, VotingEscrow.sol (vePAIMON NFT)
+- `treasury/` - Treasury.sol (RWA collateral vault), PSM.sol (USDC↔USDP 1:1 swap)
 - `dex/` - DEXFactory.sol, DEXPair.sol, DEXRouter.sol (Uniswap V2 fork with custom fees)
 - `governance/` - GaugeController.sol (liquidity mining distribution)
 - `launchpad/` - ProjectRegistry.sol (veNFT governance), IssuanceController.sol (token sales)
@@ -94,7 +95,7 @@ npm run lint
    - T3 (RWA revenue pools): 50% LTV
 
 2. **veNFT governance** (VotingEscrow.sol):
-   - Lock HYD for duration → receive voting power
+   - Lock PAIMON for duration → receive vePAIMON NFT → voting power
    - Voting power = amount × (time_remaining / MAX_TIME)
    - Linear decay, non-transferable NFT
 
@@ -146,10 +147,10 @@ npm run lint
 6. **Compatibility** - USDT (non-standard ERC20), cross-contract interactions
 
 **Critical invariants to maintain:**
-- PSM: `USDC balance >= HYD total supply` (1:1 backing)
+- PSM: `USDC balance >= USDP total supply` (1:1 backing)
 - DEX: `K = reserve0 × reserve1` (constant product, can only increase)
-- Treasury: `Total HYD minted <= Total RWA value × LTV` (collateralization)
-- VotingEscrow: `sum(voting_power) <= sum(locked_HYD)` (no phantom voting)
+- Treasury: `Total USDP minted <= Total RWA value × LTV` (collateralization)
+- VotingEscrow: `sum(voting_power) <= sum(locked_PAIMON)` (no phantom voting)
 
 ### Frontend Tests (Jest)
 
@@ -220,11 +221,11 @@ it('should call depositRWA with correct params', async () => {
 - Multicall3: `0xcA11bde05977b3631167028862bE2a173976CA11`
 
 **Deployment sequence:**
-1. HYD token
+1. USDP token
 2. DEXFactory, DEXRouter
 3. PSM
 4. Treasury + RWAPriceOracle
-5. VotingEscrow (veNFT)
+5. VotingEscrow (vePAIMON NFT)
 6. GaugeController
 7. RWABondNFT (+ Chainlink VRF setup)
 8. ProjectRegistry, IssuanceController
@@ -284,9 +285,9 @@ RWA Projects listed (Launchpad)
          ↓
 Users purchase RWA tokens
          ↓
-Deposit RWA → Treasury → Mint HYD at LTV ratio
+Deposit RWA → Treasury → Mint USDP at LTV ratio
          ↓
-Lock HYD → Receive veNFT → Governance rights
+Lock PAIMON → Receive vePAIMON NFT → Governance rights
          ↓
 veNFT voting controls:
   • DEX liquidity incentives (gauge weights)
@@ -299,7 +300,7 @@ Revenue distribution:
   • 40% ve incentive pools
   • 25% Treasury risk buffer
   • 20% PAIMON buyback/burn
-  • 10% HYD stabilizer
+  • 10% USDP stabilizer
   • 5% Operations
          ↓
 Back to top ↺

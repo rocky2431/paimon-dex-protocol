@@ -29,8 +29,8 @@
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │  ┌─────────────┐  ┌─────────────┐  ┌──────────────┐           │
-│  │   RWA       │  │    ve33     │  │   Treasury   │           │
-│  │  Launchpad  │  │     DEX     │  │   System     │           │
+│  │   RWA       │  │   veNFT     │  │   Treasury   │           │
+│  │  Launchpad  │  │ Governance  │  │   System     │           │
 │  └──────┬──────┘  └──────┬──────┘  └──────┬───────┘           │
 │         │                 │                 │                    │
 │         └─────────────────┴─────────────────┘                   │
@@ -42,8 +42,8 @@
 │         ┌─────────────────┼─────────────────┐                  │
 │         │                 │                 │                    │
 │  ┌──────▼──────┐  ┌──────▼──────┐  ┌──────▼──────┐            │
-│  │ HYD Token   │  │ PAIMON Token│  │  veNFT       │            │
-│  │(Synthetic)  │  │  (Platform)  │  │ (Governance) │            │
+│  │ USDP Token  │  │ PAIMON Token│  │  vePAIMON   │            │
+│  │(Synthetic)  │  │ (Governance) │  │    NFT      │            │
 │  └─────────────┘  └──────────────┘  └──────────────┘           │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
@@ -56,9 +56,9 @@ RWA Projects (Launchpad)
          ↓
 Users Purchase RWA Tokens
          ↓
-Deposit RWA → Treasury → Mint HYD
+Deposit RWA → Treasury → Mint USDP
          ↓
-Lock HYD → Receive veNFT → Governance Rights
+Lock PAIMON → Receive vePAIMON NFT → Governance Rights
          ↓
 veNFT Voting:
   • DEX liquidity incentives
@@ -71,7 +71,7 @@ Revenue Distribution:
   • 40% ve incentive pools
   • 25% Treasury risk buffer
   • 20% PAIMON buyback/burn
-  • 10% HYD stabilizer
+  • 10% USDP stabilizer
   • 5% Operations
          ↓
 Back to Top ↺
@@ -85,8 +85,8 @@ Back to Top ↺
 
 | Component | Contracts | Purpose | Status |
 |-----------|-----------|---------|--------|
-| **HYD Token** | HYD.sol | Synthetic asset backed by Treasury RWA | ✅ Complete |
-| **PSM** | PSM.sol | USDC ↔ HYD 1:1 swap with 0.1% fee | ✅ Complete |
+| **USDP Token** | USDP.sol | Synthetic stablecoin backed by Treasury RWA | ✅ Complete |
+| **PSM** | PSM.sol | USDC ↔ USDP 1:1 swap with 0.1% fee | ✅ Complete |
 | **DEX Core** | DEXFactory, DEXPair, DEXRouter | Uniswap V2-style AMM with custom fees | ✅ Complete |
 | **veNFT** | VotingEscrow.sol | Time-locked governance NFTs | ✅ Complete |
 | **Governance** | GaugeController.sol | Liquidity mining distribution | ✅ Complete |
@@ -99,7 +99,7 @@ Back to Top ↺
 
 ```
                     ┌──────────────┐
-                    │ HYD (ERC20)  │
+                    │ USDP (ERC20) │
                     └───────┬──────┘
                             │
         ┌───────────────────┼───────────────────┐
@@ -132,9 +132,9 @@ Back to Top ↺
 
 ### 3.1 Token Contracts
 
-#### HYD.sol (Synthetic Asset)
+#### USDP.sol (Synthetic Stablecoin)
 ```solidity
-contract HYD is ERC20, Ownable {
+contract USDP is ERC20, Ownable {
     // Minting: Only Treasury
     function mint(address to, uint256 amount) external onlyOwner;
 
@@ -327,16 +327,16 @@ contract Treasury is ReentrancyGuard, Ownable, Pausable {
 
     struct Position {
         uint256 rwaAmount;
-        uint256 hydMinted;
+        uint256 usdpMinted;
         uint256 lastUpdate;
     }
 
-    // RWA deposit → Mint HYD
+    // RWA deposit → Mint USDP
     function depositRWA(address asset, uint256 amount)
         external nonReentrant whenNotPaused;
 
-    // Redeem HYD → Withdraw RWA
-    function redeemRWA(address asset, uint256 hydAmount)
+    // Redeem USDP → Withdraw RWA
+    function redeemRWA(address asset, uint256 usdpAmount)
         external nonReentrant whenNotPaused;
 
     // Liquidation for undercollateralized positions
@@ -386,7 +386,7 @@ User deposits:
   - 50,000 tokenized bonds (T2, LTV 65%) → value = 32,500
   Total collateral value = 112,500
 
-User mints: 100,000 HYD (debt)
+User mints: 100,000 USDP (debt)
 Health factor = 112,500 / 100,000 = 1.125 ✅ Healthy
 
 If bond price drops 20%:
@@ -483,7 +483,7 @@ contract RemintController {
 
 ## 4. Data Flow
 
-### 4.1 RWA → HYD Minting Flow
+### 4.1 RWA → USDP Minting Flow
 
 ```
 User deposits RWA to Treasury
@@ -492,9 +492,9 @@ Treasury validates asset (whitelisted + tier)
          ↓
 RWAPriceOracle.getPrice(asset) → USD value
          ↓
-Calculate max HYD: (USD value * LTV ratio)
+Calculate max USDP: (USD value * LTV ratio)
          ↓
-HYD.mint(user, hydAmount)
+USDP.mint(user, usdpAmount)
          ↓
 Record position in Treasury.positions[user][asset]
          ↓
@@ -504,9 +504,9 @@ Emit DepositRWA event
 ### 4.2 veNFT Governance Flow
 
 ```
-User locks HYD for duration (1 week ~ 4 years)
+User locks PAIMON for duration (1 week ~ 4 years)
          ↓
-VotingEscrow.createLock() → Mint veNFT
+VotingEscrow.createLock() → Mint vePAIMON NFT
          ↓
 Voting power = amount * (remaining_time / MAX_TIME)
          ↓
@@ -554,13 +554,13 @@ Option 1: Convert to veNFT
   ↓
 SettlementRouter.settleToVeNFT(bondNFTId)
   ↓
-Calculate total HYD = principal + baseYield + remintYield
+Calculate total PAIMON = principal + baseYield + remintYield
   ↓
 Burn Bond NFT
   ↓
-Lock HYD for 1 year → Create veNFT
+Lock PAIMON for 1 year → Create vePAIMON NFT
   ↓
-Transfer veNFT to user
+Transfer vePAIMON NFT to user
 ```
 
 ---
@@ -837,11 +837,11 @@ function getPrice(address asset) public view returns (uint256) {
 
 **PSM Invariants**:
 ```solidity
-// Invariant: USDC balance >= HYD total supply
+// Invariant: USDC balance >= USDP total supply
 function invariant_PSM_USDCBacking() public {
     uint256 usdcBalance = usdc.balanceOf(address(psm));
-    uint256 hydSupply = hyd.totalSupply();
-    assertGe(usdcBalance, hydSupply);
+    uint256 usdpSupply = usdp.totalSupply();
+    assertGe(usdcBalance, usdpSupply);
 }
 ```
 
@@ -857,11 +857,11 @@ function invariant_DEX_ConstantProduct() public {
 
 **Treasury Invariants**:
 ```solidity
-// Invariant: Total HYD minted <= Total RWA value * LTV
+// Invariant: Total USDP minted <= Total RWA value * LTV
 function invariant_Treasury_Collateralization() public {
-    uint256 totalHydMinted = getTotalHydMinted();
+    uint256 totalUsdpMinted = getTotalUsdpMinted();
     uint256 totalRwaValue = getTotalRwaValue();
-    assertLe(totalHydMinted, totalRwaValue * MAX_LTV / 10000);
+    assertLe(totalUsdpMinted, totalRwaValue * MAX_LTV / 10000);
 }
 ```
 

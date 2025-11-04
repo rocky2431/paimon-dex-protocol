@@ -1,7 +1,7 @@
 # Paimon.dex
 
-> DeFi 协议结合 RWA（真实世界资产）代币化、ve33 DEX 和国库支持的合成资产
-> DeFi protocol combining RWA (Real World Asset) tokenization, ve33 DEX, and treasury-backed synthetic assets
+> DeFi 协议结合 RWA（真实世界资产）代币化、veNFT 治理 DEX 和国库支持的合成稳定币
+> DeFi protocol combining RWA (Real World Asset) tokenization, veNFT Governance DEX, and treasury-backed synthetic stablecoin
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.20-blue.svg)](https://docs.soliditylang.org/)
