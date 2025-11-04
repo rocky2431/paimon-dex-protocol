@@ -10,13 +10,23 @@ import "../interfaces/IHYD.sol";
 
 /// @dev Interface for DEXPair
 interface IDEXPair {
+    /// @notice Get token0 address
+    /// @return Address of token0 in the pair
     function token0() external view returns (address);
+
+    /// @notice Get token1 address
+    /// @return Address of token1 in the pair
     function token1() external view returns (address);
+
+    /// @notice Claim accumulated treasury fees
+    /// @param to Recipient address for the fees
     function claimTreasuryFees(address to) external;
 }
 
 /// @dev Interface for RWA Price Oracle
 interface IRWAPriceOracle {
+    /// @notice Get current RWA asset price
+    /// @return Price in USD with 18 decimals precision
     function getPrice() external view returns (uint256);
 }
 
