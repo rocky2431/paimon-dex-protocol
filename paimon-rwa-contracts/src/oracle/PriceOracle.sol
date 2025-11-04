@@ -17,8 +17,20 @@ interface IPyth {
         uint256 publishTime;
     }
 
-    function getPrice(bytes32 id) external view returns (Price memory price); // Deprecated
+    /// @notice Get price (deprecated - use getPriceUnsafe or getPriceNoOlderThan)
+    /// @param id Price feed ID
+    /// @return price Price struct containing price, confidence, expo, and publish time
+    function getPrice(bytes32 id) external view returns (Price memory price);
+
+    /// @notice Get latest price without staleness check
+    /// @param id Price feed ID
+    /// @return price Price struct containing price, confidence, expo, and publish time
     function getPriceUnsafe(bytes32 id) external view returns (Price memory price);
+
+    /// @notice Get price with maximum age constraint
+    /// @param id Price feed ID
+    /// @param age Maximum age in seconds
+    /// @return price Price struct containing price, confidence, expo, and publish time
     function getPriceNoOlderThan(bytes32 id, uint256 age) external view returns (Price memory price);
 }
 
