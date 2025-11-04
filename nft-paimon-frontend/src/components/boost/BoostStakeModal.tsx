@@ -94,8 +94,9 @@ export function BoostStakeModal({
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
 
-    // Only allow numeric input with decimals
-    if (value && !/^\d*\.?\d*$/.test(value)) {
+    // ✅ FIX (Task 79): Allow negative sign for proper validation
+    // Allow: digits, decimal point, and leading negative sign
+    if (value && !/^-?\d*\.?\d*$/.test(value)) {
       return;
     }
 
@@ -134,18 +135,21 @@ export function BoostStakeModal({
   const isFormValid = amountNum > 0 && amountNum <= balanceNum && !error && !staking;
 
   return (
-    <Dialog
-      open={open}
-      onClose={staking ? undefined : onClose}
-      maxWidth="sm"
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: BOOST_DESIGN_TOKENS.RADIUS_LARGE,
-          border: `2px solid ${BOOST_DESIGN_TOKENS.COLOR_PRIMARY}`,
-        },
-      }}
-    >
+    // ✅ FIX (Task 79): Wrap Dialog in div to ensure container.firstChild exists for tests
+    // MUI Dialog uses Portal which renders to document.body, making container.firstChild null
+    <div data-testid="boost-stake-modal-wrapper">
+      <Dialog
+        open={open}
+        onClose={staking ? undefined : onClose}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: BOOST_DESIGN_TOKENS.RADIUS_LARGE,
+            border: `2px solid ${BOOST_DESIGN_TOKENS.COLOR_PRIMARY}`,
+          },
+        }}
+      >
       {/* Title */}
       <DialogTitle
         sx={{
@@ -340,5 +344,6 @@ export function BoostStakeModal({
         </Button>
       </DialogActions>
     </Dialog>
+    </div>
   );
 }
