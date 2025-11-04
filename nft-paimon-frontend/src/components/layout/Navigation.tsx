@@ -19,7 +19,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import LockIcon from '@mui/icons-material/Lock';
 
-export type NavPage = 'swap' | 'liquidity' | 'lock' | 'vote' | 'presale' | 'treasury' | 'launchpad' | 'analytics' | 'bribes' | 'rewards' | 'savings';
+export type NavPage = 'swap' | 'liquidity' | 'lock' | 'vote' | 'presale' | 'treasury' | 'launchpad' | 'analytics' | 'bribes' | 'rewards' | 'savings' | 'boost' | 'vault';
 
 interface NavigationProps {
   /**

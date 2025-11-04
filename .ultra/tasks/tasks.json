@@ -1674,7 +1674,7 @@
       "priority": "P2",
       "dependencies": [],
       "estimated_days": 0.5,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "frontend",
         "performance",

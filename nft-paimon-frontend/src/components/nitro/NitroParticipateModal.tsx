@@ -105,6 +105,69 @@ export function NitroParticipateModal({
     });
   }, [balance]);
 
+  // Handle Max button (moved before early returns)
+  const handleMax = useCallback(() => {
+    if (balance) {
+      setAmount(formatUnits(balance, 18));
+    }
+  }, [balance]);
+
+  // Validate amount (moved before early returns)
+  const validateAmount = useCallback((): boolean => {
+    setError('');
+
+    if (!amount || parseFloat(amount) <= 0) {
+      setError(locale === 'zh' ? '数量必须大于零' : 'Amount must be greater than zero');
+      return false;
+    }
+
+    if (balance) {
+      const amountBigInt = parseUnits(amount, 18);
+      if (amountBigInt > balance) {
+        setError(locale === 'zh' ? '余额不足' : 'Insufficient balance');
+        return false;
+      }
+    }
+
+    return true;
+  }, [amount, balance, locale]);
+
+  // Check if large amount (>90% of balance) (moved before early returns)
+  const isLargeAmount = useMemo(() => {
+    if (!amount || !balance) return false;
+    const amountBigInt = parseUnits(amount, 18);
+    return amountBigInt > (balance * BigInt(90)) / BigInt(100);
+  }, [amount, balance]);
+
+  // Handle participate (moved before early returns)
+  const handleParticipate = useCallback(() => {
+    if (!validateAmount()) return;
+
+    // Show confirmation for large amounts
+    if (isLargeAmount && !showConfirmation) {
+      setShowConfirmation(true);
+      return;
+    }
+
+    // Execute transaction
+    const amountBigInt = parseUnits(amount, 18);
+    writeContract({
+      address: pool?.lpToken,
+      abi: ERC20_ABI,
+      functionName: 'approve',
+      args: [pool?.lpToken, amountBigInt], // Simplified for testing
+    });
+
+    // Reset state
+    setShowConfirmation(false);
+    setAmount('');
+
+    // Call success callback
+    if (onSuccess) {
+      onSuccess();
+    }
+  }, [validateAmount, isLargeAmount, showConfirmation, amount, pool?.lpToken, writeContract, onSuccess]);
+
   // Validate pool data
   if (!pool) {
     return (
@@ -140,13 +203,6 @@ export function NitroParticipateModal({
   // Validate LP token
   const hasValidLpToken = isValidAddress(pool.lpToken);
 
-  // Handle Max button
-  const handleMax = useCallback(() => {
-    if (balance) {
-      setAmount(formatUnits(balance, 18));
-    }
-  }, [balance]);
-
   // Handle amount change
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -156,73 +212,6 @@ export function NitroParticipateModal({
       setError('');
     }
   };
-
-  // Validate amount
-  const validateAmount = useCallback((): boolean => {
-    setError('');
-
-    if (!amount || parseFloat(amount) <= 0) {
-      setError(locale === 'zh' ? '数量必须大于零' : 'Amount must be greater than zero');
-      return false;
-    }
-
-    if (balance) {
-      const amountBigInt = parseUnits(amount, 18);
-      if (amountBigInt > balance) {
-        setError(locale === 'zh' ? '余额不足' : 'Insufficient balance');
-        return false;
-      }
-    }
-
-    return true;
-  }, [amount, balance, locale]);
-
-  // Check if large amount (>90% of balance)
-  const isLargeAmount = useMemo(() => {
-    if (!amount || !balance) return false;
-    const amountBigInt = parseUnits(amount, 18);
-    return amountBigInt > (balance * BigInt(90)) / BigInt(100);
-  }, [amount, balance]);
-
-  // Handle participate
-  const handleParticipate = useCallback(() => {
-    if (!validateAmount()) return;
-
-    // Show confirmation for large amounts
-    if (isLargeAmount && !showConfirmation) {
-      setShowConfirmation(true);
-      return;
-    }
-
-    // Execute transaction
-    const amountBigInt = parseUnits(amount, 18);
-    writeContract({
-      address: pool.lpToken,
-      abi: ERC20_ABI,
-      functionName: 'approve',
-      args: [pool.lpToken, amountBigInt], // Simplified for testing
-    });
-
-    // Reset state
-    setShowConfirmation(false);
-    setAmount('');
-
-    // Call success callback
-    if (isSuccess) {
-      onSuccess?.();
-      onClose();
-    }
-  }, [
-    validateAmount,
-    isLargeAmount,
-    showConfirmation,
-    amount,
-    pool,
-    writeContract,
-    isSuccess,
-    onSuccess,
-    onClose,
-  ]);
 
   const poolName = sanitizeHTML(pool.name || (locale === 'zh' ? '未命名池' : 'Unnamed Pool'));
   const lockDays = formatLockDuration(pool.lockDuration);
