@@ -62,14 +62,13 @@ contract BondUserJourneyE2ETest is Test {
         vm.prank(owner);
         treasury = new Treasury(owner, address(usdc));
 
-        // Deploy PSM contract
-        vm.prank(owner);
-        psm = new PSMParameterized(address(usdc), owner);
-
-        // Deploy HYD token
-        //hyd = new HYD(address(psm));
-        hyd=new HYD();
+        // ✅ FIX (Task 78): Deploy HYD before PSM (PSM constructor needs HYD address)
+        hyd = new HYD();
         hyd.initTempPsm(address(owner));
+
+        // ✅ FIX (Task 78): Deploy PSM with correct parameters (USDP, USDC) not (USDC, owner)
+        vm.prank(owner);
+        psm = new PSMParameterized(address(hyd), address(usdc));
 
         // Deploy Chainlink VRF Coordinator mock
         vrfCoordinator = new MockVRFCoordinatorV2();
