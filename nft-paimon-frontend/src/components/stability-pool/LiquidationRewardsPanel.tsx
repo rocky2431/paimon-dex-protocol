@@ -60,7 +60,7 @@ const translations = {
 const COLLATERAL_TYPES = [
   { address: testnet.tokens.usdc, symbol: 'USDC', decimals: 6 },
   { address: testnet.tokens.wbnb, symbol: 'WBNB', decimals: 18 },
-  { address: testnet.tokens.hyd, symbol: 'HYD', decimals: 18 },
+  { address: testnet.tokens.usdp, symbol: 'USDP', decimals: 18 },
 ];
 
 export function LiquidationRewardsPanel({ locale = 'en' }: LiquidationRewardsPanelProps) {

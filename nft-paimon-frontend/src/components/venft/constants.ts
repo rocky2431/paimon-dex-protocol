@@ -67,7 +67,7 @@ export const SLIDER_CONFIG = {
 // Contract addresses
 export const VENFT_ADDRESSES = {
   VOTING_ESCROW: config.tokens.votingEscrow as `0x${string}`,
-  HYD_TOKEN: config.tokens.hyd as `0x${string}`,
+  USDP_TOKEN: config.tokens.usdp as `0x${string}`,
 };
 
 // Messages

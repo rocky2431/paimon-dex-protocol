@@ -40,12 +40,12 @@ export const LIQUIDITY_ADDRESSES = {
  * Token configuration from centralized config
  */
 export const SUPPORTED_TOKENS: Record<string, Token> = {
-  HYD: {
-    address: config.tokenConfig.hyd.address as `0x${string}`,
-    symbol: config.tokenConfig.hyd.symbol,
-    name: config.tokenConfig.hyd.name,
-    decimals: config.tokenConfig.hyd.decimals,
-    logoURI: config.tokenConfig.hyd.icon,
+  USDP: {
+    address: config.tokenConfig.usdp.address as `0x${string}`,
+    symbol: config.tokenConfig.usdp.symbol,
+    name: config.tokenConfig.usdp.name,
+    decimals: config.tokenConfig.usdp.decimals,
+    logoURI: config.tokenConfig.usdp.icon,
   },
   USDC: {
     address: config.tokenConfig.usdc.address as `0x${string}`,

@@ -71,15 +71,15 @@ export const useVeNFT = () => {
   const [lockState, setLockState] = useState<LockState>(LockState.IDLE);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
-  // Get HYD balance
+  // Get USDP balance
   const { data: hydBalance } = useBalance({
     address,
-    token: VENFT_ADDRESSES.HYD_TOKEN,
+    token: VENFT_ADDRESSES.USDP_TOKEN,
   });
 
   // Check allowance
   const { data: allowance } = useReadContract({
-    address: VENFT_ADDRESSES.HYD_TOKEN,
+    address: VENFT_ADDRESSES.USDP_TOKEN,
     abi: ERC20_ABI,
     functionName: 'allowance',
     args: address ? [address, VENFT_ADDRESSES.VOTING_ESCROW] : undefined,
@@ -182,7 +182,7 @@ export const useVeNFT = () => {
       setLockState(LockState.APPROVING);
 
       await writeContractAsync({
-        address: VENFT_ADDRESSES.HYD_TOKEN,
+        address: VENFT_ADDRESSES.USDP_TOKEN,
         abi: ERC20_ABI,
         functionName: 'approve',
         args: [VENFT_ADDRESSES.VOTING_ESCROW, calculation.lockAmount],

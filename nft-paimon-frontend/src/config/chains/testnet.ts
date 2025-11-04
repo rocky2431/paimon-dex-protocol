@@ -14,7 +14,6 @@ export const tokens = {
   // Protocol contracts - ALL DEPRECATED, awaiting redeployment
   // 所有协议合约地址已弃用，等待重新部署
   treasury: "0x0000000000000000000000000000000000000000" as const, // TODO: Update after redeployment
-  hyd: "0x0000000000000000000000000000000000000000" as const, // TODO: Update after redeployment
   usdp: "0x0000000000000000000000000000000000000000" as const, // TODO: Update after redeployment
   paimon: "0x0000000000000000000000000000000000000000" as const, // TODO: Update after redeployment
   esPaimon: "0x0000000000000000000000000000000000000000" as const, // TODO: Update after redeployment
@@ -104,13 +103,6 @@ export const tokenConfig = {
     decimals: 18,
     address: tokens.usdp,
     icon: "/tokens/usdp.svg",
-  },
-  hyd: {
-    symbol: "HYD" as const,
-    name: "Hydra Token",
-    decimals: 18,
-    address: tokens.hyd,
-    icon: "/tokens/hyd.svg",
   },
   busd: {
     symbol: "BUSD" as const,

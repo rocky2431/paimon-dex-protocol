@@ -16,7 +16,6 @@ export enum SwapState {
 export enum Token {
   USDC = 'USDC',
   USDP = 'USDP',
-  HYD = 'HYD',
 }
 
 export interface TokenInfo {

@@ -13,7 +13,6 @@ export const BSC_MAINNET = 56;
 export const tokens = {
   // Protocol contracts
   treasury: "0x0000000000000000000000000000000000000000" as const, // TODO: Update after deployment
-  hyd: "0x0000000000000000000000000000000000000001" as const, // TODO: Update after deployment
   usdp: "0x0000000000000000000000000000000000000002" as const, // TODO: Update after deployment
   paimon: "0x0000000000000000000000000000000000000003" as const, // TODO: Update after deployment
   venft: "0x0000000000000000000000000000000000000004" as const, // TODO: Update after deployment
@@ -93,13 +92,6 @@ export const tokenConfig = {
     decimals: 18,
     address: tokens.usdp,
     icon: "/tokens/usdp.svg",
-  },
-  hyd: {
-    symbol: "HYD" as const,
-    name: "Hydra Token",
-    decimals: 18,
-    address: tokens.hyd,
-    icon: "/tokens/hyd.svg",
   },
   busd: {
     symbol: "BUSD" as const,
