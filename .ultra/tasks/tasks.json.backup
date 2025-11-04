@@ -1981,7 +1981,7 @@
       "priority": "P0",
       "dependencies": [],
       "estimated_days": 0.25,
-      "status": "completed",
+      "status": "in_progress",
       "tags": [
         "contract",
         "E2E",
@@ -1997,9 +1997,7 @@
         "src/presale/RemintController.sol"
       ],
       "failureCount": 1,
-      "startedAt": "2025-11-04T18:27:09.333516",
-      "completedAt": "2025-11-04T18:30:00",
-      "implementationNotes": "修复完成!\n\n问题根源:\n- PSM 部署时传入错误参数 (usdc, owner) 而不是 (hyd, usdc)\n- 导致构造函数试图对 owner 地址调用 decimals() 函数失败\n- HYD 部署顺序在 PSM 之后，导致参数传递错误\n\n修复方案:\n1. 将 HYD 部署移到 PSM 之前（第 66-67 行）\n2. 修正 PSM 构造函数参数: new PSMParameterized(address(hyd), address(usdc))\n\n测试结果:\n- test_E2E_AliceJourney_CashRedemption() PASS\n- test_E2E_BobJourney_VeNFTConversion() PASS\n- test_E2E_MultiUserCompetition() PASS\n- 100% 通过率 (3/3 tests)\n\nGit: feat/task-78-bond-setup-fix (commit caf199a)"
+      "startedAt": "2025-11-04T18:27:09.333516"
     },
     {
       "id": "79",
@@ -2009,7 +2007,7 @@
       "priority": "P0",
       "dependencies": [],
       "estimated_days": 0.25,
-      "status": "completed",
+      "status": "pending",
       "tags": [
         "frontend",
         "validation",
@@ -2023,10 +2021,7 @@
       "frontendFiles": [
         "src/components/boost/BoostStakeModal.tsx"
       ],
-      "failureCount": 3,
-      "startedAt": "2025-11-04T10:34:27",
-      "completedAt": "2025-11-04T19:00:00",
-      "implementationNotes": "修复完成!\n\n问题根源:\n1. 正则 /^\\d*\\.?\\d*$/ 拒绝负号,导致输入 -100 变成 100,按钮未禁用\n2. MUI Dialog 使用 Portal 渲染到 document.body,导致 container.firstChild 为 null\n\n修复方案:\n1. 更新正则为 /^-?\\d*\\.?\\d*$/ 允许负号,validateAmount 拒绝负值\n2. 在 Dialog 外包装 div 确保 container.firstChild 存在\n\n测试结果:\n- handles zero amount ✅ PASS\n- rejects negative amounts ✅ PASS\n- renders without layout errors ✅ PASS\n- 100% 通过率 (3/3 target tests)\n\nGit: feat/task-79-boost-validation (commit 6fe1160)"
+      "failureCount": 3
     },
     {
       "id": "80",
@@ -2038,7 +2033,7 @@
         "75"
       ],
       "estimated_days": 0.25,
-      "status": "in_progress",
+      "status": "pending",
       "tags": [
         "contract",
         "gas-optimization",
@@ -2052,8 +2047,7 @@
       "contractFiles": [
         "src/savings/SavingRate.sol"
       ],
-      "failureCount": 2,
-      "startedAt": "2025-11-04T10:45:55"
+      "failureCount": 2
     },
     {
       "id": "81",
