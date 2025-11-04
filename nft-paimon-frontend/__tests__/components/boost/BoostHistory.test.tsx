@@ -161,10 +161,14 @@ describe('BoostHistory Component', () => {
         amount: '<script>alert("XSS")</script>',
       };
 
-      render(<BoostHistory entries={[maliciousEntry]} />);
+      const { container } = render(<BoostHistory entries={[maliciousEntry]} />);
 
-      // Should not execute script
-      expect(screen.queryByText(/alert/)).not.toBeInTheDocument();
+      // Should render as escaped text, not execute script
+      // React auto-escapes HTML, so the text will be visible
+      expect(screen.getByText(/script.*alert.*XSS.*\/script/i)).toBeInTheDocument();
+
+      // Verify no actual <script> element was created
+      expect(container.querySelector('script')).toBeNull();
     });
 
     it('prevents XSS in multiplier field', () => {
@@ -173,11 +177,17 @@ describe('BoostHistory Component', () => {
         multiplierAfter: '<img src=x onerror=alert(1)>',
       };
 
-      render(<BoostHistory entries={[maliciousEntry]} />);
+      const { container } = render(<BoostHistory entries={[maliciousEntry]} />);
 
-      // Should render as text, not HTML
-      const images = screen.queryAllByRole('img');
-      expect(images).toHaveLength(0); // Only icons, not malicious image
+      // Should render as escaped text, not execute HTML
+      // React auto-escapes HTML
+      expect(screen.getByText(/img src=x onerror=alert/i)).toBeInTheDocument();
+
+      // Verify no malicious <img> element was created (only MUI icons)
+      const maliciousImages = Array.from(container.querySelectorAll('img')).filter(
+        (img) => img.getAttribute('src') === 'x'
+      );
+      expect(maliciousImages).toHaveLength(0);
     });
   });
 

@@ -25,6 +25,8 @@ describe('DiceRoller Component', () => {
       lastRollTimestamp: 0,
       rollsThisWeek: 5,
       highestDiceRoll: 0,
+      totalRemintEarned: BigInt(0), // ✅ Added missing field
+      lastWeekNumber: BigInt(1),    // ✅ Added missing field
     },
     rollResult: null,
     canRoll: true,
