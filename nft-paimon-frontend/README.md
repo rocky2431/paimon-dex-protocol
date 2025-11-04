@@ -1,6 +1,6 @@
 # Paimon DEX Frontend
 
-Next.js 14 frontend for Paimon DEX - a ve33 decentralized exchange on BSC.
+Next.js 14 frontend for Paimon DEX - a veNFT Governance DEX on BSC.
 
 ## Tech Stack
 
