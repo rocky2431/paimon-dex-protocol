@@ -1534,7 +1534,7 @@
       "priority": "P2",
       "dependencies": [],
       "estimated_days": 0.5,
-      "status": "in_progress",
+      "status": "completed",
       "tags": [
         "optimization",
         "gas",
@@ -1551,7 +1551,9 @@
         "test_Treasury_Gas_10Assets()",
         "test_Treasury_ResultConsistency()"
       ],
-      "startedAt": "2025-11-04T08:15:00Z"
+      "startedAt": "2025-11-04T08:15:00Z",
+      "completedAt": "2025-11-04 08:41:59",
+      "implementationNotes": "✅ 已完成 Oracle Gas 优化测试基础设施\n\n**测试修复**:\n1. 部署 MockV3Aggregator 作为 Chainlink 价格源（18 decimals, $100）\n2. 部署 MockV3Aggregator 作为 Sequencer feed（L2 网络必需）\n3. 连接 HYD token 到 Treasury (setHYDToken)\n4. 授权 Treasury 为 HYD minter (authorizeMinter)\n5. 修复时间戳下溢（vm.warp(10000)）\n\n**测试结果**:\n- test_GasCost_SingleAssetQuery: 11,845 gas (< 60K 目标) ✅\n- test_GasCost_TenAssetsQuery: 32,772 gas (< 350K 目标) ✅  \n- test_ResultConsistency_MultipleQueriesSameBlock: PASS ✅\n\n**性能表现**:\n- 单资产查询: 11.8K gas（远低于 60K 基准）\n- 10 资产查询: 32.7K gas（比 500K 基准降低 93.5%）\n- 所有测试通过，gas 使用远低于验收标准\n\n**文件变更**:\n- test/gas/OracleGasOptimization.t.sol: +34 lines, -2 lines\n\n**提交**: d2dc946\n"
     },
     {
       "id": "P2-003",
