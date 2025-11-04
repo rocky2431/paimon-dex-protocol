@@ -22,9 +22,9 @@ export { mainnet, testnet };
 export const BSC_MAINNET = mainnet.chainId;
 export const BSC_TESTNET = testnet.chainId;
 
-// Export config as alias to mainnet for backward compatibility
-// 导出config作为mainnet的别名，保持向后兼容
-export const config = mainnet;
+// Export config as alias to testnet (switching for contract redeployment)
+// 导出config作为testnet的别名（切换到测试网，准备重新部署合约）
+export const config = testnet;
 
 // ============================================================================
 // Contract Addresses
