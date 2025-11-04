@@ -22,7 +22,7 @@ import { calculateAverageAPR } from "../constants";
 function getGaugeAddressFromPoolName(
   poolName: string
 ): `0x${string}` | undefined {
-  // Convert pool name to key (e.g., "HYD/USDC" -> "hydUsdc")
+  // Convert pool name to key (e.g., "USDP/USDC" -> "hydUsdc")
   const gaugeKey = poolName
     .replace("/", "")
     .toLowerCase()
@@ -88,7 +88,7 @@ export const useRewards = () => {
   );
   const [errorMessage, setErrorMessage] = useState<string>("");
 
-  // ==================== Query Pool 0 (HYD/USDC) ====================
+  // ==================== Query Pool 0 (USDP/USDC) ====================
   const pool0 = LIQUIDITY_POOLS[0];
   const gauge0 = getGaugeAddressFromPoolName(pool0.name);
 
@@ -112,7 +112,7 @@ export const useRewards = () => {
     },
   });
 
-  // ==================== Query Pool 1 (HYD/WBNB) ====================
+  // ==================== Query Pool 1 (USDP/WBNB) ====================
   const pool1 = LIQUIDITY_POOLS[1];
   const gauge1 = getGaugeAddressFromPoolName(pool1.name);
 

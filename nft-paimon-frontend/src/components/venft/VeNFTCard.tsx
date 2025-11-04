@@ -15,7 +15,7 @@ import { useState, useEffect } from 'react';
  * OlympusDAO-inspired veNFT locking interface
  *
  * Features:
- * - Lock HYD for voting power
+ * - Lock USDP for voting power
  * - Duration slider (1 week - 4 years)
  * - Real-time voting power calculation
  * - Visual feedback with dynamic gradients
@@ -81,7 +81,7 @@ export const VeNFTCard: React.FC = () => {
           color="text.primary"
           sx={{ mb: 1, fontSize: '1.5rem' }}
         >
-          Lock HYD for Voting Power
+          Lock USDP for Voting Power
         </Typography>
 
         <Typography
@@ -89,7 +89,7 @@ export const VeNFTCard: React.FC = () => {
           color="text.secondary"
           sx={{ mb: 4, fontSize: '0.875rem' }}
         >
-          Lock your HYD tokens to earn veHYD and participate in governance
+          Lock your USDP tokens to earn veHYD and participate in governance
         </Typography>
 
         {/* Lock amount input */}

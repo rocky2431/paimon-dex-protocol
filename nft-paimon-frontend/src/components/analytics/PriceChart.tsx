@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * HYD Price Chart Component
+ * USDP Price Chart Component
  * Line chart with time range selector
  * Shows HYD price trend with $1.00 target reference line
  */
@@ -29,7 +29,7 @@ import { ChartTimeRange } from './types';
 import {
   generateMockPriceData,
   formatChartDate,
-  HYD_TARGET_PRICE,
+  USDP_TARGET_PRICE,
   ANALYTICS_DESIGN_TOKENS,
 } from './constants';
 
@@ -39,7 +39,7 @@ import {
  * PriceChart component props
  */
 export interface PriceChartProps {
-  /** Current HYD price */
+  /** Current USDP price */
   currentPrice: number;
   /** Loading state */
   isLoading: boolean;
@@ -48,7 +48,7 @@ export interface PriceChartProps {
 // ==================== Component ====================
 
 /**
- * HYD Price Chart Component
+ * USDP Price Chart Component
  *
  * Features:
  * - Line chart showing HYD price trend
@@ -141,7 +141,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
                 letterSpacing: '0.1em',
               }}
             >
-              HYD Price
+              USDP Price
             </Typography>
             <Typography
               variant="h4"
@@ -215,7 +215,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
             />
             {/* Target Price Reference Line */}
             <ReferenceLine
-              y={HYD_TARGET_PRICE}
+              y={USDP_TARGET_PRICE}
               stroke="#FF9800"
               strokeDasharray="5 5"
               strokeWidth={2}

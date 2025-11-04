@@ -1,6 +1,6 @@
 /**
  * useDepositPreview Hook
- * Calculates HYD mint amount and health factor for RWA deposit preview
+ * Calculates USDP mint amount and health factor for RWA deposit preview
  */
 
 import { useMemo } from "react";
@@ -100,19 +100,19 @@ export function useDepositPreview({
         mintDiscount = (Number(assetConfig[3]) / Number(bpsDenominator)) * 100;
       }
 
-      // Calculate HYD mint amount with LTV and discount
-      // hydMintAmount = rwaValue * (ltvRatio / 100) * (1 - mintDiscount / 100)
+      // Calculate USDP mint amount with LTV and discount
+      // usdpMintAmount = rwaValue * (ltvRatio / 100) * (1 - mintDiscount / 100)
       const ltvMultiplier = BigInt(Math.floor(effectiveLtvRatio * 100));
       const discountMultiplier = BigInt(Math.floor((100 - mintDiscount) * 100));
 
-      let hydMintAmount = (rwaValue * ltvMultiplier) / 10000n;
-      hydMintAmount = (hydMintAmount * discountMultiplier) / 10000n;
+      let usdpMintAmount = (rwaValue * ltvMultiplier) / 10000n;
+      usdpMintAmount = (usdpMintAmount * discountMultiplier) / 10000n;
 
       // Calculate health factor
       // For new position: healthFactor = (collateralValue / debtValue) * 100
       // Need to consider existing position if any
       let totalRwaValue = rwaValue;
-      let totalHydMinted = hydMintAmount;
+      let totalHydMinted = usdpMintAmount;
 
       if (userPosition && userPosition[1] > 0n) {
         // User has existing position
@@ -125,7 +125,7 @@ export function useDepositPreview({
           parseUnits("1", 18);
 
         totalRwaValue = rwaValue + existingRwaValue;
-        totalHydMinted = hydMintAmount + existingHydMinted;
+        totalHydMinted = usdpMintAmount + existingHydMinted;
       }
 
       // Health factor = (totalCollateralValue / totalDebt) * 100
@@ -137,7 +137,7 @@ export function useDepositPreview({
 
       return {
         rwaValue,
-        hydMintAmount,
+        usdpMintAmount,
         ltvRatio: effectiveLtvRatio,
         healthFactor,
         mintDiscount,

@@ -90,26 +90,26 @@ export const LIQUIDITY_POOLS: LiquidityPool[] = [
   {
     address: (config.pools.hydUsdc ||
       "0x0000000000000000000000000000000000000010") as `0x${string}`,
-    token0: SUPPORTED_TOKENS.HYD,
+    token0: SUPPORTED_TOKENS.USDP,
     token1: SUPPORTED_TOKENS.USDC,
     type: PoolType.STABLE,
     reserve0: 0n,
     reserve1: 0n,
     totalSupply: 0n,
-    name: "HYD/USDC",
+    name: "USDP/USDC",
     apr: "25%",
     tvl: "$1,200,000",
   },
   {
     address: (config.pools.hydWbnb ||
       "0x0000000000000000000000000000000000000011") as `0x${string}`,
-    token0: SUPPORTED_TOKENS.HYD,
+    token0: SUPPORTED_TOKENS.USDP,
     token1: SUPPORTED_TOKENS.WBNB,
     type: PoolType.VOLATILE,
     reserve0: 0n,
     reserve1: 0n,
     totalSupply: 0n,
-    name: "HYD/WBNB",
+    name: "USDP/WBNB",
     apr: "30%",
     tvl: "$850,000",
   },
@@ -394,14 +394,14 @@ export const calculateRemoveAmount = (
  * Get gauge address for a pool
  * Gauge addresses are now retrieved from @/config
  *
- * @param poolName - Pool name (e.g., "HYD/USDC")
+ * @param poolName - Pool name (e.g., "USDP/USDC")
  * @returns Gauge address or null
  *
  * @deprecated Use config.gauges[gaugeKey] directly instead
  * This function is kept for backward compatibility
  */
 export const getGaugeAddress = (poolName: string): `0x${string}` | null => {
-  // Convert pool name to key (e.g., "HYD/USDC" -> "hydUsdc")
+  // Convert pool name to key (e.g., "USDP/USDC" -> "hydUsdc")
   const gaugeKey = poolName
     .replace("/", "")
     .toLowerCase()

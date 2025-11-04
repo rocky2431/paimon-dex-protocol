@@ -16,7 +16,7 @@ export interface Bribe {
   epoch: bigint;
   /** Target gauge address */
   gauge: `0x${string}`;
-  /** Gauge/Pool name (e.g., "HYD/USDC") */
+  /** Gauge/Pool name (e.g., "USDP/USDC") */
   gaugeName: string;
   /** Bribe token address */
   token: `0x${string}`;

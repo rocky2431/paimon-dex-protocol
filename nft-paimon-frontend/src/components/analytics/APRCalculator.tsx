@@ -60,7 +60,7 @@ const MAX_LOCK_WEEKS = 208; // 4 years
  * veNFT APR Calculator Component
  *
  * Features:
- * - Lock amount input (HYD)
+ * - Lock amount input (USDP)
  * - Lock duration slider (1 week - 4 years)
  * - Real-time APR calculation
  * - Voting power preview
@@ -74,7 +74,7 @@ export const APRCalculator: React.FC<APRCalculatorProps> = ({
 }) => {
   // ==================== State ====================
 
-  const [lockAmountInput, setLockAmountInput] = useState<string>('10000'); // Default: 10,000 HYD
+  const [lockAmountInput, setLockAmountInput] = useState<string>('10000'); // Default: 10,000 USDP
   const [lockDurationWeeks, setLockDurationWeeks] = useState<number>(52); // Default: 1 year
 
   // ==================== Derived State ====================
@@ -169,7 +169,7 @@ export const APRCalculator: React.FC<APRCalculatorProps> = ({
                   marginBottom: 1,
                 }}
               >
-                Lock Amount (HYD)
+                Lock Amount (USDP)
               </Typography>
               <TextField
                 fullWidth

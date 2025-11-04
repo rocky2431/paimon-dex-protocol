@@ -19,7 +19,7 @@ import {
 import { useAccount } from 'wagmi';
 import { StyledCard } from '@/components/common';
 import { RWAAssetSelector } from './RWAAssetSelector';
-import { HYDMintPreview } from './HYDMintPreview';
+import { USDPMintPreview } from './USDPMintPreview';
 import { useRWABalance } from './hooks/useRWABalance';
 import { useDepositPreview } from './hooks/useDepositPreview';
 import { useTreasuryDeposit } from './hooks/useTreasuryDeposit';
@@ -319,7 +319,7 @@ export function DepositForm() {
 
       {/* Right: Preview */}
       <Box sx={{ flex: 1 }}>
-        <HYDMintPreview preview={preview} isLoading={isPreviewLoading} />
+        <USDPMintPreview preview={preview} isLoading={isPreviewLoading} />
       </Box>
     </Box>
   );

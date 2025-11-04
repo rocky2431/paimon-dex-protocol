@@ -31,9 +31,9 @@ export const VOTING_POWER = {
    * Formula: voting_power = amount × (lock_duration / MAX_LOCK)
    *
    * Examples:
-   * - 100 HYD locked for 4 years = 100 veHYD (100% voting power)
-   * - 100 HYD locked for 2 years = 50 veHYD (50% voting power)
-   * - 100 HYD locked for 1 year = 25 veHYD (25% voting power)
+   * - 100 USDP locked for 4 years = 100 veHYD (100% voting power)
+   * - 100 USDP locked for 2 years = 50 veHYD (50% voting power)
+   * - 100 USDP locked for 1 year = 25 veHYD (25% voting power)
    */
   calculateVotingPower: (amount: bigint, durationSeconds: number): bigint => {
     return (amount * BigInt(durationSeconds)) / BigInt(LOCK_DURATION.MAX_LOCK);
@@ -74,13 +74,13 @@ export const VENFT_ADDRESSES = {
 export const VENFT_MESSAGES = {
   LOCK_SUCCESS: "Lock created successfully! 🎉",
   LOCK_ERROR: "Failed to create lock. Please try again.",
-  APPROVAL_SUCCESS: "HYD approved successfully",
+  APPROVAL_SUCCESS: "USDP approved successfully",
   APPROVAL_ERROR: "Approval failed. Please try again.",
-  INSUFFICIENT_BALANCE: "Insufficient HYD balance",
+  INSUFFICIENT_BALANCE: "Insufficient USDP balance",
   INVALID_AMOUNT: "Please enter a valid amount",
   INVALID_DURATION: "Lock duration must be between 1 week and 4 years",
   CONNECT_WALLET: "Please connect your wallet",
-  MIN_LOCK_AMOUNT: "Minimum lock amount is 0.01 HYD",
+  MIN_LOCK_AMOUNT: "Minimum lock amount is 0.01 USDP",
 };
 
 // Minimum lock amount

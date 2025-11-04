@@ -33,7 +33,7 @@ export const CreateLockButton: React.FC<CreateLockButtonProps> = ({
       case LockState.INPUT:
         return 'Create Lock';
       case LockState.APPROVING:
-        return 'Approving HYD...';
+        return 'Approving USDP...';
       case LockState.APPROVED:
         return 'Create Lock';
       case LockState.CREATING:

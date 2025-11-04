@@ -92,7 +92,7 @@ export const useVeNFT = () => {
     }
 
     try {
-      const lockAmountBigInt = parseUnits(formData.lockAmount, 18); // HYD has 18 decimals
+      const lockAmountBigInt = parseUnits(formData.lockAmount, 18); // USDP has 18 decimals
 
       // Calculate voting power
       const votingPowerBigInt = VOTING_POWER.calculateVotingPower(
@@ -174,7 +174,7 @@ export const useVeNFT = () => {
     }
   }, [hydBalance, handleAmountChange]);
 
-  // Approve HYD
+  // Approve USDP
   const handleApprove = useCallback(async () => {
     if (!address || !calculation) return;
 

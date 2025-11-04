@@ -6,7 +6,7 @@
  *
  * Data Sources:
  * - USDP.totalSupply() - Total USDP in circulation (replaces deprecated PSM.totalMintedHYD)
- * - PriceOracle.getPrice("HYD") - Current HYD/USD price
+ * - PriceOracle.getPrice("USDP") - Current HYD/USD price
  *
  * Auto-refreshes every 5 minutes
  */
@@ -92,7 +92,7 @@ export interface UseAnalyticsResult {
  *
  * Features:
  * - Queries USDP.totalSupply() for TVL calculation
- * - Queries PriceOracle.getPrice("HYD") for current price
+ * - Queries PriceOracle.getPrice("USDP") for current price
  * - Auto-refreshes every 5 minutes
  * - Returns aggregated analytics data
  *
@@ -131,7 +131,7 @@ export const useAnalytics = (): UseAnalyticsResult => {
   });
 
   /**
-   * Query PriceOracle.getPrice("HYD")
+   * Query PriceOracle.getPrice("USDP")
    * Returns HYD price in USD (8 decimals, Chainlink format)
    */
   const {
@@ -144,7 +144,7 @@ export const useAnalytics = (): UseAnalyticsResult => {
     address: PRICE_ORACLE_ADDRESS,
     abi: PRICE_ORACLE_ABI,
     functionName: 'getPrice',
-    args: ['HYD'],
+    args: ['USDP'],
     query: {
       // Refresh every 5 minutes
       refetchInterval: ANALYTICS_REFRESH_INTERVAL,

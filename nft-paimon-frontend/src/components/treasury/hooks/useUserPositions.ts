@@ -183,13 +183,13 @@ export function useUserPositions() {
       })
       .map((query) => {
         const { asset, positionData, canRedeemData, rwaPrice } = query;
-        const [rwaAsset, rwaAmount, hydMinted, depositTime] = positionData!;
+        const [rwaAsset, rwaAmount, usdpMinted, depositTime] = positionData!;
 
         // Calculate USD values
         const rwaAmountFloat = parseFloat(formatUnits(rwaAmount, 18));
-        const hydMintedFloat = parseFloat(formatUnits(hydMinted, 18));
+        const usdpMintedFloat = parseFloat(formatUnits(usdpMinted, 18));
         const rwaValueUSD = rwaAmountFloat * rwaPrice;
-        const hydValueUSD = hydMintedFloat; // HYD is 1:1 with USD
+        const hydValueUSD = usdpMintedFloat; // USDP is 1:1 with USD
 
         // Calculate collateralization ratio (collateral / debt * 100%)
         const collateralizationRatio =
@@ -209,7 +209,7 @@ export function useUserPositions() {
         return {
           rwaAsset,
           rwaAmount,
-          hydMinted,
+          usdpMinted,
           depositTime,
           assetSymbol: asset.symbol,
           assetName: asset.name,

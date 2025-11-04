@@ -15,7 +15,7 @@ export const ANALYTICS_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes in ms
 /**
  * HYD target price ($1.00 USD)
  */
-export const HYD_TARGET_PRICE = 1.0;
+export const USDP_TARGET_PRICE = 1.0;
 
 /**
  * VotingEscrow MAXTIME (4 years in seconds)
@@ -174,7 +174,7 @@ export const generateMockPriceData = (dataPoints: number = 30) => {
     const timestamp = now - (dataPoints - i - 1) * DAY_MS;
     // Simulate price fluctuation around $1.00 (±2%)
     const priceVariation = (Math.random() - 0.5) * 0.04; // ±2%
-    const price = HYD_TARGET_PRICE + priceVariation;
+    const price = USDP_TARGET_PRICE + priceVariation;
 
     return {
       timestamp,

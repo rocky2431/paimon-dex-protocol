@@ -68,16 +68,16 @@ export function VeNFTOption({ option, onLockDurationChange, onSettle, settling }
         />
       </Box>
 
-      {/* HYD Amount */}
+      {/* USDP Amount */}
       <Box sx={{ mb: 3 }}>
         <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 0.5, display: 'block' }}>
           You will receive
         </Typography>
         <Typography variant="h3" sx={{ fontWeight: 800, color: '#FF6B35' }}>
-          {option.hydAmount.toFixed(2)}
+          {option.usdpAmount.toFixed(2)}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          HYD tokens (locked)
+          USDP tokens (locked)
         </Typography>
       </Box>
 

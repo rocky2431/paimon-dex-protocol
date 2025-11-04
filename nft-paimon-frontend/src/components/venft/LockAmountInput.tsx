@@ -15,7 +15,7 @@ interface LockAmountInputProps {
 
 /**
  * LockAmountInput Component
- * OlympusDAO-style input for lock amount (HYD token only)
+ * OlympusDAO-style input for lock amount ((USDP token only))
  *
  * Features:
  * - Inset shadow borders
@@ -74,7 +74,7 @@ export const LockAmountInput: React.FC<LockAmountInputProps> = ({
           },
         }}
       >
-        {/* Amount input + HYD label */}
+        {/* Amount input + USDP label */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
           {/* Amount input */}
           <TextField
@@ -104,7 +104,7 @@ export const LockAmountInput: React.FC<LockAmountInputProps> = ({
             }}
           />
 
-          {/* HYD label (static) */}
+          {/* USDP label (static) */}
           <Box
             sx={{
               backgroundColor: 'background.elevated',
@@ -114,7 +114,7 @@ export const LockAmountInput: React.FC<LockAmountInputProps> = ({
             }}
           >
             <Typography variant="body1" fontWeight={700} color="primary.main">
-              HYD
+              USDP
             </Typography>
           </Box>
         </Box>
@@ -137,7 +137,7 @@ export const LockAmountInput: React.FC<LockAmountInputProps> = ({
             <AnimatedNumber
               value={balanceValue}
               decimals={4}
-              suffix=" HYD"
+              suffix=" USDP"
             />
           </Typography>
 

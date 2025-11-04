@@ -1,5 +1,5 @@
 /**
- * HYDMintPreview Component
+ * USDPMintPreview Component
  * Displays deposit preview with RWA value, LTV, HYD mint amount, and health factor
  */
 
@@ -11,12 +11,12 @@ import { DepositPreview } from '@/types/treasury';
 import { formatUnits } from 'viem';
 import { TREASURY_THEME, TREASURY_CONFIG } from './constants';
 
-interface HYDMintPreviewProps {
+interface USDPMintPreviewProps {
   preview: DepositPreview | null;
   isLoading?: boolean;
 }
 
-export function HYDMintPreview({ preview, isLoading }: HYDMintPreviewProps) {
+export function USDPMintPreview({ preview, isLoading }: USDPMintPreviewProps) {
   if (isLoading) {
     return (
       <StyledCard variant="accent">
@@ -43,7 +43,7 @@ export function HYDMintPreview({ preview, isLoading }: HYDMintPreviewProps) {
 
   // Format values
   const rwaValueFormatted = parseFloat(formatUnits(preview.rwaValue, 18)).toFixed(2);
-  const hydMintAmountFormatted = parseFloat(formatUnits(preview.hydMintAmount, 18)).toFixed(2);
+  const usdpMintAmountFormatted = parseFloat(formatUnits(preview.usdpMintAmount, 18)).toFixed(2);
 
   // Determine health factor status
   const getHealthFactorStatus = (hf: number) => {
@@ -104,7 +104,7 @@ export function HYDMintPreview({ preview, isLoading }: HYDMintPreviewProps) {
               color: TREASURY_THEME.ACCENT,
             }}
           >
-            {hydMintAmountFormatted} HYD
+            {usdpMintAmountFormatted} USDP
           </Typography>
         </Box>
 

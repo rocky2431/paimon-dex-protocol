@@ -104,7 +104,7 @@ export function ConfirmationModal({
                   You will receive
                 </Typography>
                 <Typography variant="h5" fontWeight={800} color="#FF6B35">
-                  {veNFTOption.hydAmount.toFixed(2)} HYD
+                  {veNFTOption.usdpAmount.toFixed(2)} USDP
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   (locked for {veNFTOption.lockDurationMonths} months)
@@ -164,7 +164,7 @@ export function ConfirmationModal({
                   Your Bond NFT #{tokenId} will be burned
                 </Typography>
                 <Typography component="li" variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                  {veNFTOption?.hydAmount.toFixed(2)} HYD will be minted to VotingEscrow
+                  {veNFTOption?.usdpAmount.toFixed(2)} USDP will be minted to VotingEscrow
                 </Typography>
                 <Typography component="li" variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
                   A new veNFT will be created with a {veNFTOption?.lockDurationMonths}-month lock

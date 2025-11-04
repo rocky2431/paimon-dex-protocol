@@ -23,7 +23,7 @@ describe('BribesList - Functional Tests (Multi-Asset Display)', () => {
         bribeId: 0n,
         epoch: 1n,
         gauge: '0x1000000000000000000000000000000000000000' as `0x${string}`,
-        gaugeName: 'HYD/USDC',
+        gaugeName: 'USDP/USDC',
         token: '0xaa3F4B0cEF6F8f4C584cc6fD3A5e79E68dAa13b2' as `0x${string}`,
         tokenSymbol: 'USDC',
         amount: 1000000000000000000000n,
@@ -36,7 +36,7 @@ describe('BribesList - Functional Tests (Multi-Asset Display)', () => {
         bribeId: 1n,
         epoch: 1n,
         gauge: '0x1000000000000000000000000000000000000000' as `0x${string}`,
-        gaugeName: 'HYD/USDC',
+        gaugeName: 'USDP/USDC',
         token: '0x0000000000000000000000000000000000000002' as `0x${string}`,
         tokenSymbol: 'esPAIMON',
         amount: 500000000000000000000n,
@@ -50,7 +50,7 @@ describe('BribesList - Functional Tests (Multi-Asset Display)', () => {
     render(<BribesList bribes={bribes} />);
 
     // Should show gauge name only once
-    expect(screen.getByText('HYD/USDC')).toBeInTheDocument();
+    expect(screen.getByText('USDP/USDC')).toBeInTheDocument();
 
     // Should show both tokens
     expect(screen.getByText('USDC')).toBeInTheDocument();
@@ -91,12 +91,12 @@ describe('BribesList - Functional Tests (Multi-Asset Display)', () => {
 
   it('should group bribes by gauge and display all assets', () => {
     const bribes: Bribe[] = [
-      // Gauge 1: HYD/USDC with USDC and esPAIMON bribes
+      // Gauge 1: USDP/USDC with USDC and esPAIMON bribes
       {
         bribeId: 0n,
         epoch: 1n,
         gauge: '0x1000000000000000000000000000000000000000' as `0x${string}`,
-        gaugeName: 'HYD/USDC',
+        gaugeName: 'USDP/USDC',
         token: '0xaa3F4B0cEF6F8f4C584cc6fD3A5e79E68dAa13b2' as `0x${string}`,
         tokenSymbol: 'USDC',
         amount: 1000000000000000000000n,
@@ -109,7 +109,7 @@ describe('BribesList - Functional Tests (Multi-Asset Display)', () => {
         bribeId: 1n,
         epoch: 1n,
         gauge: '0x1000000000000000000000000000000000000000' as `0x${string}`,
-        gaugeName: 'HYD/USDC',
+        gaugeName: 'USDP/USDC',
         token: '0x0000000000000000000000000000000000000002' as `0x${string}`,
         tokenSymbol: 'esPAIMON',
         amount: 500000000000000000000n,
@@ -137,7 +137,7 @@ describe('BribesList - Functional Tests (Multi-Asset Display)', () => {
     render(<BribesList bribes={bribes} />);
 
     // Should show both gauge names
-    expect(screen.getByText('HYD/USDC')).toBeInTheDocument();
+    expect(screen.getByText('USDP/USDC')).toBeInTheDocument();
     expect(screen.getByText('PAIMON/BUSD')).toBeInTheDocument();
 
     // Should show all token symbols (2 esPAIMON instances + 1 USDC)
@@ -153,7 +153,7 @@ describe('BribesList - Functional Tests (Multi-Asset Display)', () => {
         bribeId: 0n,
         epoch: 1n,
         gauge: '0x1000000000000000000000000000000000000000' as `0x${string}`,
-        gaugeName: 'HYD/USDC',
+        gaugeName: 'USDP/USDC',
         token: '0xaa3F4B0cEF6F8f4C584cc6fD3A5e79E68dAa13b2' as `0x${string}`,
         tokenSymbol: 'USDC',
         amount: 1000n,
@@ -165,7 +165,7 @@ describe('BribesList - Functional Tests (Multi-Asset Display)', () => {
         bribeId: 1n,
         epoch: 1n,
         gauge: '0x1000000000000000000000000000000000000000' as `0x${string}`,
-        gaugeName: 'HYD/USDC',
+        gaugeName: 'USDP/USDC',
         token: '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56' as `0x${string}`,
         tokenSymbol: 'BUSD',
         amount: 2000n,
@@ -177,7 +177,7 @@ describe('BribesList - Functional Tests (Multi-Asset Display)', () => {
         bribeId: 2n,
         epoch: 1n,
         gauge: '0x1000000000000000000000000000000000000000' as `0x${string}`,
-        gaugeName: 'HYD/USDC',
+        gaugeName: 'USDP/USDC',
         token: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c' as `0x${string}`,
         tokenSymbol: 'WBNB',
         amount: 3000n,
@@ -189,7 +189,7 @@ describe('BribesList - Functional Tests (Multi-Asset Display)', () => {
         bribeId: 3n,
         epoch: 1n,
         gauge: '0x1000000000000000000000000000000000000000' as `0x${string}`,
-        gaugeName: 'HYD/USDC',
+        gaugeName: 'USDP/USDC',
         token: '0x0000000000000000000000000000000000000003' as `0x${string}`,
         tokenSymbol: 'PAIMON',
         amount: 4000n,
@@ -201,7 +201,7 @@ describe('BribesList - Functional Tests (Multi-Asset Display)', () => {
         bribeId: 4n,
         epoch: 1n,
         gauge: '0x1000000000000000000000000000000000000000' as `0x${string}`,
-        gaugeName: 'HYD/USDC',
+        gaugeName: 'USDP/USDC',
         token: '0x0000000000000000000000000000000000000002' as `0x${string}`,
         tokenSymbol: 'esPAIMON',
         amount: 5000n,
@@ -247,7 +247,7 @@ describe('BribesList - Boundary Tests', () => {
         bribeId: 0n,
         epoch: 1n,
         gauge: '0x1000000000000000000000000000000000000000' as `0x${string}`,
-        gaugeName: 'HYD/USDC',
+        gaugeName: 'USDP/USDC',
         token: '0x0000000000000000000000000000000000000002' as `0x${string}`,
         tokenSymbol: 'esPAIMON',
         amount: 1000n,
@@ -271,7 +271,7 @@ describe('BribesList - Exception Tests', () => {
         bribeId: 0n,
         epoch: 1n,
         gauge: '0x1000000000000000000000000000000000000000' as `0x${string}`,
-        gaugeName: 'HYD/USDC',
+        gaugeName: 'USDP/USDC',
         token: '0x0000000000000000000000000000000000000002' as `0x${string}`,
         tokenSymbol: 'esPAIMON',
         amount: 1000n,
@@ -297,7 +297,7 @@ describe('BribesList - Exception Tests', () => {
         bribeId: 0n,
         epoch: 1n,
         gauge: '0x1000000000000000000000000000000000000000' as `0x${string}`,
-        gaugeName: 'HYD/USDC',
+        gaugeName: 'USDP/USDC',
         token: '0x0000000000000000000000000000000000000002' as `0x${string}`,
         tokenSymbol: 'esPAIMON',
         amount: 1000n,
@@ -322,7 +322,7 @@ describe('BribesList - Compatibility Tests', () => {
         bribeId: 0n,
         epoch: 1n,
         gauge: '0x1000000000000000000000000000000000000000' as `0x${string}`,
-        gaugeName: 'HYD/USDC',
+        gaugeName: 'USDP/USDC',
         token: '0x0000000000000000000000000000000000000002' as `0x${string}`,
         tokenSymbol: 'esPAIMON',
         amount: 1000n,

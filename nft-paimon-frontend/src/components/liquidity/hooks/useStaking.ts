@@ -122,7 +122,7 @@ export const useStaking = () => {
 
   // Helper function to get gauge address from pool name
   function getGaugeAddressFromPoolName(poolName: string): `0x${string}` | null {
-    // Convert pool name to key (e.g., "HYD/USDC" -> "hydUsdc")
+    // Convert pool name to key (e.g., "USDP/USDC" -> "hydUsdc")
     const gaugeKey = poolName
       .replace("/", "")
       .toLowerCase()

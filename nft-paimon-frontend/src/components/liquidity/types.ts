@@ -85,7 +85,7 @@ export interface LiquidityPool {
   reserve1: bigint;
   /** Total LP token supply */
   totalSupply: bigint;
-  /** Pool name (e.g., "HYD/USDC") */
+  /** Pool name (e.g., "USDP/USDC") */
   name: string;
   /** Annual Percentage Rate (for display) */
   apr?: string;

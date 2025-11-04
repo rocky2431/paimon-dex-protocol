@@ -30,7 +30,7 @@ import { config } from "@/config";
 function getGaugeAddressFromPoolName(
   poolName: string
 ): `0x${string}` | undefined {
-  // Convert pool name to key (e.g., "HYD/USDC" -> "hydUsdc")
+  // Convert pool name to key (e.g., "USDP/USDC" -> "hydUsdc")
   const gaugeKey = poolName
     .replace("/", "")
     .toLowerCase()

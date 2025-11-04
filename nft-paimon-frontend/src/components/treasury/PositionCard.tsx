@@ -59,15 +59,15 @@ function formatTimeRemaining(seconds: number): string {
  */
 function getLiquidationPrice(position: PositionWithMetadata): number {
   const rwaAmount = parseFloat(formatUnits(position.rwaAmount, 18));
-  const hydMinted = parseFloat(formatUnits(position.hydMinted, 18));
+  const usdpMinted = parseFloat(formatUnits(position.usdpMinted, 18));
 
   if (rwaAmount === 0) return 0;
 
   // Liquidation occurs at 115% health factor
   // HF = (rwaValue / hydValue) * 100
-  // 115 = (rwaAmount * liquidationPrice / hydMinted) * 100
-  // liquidationPrice = (115 * hydMinted) / (100 * rwaAmount)
-  const liquidationPrice = (115 * hydMinted) / (100 * rwaAmount);
+  // 115 = (rwaAmount * liquidationPrice / usdpMinted) * 100
+  // liquidationPrice = (115 * usdpMinted) / (100 * rwaAmount)
+  const liquidationPrice = (115 * usdpMinted) / (100 * rwaAmount);
   return liquidationPrice;
 }
 
@@ -80,7 +80,7 @@ export function PositionCard({ position, onRedeem, onAddCollateral }: PositionCa
   const hfStatus = getHealthFactorStatus(position.healthFactor);
   const liquidationPrice = getLiquidationPrice(position);
   const rwaAmountFloat = parseFloat(formatUnits(position.rwaAmount, 18));
-  const hydMintedFloat = parseFloat(formatUnits(position.hydMinted, 18));
+  const usdpMintedFloat = parseFloat(formatUnits(position.usdpMinted, 18));
 
   const isAtRisk = position.healthFactor < 150;
 
@@ -178,7 +178,7 @@ export function PositionCard({ position, onRedeem, onAddCollateral }: PositionCa
           <Stack spacing={1.5}>
             <StatRow label="Collateral Amount" value={`${rwaAmountFloat.toFixed(2)} ${position.assetSymbol}`} />
             <StatRow label="Collateral Value" value={`$${position.rwaValueUSD.toFixed(2)}`} />
-            <StatRow label="HYD Minted" value={`${hydMintedFloat.toFixed(2)} HYD`} />
+            <StatRow label="USDP Minted" value={`${usdpMintedFloat.toFixed(2)} HYD`} />
             <StatRow label="Collateralization Ratio" value={`${position.collateralizationRatio.toFixed(0)}%`} />
             <StatRow
               label="Liquidation Price"
@@ -244,7 +244,7 @@ export function PositionCard({ position, onRedeem, onAddCollateral }: PositionCa
         <DialogTitle sx={{ fontWeight: 700, color: TREASURY_THEME.PRIMARY }}>Redeem Collateral</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Enter the amount of {position.assetSymbol} to redeem. You will need to burn the corresponding HYD
+            Enter the amount of {position.assetSymbol} to redeem. You will need to burn the corresponding USDP
             stablecoins.
           </Typography>
           <TextField

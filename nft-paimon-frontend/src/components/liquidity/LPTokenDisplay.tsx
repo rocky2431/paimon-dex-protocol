@@ -15,7 +15,7 @@ interface LPTokenDisplayProps {
   lpTokens: bigint;
   /** LP tokens to remove (formatted) */
   lpTokensFormatted: string;
-  /** Pool name (e.g., "HYD/USDC") */
+  /** Pool name (e.g., "USDP/USDC") */
   poolName: string;
   /** Current percentage selected */
   percentage: number;

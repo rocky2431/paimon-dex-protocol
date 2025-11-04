@@ -80,7 +80,7 @@ export enum AnalyticsDashboardState {
 export interface AnalyticsSummary {
   /** Protocol TVL */
   tvl: ProtocolTVL;
-  /** Current HYD price */
+  /** Current USDP price */
   hydPrice: number;
   /** 24h volume (Phase 2) */
   volume24h?: VolumeData;
@@ -110,7 +110,7 @@ export enum ChartTimeRange {
  * APR calculation form data
  */
 export interface APRFormData {
-  /** Lock amount (HYD) */
+  /** Lock amount (USDP) */
   lockAmount: bigint;
   /** Lock amount formatted */
   lockAmountFormatted: string;

@@ -64,7 +64,7 @@ export function PositionList() {
       'Tier',
       'Collateral Amount',
       'Collateral Value (USD)',
-      'HYD Minted',
+      'USDP Minted',
       'Health Factor (%)',
       'Collateralization Ratio (%)',
       'Current Price (USD)',
@@ -78,7 +78,7 @@ export function PositionList() {
       pos.assetTier,
       parseFloat(pos.rwaAmount.toString()) / 1e18,
       pos.rwaValueUSD.toFixed(2),
-      parseFloat(pos.hydMinted.toString()) / 1e18,
+      parseFloat(pos.usdpMinted.toString()) / 1e18,
       pos.healthFactor.toFixed(2),
       pos.collateralizationRatio.toFixed(2),
       pos.rwaPrice.toFixed(4),
@@ -234,7 +234,7 @@ export function PositionList() {
             <Grid item xs={12} sm={4}>
               <Box>
                 <Typography variant="caption" sx={{ color: TREASURY_THEME.CAPTION }}>
-                  Total Debt (HYD)
+                  Total Debt (USDP)
                 </Typography>
                 <Typography variant="h5" sx={{ fontWeight: 700, color: TREASURY_THEME.EMPHASIS }}>
                   ${totalDebtUSD.toFixed(2)}
