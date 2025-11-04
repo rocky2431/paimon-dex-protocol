@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 /**
@@ -25,7 +26,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
  * - User balance becomes 1000 * 1.02 / 1.0 = 1020 USDP
  * - User shares remain 1000 (unchanged)
  */
-contract USDP is IERC20, Ownable, ReentrancyGuard {
+contract USDP is IERC20, Ownable, ReentrancyGuard, Pausable {
     // ==================== State Variables ====================
 
     string public constant name = "USD Paimon";
@@ -159,7 +160,7 @@ contract USDP is IERC20, Ownable, ReentrancyGuard {
      * @param amount Amount in USDP units
      * @return success True if successful
      */
-    function transfer(address to, uint256 amount) external override nonReentrant returns (bool) {
+    function transfer(address to, uint256 amount) external override nonReentrant whenNotPaused returns (bool) {
         _transfer(msg.sender, to, amount);
         return true;
     }
@@ -175,6 +176,7 @@ contract USDP is IERC20, Ownable, ReentrancyGuard {
         external
         override
         nonReentrant
+        whenNotPaused
         returns (bool)
     {
         uint256 currentAllowance = _allowances[from][msg.sender];
@@ -271,7 +273,7 @@ contract USDP is IERC20, Ownable, ReentrancyGuard {
      * @param to Recipient address
      * @param amount Amount in USDP units
      */
-    function mint(address to, uint256 amount) external nonReentrant {
+    function mint(address to, uint256 amount) external nonReentrant whenNotPaused {
         require(isMinter[msg.sender], "USDP: Not authorized minter");
         require(to != address(0), "USDP: Mint to zero address");
         require(amount > 0, "USDP: Cannot mint zero");
@@ -290,7 +292,7 @@ contract USDP is IERC20, Ownable, ReentrancyGuard {
      * @param from Account to burn from
      * @param amount Amount in USDP units
      */
-    function burnFrom(address from, uint256 amount) external nonReentrant {
+    function burnFrom(address from, uint256 amount) external nonReentrant whenNotPaused {
         require(isMinter[msg.sender], "USDP: Not authorized minter");
         require(from != address(0), "USDP: Burn from zero address");
         require(amount > 0, "USDP: Cannot burn zero");
@@ -386,10 +388,18 @@ contract USDP is IERC20, Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice Emergency pause by renouncing ownership (irreversible)
-     * @dev This is a safety mechanism to freeze the contract if needed
+     * @notice Pause all transfer and mint/burn operations (Task P2-006)
+     * @dev Only owner can pause. Use unpause() to resume operations.
      */
-    function emergencyPause() external onlyOwner {
-        renounceOwnership();
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    /**
+     * @notice Resume all transfer and mint/burn operations (Task P2-006)
+     * @dev Only owner can unpause. Operations were paused with pause().
+     */
+    function unpause() external onlyOwner {
+        _unpause();
     }
 }
