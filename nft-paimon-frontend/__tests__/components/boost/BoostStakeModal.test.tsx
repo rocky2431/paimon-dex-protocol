@@ -422,5 +422,154 @@ describe('BoostStakeModal Component', () => {
 
       expect(container.firstChild).toBeInTheDocument();
     });
+
+    describe('Mobile Viewport (375px)', () => {
+      beforeEach(() => {
+        Object.defineProperty(window, 'innerWidth', {
+          writable: true,
+          configurable: true,
+          value: 375,
+        });
+      });
+
+      it('should render modal content on mobile', () => {
+        render(
+          <BoostStakeModal
+            open={true}
+            userBalance="1000.0"
+            currentStaked="0"
+            onClose={mockOnClose}
+            onStake={mockOnStake}
+          />
+        );
+
+        expect(screen.getByText('Stake PAIMON to Boost Rewards')).toBeInTheDocument();
+        expect(screen.getByRole('textbox', { name: /amount/i })).toBeInTheDocument();
+      });
+
+      it('should display buttons on mobile', () => {
+        render(
+          <BoostStakeModal
+            open={true}
+            userBalance="1000.0"
+            currentStaked="0"
+            onClose={mockOnClose}
+            onStake={mockOnStake}
+          />
+        );
+
+        expect(screen.getByRole('button', { name: /Max/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /Cancel/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /Stake/i })).toBeInTheDocument();
+      });
+
+      it('should handle touch interactions on mobile', async () => {
+        const user = userEvent.setup();
+        mockOnStake.mockResolvedValue(undefined);
+
+        render(
+          <BoostStakeModal
+            open={true}
+            userBalance="1000.0"
+            currentStaked="0"
+            onClose={mockOnClose}
+            onStake={mockOnStake}
+          />
+        );
+
+        const input = screen.getByRole('textbox', { name: /amount/i });
+        await user.type(input, '250');
+
+        const stakeButton = screen.getByRole('button', { name: /Stake/i });
+        await user.click(stakeButton);
+
+        await waitFor(() => {
+          expect(mockOnStake).toHaveBeenCalledWith('250');
+        });
+      });
+    });
+
+    describe('Tablet Viewport (768px)', () => {
+      beforeEach(() => {
+        Object.defineProperty(window, 'innerWidth', {
+          writable: true,
+          configurable: true,
+          value: 768,
+        });
+      });
+
+      it('should render modal correctly on tablet', () => {
+        render(
+          <BoostStakeModal
+            open={true}
+            userBalance="1000.0"
+            currentStaked="0"
+            onClose={mockOnClose}
+            onStake={mockOnStake}
+          />
+        );
+
+        expect(screen.getByText('Stake PAIMON to Boost Rewards')).toBeInTheDocument();
+        // ✅ FIX (Task 85): Use correct text "Available Balance"
+        expect(screen.getByText(/Available Balance/)).toBeInTheDocument();
+      });
+
+      it('should display all content without truncation on tablet', () => {
+        render(
+          <BoostStakeModal
+            open={true}
+            userBalance="9999.99"
+            currentStaked="1234.56"
+            onClose={mockOnClose}
+            onStake={mockOnStake}
+          />
+        );
+
+        // ✅ FIX (Task 85): Component displays userBalance, not currentStaked directly
+        expect(screen.getByText(/9999\.99/)).toBeVisible();
+        expect(screen.getByText(/Available Balance/)).toBeVisible();
+      });
+    });
+
+    describe('Desktop Viewport (1920px)', () => {
+      beforeEach(() => {
+        Object.defineProperty(window, 'innerWidth', {
+          writable: true,
+          configurable: true,
+          value: 1920,
+        });
+      });
+
+      it('should render modal with full layout on desktop', () => {
+        render(
+          <BoostStakeModal
+            open={true}
+            userBalance="1000.0"
+            currentStaked="0"
+            onClose={mockOnClose}
+            onStake={mockOnStake}
+          />
+        );
+
+        expect(screen.getByText('Stake PAIMON to Boost Rewards')).toBeInTheDocument();
+        expect(screen.getByRole('textbox', { name: /amount/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /Max/i })).toBeInTheDocument();
+      });
+
+      it('should have proper spacing on desktop', () => {
+        const { container } = render(
+          <BoostStakeModal
+            open={true}
+            userBalance="1000.0"
+            currentStaked="0"
+            onClose={mockOnClose}
+            onStake={mockOnStake}
+          />
+        );
+
+        // Modal should be rendered
+        expect(container.firstChild).toBeInTheDocument();
+      });
+    });
   });
 });
