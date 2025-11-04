@@ -15,7 +15,7 @@ interface LockAmountInputProps {
 
 /**
  * LockAmountInput Component
- * OlympusDAO-style input for lock amount ((USDP token only))
+ * OlympusDAO-style input for lock amount ((PAIMON token only))
  *
  * Features:
  * - Inset shadow borders
@@ -74,7 +74,7 @@ export const LockAmountInput: React.FC<LockAmountInputProps> = ({
           },
         }}
       >
-        {/* Amount input + USDP label */}
+        {/* Amount input + PAIMON label */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
           {/* Amount input */}
           <TextField
@@ -104,7 +104,7 @@ export const LockAmountInput: React.FC<LockAmountInputProps> = ({
             }}
           />
 
-          {/* USDP label (static) */}
+          {/* PAIMON label (static) */}
           <Box
             sx={{
               backgroundColor: 'background.elevated',
@@ -114,7 +114,7 @@ export const LockAmountInput: React.FC<LockAmountInputProps> = ({
             }}
           >
             <Typography variant="body1" fontWeight={700} color="primary.main">
-              USDP
+              PAIMON
             </Typography>
           </Box>
         </Box>
@@ -137,7 +137,7 @@ export const LockAmountInput: React.FC<LockAmountInputProps> = ({
             <AnimatedNumber
               value={balanceValue}
               decimals={4}
-              suffix=" USDP"
+              suffix=" PAIMON"
             />
           </Typography>
 

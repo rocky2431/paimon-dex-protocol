@@ -113,7 +113,7 @@ export const VotingPowerPreview: React.FC<VotingPowerPreviewProps> = ({
           <AnimatedNumber
             value={parseFloat(votingPowerFormatted)}
             decimals={2}
-            suffix=" veHYD"
+            suffix=" vePAIMON"
           />
         </Typography>
 

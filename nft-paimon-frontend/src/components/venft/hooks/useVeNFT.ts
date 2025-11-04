@@ -71,15 +71,15 @@ export const useVeNFT = () => {
   const [lockState, setLockState] = useState<LockState>(LockState.IDLE);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
-  // Get USDP balance
+  // Get PAIMON balance
   const { data: hydBalance } = useBalance({
     address,
-    token: VENFT_ADDRESSES.USDP_TOKEN,
+    token: VENFT_ADDRESSES.PAIMON_TOKEN,
   });
 
   // Check allowance
   const { data: allowance } = useReadContract({
-    address: VENFT_ADDRESSES.USDP_TOKEN,
+    address: VENFT_ADDRESSES.PAIMON_TOKEN,
     abi: ERC20_ABI,
     functionName: 'allowance',
     args: address ? [address, VENFT_ADDRESSES.VOTING_ESCROW] : undefined,
@@ -92,7 +92,7 @@ export const useVeNFT = () => {
     }
 
     try {
-      const lockAmountBigInt = parseUnits(formData.lockAmount, 18); // USDP has 18 decimals
+      const lockAmountBigInt = parseUnits(formData.lockAmount, 18); // PAIMON has 18 decimals
 
       // Calculate voting power
       const votingPowerBigInt = VOTING_POWER.calculateVotingPower(
@@ -174,7 +174,7 @@ export const useVeNFT = () => {
     }
   }, [hydBalance, handleAmountChange]);
 
-  // Approve USDP
+  // Approve PAIMON
   const handleApprove = useCallback(async () => {
     if (!address || !calculation) return;
 
@@ -182,7 +182,7 @@ export const useVeNFT = () => {
       setLockState(LockState.APPROVING);
 
       await writeContractAsync({
-        address: VENFT_ADDRESSES.USDP_TOKEN,
+        address: VENFT_ADDRESSES.PAIMON_TOKEN,
         abi: ERC20_ABI,
         functionName: 'approve',
         args: [VENFT_ADDRESSES.VOTING_ESCROW, calculation.lockAmount],
