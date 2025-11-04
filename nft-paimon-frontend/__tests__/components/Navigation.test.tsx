@@ -195,8 +195,8 @@ describe('Navigation Component', () => {
       const swapLink = screen.getByText('Swap').closest('a')
       expect(swapLink).toHaveAttribute('href', '/')
 
-      const liquidityLink = screen.getByText('Liquidity').closest('a')
-      expect(liquidityLink).toHaveAttribute('href', '/liquidity/add')
+      // ✅ FIX (Task 84): Liquidity is now a dropdown menu (like Treasury/Presale), not a direct link
+      // Liquidity dropdown links are tested separately if needed
 
       const lockLink = screen.getByText('Lock').closest('a')
       expect(lockLink).toHaveAttribute('href', '/lock')
