@@ -1,8 +1,8 @@
 # Paimon DEX - System Architecture
 
-**Version**: 3.2.0
-**Last Updated**: 2025-10-28
-**Status**: Audit Ready (9.2/10)
+**Version**: 3.3.0
+**Last Updated**: 2025-11-05
+**Status**: Audit Ready (9.5/10) - Complete Component Documentation
 
 ---
 
@@ -24,29 +24,46 @@
 ### 1.1 High-Level Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Paimon DEX Protocol                       │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  ┌─────────────┐  ┌─────────────┐  ┌──────────────┐           │
-│  │   RWA       │  │   veNFT     │  │   Treasury   │           │
-│  │  Launchpad  │  │ Governance  │  │   System     │           │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬───────┘           │
-│         │                 │                 │                    │
-│         └─────────────────┴─────────────────┘                   │
-│                           │                                      │
-│                ┌──────────┴──────────┐                          │
-│                │   veNFT Governance   │                          │
-│                └──────────┬──────────┘                          │
-│                           │                                      │
-│         ┌─────────────────┼─────────────────┐                  │
-│         │                 │                 │                    │
-│  ┌──────▼──────┐  ┌──────▼──────┐  ┌──────▼──────┐            │
-│  │ USDP Token  │  │ PAIMON Token│  │  vePAIMON   │            │
-│  │(Synthetic)  │  │ (Governance) │  │    NFT      │            │
-│  └─────────────┘  └──────────────┘  └──────────────┘           │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                          Paimon DEX Protocol v2.0                             │
+│              (RWA Launchpad + veNFT Governance DEX + USDP Stablecoin)        │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────────────┐
+│   Launchpad     │     │ RWA & Treasury   │     │   Stablecoin Stack      │
+├─────────────────┤     ├──────────────────┤     ├─────────────────────────┤
+│ • Issuance      │────▶│ • RWA Tokens/HYD │────▶│ • USDP (Synthetic)      │
+│   Controller    │     │ • Treasury       │     │ • PSM (USDC↔USDP 1:1)   │
+│ • Settlement    │     │ • Oracle         │     │ • SavingRate (APR)      │
+│   Router        │     │   (Chainlink+NAV)│     │ • USDPVault             │
+│                 │     │                  │     │ • Stability Pool        │
+└─────────────────┘     └──────────────────┘     └───────────┬─────────────┘
+                                                               │
+                                                               │ USDP
+                                                               ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│                    veNFT Governance DEX & Incentives                       │
+├───────────────────────────────────────────────────────────────────────────┤
+│                                                                            │
+│  ┌──────────────┐   Lock    ┌──────────────┐   Vote   ┌───────────────┐ │
+│  │   PAIMON     │─────────▶ │  vePAIMON    │────────▶ │   Gauge       │ │
+│  │  (Governance)│           │    NFT       │          │  Controller   │ │
+│  └──────────────┘           └──────────────┘          └───────┬───────┘ │
+│         │                                                       │         │
+│         │ Stake                                                 │ Weights │
+│         ▼                                                       ▼         │
+│  ┌──────────────┐                                      ┌───────────────┐ │
+│  │   Boost      │                                      │   AMM Pairs   │ │
+│  │  Staking     │◀───────────────────────────────────▶│ USDP/USDC     │ │
+│  └──────────────┘     Boost Multiplier                │ PAIMON/USDP   │ │
+│                                                        └───────────────┘ │
+│                                                                            │
+│  ┌──────────────┐           ┌──────────────┐         ┌───────────────┐ │
+│  │   Bribe      │           │   Reward     │         │   esPaimon    │ │
+│  │ Marketplace  │           │ Distributor  │────────▶│  (Vesting)    │ │
+│  └──────────────┘           └──────────────┘         └───────────────┘ │
+│                                                                            │
+└───────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### 1.2 Protocol Flywheel
@@ -87,9 +104,16 @@ Back to Top ↺
 |-----------|-----------|---------|--------|
 | **USDP Token** | USDP.sol | Synthetic stablecoin backed by Treasury RWA | ✅ Complete |
 | **PSM** | PSM.sol | USDC ↔ USDP 1:1 swap with 0.1% fee | ✅ Complete |
+| **SavingRate** | SavingRate.sol | USDP savings rate with APR-based interest | ✅ Complete |
+| **USDPVault** | USDPVault.sol | Collateral borrowing vault (deposit RWA → mint USDP) | ✅ Complete |
+| **USDPStabilityPool** | USDPStabilityPool.sol | USDP stability pool for liquidation buffer | ✅ Complete |
 | **DEX Core** | DEXFactory, DEXPair, DEXRouter | Uniswap V2-style AMM with custom fees | ✅ Complete |
-| **veNFT** | VotingEscrow.sol | Time-locked governance NFTs | ✅ Complete |
+| **veNFT** | VotingEscrow.sol | Time-locked governance NFTs (vePAIMON) | ✅ Complete |
 | **Governance** | GaugeController.sol | Liquidity mining distribution | ✅ Complete |
+| **esPaimon** | esPaimon.sol | Vesting token (365-day linear vesting) | ✅ Complete |
+| **BoostStaking** | BoostStaking.sol | PAIMON staking for boost multipliers (1.0x-1.5x) | ✅ Complete |
+| **BribeMarketplace** | BribeMarketplace.sol | Multi-asset bribe aggregation | ✅ Complete |
+| **RewardDistributor** | RewardDistributor.sol | Merkle-based reward distribution with boost | ✅ Complete |
 | **Treasury** | Treasury.sol, RWAPriceOracle.sol | RWA collateralization vault | ✅ Complete |
 | **Launchpad** | IssuanceController.sol, ProjectRegistry.sol | RWA token sales platform | ✅ Complete |
 | **Presale** | RWABondNFT.sol, RemintController.sol | Gamified bond NFT system | ✅ Complete |
@@ -98,32 +122,52 @@ Back to Top ↺
 ### 2.2 Contract Dependency Graph
 
 ```
-                    ┌──────────────┐
-                    │ USDP (ERC20) │
-                    └───────┬──────┘
-                            │
-        ┌───────────────────┼───────────────────┐
-        │                   │                   │
-   ┌────▼────┐       ┌─────▼──────┐      ┌─────▼────────┐
-   │   PSM   │       │  Treasury  │      │ VotingEscrow │
-   └─────────┘       └─────┬──────┘      └───────┬──────┘
-                           │                     │
-                    ┌──────▼───────┐            │
-                    │ RWAPriceOracle│            │
-                    └──────────────┘             │
-                                          ┌──────▼───────┐
-                                          │GaugeController│
-                                          └──────┬───────┘
-                                                 │
-                    ┌────────────────────────────┼────────────┐
-                    │                            │            │
-           ┌────────▼─────┐           ┌─────────▼──┐   ┌─────▼──────┐
-           │ProjectRegistry│           │ DEXFactory │   │RWABondNFT  │
-           └────────┬─────┘           └──────┬─────┘   └─────┬──────┘
-                    │                        │               │
-          ┌─────────▼────────┐         ┌─────▼────┐    ┌─────▼────────┐
-          │IssuanceController │         │ DEXPair  │    │RemintController│
-          └──────────────────┘         └──────────┘    └──────────────┘
+                         ┌──────────────┐
+                         │ USDP (ERC20) │
+                         └───────┬──────┘
+                                 │
+        ┌────────────────────────┼──────────────────────────┐
+        │                        │                          │
+   ┌────▼────┐          ┌────────▼────────┐        ┌───────▼────────┐
+   │   PSM   │          │   SavingRate    │        │   USDPVault    │
+   └─────────┘          │  (APR Interest) │        │   (Borrow)     │
+                        └─────────────────┘        └───────┬────────┘
+                                                            │
+                                                    ┌───────▼────────┐
+                                                    │ USDPStabilityPool│
+                                                    │ (Liquidation)  │
+                                                    └────────────────┘
+
+              ┌──────────────┐
+              │ PAIMON Token │
+              └───────┬──────┘
+                      │
+        ┌─────────────┼─────────────┐
+        │             │             │
+   ┌────▼─────┐  ┌───▼──────┐  ┌──▼──────────┐
+   │VotingEscrow│  │BoostStaking│  │esPaimon    │
+   │(vePAIMON)  │  │(1.0x-1.5x) │  │(365d vest) │
+   └────┬───────┘  └────┬───────┘  └────▲───────┘
+        │               │               │
+        │               │          ┌────┴──────────┐
+        │               │          │RewardDistributor│
+        │               │          │(Merkle + Boost)│
+        │               └──────────┤               │
+        │                          └───────────────┘
+        │
+   ┌────▼───────┐
+   │GaugeController│
+   └────┬───────┘
+        │
+        ├─────────────┬────────────┬────────────────┐
+        │             │            │                │
+   ┌────▼─────┐  ┌───▼────┐  ┌────▼──────┐  ┌─────▼─────────┐
+   │DEXFactory│  │Treasury│  │ProjectReg │  │BribeMarketplace│
+   └────┬─────┘  └───┬────┘  └────┬──────┘  └───────────────┘
+        │            │             │
+   ┌────▼────┐  ┌───▼──────┐  ┌───▼─────────────┐
+   │ DEXPair │  │RWAPriceOr│  │IssuanceController│
+   └─────────┘  └──────────┘  └─────────────────┘
 ```
 
 ---
@@ -478,6 +522,355 @@ contract RemintController {
     function getTopHolders(uint256 limit) external view returns (address[] memory);
 }
 ```
+
+### 3.8 SavingRate (USDP Savings)
+
+```solidity
+contract SavingRate is Ownable, ReentrancyGuard {
+    using SafeERC20 for IERC20;
+
+    IUSDP public immutable USDP;
+
+    struct UserDeposit {
+        uint256 amount;
+        uint256 lastUpdate;
+        uint256 accruedInterest;
+    }
+
+    uint256 public annualRate;  // APR in basis points (e.g., 200 = 2%)
+
+    // Deposit USDP to earn interest
+    function deposit(uint256 amount) external nonReentrant;
+
+    // Withdraw USDP with accrued interest
+    function withdraw(uint256 amount) external nonReentrant;
+
+    // Claim accrued interest
+    function claim() external nonReentrant;
+
+    // Treasury funds interest payments (USDC → PSM → USDP → fund())
+    function fund(uint256 amount) external onlyOwner;
+}
+```
+
+**Key Features**:
+- Linear interest accrual based on APR (default 2-3%)
+- User deposits USDP, earns interest over time
+- Interest funded by Treasury (not by USDP inflation)
+- Withdraw anytime with accrued interest
+
+**Design Rationale**:
+- Separates savings yield from core USDP token (no index accumulation)
+- Treasury subsidizes interest to incentivize USDP holding
+- Encourages long-term liquidity depth
+
+### 3.9 USDPVault (Collateral Borrowing)
+
+```solidity
+contract USDPVault is ReentrancyGuard, Ownable, Pausable {
+    using SafeERC20 for IERC20;
+
+    struct Position {
+        mapping(address => uint256) collateralAmounts;  // Multi-collateral support
+        uint256 totalDebt;
+        uint256 lastUpdate;
+    }
+
+    mapping(address => Position) public positions;
+
+    // Deposit RWA collateral
+    function deposit(address asset, uint256 amount) external nonReentrant whenNotPaused;
+
+    // Withdraw collateral (requires healthy position)
+    function withdraw(address asset, uint256 amount) external nonReentrant;
+
+    // Borrow USDP against collateral
+    function borrow(uint256 usdpAmount) external nonReentrant whenNotPaused;
+
+    // Repay borrowed USDP
+    function repay(uint256 usdpAmount) external nonReentrant;
+
+    // Liquidate undercollateralized position
+    function liquidate(address user, address asset, uint256 repayAmount) external;
+
+    // Get user's outstanding debt (used by debt mining)
+    function debtOf(address user) external view returns (uint256);
+
+    // Calculate health factor
+    function healthFactor(address user) external view returns (uint256);
+}
+```
+
+**Key Features**:
+- Multi-collateral support (T1/T2/T3 RWA assets)
+- Weighted health factor calculation
+- Liquidation when HF < 1.15
+- Debt position tracked for emission distribution
+
+**Health Factor Calculation**:
+```solidity
+// For each collateral i:
+value_i = amount_i × price_i × ltv_i
+
+// Aggregated:
+totalCollateralValue = Σ value_i
+healthFactor = totalCollateralValue / totalDebt
+
+// Liquidation trigger:
+if (healthFactor < 1.15) → liquidatable
+```
+
+**Integration with Emissions**:
+- `debtOf(user)` exposes outstanding debt
+- Debt mining uses TWAD (Time-Weighted Average Debt)
+- Larger debt = more PAIMON emissions
+
+### 3.10 USDPStabilityPool (Liquidation Buffer)
+
+```solidity
+contract USDPStabilityPool is ReentrancyGuard, Ownable {
+    using SafeERC20 for IERC20;
+
+    struct UserInfo {
+        uint256 shares;
+        uint256 rewardDebt;
+    }
+
+    mapping(address => UserInfo) public users;
+    uint256 public totalShares;
+
+    // Deposit USDP to stability pool
+    function deposit(uint256 usdp) external nonReentrant;
+
+    // Withdraw shares from pool
+    function withdraw(uint256 shares) external nonReentrant;
+
+    // Claim liquidation proceeds (assets or USDC)
+    function claim() external nonReentrant;
+
+    // Called by Vault during liquidation
+    function onLiquidationProceeds(address asset, uint256 amount) external onlyVault;
+}
+```
+
+**Key Features**:
+- Users deposit USDP to provide liquidation buffer
+- During liquidation: Pool absorbs debt, receives discounted collateral
+- Liquidation proceeds distributed pro-rata by shares
+- Secondary LP emissions channel (part of LP allocation)
+
+**Liquidation Flow**:
+```
+USDPVault liquidates position
+         ↓
+Burns USDP from Stability Pool
+         ↓
+Transfers seized collateral to Stability Pool
+         ↓
+Users claim proportional share of collateral
+```
+
+**Emissions**:
+- Receives portion of LP channel emissions (default 40% of LP total)
+- Adjustable via `EmissionManager.setLPSplit()`
+
+### 3.11 esPaimon (Vesting Token)
+
+```solidity
+contract esPaimon is ERC20, Ownable {
+    struct VestingSchedule {
+        uint256 totalAmount;
+        uint256 startTime;
+        uint256 claimed;
+    }
+
+    mapping(address => VestingSchedule) public vestingSchedules;
+
+    uint256 public constant VESTING_DURATION = 365 days;
+    uint256 public constant EARLY_EXIT_PENALTY_BPS = 5000; // 50%
+
+    // Initiate vesting for user (called by Distributor/Treasury)
+    function vestFor(address user, uint256 amount) external onlyRole(DISTRIBUTOR_OR_TREASURY);
+
+    // Claim vested PAIMON (linear over 365 days)
+    function claim() external nonReentrant;
+
+    // Early exit with penalty
+    function earlyExit() external nonReentrant;
+
+    // View claimable amount
+    function claimable(address user) external view returns (uint256);
+}
+```
+
+**Key Features**:
+- 365-day linear vesting from allocation time
+- Non-transferable (soulbound)
+- Early exit option with 50% penalty
+- All community emissions default to esPaimon
+
+**Vesting Mechanics**:
+```solidity
+// Linear vesting formula:
+vested = totalAmount × (now - startTime) / VESTING_DURATION
+claimable = vested - claimed
+
+// Example:
+// Day 0: 1000 esPaimon allocated
+// Day 182 (6 months): 500 PAIMON claimable
+// Day 365: 1000 PAIMON fully vested
+```
+
+**Early Exit**:
+```solidity
+// User gets 50% immediately, 50% burned
+if (user earlyExit at Day 182):
+    unvested = 500
+    penalty = 250 (50% of unvested)
+    user receives: 250 PAIMON
+    burned: 250 PAIMON
+```
+
+### 3.12 BoostStaking (Multiplier System)
+
+```solidity
+contract BoostStaking is ReentrancyGuard, Ownable {
+    struct StakeInfo {
+        uint256 amount;
+        uint256 startTime;
+        uint256 lockDuration;
+    }
+
+    mapping(address => StakeInfo) public stakes;
+
+    // Stake PAIMON for boost
+    function stake(uint256 amount, uint256 lockDuration) external nonReentrant;
+
+    // Unstake after lock expires
+    function unstake() external nonReentrant;
+
+    // Get user's boost multiplier (1.0x - 1.5x)
+    function getBoostMultiplier(address user) external view returns (uint256);
+}
+```
+
+**Boost Multiplier Formula**:
+```solidity
+// Base multiplier: 1.0x (10000 in basis points)
+// Max multiplier: 1.5x (15000 in basis points)
+
+multiplier = 10000 + (stakedAmount × lockDuration) / (maxStake × maxLockDuration) × 5000
+
+// Example:
+// Stake 1000 PAIMON for 180 days:
+//   If maxStake = 10000, maxLockDuration = 365 days
+//   Bonus = (1000 × 180) / (10000 × 365) × 5000 = 246 bps
+//   Final multiplier = 1.0246x
+```
+
+**Integration**:
+- `RewardDistributor` queries `getBoostMultiplier()` during claim
+- Boosts ALL reward types (debt mining, LP, ecosystem)
+- Optional extension: aggregate with esPaimon holdings (future)
+
+### 3.13 BribeMarketplace (Bribe Market)
+
+```solidity
+contract BribeMarketplace is ReentrancyGuard, Ownable {
+    struct Bribe {
+        uint256 gaugeId;
+        address token;
+        uint256 amount;
+        uint256 deadline;
+    }
+
+    mapping(uint256 => Bribe[]) public bribesPerGauge;
+    mapping(address => bool) public whitelistedTokens;
+
+    // Add bribe for specific gauge
+    function addBribe(
+        uint256 gaugeId,
+        address token,
+        uint256 amount,
+        uint256 deadline
+    ) external nonReentrant;
+
+    // Claim bribes proportional to voting power
+    function claimBribes(uint256 gaugeId, uint256 veNFTId) external;
+
+    // Whitelist bribe tokens
+    function whitelistToken(address token, bool status) external onlyOwner;
+}
+```
+
+**Key Features**:
+- Multi-asset bribes (esPaimon, USDC, USDP, partner tokens)
+- Whitelist-based token control
+- Pro-rata distribution by voting power
+- Independent from base emissions
+
+**Bribe Distribution**:
+```
+User votes with veNFT on Gauge X
+         ↓
+Epoch ends, user has 10% of votes for Gauge X
+         ↓
+Gauge X has bribes: 1000 USDC, 5000 esPaimon
+         ↓
+User claims: 100 USDC + 500 esPaimon
+```
+
+### 3.14 RewardDistributor (Merkle Claims)
+
+```solidity
+contract RewardDistributor is ReentrancyGuard, Ownable {
+    bytes32 public merkleRoot;
+    mapping(address => uint256) public claimed;
+
+    IBoostStaking public boostStaking;
+    IesPaimon public esPaimon;
+
+    // Update Merkle root (weekly)
+    function updateMerkleRoot(bytes32 newRoot) external onlyOwner;
+
+    // Claim rewards with Merkle proof
+    function claim(
+        uint256 amount,
+        bytes32[] calldata proof
+    ) external nonReentrant;
+
+    // Emergency withdraw (direct PAIMON)
+    function emergencyClaim(
+        uint256 amount,
+        bytes32[] calldata proof
+    ) external nonReentrant;
+}
+```
+
+**Claim Flow**:
+```
+1. Off-chain aggregator computes weekly rewards:
+   - Debt mining (TWAD)
+   - LP farming (share × time × boost)
+   - Stability Pool (share × time)
+   - Ecosystem (specific allocations)
+
+2. Generate Merkle tree from allocations
+
+3. Update on-chain root
+
+4. User claims with proof:
+   - RewardDistributor verifies proof
+   - Queries BoostStaking.getBoostMultiplier(user)
+   - Applies multiplier: actual = base × multiplier
+   - Calls esPaimon.vestFor(user, actual)
+```
+
+**Key Features**:
+- Gas-efficient (Merkle tree, no loops)
+- Boost integration (1.0x-1.5x multipliers)
+- Default vesting via esPaimon
+- Emergency direct claim option (for users needing liquidity)
 
 ---
 
