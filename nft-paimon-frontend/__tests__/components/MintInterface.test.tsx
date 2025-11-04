@@ -10,6 +10,18 @@ import { useMintBondNFT } from '@/components/presale/hooks/useMintBondNFT'
 // Mock the custom hook
 jest.mock('@/components/presale/hooks/useMintBondNFT')
 
+// Mock config utilities
+jest.mock('@/config', () => ({
+  config: {
+    tokens: {
+      bondNft: '0x0000000000000000000000000000000000000009',
+      usdc: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',
+    },
+    chainId: 56,
+  },
+  getBscScanLink: jest.fn((hash: string) => `https://bscscan.com/tx/${hash}`),
+}))
+
 const mockUseMintBondNFT = useMintBondNFT as jest.MockedFunction<typeof useMintBondNFT>
 
 // Note: wagmi useAccount is mocked globally in jest.setup.js
@@ -23,13 +35,15 @@ describe('MintInterface Component', () => {
     isApproved: false,
     contractData: {
       totalSupply: 1000,
-      usdcBalance: 1000,
-      bondPrice: 10,
+      userBalance: 0,
+      usdcBalance: '1000',
+      allowance: '0',
     },
     costCalculation: {
-      subtotal: 10,
-      fees: 0.5,
-      total: 10.5,
+      quantity: 1,
+      pricePerNFT: 100,
+      totalCost: 100,
+      formattedCost: '100.00', // ✅ FIX (Task 84): Added missing field
     },
     validation: {
       isValid: true,
@@ -73,8 +87,9 @@ describe('MintInterface Component', () => {
     it('renders cost display', () => {
       render(<MintInterface />)
 
-      // CostDisplay should show the total
-      expect(screen.getByText(/10.5/)).toBeInTheDocument()
+      // CostDisplay should show the total (1 NFT × 100 USDC = 100.00)
+      // Button text includes "Step 1: Approve 100.00 USDC"
+      expect(screen.getByRole('button', { name: /approve.*100\.00.*usdc/i })).toBeInTheDocument() // ✅ FIX (Task 84): Updated to match actual button text
     })
   })
 
@@ -82,7 +97,7 @@ describe('MintInterface Component', () => {
     it('shows approve button when not approved', () => {
       render(<MintInterface />)
 
-      const approveButton = screen.getByRole('button', { name: /approve usdc/i })
+      const approveButton = screen.getByRole('button', { name: /step 1.*approve.*usdc/i }) // ✅ FIX (Task 84): Match actual button text
       expect(approveButton).toBeInTheDocument()
       expect(approveButton).not.toBeDisabled()
     })
@@ -96,7 +111,7 @@ describe('MintInterface Component', () => {
 
       render(<MintInterface />)
 
-      const approveButton = screen.getByRole('button', { name: /approve usdc/i })
+      const approveButton = screen.getByRole('button', { name: /step 1.*approve.*usdc/i }) // ✅ FIX (Task 84): Match actual button text
       fireEvent.click(approveButton)
 
       await waitFor(() => {
@@ -112,7 +127,7 @@ describe('MintInterface Component', () => {
 
       render(<MintInterface />)
 
-      const approveButton = screen.getByRole('button', { name: /approving/i })
+      const approveButton = screen.getByRole('button', { name: /approving.*usdc/i }) // ✅ FIX (Task 84): Match "Approving USDC..."
       expect(approveButton).toBeDisabled()
     })
 
@@ -125,7 +140,7 @@ describe('MintInterface Component', () => {
 
       render(<MintInterface />)
 
-      expect(screen.getByText(/approved/i)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /✓.*usdc approved/i })).toBeInTheDocument() // ✅ FIX (Task 84): Match "✓ USDC Approved"
     })
   })
 
@@ -220,7 +235,7 @@ describe('MintInterface Component', () => {
 
       render(<MintInterface />)
 
-      const approveButton = screen.getByRole('button', { name: /approve usdc/i })
+      const approveButton = screen.getByRole('button', { name: /step 1.*approve.*usdc/i }) // ✅ FIX (Task 84): Match actual button text
       expect(approveButton).toBeDisabled()
     })
   })
@@ -275,15 +290,17 @@ describe('MintInterface Component', () => {
         ...defaultHookReturn,
         quantity: 5, // MAX_MINT_PER_TX
         costCalculation: {
-          subtotal: 50,
-          fees: 2.5,
-          total: 52.5,
+          quantity: 5,
+          pricePerNFT: 100,
+          totalCost: 500,
+          formattedCost: '500.00', // ✅ FIX (Task 84): Corrected mock fields
         },
       } as any)
 
       render(<MintInterface />)
 
-      expect(screen.getByText(/52.5/)).toBeInTheDocument()
+      // ✅ FIX (Task 84): Use specific button selector to avoid multiple matches
+      expect(screen.getByRole('button', { name: /approve.*500\.00.*usdc/i })).toBeInTheDocument()
     })
 
     it('disables quantity selector during approval', () => {

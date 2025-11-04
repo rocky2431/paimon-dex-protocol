@@ -157,10 +157,14 @@ describe('BoostStakingCard Component', () => {
         amountFormatted: '<script>alert("XSS")</script>',
       };
 
-      render(<BoostStakingCard stake={maliciousStake} />);
+      const { container } = render(<BoostStakingCard stake={maliciousStake} />);
 
-      // Should render as text, not execute script
-      expect(screen.queryByText(/alert/i)).not.toBeInTheDocument();
+      // Should render as escaped text, not execute script
+      // Check that the text is rendered (React auto-escapes HTML)
+      expect(screen.getByText(/script.*alert.*XSS.*\/script/i)).toBeInTheDocument();
+
+      // Verify no actual <script> element was created
+      expect(container.querySelector('script')).toBeNull();
     });
   });
 

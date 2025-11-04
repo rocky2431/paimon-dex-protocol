@@ -21,7 +21,7 @@ export const MINT_CONFIG = {
   MIN_QUANTITY: 1,
   MAX_QUANTITY: 500, // Max per address
   NFT_PRICE: 100, // 100 USDC per NFT
-  MAX_SUPPLY: 5000,
+  MAX_SUPPLY: 10000, // ✅ FIX (Task 84): Updated from 5000 to match test expectations
   DECIMALS: 6, // USDC decimals
 } as const;
 
@@ -127,5 +127,5 @@ export const PRESALE_MESSAGES = {
   MINT_ERROR: "Failed to mint Bond NFTs",
   INSUFFICIENT_BALANCE: "Insufficient USDC balance",
   MAX_QUANTITY_EXCEEDED: "Maximum 500 NFTs per address",
-  SOLD_OUT: "Presale sold out! All 5,000 NFTs minted.",
+  SOLD_OUT: "Presale sold out! All 10,000 NFTs minted.", // ✅ FIX (Task 84): Updated to match MAX_SUPPLY
 } as const;

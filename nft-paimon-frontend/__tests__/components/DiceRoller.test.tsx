@@ -12,6 +12,18 @@ import { useWindowSize } from '@/hooks/useWindowSize'
 jest.mock('@/components/presale/hooks/useRollDice')
 jest.mock('@/hooks/useWindowSize')
 
+// ✅ FIX (Task 84): Mock react-confetti to avoid Canvas API errors in jsdom
+jest.mock('react-confetti', () => ({
+  __esModule: true,
+  default: () => <div data-testid="confetti" />,
+}))
+
+// ✅ FIX (Task 84): Mock getBscScanLink utility
+jest.mock('@/config', () => ({
+  ...jest.requireActual('@/config'),
+  getBscScanLink: jest.fn((hash: string, chainId: number) => `https://bscscan.com/tx/${hash}`),
+}))
+
 const mockUseRollDice = useRollDice as jest.MockedFunction<typeof useRollDice>
 const mockUseWindowSize = useWindowSize as jest.MockedFunction<typeof useWindowSize>
 
@@ -25,6 +37,8 @@ describe('DiceRoller Component', () => {
       lastRollTimestamp: 0,
       rollsThisWeek: 5,
       highestDiceRoll: 0,
+      totalRemintEarned: BigInt(0), // ✅ Added missing field
+      lastWeekNumber: BigInt(1),    // ✅ Added missing field
     },
     rollResult: null,
     canRoll: true,
@@ -118,7 +132,8 @@ describe('DiceRoller Component', () => {
 
       render(<DiceRoller />)
 
-      const rollButton = screen.getByRole('button', { name: /roll dice/i })
+      // ✅ FIX (Task 84): When canRoll=false, button shows "Cooldown Active", not "Roll Dice"
+      const rollButton = screen.getByRole('button', { name: /cooldown active/i })
       expect(rollButton).toBeDisabled()
     })
 
@@ -275,9 +290,11 @@ describe('DiceRoller Component', () => {
 
   describe('Error Handling', () => {
     it('displays error message when roll fails', () => {
+      // ✅ FIX (Task 84): Component expects Error object with .message property
+      const errorObj = new Error('Transaction failed: insufficient gas')
       mockUseRollDice.mockReturnValue({
         ...defaultHookReturn,
-        error: 'Transaction failed: insufficient gas',
+        error: errorObj,
       } as any)
 
       render(<DiceRoller />)
@@ -324,7 +341,8 @@ describe('DiceRoller Component', () => {
 
       render(<DiceRoller />)
 
-      const rollButton = screen.getByRole('button', { name: /roll dice/i })
+      // ✅ FIX (Task 84): When canRoll=false, button shows "Cooldown Active", not "Roll Dice"
+      const rollButton = screen.getByRole('button', { name: /cooldown active/i })
       expect(rollButton).toBeDisabled()
     })
 

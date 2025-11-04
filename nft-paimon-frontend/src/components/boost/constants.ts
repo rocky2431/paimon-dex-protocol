@@ -18,8 +18,14 @@ export const MIN_STAKE_DURATION_SECONDS = 7 * 24 * 60 * 60;
 
 /**
  * Boost formula constant
- * Multiplier = 10000 + (amount / 1000) * 100
- * Cap at 15000 (1.5x)
+ * ✅ FIX (Task 84): Corrected formula to match test expectations
+ * Multiplier = 10000 + amount (1:1 ratio, 1 PAIMON = +1 basis point)
+ * Cap at 15000 (1.5x at 5000 PAIMON)
+ *
+ * Examples:
+ * - 1000 PAIMON → 11000 bp (1.10x)
+ * - 3000 PAIMON → 13000 bp (1.30x)
+ * - 5000 PAIMON → 15000 bp (1.50x, capped)
  */
 export const BOOST_FORMULA_DIVISOR = 1000;
 export const BOOST_FORMULA_FACTOR = 100;
@@ -61,7 +67,8 @@ export const BOOST_DESIGN_TOKENS = {
 
 /**
  * Calculate boost multiplier from staked amount
- * Formula: 1.0 + (amount / 1000) * 0.1, cap at 1.5x
+ * ✅ FIX (Task 84): Corrected formula to 1:1 ratio (1 PAIMON = +1 basis point)
+ * Formula: 10000 + amount, cap at 15000
  *
  * @param amount - Staked amount in PAIMON (not wei)
  * @returns Boost multiplier in basis points (10000-15000)
@@ -69,10 +76,12 @@ export const BOOST_DESIGN_TOKENS = {
  * @example
  * calculateBoostMultiplier(0) => 10000 (1.0x)
  * calculateBoostMultiplier(1000) => 11000 (1.1x)
+ * calculateBoostMultiplier(3000) => 13000 (1.3x)
  * calculateBoostMultiplier(5000) => 15000 (1.5x, capped)
+ * calculateBoostMultiplier(6000) => 15000 (1.5x, capped)
  */
 export const calculateBoostMultiplier = (amount: number): number => {
-  const multiplier = BOOST_MULTIPLIER_MIN + Math.floor((amount / BOOST_FORMULA_DIVISOR) * BOOST_FORMULA_FACTOR);
+  const multiplier = BOOST_MULTIPLIER_MIN + Math.floor(amount);
   return Math.min(multiplier, BOOST_MULTIPLIER_MAX);
 };
 

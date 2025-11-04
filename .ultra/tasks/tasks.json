@@ -2153,7 +2153,7 @@
         "79"
       ],
       "estimated_days": 0.5,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "frontend",
         "validation",
@@ -2168,7 +2168,8 @@
         "src/components/*/*.tsx",
         "src/hooks/useFormValidation.ts"
       ],
-      "failureCount": 30
+      "failureCount": 30,
+      "startedAt": "2025-11-04T21:40:00Z"
     },
     {
       "id": "85",

@@ -185,7 +185,7 @@ export function DiceRoller() {
                       Total Remint Earned
                     </Typography>
                     <Typography variant="h6" fontWeight="bold">
-                      {diceData.totalRemintEarned.toString()} USDC
+                      {diceData.totalRemintEarned?.toString() || '0'} USDC
                     </Typography>
                   </Box>
                   <Box>

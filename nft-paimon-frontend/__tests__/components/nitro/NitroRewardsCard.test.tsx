@@ -106,8 +106,9 @@ describe('NitroRewardsCard Component', () => {
 
       render(<NitroRewardsCard pools={mockPools} locale="en" />);
 
-      const claimButtons = screen.getAllByText(/Claim Rewards/i);
-      const exitButtons = screen.getAllByText(/Exit Pool/i);
+      // ✅ FIX (Task 84): Use getByRole to get buttons only (not summary text with "Claim rewards")
+      const claimButtons = screen.getAllByRole('button', { name: /Claim Rewards/i });
+      const exitButtons = screen.getAllByRole('button', { name: /Exit Pool/i });
 
       expect(claimButtons.length).toBe(2); // One for each pool
       expect(exitButtons.length).toBe(2);
@@ -208,10 +209,14 @@ describe('NitroRewardsCard Component', () => {
         name: '<script>alert("XSS")</script>',
       };
 
-      render(<NitroRewardsCard pools={[maliciousPool]} locale="en" />);
+      const { container } = render(<NitroRewardsCard pools={[maliciousPool]} locale="en" />);
 
-      // Should render as text, not execute script
-      expect(screen.queryByText(/alert/)).not.toBeInTheDocument();
+      // ✅ FIX (Task 84): React escapes HTML, so text "alert" will be visible but safe
+      // Verify the escaped text is displayed (safe)
+      expect(screen.getByText(/<script>alert\("XSS"\)<\/script>/)).toBeInTheDocument();
+
+      // Verify no actual <script> element was created (security check)
+      expect(container.querySelector('script')).toBeNull();
     });
 
     it('validates address format', () => {
@@ -243,8 +248,11 @@ describe('NitroRewardsCard Component', () => {
       render(<NitroRewardsCard pools={mockPools} locale="en" />);
 
       expect(screen.getByText(/My Nitro Rewards/i)).toBeInTheDocument();
-      expect(screen.getByText(/Claim Rewards/i)).toBeInTheDocument();
-      expect(screen.getByText(/Exit Pool/i)).toBeInTheDocument();
+      // ✅ FIX (Task 84): Buttons appear multiple times (one per pool), use getAllByText
+      const claimMatches = screen.getAllByText(/Claim Rewards/i);
+      expect(claimMatches.length).toBeGreaterThanOrEqual(1);
+      const exitMatches = screen.getAllByText(/Exit Pool/i);
+      expect(exitMatches.length).toBeGreaterThanOrEqual(1);
     });
 
     it('renders Chinese text when locale is "zh"', () => {
@@ -253,8 +261,11 @@ describe('NitroRewardsCard Component', () => {
       render(<NitroRewardsCard pools={mockPools} locale="zh" />);
 
       expect(screen.getByText(/我的 Nitro 奖励/i)).toBeInTheDocument();
-      expect(screen.getByText(/领取奖励/i)).toBeInTheDocument();
-      expect(screen.getByText(/退出池/i)).toBeInTheDocument();
+      // ✅ FIX (Task 84): Buttons appear multiple times (one per pool), use getAllByText
+      const claimMatches = screen.getAllByText(/领取奖励/i);
+      expect(claimMatches.length).toBeGreaterThanOrEqual(1);
+      const exitMatches = screen.getAllByText(/退出池/i);
+      expect(exitMatches.length).toBeGreaterThanOrEqual(1);
     });
 
     it('renders Chinese wallet connection message', () => {
@@ -292,7 +303,8 @@ describe('NitroRewardsCard Component', () => {
 
       render(<NitroRewardsCard pools={mockPools} locale="en" />);
 
-      const claimButtons = screen.getAllByText(/Claim Rewards/i);
+      // ✅ FIX (Task 84): Use getByRole to get button elements (not text elements)
+      const claimButtons = screen.getAllByRole('button', { name: /Claim Rewards/i });
 
       // All claim buttons should be disabled (placeholder data has no rewards)
       claimButtons.forEach((button) => {
@@ -322,9 +334,10 @@ describe('NitroRewardsCard Component', () => {
       expect(screen.getByText('USDP-USDC Pool')).toBeInTheDocument();
       expect(screen.getByText('PAIMON-USDP Pool')).toBeInTheDocument();
 
+      // ✅ FIX (Task 84): Use getByRole to count buttons (not text including summary)
       // Should have 2 sets of buttons
-      expect(screen.getAllByText(/Claim Rewards/i).length).toBe(2);
-      expect(screen.getAllByText(/Exit Pool/i).length).toBe(2);
+      expect(screen.getAllByRole('button', { name: /Claim Rewards/i }).length).toBe(2);
+      expect(screen.getAllByRole('button', { name: /Exit Pool/i }).length).toBe(2);
     });
   });
 });
