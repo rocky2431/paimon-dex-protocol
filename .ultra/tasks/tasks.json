@@ -1590,7 +1590,7 @@
       "priority": "P2",
       "dependencies": [],
       "estimated_days": 0.5,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "quality",
         "events",
@@ -1604,7 +1604,8 @@
         "test_Events_AllStateChanges()",
         "test_Events_IndexedFields()",
         "test_Events_Emit_Verification()"
-      ]
+      ],
+      "startedAt": "2025-11-04T00:11:53.322403Z"
     },
     {
       "id": "P2-005",

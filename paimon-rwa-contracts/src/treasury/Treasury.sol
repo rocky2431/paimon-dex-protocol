@@ -164,6 +164,9 @@ contract Treasury is Ownable2Step, Pausable, ReentrancyGuard {
     /// @notice Emitted when RWA asset is removed from whitelist
     event RWAAssetRemoved(address indexed asset);
 
+    /// @notice Emitted when RWA asset parameters are updated (Task P2-004)
+    event RWAAssetUpdated(address indexed asset, address indexed oracle, uint8 tier, uint256 ltvRatio, uint256 mintDiscount);
+
     /// @notice Emitted when user deposits RWA
     event RWADeposited(address indexed user, address indexed asset, uint256 rwaAmount, uint256 hydMinted);
 
@@ -399,6 +402,37 @@ contract Treasury is Ownable2Step, Pausable, ReentrancyGuard {
         rwaAssets[asset].isActive = false;
 
         emit RWAAssetRemoved(asset);
+    }
+
+    /**
+     * @notice Update RWA asset parameters (Task P2-004)
+     * @param asset RWA token address
+     * @param oracle New oracle address
+     * @param tier New tier (1-3)
+     * @param ltvRatio New LTV ratio in basis points
+     * @param mintDiscount New mint discount in basis points
+     * @dev Only owner can update parameters. Users with existing positions unaffected.
+     *      New parameters apply to future deposits only.
+     */
+    function updateRWAAsset(
+        address asset,
+        address oracle,
+        uint8 tier,
+        uint256 ltvRatio,
+        uint256 mintDiscount
+    ) external onlyOwner {
+        if (asset == address(0)) revert ZeroAddress();
+        if (oracle == address(0)) revert ZeroAddress();
+        if (tier < 1 || tier > 3) revert InvalidTier();
+        if (ltvRatio == 0 || ltvRatio > BPS_DENOMINATOR) revert InvalidLTV();
+        if (!rwaAssets[asset].isActive) revert AssetNotWhitelisted();
+
+        rwaAssets[asset].oracle = oracle;
+        rwaAssets[asset].tier = tier;
+        rwaAssets[asset].ltvRatio = ltvRatio;
+        rwaAssets[asset].mintDiscount = mintDiscount;
+
+        emit RWAAssetUpdated(asset, oracle, tier, ltvRatio, mintDiscount);
     }
 
     /**

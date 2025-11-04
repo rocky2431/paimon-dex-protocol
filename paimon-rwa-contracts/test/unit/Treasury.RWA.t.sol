@@ -701,4 +701,181 @@ contract TreasuryRWATest is Test {
     // Should return type(uint256).max (infinite health)
     assertEq(healthFactor, type(uint256).max);
   }
+
+  // ============================================================
+  // UPDATE RWA ASSET TESTS (Task P2-004)
+  // ============================================================
+
+  /**
+   * @notice Test P2-004: FUNCTIONAL - Successfully update RWA asset parameters
+   */
+  function test_UpdateRWAAsset_Success() public {
+    // Add initial asset
+    vm.prank(owner);
+    treasury.addRWAAsset(address(rwaToken), address(oracle), 1, LTV_T1, 0);
+
+    // Create new oracle for update
+    RWAPriceOracle newOracle = new RWAPriceOracle(
+      address(ethUsdFeed),
+      address(sequencerFeed),
+      trustedOracle
+    );
+
+    // Update parameters
+    vm.prank(owner);
+    vm.expectEmit(true, true, false, true);
+    emit Treasury.RWAAssetUpdated(address(rwaToken), address(newOracle), 2, LTV_T2, 100);
+    treasury.updateRWAAsset(address(rwaToken), address(newOracle), 2, LTV_T2, 100);
+
+    // Verify updates
+    (address oracle_, uint8 tier, uint256 ltvRatio, uint256 mintDiscount, bool isActive) =
+      treasury.rwaAssets(address(rwaToken));
+
+    assertEq(oracle_, address(newOracle));
+    assertEq(tier, 2);
+    assertEq(ltvRatio, LTV_T2);
+    assertEq(mintDiscount, 100);
+    assertTrue(isActive);
+  }
+
+  /**
+   * @notice Test P2-004: EXCEPTION - Non-owner cannot update RWA asset
+   */
+  function test_UpdateRWAAsset_Unauthorized_Reverts() public {
+    // Add initial asset
+    vm.prank(owner);
+    treasury.addRWAAsset(address(rwaToken), address(oracle), 1, LTV_T1, 0);
+
+    // Try to update as unauthorized user
+    vm.prank(unauthorized);
+    vm.expectRevert();
+    treasury.updateRWAAsset(address(rwaToken), address(oracle), 2, LTV_T2, 0);
+  }
+
+  /**
+   * @notice Test P2-004: EXCEPTION - Cannot update non-existent asset
+   */
+  function test_UpdateRWAAsset_AssetNotWhitelisted_Reverts() public {
+    vm.prank(owner);
+    vm.expectRevert(Treasury.AssetNotWhitelisted.selector);
+    treasury.updateRWAAsset(address(rwaToken), address(oracle), 1, LTV_T1, 0);
+  }
+
+  /**
+   * @notice Test P2-004: BOUNDARY - Cannot set invalid tier
+   */
+  function test_UpdateRWAAsset_InvalidTier_Reverts() public {
+    // Add initial asset
+    vm.prank(owner);
+    treasury.addRWAAsset(address(rwaToken), address(oracle), 1, LTV_T1, 0);
+
+    // Try tier 0 (invalid)
+    vm.prank(owner);
+    vm.expectRevert(Treasury.InvalidTier.selector);
+    treasury.updateRWAAsset(address(rwaToken), address(oracle), 0, LTV_T1, 0);
+
+    // Try tier 4 (invalid)
+    vm.prank(owner);
+    vm.expectRevert(Treasury.InvalidTier.selector);
+    treasury.updateRWAAsset(address(rwaToken), address(oracle), 4, LTV_T1, 0);
+  }
+
+  /**
+   * @notice Test P2-004: BOUNDARY - Cannot set invalid LTV
+   */
+  function test_UpdateRWAAsset_InvalidLTV_Reverts() public {
+    // Add initial asset
+    vm.prank(owner);
+    treasury.addRWAAsset(address(rwaToken), address(oracle), 1, LTV_T1, 0);
+
+    // Try LTV = 0 (invalid)
+    vm.prank(owner);
+    vm.expectRevert(Treasury.InvalidLTV.selector);
+    treasury.updateRWAAsset(address(rwaToken), address(oracle), 1, 0, 0);
+
+    // Try LTV > 10000 (invalid)
+    vm.prank(owner);
+    vm.expectRevert(Treasury.InvalidLTV.selector);
+    treasury.updateRWAAsset(address(rwaToken), address(oracle), 1, 10001, 0);
+  }
+
+  /**
+   * @notice Test P2-004: EXCEPTION - Cannot set zero address oracle
+   */
+  function test_UpdateRWAAsset_ZeroOracle_Reverts() public {
+    // Add initial asset
+    vm.prank(owner);
+    treasury.addRWAAsset(address(rwaToken), address(oracle), 1, LTV_T1, 0);
+
+    // Try zero oracle address
+    vm.prank(owner);
+    vm.expectRevert(Treasury.ZeroAddress.selector);
+    treasury.updateRWAAsset(address(rwaToken), address(0), 1, LTV_T1, 0);
+  }
+
+  /**
+   * @notice Test P2-004: FUNCTIONAL - Updated parameters apply to future deposits
+   */
+  function test_UpdateRWAAsset_AppliesToFutureDeposits() public {
+    // Add initial asset with LTV_T1 (80%)
+    vm.prank(owner);
+    treasury.addRWAAsset(address(rwaToken), address(oracle), 1, LTV_T1, 0);
+
+    // Update NAV price
+    vm.prank(trustedOracle);
+    oracle.updateNAV(INITIAL_RWA_PRICE);
+
+    // First deposit with old LTV (80%)
+    vm.startPrank(user);
+    rwaToken.mint(user, RWA_DEPOSIT_AMOUNT);
+    rwaToken.approve(address(treasury), RWA_DEPOSIT_AMOUNT);
+    treasury.depositRWA(address(rwaToken), RWA_DEPOSIT_AMOUNT);
+    uint256 hydBalance1 = hydToken.balanceOf(user);
+    vm.stopPrank();
+
+    // Update LTV to T2 (65%)
+    vm.prank(owner);
+    treasury.updateRWAAsset(address(rwaToken), address(oracle), 2, LTV_T2, 0);
+
+    // Second deposit with new LTV (65%)
+    vm.startPrank(user);
+    rwaToken.mint(user, RWA_DEPOSIT_AMOUNT);
+    rwaToken.approve(address(treasury), RWA_DEPOSIT_AMOUNT);
+    uint256 hydBalanceBefore = hydToken.balanceOf(user);
+    treasury.depositRWA(address(rwaToken), RWA_DEPOSIT_AMOUNT);
+    uint256 hydBalance2 = hydToken.balanceOf(user) - hydBalanceBefore;
+    vm.stopPrank();
+
+    // Verify: Second deposit mints less HYD (65% < 80%)
+    assertLt(hydBalance2, hydBalance1);
+
+    // Expected HYD for first deposit: 10 RWA * $1000 * 80% = $8000
+    uint256 expected1 = (RWA_DEPOSIT_AMOUNT * INITIAL_RWA_PRICE * LTV_T1) / (10**18 * 10000);
+    assertApproxEqRel(hydBalance1, expected1, 0.01e18); // 1% tolerance
+
+    // Expected HYD for second deposit: 10 RWA * $1000 * 65% = $6500
+    uint256 expected2 = (RWA_DEPOSIT_AMOUNT * INITIAL_RWA_PRICE * LTV_T2) / (10**18 * 10000);
+    assertApproxEqRel(hydBalance2, expected2, 0.01e18); // 1% tolerance
+  }
+
+  /**
+   * @notice Test P2-004: SECURITY - Event emitted with correct indexed fields
+   */
+  function test_UpdateRWAAsset_EventEmission() public {
+    // Add initial asset
+    vm.prank(owner);
+    treasury.addRWAAsset(address(rwaToken), address(oracle), 1, LTV_T1, 0);
+
+    RWAPriceOracle newOracle = new RWAPriceOracle(
+      address(ethUsdFeed),
+      address(sequencerFeed),
+      trustedOracle
+    );
+
+    // Check event emission
+    vm.prank(owner);
+    vm.expectEmit(true, true, false, true);
+    emit Treasury.RWAAssetUpdated(address(rwaToken), address(newOracle), 3, LTV_T3, 200);
+    treasury.updateRWAAsset(address(rwaToken), address(newOracle), 3, LTV_T3, 200);
+  }
 }
