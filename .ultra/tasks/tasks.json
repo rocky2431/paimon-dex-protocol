@@ -1645,7 +1645,7 @@
       "priority": "P2",
       "dependencies": [],
       "estimated_days": 0.5,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "security",
         "pausable",
@@ -1659,7 +1659,10 @@
         "test_USDP_Pause_Unpause()",
         "test_USDP_Paused_Reverts()",
         "test_USDP_Unpaused_Works()"
-      ]
+      ],
+      "startedAt": "2025-11-04T00:25:35.004119Z",
+      "completedAt": "2025-11-04T00:33:13.450094+00:00",
+      "implementationNotes": "✅ 已完成 USDP 暂停/恢复功能改造\n\n**实现变更**:\n1. 添加 OpenZeppelin Pausable 继承\n2. 添加 whenNotPaused 修饰符到 transfer/transferFrom/mint/burnFrom\n3. 用 pause()/unpause() 替换 emergencyPause()（不再调用 renounceOwnership）\n4. 添加 3 个综合测试用例\n\n**测试结果**:\n- test_USDP_Pause_Unpause(): ✅ PASS (Owner 可暂停和恢复)\n- test_USDP_Paused_Reverts(): ✅ PASS (暂停期间操作 revert)\n- test_USDP_Unpaused_Works(): ✅ PASS (恢复后正常运行)\n- 全部 54 个 USDP 测试通过\n\n**文件修改**:\n- src/core/USDP.sol: +26 lines (添加 Pausable 继承和 pause/unpause 函数)\n- test/unit/USDP.t.sol: +129 lines (添加 3 个测试函数)\n\n**commit**: 63cd6c7 \"feat: refactor USDP to use recoverable pause/unpause (P2-006)\"\n"
     },
     {
       "id": "P2-007",
