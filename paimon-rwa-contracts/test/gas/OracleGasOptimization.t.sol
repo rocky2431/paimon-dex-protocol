@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import "../../src/oracle/RWAPriceOracle.sol";
 import "../../src/treasury/Treasury.sol";
 import "../../src/core/HYD.sol";
+import "../../src/mocks/MockV3Aggregator.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 /**
@@ -24,13 +25,40 @@ contract OracleGasOptimizationTest is Test {
     address public mockAsset;
 
     function setUp() public {
+        // Set timestamp to avoid underflow
+        vm.warp(10000);
+
         // Deploy HYD (no constructor parameters)
         hyd = new HYD();
 
+        // Deploy mock Chainlink price feed (18 decimals for USD price)
+        MockV3Aggregator priceFeed = new MockV3Aggregator(18, 100 * 1e18);
+        // Set round data to pass validation checks
+        priceFeed.updateRoundData(
+            1, // roundId
+            100 * 1e18, // answer ($100 per token, 18 decimals)
+            block.timestamp - 3600, // startedAt (1 hour ago, within CHAINLINK_TIMEOUT)
+            block.timestamp, // updatedAt (current time)
+            1 // answeredInRound
+        );
+
+        // Deploy mock sequencer feed (required for L2 networks)
+        // sequencer answer: 0 = up, 1 = down
+        MockV3Aggregator sequencerFeed = new MockV3Aggregator(0, 0);
+        // Set startedAt to ensure grace period check passes (GRACE_PERIOD = 3600 seconds = 1 hour)
+        sequencerFeed.updateRoundData(
+            1, // roundId
+            0, // answer (0 = sequencer up)
+            block.timestamp - 7200, // startedAt (2 hours ago, > GRACE_PERIOD)
+            block.timestamp, // updatedAt
+            1 // answeredInRound
+        );
+
         // Deploy Oracle with correct constructor (chainlinkFeed, sequencerFeed, trustedOracle)
+        // Note: Foundry testnet (chainId 31337) is treated as L2, so sequencer feed is required
         oracle = new RWAPriceOracle(
-            address(0x1), // Mock Chainlink feed address
-            address(0), // No sequencer feed
+            address(priceFeed), // Mock Chainlink price feed
+            address(sequencerFeed), // Mock sequencer feed
             address(this) // Trusted oracle (custodian)
         );
 
@@ -42,6 +70,10 @@ contract OracleGasOptimizationTest is Test {
 
         // Deploy Treasury (initialOwner, usdcToken)
         treasury = new Treasury(address(this), mockUSDC);
+
+        // Connect HYD to Treasury and authorize minting
+        treasury.setHYDToken(address(hyd));
+        hyd.authorizeMinter(address(treasury));
 
         // Create mock RWA asset
         mockAsset = address(new MockERC20("Mock RWA", "mRWA"));
