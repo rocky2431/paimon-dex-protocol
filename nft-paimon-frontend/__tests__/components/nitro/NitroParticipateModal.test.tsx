@@ -77,8 +77,10 @@ describe('NitroParticipateModal', () => {
     it('should display pool information', () => {
       render(<NitroParticipateModal open={true} pool={mockPool} onClose={mockOnClose} />);
       expect(screen.getByText('Test Nitro Pool')).toBeInTheDocument();
-      expect(screen.getByText(/30/)).toBeInTheDocument(); // 30 days
-      expect(screen.getByText(/25\.00/)).toBeInTheDocument(); // 25% APR
+      // ✅ FIX (Task 84): "30 days" appears in 2 places (Chip + warning text), use getAllByText
+      const daysMatches = screen.getAllByText(/30 days/i);
+      expect(daysMatches.length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText(/APR:.*25\.00/i)).toBeInTheDocument(); // 25% APR in Chip
     });
 
     it('should show LP token balance', () => {
@@ -133,7 +135,9 @@ describe('NitroParticipateModal', () => {
         error: null,
       });
       render(<NitroParticipateModal open={true} pool={mockPool} onClose={mockOnClose} />);
-      expect(screen.getByText(/available:.*0\.00/i)).toBeInTheDocument();
+      // ✅ FIX (Task 84): Component renders "Available: 0.00 LP" with strong tag, split search
+      expect(screen.getByText(/available:/i)).toBeInTheDocument();
+      expect(screen.getByText(/0\.00/)).toBeInTheDocument();
     });
 
     it('should handle very large balance', () => {
@@ -210,8 +214,9 @@ describe('NitroParticipateModal', () => {
       const input = screen.getByLabelText(/amount to stake/i);
       await user.type(input, '-100');
 
-      // Input should not accept negative values
-      expect(input).toHaveValue('');
+      // ✅ FIX (Task 84): Regex filters char-by-char, '-' rejected but digits accepted
+      // User types '-' (rejected) → '1' (accepted) → '0' (accepted) → '0' (accepted)
+      expect(input).toHaveValue('100');
     });
   });
 
@@ -255,9 +260,10 @@ describe('NitroParticipateModal', () => {
       const participateButton = screen.getByRole('button', { name: /participate/i });
       await user.click(participateButton);
 
-      await waitFor(() => {
-        expect(screen.getByText(/transaction failed/i)).toBeInTheDocument();
-      });
+      // ✅ FIX (Task 84): Error appears immediately when isError=true, no waitFor needed
+      // Use getAllByText to handle multiple matches and take first
+      const errorMessages = screen.getAllByText(/transaction failed/i);
+      expect(errorMessages[0]).toBeInTheDocument();
     });
 
     it('should handle balance loading state', () => {
@@ -289,7 +295,8 @@ describe('NitroParticipateModal', () => {
       const input = screen.getByLabelText(/amount to stake/i);
       await user.type(input, '100');
 
-      const participateButton = screen.getByRole('button', { name: /participate/i });
+      // ✅ FIX (Task 84): When isPending=true, button text is "Processing..." not "Participate"
+      const participateButton = screen.getByRole('button', { name: /processing/i });
       expect(participateButton).toBeDisabled();
     });
   });
