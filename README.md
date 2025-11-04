@@ -248,21 +248,41 @@ npm run test:coverage
 
 ### 部署顺序 / Deployment Sequence
 
-1. USDP token
-2. PAIMON token
-3. esPAIMON token
-4. VotingEscrow (veNFT)
-5. USDPVault
-6. Treasury + RWAPriceOracle
-7. PSM (Peg Stability Module)
-8. DEXFactory + DEXRouter
-9. BoostController
-10. GaugeController
-11. EmissionManager
-12. RewardDistributor
-13. RWABondNFT (+ Chainlink VRF)
-14. ProjectRegistry + IssuanceController
-15. RemintController + SettlementRouter
+**⚠️ 重要：测试网必须先部署 Mock 代币！**
+
+**Step 1: Mock Tokens (Testnet Only / 测试网专用)**
+1. **MockUSDC** - 模拟 USDC 稳定币（PSM 1:1 兑换需要）
+2. **MockRWATokens** - Demo RWA 资产代币（Treasury 抵押品）:
+   - HYD (Tier 1, 60% LTV)
+   - tUST - Tokenized US Treasury (Tier 1, 60% LTV)
+   - tCORPBOND - Tokenized Corporate Bond (Tier 2, 50% LTV)
+   - tRE - Tokenized Real Estate (Tier 3, 40% LTV)
+
+**Step 2: Core Tokens / 核心代币**
+3. USDP token
+4. PAIMON token
+5. esPAIMON token
+
+**Step 3: Core Protocol / 核心协议**
+6. VotingEscrow (veNFT)
+7. USDPVault
+8. Treasury + RWAPriceOracle (⚠️ 传入 MockRWATokens 地址)
+9. PSM (Peg Stability Module) - ⚠️ 传入 MockUSDC 地址
+10. DEXFactory + DEXRouter
+11. BoostController
+12. GaugeController
+13. EmissionManager
+14. RewardDistributor
+
+**Step 4: Presale & Launchpad / 预售和项目发行**
+15. RWABondNFT (+ Chainlink VRF)
+16. ProjectRegistry + IssuanceController
+17. RemintController + SettlementRouter
+
+**⚠️ 关键依赖 / Critical Dependencies**:
+- PSM 部署时必须传入 MockUSDC 地址，否则无法进行 USDC ↔ USDP 兑换
+- Treasury 部署后必须 whitelist 所有 MockRWATokens，否则无法存入抵押品
+- 没有这些 Mock 代币，整个系统无法测试！
 
 ### 部署脚本 / Deployment Script
 
@@ -278,10 +298,25 @@ forge script script/DeployComplete.s.sol \
 
 ### 部署后任务 / Post-Deployment Tasks
 
-1. 更新前端合约地址 / Update frontend contract addresses (`src/config/chains/testnet.ts`)
-2. 测试 veNFT 锁定流程 / Test veNFT lock flow
-3. 测试 Treasury 存款流程 / Test Treasury deposit flow
-4. 验证 Core Web Vitals (LCP/INP/CLS)
+**Immediate (Within 1 hour / 立即执行)**:
+1. **初始化 Mock 代币** / Initialize Mock Tokens:
+   - 给测试账户 mint MockUSDC（如 1,000,000 USDC）
+   - 给测试账户 mint MockRWATokens（每种 100,000 代币）
+   - 设置 RWAPriceOracle 的初始价格（HYD=$1, tUST=$1, etc.）
+2. **Whitelist RWA 资产** / Whitelist RWA Assets:
+   - Treasury.whitelistRWA(HYD_ADDRESS, tier=1, ltv=6000)
+   - Treasury.whitelistRWA(tUST_ADDRESS, tier=1, ltv=6000)
+   - Treasury.whitelistRWA(tCORPBOND_ADDRESS, tier=2, ltv=5000)
+   - Treasury.whitelistRWA(tRE_ADDRESS, tier=3, ltv=4000)
+3. 更新前端合约地址 / Update frontend contract addresses (`src/config/chains/testnet.ts`)
+
+**Testing (Within 24 hours / 24小时内测试)**:
+4. 测试完整流程 / Test Complete Flow:
+   - PSM: USDC → USDP 1:1 兑换
+   - Treasury: 存入 HYD → 铸造 USDP（检查 LTV）
+   - VeNFT: 锁定 PAIMON → 获得 vePAIMON NFT
+   - DEX: 添加流动性 + 交换
+5. 验证 Core Web Vitals (LCP/INP/CLS)
 
 ---
 

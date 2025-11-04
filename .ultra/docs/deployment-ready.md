@@ -139,21 +139,40 @@ All critical modifications have been successfully implemented and tested:
 ### Phase 1: Contract Deployment (BSC Testnet)
 
 **Order**:
-1. USDP token
-2. PAIMON token
-3. esPAIMON token
-4. VotingEscrow (veNFT)
-5. USDPVault
-6. Treasury + RWAPriceOracle
-7. PSM (Peg Stability Module)
-8. DEXFactory + DEXRouter
-9. BoostController
-10. GaugeController
-11. EmissionManager
-12. RewardDistributor
-13. RWABondNFT (+ Chainlink VRF)
-14. ProjectRegistry + IssuanceController
-15. RemintController + SettlementRouter
+
+**Step 1: Mock Tokens (Testnet Only)**
+1. MockUSDC - 模拟 USDC 稳定币（PSM 需要）
+2. MockRWATokens - Demo RWA 资产代币:
+   - HYD (Tier 1, 60% LTV)
+   - tUST (Tier 1, 60% LTV)
+   - tCORPBOND (Tier 2, 50% LTV)
+   - tRE (Tier 3, 40% LTV)
+
+**Step 2: Core Tokens**
+3. USDP token
+4. PAIMON token
+5. esPAIMON token
+
+**Step 3: Core Protocol**
+6. VotingEscrow (veNFT)
+7. USDPVault
+8. Treasury + RWAPriceOracle (传入 MockRWATokens 地址)
+9. PSM (Peg Stability Module) - 传入 MockUSDC 地址
+10. DEXFactory + DEXRouter
+11. BoostController
+12. GaugeController
+13. EmissionManager
+14. RewardDistributor
+
+**Step 4: Presale & Launchpad**
+15. RWABondNFT (+ Chainlink VRF)
+16. ProjectRegistry + IssuanceController
+17. RemintController + SettlementRouter
+
+**⚠️ Critical Dependencies**:
+- PSM 部署时必须传入 MockUSDC 地址
+- Treasury 部署后必须 whitelist MockRWATokens (HYD, tUST, tCORPBOND, tRE)
+- 没有这些 Mock 代币，无法进行任何测试！
 
 **Deployment Script**:
 ```bash
