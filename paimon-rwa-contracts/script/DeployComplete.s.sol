@@ -8,6 +8,7 @@ import "forge-std/console.sol";
 import "../src/core/USDP.sol";
 import "../src/core/PAIMON.sol";
 import "../src/core/esPaimon.sol";
+import "../src/core/HYD.sol";
 import "../src/core/PSMParameterized.sol";
 import "../src/core/VotingEscrow.sol";
 import "../src/core/VotingEscrowPaimon.sol";
@@ -84,6 +85,7 @@ contract DeployCompleteScript is Script {
     USDP public usdp;
     PAIMON public paimon;
     esPaimon public esPaimonToken;
+    HYD public hyd;
     PSMParameterized public psm;
     VotingEscrow public votingEscrow;
     VotingEscrowPaimon public votingEscrowPaimon;
@@ -271,6 +273,10 @@ contract DeployCompleteScript is Script {
         // Deploy esPAIMON (escrowed PAIMON)
         esPaimonToken = new esPaimon(address(paimon));
         console.log("  esPAIMON deployed:", address(esPaimonToken));
+
+        // Deploy HYD (RWA asset token)
+        hyd = new HYD();
+        console.log("  HYD deployed:", address(hyd));
 
         console.log();
     }
@@ -516,6 +522,10 @@ contract DeployCompleteScript is Script {
         usdpVault.setStabilityPool(address(stabilityPool));
         console.log("  Set StabilityPool in Vault");
 
+        // Note: Treasury is ONLY for protocol fee collection
+        // User RWA collateral/lending is handled by USDPVault
+        // Therefore, Treasury does NOT need USDP minter authorization
+
         console.log();
     }
 
@@ -590,6 +600,7 @@ contract DeployCompleteScript is Script {
         vm.serializeAddress(json, "usdp", address(usdp));
         vm.serializeAddress(json, "paimon", address(paimon));
         vm.serializeAddress(json, "esPaimon", address(esPaimonToken));
+        vm.serializeAddress(json, "hyd", address(hyd));
         vm.serializeAddress(json, "psm", address(psm));
 
         // Governance

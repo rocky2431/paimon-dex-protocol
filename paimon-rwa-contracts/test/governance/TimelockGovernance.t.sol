@@ -280,9 +280,9 @@ contract TimelockGovernanceTest is Test {
         // Assert: Treasury should be paused
         assertTrue(treasury.paused(), "Treasury should be paused");
 
-        // Verify: Cannot deposit while paused
+        // Verify: Cannot withdraw while paused
         vm.expectRevert(); // OpenZeppelin uses EnforcedPause custom error
-        treasury.depositRWA(address(mockUSDC), 1000e6);
+        treasury.withdraw(address(mockUSDC), address(this), 1000e6);
     }
 
     // ==================== Test 5: Ownership Transfer (Functional) ====================
