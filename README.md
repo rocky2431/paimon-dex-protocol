@@ -80,8 +80,8 @@
 |--------------|----------------|-------------------------------|
 | **USDP** | 合成稳定币 / Synthetic Stablecoin | 由 Treasury RWA 持仓支持,PSM 提供 1:1 USDC 兑换<br/>Backed by Treasury RWA holdings, PSM provides 1:1 USDC swap |
 | **PAIMON** | 治理代币 / Governance Token | 总量 ~10B,三阶段排放 (6.77 年)<br/>Total ~10B, 3-phase emission (6.77 years) |
-| **vePAIMON NFT** | 投票托管 NFT / Vote-Escrowed NFT | 锁定 PAIMON (1周~4年) → 获得治理 NFT,投票权随时间线性衰减<br/>Lock PAIMON (1 week~4 years) → Receive governance NFT, voting power decays linearly |
-| **esPAIMON** | 归属代币 / Vesting Token | 365 天线性解锁为 PAIMON<br/>365-day linear vesting to PAIMON |
+| **esPAIMON** | 归属代币 / Vesting Token | 365 天线性解锁,提前退出有惩罚,每周 Boost 衰减 1%,非转让性 Position-based<br/>365-day linear vesting, early exit penalty, 1% Boost decay/week, non-transferable position-based |
+| **vePAIMON NFT** | 投票托管 NFT / Vote-Escrowed NFT | 锁定 PAIMON (1周~4年) → ERC-721 NFT,投票权随时间线性衰减,可转让<br/>Lock PAIMON (1 week~4 years) → ERC-721 NFT, voting power decays linearly, transferable |
 | **HYD** | RWA 抵押资产示例 / RWA Collateral Asset (Example) | Tier 1 级别,80% LTV,用于演示 Treasury 抵押铸 USDP<br/>Tier 1, 80% LTV, demonstrates Treasury collateral minting USDP |
 
 ---

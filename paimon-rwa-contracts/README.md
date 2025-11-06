@@ -22,8 +22,9 @@ Paimon.dex 是一个综合 DeFi 协议,结合 **RWA (Real World Asset)** 发行�
 | **USDP** | 由 Treasury RWA 持仓支持的合成稳定币 |
 | **PSM** | USDC ↔ USDP 1:1 兑换模块 (0.1% 费率) |
 | **Treasury** | RWA 抵押金库 (T1/T2/T3 分层 LTV: 80%/65%/50%) |
-| **veNFT (vePAIMON)** | 锁定 PAIMON 获得的治理 NFT (1周~4年) |
 | **PAIMON** | 治理代币 (总量 ~10B,三阶段排放) |
+| **esPAIMON** | 归属代币 (365 天线性解锁,提前退出有惩罚,每周 Boost 衰减 1%) |
+| **vePAIMON** | 投票托管 NFT (锁定 PAIMON 1周~4年获得,投票权随时间线性衰减,ERC-721 可转让) |
 | **EmissionManager** | 三阶段排放调度器 (固定→指数衰减→固定) |
 | **EmissionRouter** | 四通道预算分发 (Debt/LP/Stability/Eco) |
 | **GaugeController** | 流动性挖矿权重控制 |
