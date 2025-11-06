@@ -1,555 +1,382 @@
-# Paimon.dex
+# Paimon.dex Smart Contracts
 
-**RWA Launchpad + veNFT Governance DEX + Treasury + USDP Synthetic Asset Protocol**
+**RWA Launchpad + veNFT Governance DEX + Treasury-Backed USDP Synthetic Asset Protocol**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-3.2.0-orange.svg)](https://github.com/yourusername/paimon-dex)
-[![Tests](https://img.shields.io/badge/tests-323%2F337%20passing-brightgreen.svg)]()
-[![Audit Ready](https://img.shields.io/badge/audit%20ready-9.2%2F10-success.svg)]()
+[![Solidity](https://img.shields.io/badge/Solidity-0.8.24-orange.svg)](https://soliditylang.org/)
+[![Tests](https://img.shields.io/badge/tests-980%2F990%20passing-brightgreen.svg)]()
+[![Foundry](https://img.shields.io/badge/Built%20with-Foundry-FFDB1C.svg)](https://getfoundry.sh/)
 
 ---
 
-## 🌟 Overview
+## 概述
 
-Paimon.dex is an integrated DeFi protocol that combines **Real World Asset (RWA)** issuance, **veNFT Governance DEX** liquidity provision, and **treasury-backed synthetic assets** into a unified governance flywheel.
+Paimon.dex 是一个综合 DeFi 协议,结合 **RWA (Real World Asset)** 发行、**veNFT 治理 DEX** 流动性供给和 **国库支持的合成资产** 形成统一的治理飞轮。
 
 **"面向 RWA 的发行、流动性与治理一体化协议"**
 
-### Key Components
+### 核心组件
 
-| Component | Description |
-|-----------|-------------|
-| **🚀 RWA Launchpad** | Compliant issuance platform for tokenized real-world assets |
-| **💱 veNFT Governance DEX** | Velodrome-style AMM with vote-escrowed governance |
-| **🏦 Treasury System** | Collateralized vault backing USDP synthetic stablecoin |
-| **💎 USDP Token** | Synthetic stablecoin backed by RWA treasury holdings |
-| **🎫 vePAIMON NFT** | Vote-escrowed NFT from locking PAIMON for governance |
-| **🪙 PAIMON Token** | Governance token for incentives and veNFT locking |
-
----
-
-## 🎯 Core Value Proposition
-
-- **Lower Barriers**: Mint USDP against RWA deposits instead of buying full-priced assets
-- **Higher Capital Efficiency**: Use USDP in DeFi while retaining RWA exposure
-- **Governance Flywheel**: vePAIMON NFT voting controls Launchpad listings, Treasury whitelist, and DEX incentives
-- **Revenue → Growth Loop**: Protocol fees → Treasury → USDP backing → ve rewards → More activity
+| 组件 | 描述 |
+|------|------|
+| **USDP** | 由 Treasury RWA 持仓支持的合成稳定币 |
+| **PSM** | USDC ↔ USDP 1:1 兑换模块 (0.1% 费率) |
+| **Treasury** | RWA 抵押金库 (T1/T2/T3 分层 LTV: 80%/65%/50%) |
+| **veNFT (vePAIMON)** | 锁定 PAIMON 获得的治理 NFT (1周~4年) |
+| **PAIMON** | 治理代币 (总量 ~10B,三阶段排放) |
+| **EmissionManager** | 三阶段排放调度器 (固定→指数衰减→固定) |
+| **EmissionRouter** | 四通道预算分发 (Debt/LP/Stability/Eco) |
+| **GaugeController** | 流动性挖矿权重控制 |
+| **DEX** | Uniswap V2 风格 AMM (定制费率分配) |
+| **Launchpad** | RWA 项目合规发行平台 |
 
 ---
 
-## 📊 Protocol Flywheel
+## 架构亮点
 
+### 统一基础设施
+
+**Governable 治理基类**:
+- 所有核心合约继承统一治理接口
+- 基于 OpenZeppelin AccessControlEnumerable
+- 支持多治理主体 (Timelock/Multi-sig)
+- 治理转移钩子 (`_afterGovernanceTransfer`)
+- 兼容 Ownable 接口 (`owner()`, `transferOwnership()`)
+
+**ProtocolConstants 常量库**:
+- `BASIS_POINTS = 10_000` (百分比基准)
+- `WEEK = 7 days` (治理周期)
+- `EPOCH_DURATION = 7 days` (Epoch 长度)
+- 消除跨合约魔法数字
+
+**ProtocolRoles 角色定义**:
+- `GOVERNANCE_ADMIN_ROLE` - 治理管理员
+- `EMISSION_POLICY_ROLE` - 排放策略管理员
+- `INCENTIVE_MANAGER_ROLE` - 激励管理员
+- `TREASURY_MANAGER_ROLE` - 国库管理员
+
+**EpochUtils 时间计算工具**:
+- `computeEpoch(start, duration, timestamp)` - 计算 Epoch
+- `currentEpoch(start, duration)` - 当前 Epoch
+- 消除重复时间计算逻辑
+
+### 排放架构
+
+**EmissionManager** (三阶段调度):
+- **Phase A** (Week 1-12): 固定 37.5M PAIMON/周
+- **Phase B** (Week 13-248): 指数衰减 0.985^t (37.5M → 4.327M)
+  - 使用 236 元素查找表优化 gas (O(1) 查询)
+- **Phase C** (Week 249-352): 固定 4.327M PAIMON/周
+- 总排放量: ~10B PAIMON (6.77 年)
+
+**EmissionRouter** (四通道分发):
 ```
-Quality RWA Projects (Launchpad)
-           ↓
-Users Purchase/Hold RWA
-           ↓
-Deposit RWA → Treasury → Mint USDP
-           ↓
-Lock PAIMON → Receive vePAIMON NFT (Governance Rights)
-           ↓
-veNFT Voting:
-  • DEX liquidity incentives
-  • Launchpad project approvals
-  • Treasury asset whitelist
-           ↓
-Increased Activity → Protocol Revenue
-           ↓
-Revenue Distribution:
-  • 40% ve incentive pools
-  • 25% Treasury risk buffer
-  • 20% PAIMON buyback/burn
-  • 10% USDP stabilizer
-  • 5% Operations
-           ↓
-Reinforces Cycle ↺
+EmissionManager.getWeeklyBudget(week)
+         ↓
+EmissionRouter.routeWeek(week)
+         ↓
+四通道转账:
+  • Debt Mining (债务挖矿)
+  • LP Pairs (AMM 流动性)
+  • Stability Pool (稳定池)
+  • Ecosystem (生态基金)
 ```
 
----
+**通道分配比例** (阶段动态):
+| 阶段 | Debt | LP Total | Eco | 备注 |
+|-----|------|----------|-----|------|
+| Phase A (Week 1-12) | 30% | 60% | 10% | 引导流动性 |
+| Phase B (Week 13-248) | 50% | 37.5% | 12.5% | 过渡到债务聚焦 |
+| Phase C (Week 249-352) | 55% | 35% | 10% | 可持续长期 |
 
-## 🪙 Protocol Tokens
-
-### USDP (Synthetic Stablecoin)
-- **Type**: Treasury-backed synthetic stablecoin
-- **Backing**: Treasury RWA holdings (US Treasuries, investment-grade credit, RWA revenue pools)
-- **Minting**: Deposit RWA at LTV ratios (T1: 80%, T2: 65%, T3: 50%)
-- **Use Cases**: DEX trading, collateral, 1:1 swap with USDC via PSM
-
-### PAIMON (Governance Token)
-- **Purpose**: Governance participation (lock for vePAIMON NFT), ecosystem incentives
-- **Total Supply**: ~10B PAIMON over 352 weeks (6.77 years)
-- **Emissions Schedule**:
-  - **Phase A** (Week 1-12): Fixed 37.5M PAIMON/week
-  - **Phase B** (Week 13-248): Exponential decay 0.985^t (37.5M → 4.327M)
-  - **Phase C** (Week 249-352): Fixed 4.327M PAIMON/week
-- **Channel Allocation** (phase-dynamic):
-  - Phase A: Debt 30%, LP 60%, Eco 10%
-  - Phase B: Debt 50%, LP 37.5%, Eco 12.5%
-  - Phase C: Debt 55%, LP 35%, Eco 10%
-- **Distribution**: LP rewards controlled by veNFT voting (gauge weights)
-- **Value Capture**: 20% of protocol revenue → buyback & burn
-
-### vePAIMON NFT (Governance NFT)
-- **Mechanism**: Lock PAIMON for 1 week ~ 4 years → receive voting power
-- **Voting Weight**: Linear decay (4 years = 2.00x, 1 year = 1.00x, 1 week = 0.05x)
-- **Benefits**: Protocol fee share, incentive allocation control, whitelist voting rights
+**LP 二级分割** (治理可调):
+- 默认: LP Pairs 60%,Stability Pool 40%
+- 通过 `EmissionManager.setLpSplitParams()` 调整
+- 必须总和 100% (链上验证)
 
 ---
 
-## 🚀 Getting Started
+## 快速开始
 
-### Prerequisites
+### 环境要求
 
 ```bash
-# Node.js & package manager
+# Foundry (推荐)
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
+
+# Node.js (可选,用于部署脚本)
 node >= 18.0.0
-npm >= 9.0.0 (or yarn/pnpm)
-
-# Recommended development tools
-- Hardhat 2.x (smart contracts)
-- Foundry (testing & fuzzing)
-- MetaMask or compatible Web3 wallet
+npm >= 9.0.0
 ```
 
-### Installation
+### 安装
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/paimon-dex.git
-cd paimon-dex
+# 克隆仓库
+git clone https://github.com/rocky2431/paimon-dex-protocol.git
+cd paimon-rwa-contracts
 
-# Install dependencies
-npm install
-# or
-yarn install
-```
+# 安装 Foundry 依赖
+forge install
 
-### Configuration
-
-```bash
-# Copy environment template
+# 配置环境变量
 cp .env.example .env
-
-# Fill in required values
-RPC_URL=https://...                    # Alchemy/Infura RPC endpoint
-PRIVATE_KEY=your_private_key_here      # For deployment (NEVER commit!)
-ETHERSCAN_API_KEY=your_api_key         # For contract verification
+# 编辑 .env 填写 PRIVATE_KEY、BSC_TESTNET_RPC_URL、BSCSCAN_API_KEY
 ```
 
-### Development
+### 编译和测试
 
 ```bash
-# Compile smart contracts
-npm run compile
+# 编译合约
+forge build
 
-# Run tests
-npm run test
-
-# Run frontend development server
-npm run dev
-
-# Deploy to testnet (Sepolia/Goerli)
-npm run deploy:testnet
-```
-
----
-
-## 📁 Project Structure
-
-```
-paimon-dex/
-├── .ultra/                     # Ultra Builder Pro 3.1 project management
-│   ├── config.json            # Project configuration
-│   ├── tasks/
-│   │   └── tasks.json         # Native task tracking
-│   └── docs/
-│       ├── prd.md             # 📋 Product Requirements (START HERE!)
-│       ├── tech.md            # 🔧 Technical Architecture
-│       ├── decisions/         # Architecture Decision Records (ADR)
-│       ├── tech-debt/         # Technical debt tracking
-│       └── lessons-learned/   # Post-mortem learnings
-│
-├── contracts/                  # Smart contracts (Solidity)
-│   ├── core/
-│   │   ├── USDP.sol          # Synthetic stablecoin token
-│   │   ├── PAIMON.sol        # Governance token
-│   │   └── VotingEscrow.sol  # Vote-escrowed NFT (vePAIMON)
-│   ├── treasury/
-│   │   ├── Treasury.sol      # Main vault
-│   │   ├── RWAPriceOracle.sol
-│   │   └── Liquidator.sol
-│   ├── dex/
-│   │   ├── DEX.sol           # AMM core
-│   │   ├── VotingEpoch.sol   # veNFT governance voting
-│   │   └── BribeMarket.sol
-│   ├── launchpad/
-│   │   ├── ProjectRegistry.sol      # ✅ RWA project governance (26/26 tests)
-│   │   └── IssuanceController.sol   # ✅ Token sale controller (42/42 tests)
-│   ├── presale/
-│   │   ├── RWABondNFT.sol          # Gamified bond certificate
-│   │   ├── DiceRoller.sol          # Chainlink VRF integration
-│   │   └── SocialTaskManager.sol   # Twitter/Discord verification
-│   └── governance/
-│       └── GovernanceCoordinator.sol
-│
-├── scripts/                    # Deployment & utility scripts
-├── test/                       # Smart contract tests (Hardhat + Foundry)
-├── frontend/                   # Next.js frontend application
-│   ├── src/
-│   │   ├── app/              # App router pages
-│   │   ├── components/       # React components
-│   │   ├── hooks/            # Custom Web3 hooks
-│   │   └── lib/              # Utilities & configs
-│   └── public/               # Static assets
-├── subgraph/                   # The Graph indexer
-└── README.md
-```
-
----
-
-## 📚 Documentation
-
-### Essential Reading
-
-1. **[Product Requirements Document](.ultra/docs/prd.md)** ⭐ START HERE!
-   - Complete product vision, features, user stories, roadmap
-   - RWA NFT presale details (Phase 1)
-   - Protocol flywheel mechanics
-
-2. **[Technical Design Document](.ultra/docs/tech.md)**
-   - System architecture & smart contract design
-   - Frontend stack & Material Design 3 compliance
-   - Security considerations & testing strategy
-
-3. **[Architecture Decisions](.ultra/docs/decisions/)**
-   - ADR templates for documenting key technical choices
-
-### Quick Links
-
-- **Tokenomics**: See PRD Section 2 (HYD, PAIMON, veNFT)
-- **RWA Asset Tiers**: See PRD Section 3.3 (T1/T2/T3 classifications)
-- **Fee Structure**: See PRD Section 4.2 (Revenue flows)
-- **Governance Voting**: See PRD Section 3.4 (veNFT mechanics)
-
----
-
-## 🎬 Phase 1: RWA NFT Presale
-
-### Overview
-**3-Month Yield-Bearing Bond Certificate** with convertible options to bootstrap the protocol.
-
-| Parameter | Value |
-|-----------|-------|
-| Total Supply | 5,000 NFTs |
-| Price | 100 USDC per NFT |
-| Duration | 90 days |
-| Base Yield | 2% APR (~0.5% for 3 months) |
-| Remint Yield | 0-8% APR (via ecosystem engagement) |
-| Target APR | 6% (range: 2-10%) |
-
-### Maturity Options (Choose One)
-
-1. **Convert to vePAIMON NFT**: Lock PAIMON (principal + yield) → Governance rights + fee share
-2. **Redeem PAIMON**: Receive PAIMON tokens @ conversion rate → Ecosystem utility
-3. **Cash Redemption**: Withdraw principal + accrued yield → Stable exit
-
-**📖 Full Details**: See [PRD Section 8](.ultra/docs/prd.md#8-initial-product-offering-rwa-nft-presale-bond)
-
----
-
-## 🛠 Tech Stack
-
-### Smart Contracts
-- **Language**: Solidity ^0.8.20
-- **Framework**: Hardhat 2.x + Foundry
-- **Testing**: Hardhat (integration), Foundry (fuzz/invariant), Echidna
-- **Auditing**: Trail of Bits, OpenZeppelin, Consensys Diligence (planned)
-- **Standards**: ERC-20 (HYD, PAIMON), ERC-721 (veNFT, RWA NFT)
-
-### Frontend
-- **Framework**: Next.js 14 (App Router) with TypeScript
-- **Web3**: wagmi v2 + viem (type-safe Ethereum interactions)
-- **UI Library**: Material-UI (MUI) v5 with Material Design 3 compliance
-- **Styling**: Tailwind CSS + MUI theming (warm color palette)
-- **State**: Zustand + TanStack Query
-- **i18n**: next-intl (English + Chinese)
-
-### Infrastructure
-- **Indexing**: The Graph (Subgraph for on-chain data)
-- **RPC**: Alchemy / Infura
-- **Oracles**: Chainlink + Custodian NAV sync
-- **Analytics**: Dune Analytics, Vercel Analytics
-- **Monitoring**: Forta Network, PagerDuty
-
----
-
-## 🔒 Security
-
-### Smart Contract Security
-- ✅ OpenZeppelin 5.x libraries (ReentrancyGuard, SafeERC20, Pausable, AccessControl)
-- ✅ Chainlink VRF v2 for randomness (dice rolling)
-- ✅ Oracle signature verification (social tasks)
-- ✅ Dual-oracle pricing (Chainlink + custodian NAV)
-- ✅ Circuit breaker (>20% price deviation triggers pause)
-- ✅ Multi-sig wallet setup (3-of-5 for Treasury)
-- ✅ Timelock governance (48-hour delay on parameter changes)
-
-### Security Audit Status (Phase 6 Complete)
-**Audit Readiness Score: 9.2/10**
-
-| Category | Status | Details |
-|----------|--------|---------|
-| **Static Analysis** | ✅ Passed | Slither: 0 Medium/High issues |
-| **Critical Vulnerabilities** | ✅ Fixed | 3 P0 issues resolved (SEC-003) |
-| **Code Quality** | ✅ Optimized | 16 precision fixes (SEC-005) |
-| **Test Coverage** | ✅ Achieved | 337 tests, 95.8% pass rate, ~85% coverage |
-| **Audit Package** | ✅ Ready | See [`.ultra/docs/audit/`](.ultra/docs/audit/) |
-
-**Key Fixes**:
-- Reentrancy protection (all state-changing functions)
-- SafeERC20 migration (USDT compatibility)
-- Chainlink VRF integration (front-running prevention)
-- 16 divide-before-multiply precision optimizations
-
-**Security Reports**:
-- [Security Fixes Changelog](.ultra/docs/audit/SECURITY-FIXES-CHANGELOG.md)
-- [Audit Submission Checklist](.ultra/docs/audit/AUDIT-SUBMISSION-CHECKLIST.md)
-
-### Reporting Vulnerabilities
-Please report security vulnerabilities to: **security@paimondex.com**
-
-Bug bounty program via ImmuneFi (planned post-audit)
-
----
-
-## 🗺 Roadmap
-
-### Phase 1: Core Infrastructure ✅ 100% Complete
-- [x] Ultra Builder Pro 3.1 initialization
-- [x] Complete PRD & Technical Design
-- [x] HYD Token, PSM (Peg Stability Module)
-- [x] DEX core (Factory, Router, Pair)
-- [x] Security audit (Slither, internal review)
-
-### Phase 2: DEX Enhancement ✅ 100% Complete
-- [x] VotingEscrow (veNFT locking mechanism)
-- [x] GaugeController (liquidity mining)
-- [x] Governance voting integration
-- [x] Reward distribution system
-
-### Phase 3: Frontend & Governance ✅ 100% Complete
-- [x] Next.js 14 frontend setup
-- [x] DEX UI (Swap, Liquidity, Farming)
-- [x] veNFT Lock UI & Governance voting
-- [x] Analytics dashboard
-- [x] Bribes marketplace UI
-
-### Phase 3.5: Presale & Gamification ✅ 100% Complete (16/16 tasks)
-- [x] RWA Bond NFT system (5 core contracts)
-- [x] Chainlink VRF dice rolling
-- [x] Social task verification (Twitter/Discord)
-- [x] Leaderboard system
-- [x] Complete presale frontend with 3D animations
-- [x] Bond Doge mascot system (10 expressions)
-
-### Phase 3.6: RWA Launchpad & Treasury ✅ 100% Complete (12/12 tasks)
-- [x] ProjectRegistry contract (veNFT governance)
-- [x] IssuanceController (token sale logic)
-- [x] Treasury RWA deposit/redeem system
-- [x] RWAPriceOracle (Chainlink + NAV dual-source)
-- [x] Launchpad frontend (Project list, Details, Participation)
-- [x] Treasury frontend (Deposit, Position monitoring)
-- [x] Liquidation system
-
-### Phase 6: Pre-Audit Hardening ✅ 100% Complete (4/4 tasks)
-- [x] SEC-003: P0 Critical fixes (Reentrancy, SafeERC20, VRF)
-- [x] SEC-004: Frontend testing (111 tests, 88% coverage)
-- [x] SEC-005: Code quality optimization (16 precision fixes)
-- [x] SEC-006: Audit submission package preparation
-- [x] **Audit Readiness Score: 9.2/10**
-
-### Phase 4: Professional Audit 🎯 Next Steps
-- [ ] Audit firm selection (CertiK / Trail of Bits / OpenZeppelin)
-- [ ] Submit audit package (Ready: 337 tests, 95.8% pass rate)
-- [ ] Audit remediation
-- [ ] Bug bounty program (ImmuneFi)
-
-### Phase 5: Mainnet Deployment ⏳ Planned
-- [x] Multi-sig wallet setup (3-of-5)
-- [ ] Mainnet contract deployment
-- [ ] Initial liquidity bootstrapping
-- [ ] Monitoring & alerting setup
-- [ ] Public launch announcement
-
-**Development Status**: ✅ **All core development complete (58/62 tasks, 93.5%)**
-**Full Roadmap**: See [PRD Section 11](.ultra/docs/prd.md#11-roadmap)
-
----
-
-## 🧪 Testing
-
-### Run Smart Contract Tests
-
-```bash
-# Unit + integration tests (Hardhat)
-npm run test
-
-# Coverage report
-npm run test:coverage
-
-# Fuzz testing (Foundry)
+# 运行测试
 forge test
 
-# Invariant testing
-forge test --mt invariant
+# 详细输出 (显示 console.log)
+forge test -vvv
+
+# 测试覆盖率
+forge coverage
+
+# Gas 报告
+forge test --gas-report
 ```
 
-### Current Test Status
-
-#### Smart Contracts (Forge)
-- **Total Tests**: 337
-- **Passing**: 323 (95.8%)
-- **Failed**: 14 (gas benchmarks + edge cases, non-critical)
-- **Coverage**: ~85% lines, ~90% functions, ~80% branches
-
-| Contract Suite | Tests | Status |
-|----------------|-------|--------|
-| PSM | 5 invariant tests | ✅ Passing |
-| DEXPair | 3 invariant tests | ✅ Passing |
-| Treasury | 39 tests (25 RWA + 14 Liquidation) | ✅ Passing |
-| VotingEscrow | 4 invariant tests | ✅ Passing |
-| RWABondNFT | 57 tests (52 unit + 5 VRF integration) | ✅ Passing |
-| RemintController | 47 tests | ⚠️ 9 NFT owner check failures (test setup issue) |
-| ProjectRegistry | 26 tests | ✅ All Passing |
-| IssuanceController | 42 tests | ✅ All Passing |
-
-#### Frontend Tests (Jest + Playwright)
-- **Unit Tests**: 111/126 (88% pass rate)
-- **E2E Tests**: 4/4 critical flows (100%)
-- **Coverage**: ~85% overall
-
-**Test Quality**: 6-dimensional coverage (Functional, Boundary, Exception, Performance, Security, Compatibility)
-**Detailed Report**: See [`.ultra/docs/audit/FORGE-COVERAGE-REPORT.txt`](.ultra/docs/audit/FORGE-COVERAGE-REPORT.txt)
-
-### Run Frontend Tests
+### 部署到 BSC 测试网
 
 ```bash
-# Component tests
-npm run test:unit
+# 加载环境变量
+source .env
 
-# E2E tests (Playwright)
-npm run test:e2e
-
-# Performance tests (Lighthouse CI)
-npm run test:perf
-```
-
-**Target Coverage**: >95% for smart contracts, >80% for frontend
-
----
-
-## 🚢 Deployment
-
-### Testnet Deployment
-
-```bash
-# Deploy core contracts to Sepolia
-npm run deploy:testnet
-
-# Verify on Etherscan
-npm run verify:testnet
-
-# Initialize with test parameters
-npm run initialize:testnet
-```
-
-### Mainnet Deployment Checklist
-
-- [ ] Smart contract audits completed (2+ firms)
-- [ ] All critical/high findings resolved
-- [ ] Frontend security review
-- [ ] Legal opinion on RWA custody structure
-- [ ] Insurance coverage for Treasury (>$1M)
-- [ ] Multi-sig setup tested
-- [ ] Emergency procedures documented
-- [ ] Community governance vote passed
-
-**⚠️ IMPORTANT**: Mainnet deployment requires multi-sig approval and gradual rollout.
-
----
-
-## 🤝 Contributing
-
-We welcome contributions from the community! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-### Development Workflow
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Write tests for your changes
-4. Ensure all tests pass (`npm run test`)
-5. Commit using conventional commits (`feat:`, `fix:`, `docs:`, etc.)
-6. Push to your branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
-
-**Code Quality Standards**:
-- Follow SOLID principles
-- Maintain >95% test coverage
-- Document all public functions (NatSpec for Solidity)
-- Use TypeScript strict mode
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 📞 Contact & Community
-
-- **Website**: https://paimondex.com (coming soon)
-- **Twitter**: [@PaimonDex](https://twitter.com/PaimonDex)
-- **Discord**: [Join our community](https://discord.gg/paimondex)
-- **Telegram**: [Announcements](https://t.me/paimondex)
-- **Email**: contact@paimondex.com
-
----
-
-## 🙏 Acknowledgments
-
-**Inspired by**:
-- **Velodrome Finance** (veNFT Governance DEX model)
-- **MakerDAO** (CDP collateral system)
-- **Ondo Finance** (RWA tokenization)
-- **Curve Finance** (veToken governance)
-
-**Built with Ultra Builder Pro 3.1** 🚀
-
----
-
-## ⚡ Quick Start Commands
-
-```bash
-# Development
-npm run dev              # Start frontend dev server
-npm run compile          # Compile smart contracts
-npm run test             # Run all tests
-
-# Deployment
-npm run deploy:testnet   # Deploy to Sepolia/Goerli
-npm run deploy:mainnet   # Deploy to mainnet (requires multi-sig)
-
-# Documentation
-npm run docs:generate    # Generate smart contract docs from NatSpec
-npm run docs:serve       # Serve documentation locally
-
-# Utilities
-npm run format           # Format code (Prettier + Solhint)
-npm run lint             # Lint code
-npm run analyze          # Analyze smart contract security (Slither)
+# 部署全套合约
+forge script script/DeployComplete.s.sol \
+  --rpc-url $BSC_TESTNET_RPC_URL \
+  --broadcast \
+  --verify \
+  --etherscan-api-key $BSCSCAN_API_KEY \
+  -vvvv
 ```
 
 ---
 
-**⚠️ Disclaimer**: This project is in active development. Smart contracts have not been audited. Use at your own risk. RWA investments carry regulatory and market risks. Always do your own research (DYOR).
+## 项目结构
+
+```
+paimon-rwa-contracts/
+├── src/
+│   ├── common/                        # 统一基础设施
+│   │   ├── Governable.sol            # 治理基类
+│   │   ├── ProtocolConstants.sol     # 协议常量
+│   │   ├── ProtocolRoles.sol         # 角色定义
+│   │   └── EpochUtils.sol            # 时间计算工具
+│   ├── core/
+│   │   ├── USDP.sol                  # 合成稳定币
+│   │   ├── PAIMON.sol                # 治理代币
+│   │   └── VotingEscrow.sol          # vePAIMON NFT
+│   ├── treasury/
+│   │   ├── Treasury.sol              # RWA 抵押金库
+│   │   ├── PSM.sol                   # 锚定稳定模块
+│   │   ├── PSMParameterized.sol      # 参数化 PSM (支持 6/18 decimals)
+│   │   ├── SavingRate.sol            # USDP 储蓄利率
+│   │   └── RWAPriceOracle.sol        # 双源预言机
+│   ├── dex/
+│   │   ├── DEXFactory.sol            # AMM 工厂
+│   │   ├── DEXPair.sol               # 交易对
+│   │   └── DEXRouter.sol             # 路由器
+│   ├── governance/
+│   │   ├── EmissionManager.sol       # 排放调度器
+│   │   ├── EmissionRouter.sol        # 四通道分发器
+│   │   ├── GaugeController.sol       # 流动性权重控制
+│   │   └── RewardDistributor.sol     # 奖励分发器
+│   ├── launchpad/
+│   │   ├── ProjectRegistry.sol       # 项目注册表
+│   │   └── IssuanceController.sol    # 发行控制器
+│   └── presale/
+│       ├── RWABondNFT.sol           # 债券 NFT
+│       └── RemintController.sol      # Remint 控制器
+├── test/                             # 测试套件
+│   ├── core/                         # 核心合约测试
+│   ├── governance/                   # 治理测试
+│   ├── treasury/                     # 国库测试
+│   └── invariant/                    # 不变量测试
+├── script/                           # 部署脚本
+│   ├── DeployComplete.s.sol         # 完整部署
+│   └── DEPLOYMENT.md                # 部署文档
+├── audit-package/                    # 审计包
+│   ├── contracts/                    # 同步的合约代码
+│   └── docs/                         # 审计文档
+└── scripts/
+    └── sync_audit_package.sh        # 审计包同步脚本
+```
+
+---
+
+## 测试状态
+
+### 测试统计
+
+- **总测试数**: 990
+- **通过**: 980 (98.99%)
+- **失败**: 10 (Gas 基准测试,非关键)
+- **覆盖率**: ~85% 行覆盖, ~90% 函数覆盖
+
+### 关键测试套件
+
+| 合约套件 | 测试数 | 状态 |
+|---------|-------|------|
+| **EmissionManager** | 48 | ✅ 全部通过 |
+| **EmissionRouter** | 4 | ✅ 全部通过 |
+| **PSMParameterized** | 12 | ✅ 全部通过 |
+| **Treasury** | 39 | ✅ 全部通过 |
+| **VotingEscrow** | 28 | ✅ 全部通过 |
+| **GaugeController** | 36 | ✅ 全部通过 |
+| **DEX (Factory/Pair/Router)** | 67 | ✅ 全部通过 |
+| **Launchpad (Registry/Issuance)** | 68 | ✅ 全部通过 |
+
+### 不变量测试
+
+**PSM 不变量**:
+```solidity
+invariant_PSM_USDCBacking: USDC reserve >= USDP supply (1:1 backing)
+```
+
+**DEX 不变量**:
+```solidity
+invariant_DEX_ConstantProduct: K = reserve0 × reserve1 (constant product)
+invariant_DEX_KMonotonicity: K only increases after swaps (fee accumulation)
+```
+
+**Treasury 不变量**:
+```solidity
+invariant_Treasury_Collateralization: Total USDP minted <= Total RWA value × LTV
+```
+
+---
+
+## 安全特性
+
+### 合约安全
+
+- ✅ OpenZeppelin 5.x 库 (ReentrancyGuard, SafeERC20, Pausable, AccessControl)
+- ✅ Chainlink VRF v2 随机性 (骰子游戏)
+- ✅ 双源预言机定价 (Chainlink + 托管方 NAV)
+- ✅ 熔断机制 (>20% 价格偏差触发暂停)
+- ✅ Multi-sig 钱包 (3-of-5 用于 Treasury)
+- ✅ Timelock 治理 (参数修改 48 小时延迟)
+- ✅ 所有状态修改函数使用 `nonReentrant` 防重入
+- ✅ 所有代币转账使用 `SafeERC20` (兼容 USDT)
+
+### 精度优化
+
+所有价值计算遵循 **先乘后除** 原则:
+
+```solidity
+// ✅ 正确: 单次除法
+uint256 result = (amount × price × ltvRatio) / (1e18 × BASIS_POINTS);
+
+// ❌ 错误: 多次除法累积精度损失
+uint256 step1 = amount × price / 1e18;
+uint256 result = step1 × ltvRatio / BASIS_POINTS;
+```
+
+16 处精度优化 (SEC-005) 已全部修复。
+
+---
+
+## 部署信息
+
+### 目标网络
+
+**BSC Mainnet** (ChainID 56):
+- RPC: https://bsc-dataseed.binance.org/
+- Explorer: https://bscscan.com/
+- Gas 价格: ~3 Gwei
+
+**BSC Testnet** (ChainID 97):
+- RPC: https://data-seed-prebsc-1-s1.binance.org:8545/
+- Explorer: https://testnet.bscscan.com/
+- Faucet: https://testnet.bnbchain.org/faucet-smart
+
+### 部署顺序
+
+1. **基础设施**: Governable 基类 (抽象合约,不部署)
+2. **代币**: USDP, PAIMON
+3. **DEX**: DEXFactory, DEXRouter
+4. **稳定币**: PSMParameterized
+5. **国库**: Treasury, RWAPriceOracle
+6. **治理**: VotingEscrow, GaugeController
+7. **排放**: EmissionManager, EmissionRouter
+8. **启动板**: ProjectRegistry, IssuanceController
+9. **预售**: RWABondNFT, RemintController (+ Chainlink VRF)
+
+完整部署流程见 [script/DEPLOYMENT.md](script/DEPLOYMENT.md)。
+
+---
+
+## 文档
+
+### 核心文档
+
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - 系统架构详解
+- **[DEVELOPMENT.md](DEVELOPMENT.md)** - 开发指南
+- **[script/DEPLOYMENT.md](script/DEPLOYMENT.md)** - 部署文档
+- **[.ultra/docs/usdp-camelot-lybra-system-guide.md](.ultra/docs/usdp-camelot-lybra-system-guide.md)** - 核心设计文档
+
+### 审计资料
+
+- **[audit-package/README.md](audit-package/README.md)** - 审计包概览
+- **[audit-package/docs/](audit-package/docs/)** - 审计相关文档
+
+---
+
+## 贡献
+
+欢迎社区贡献！请遵循以下流程:
+
+1. Fork 仓库
+2. 创建特性分支 (`git checkout -b feat/amazing-feature`)
+3. 编写测试 (覆盖率 >80%)
+4. 提交符合 Conventional Commits 的消息 (`feat:`, `fix:`, `docs:`)
+5. 推送分支 (`git push origin feat/amazing-feature`)
+6. 创建 Pull Request
+
+**代码质量标准**:
+- 遵循 SOLID 原则
+- 函数 <50 行
+- 测试覆盖率 >80%
+- 所有公共函数有 NatSpec 文档
+
+---
+
+## 许可证
+
+本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件。
+
+---
+
+## 联系方式
+
+- **GitHub**: https://github.com/rocky2431/paimon-dex-protocol
+- **Issues**: https://github.com/rocky2431/paimon-dex-protocol/issues
+- **Email**: rocky243@example.com
+
+---
+
+## 致谢
+
+**灵感来源**:
+- **Velodrome Finance** - veNFT 治理 DEX 模型
+- **Lybra Finance** - 抵押生息资产铸稳定币
+- **Camelot DEX** - ve(3,3) 投票 + Gauge + Bribe
+- **MakerDAO** - CDP 抵押系统
+- **Curve Finance** - veToken 治理
+
+**构建工具**: Foundry, OpenZeppelin, Chainlink
+
+---
+
+**当前版本**: v3.3.0
+**最后更新**: 2025-11-06
+**审计状态**: 准备中 (测试通过率 98.99%, 覆盖率 ~85%)

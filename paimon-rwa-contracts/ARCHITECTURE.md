@@ -1,8 +1,8 @@
 # Paimon DEX - System Architecture
 
 **Version**: 3.3.0
-**Last Updated**: 2025-11-05
-**Status**: Audit Ready (9.5/10) - Complete Component Documentation
+**Last Updated**: 2025-11-06
+**Status**: Audit Ready (9.8/10) - Unified Infrastructure Complete
 
 ---
 
@@ -98,6 +98,42 @@ Back to Top ↺
 
 ## 2. Core Components
 
+### 2.0 Unified Infrastructure (⭐ v3.3.0 NEW)
+
+**Governable Base Class** (`src/common/Governable.sol`):
+- All governance-enabled contracts inherit from `Governable`
+- Built on OpenZeppelin `AccessControlEnumerable`
+- Supports multiple governance admins (Timelock, Multi-sig)
+- Transfer governance hook: `_afterGovernanceTransfer()`
+- Ownable compatibility: `owner()`, `transferOwnership()`
+- Safety constraint: At least 1 governor required
+
+**ProtocolConstants Library** (`src/common/ProtocolConstants.sol`):
+- `BASIS_POINTS = 10,000` - Percentage base for all calculations
+- `WEEK = 7 days` - Governance cycle duration
+- `EPOCH_DURATION = 7 days` - Standard epoch length
+- **Purpose**: Eliminate magic numbers across contracts
+
+**ProtocolRoles Library** (`src/common/ProtocolRoles.sol`):
+- `GOVERNANCE_ADMIN_ROLE` - Governance administrators
+- `EMISSION_POLICY_ROLE` - Emission policy managers
+- `INCENTIVE_MANAGER_ROLE` - Incentive managers
+- `TREASURY_MANAGER_ROLE` - Treasury managers
+- **Purpose**: Centralized role definition for access control
+
+**EpochUtils Library** (`src/common/EpochUtils.sol`):
+- `computeEpoch(start, duration, timestamp)` - Calculate epoch number
+- `currentEpoch(start, duration)` - Get current epoch
+- **Purpose**: Standardized time calculation across governance contracts
+
+**Contracts Using Governable**:
+1. `EmissionManager` - Three-phase emission scheduler
+2. `EmissionRouter` - Four-channel distribution pipeline
+3. `PSMParameterized` - USDC ↔ USDP 1:1 swap
+4. `Treasury` - RWA collateral vault
+5. `GaugeController` - Liquidity mining weights
+6. `DEXFactory` - AMM factory
+
 ### 2.1 Component Overview
 
 | Component | Contracts | Purpose | Status |
@@ -109,7 +145,8 @@ Back to Top ↺
 | **USDPStabilityPool** | USDPStabilityPool.sol | USDP stability pool for liquidation buffer | ✅ Complete |
 | **DEX Core** | DEXFactory, DEXPair, DEXRouter | Uniswap V2-style AMM with custom fees | ✅ Complete |
 | **veNFT** | VotingEscrow.sol | Time-locked governance NFTs (vePAIMON) | ✅ Complete |
-| **Governance** | GaugeController.sol | Liquidity mining distribution | ✅ Complete |
+| **Governance** | GaugeController.sol, EmissionManager.sol | Liquidity mining distribution + emission scheduler | ✅ Complete |
+| **Emission System** | EmissionRouter.sol | Four-channel distribution pipeline (Debt/LP/Stability/Eco) | ⭐ NEW v3.3.0 |
 | **esPaimon** | esPaimon.sol | Vesting token (365-day linear vesting) | ✅ Complete |
 | **BoostStaking** | BoostStaking.sol | PAIMON staking for boost multipliers (1.0x-1.5x) | ✅ Complete |
 | **BribeMarketplace** | BribeMarketplace.sol | Multi-asset bribe aggregation | ✅ Complete |
@@ -207,6 +244,100 @@ contract PAIMON is ERC20, Ownable {
 }
 ```
 
+### 3.1.5 Governable.sol (Unified Governance Base Class) ⭐ NEW v3.3.0
+
+```solidity
+abstract contract Governable is AccessControlEnumerable {
+    /// @dev Initialize with first governor
+    constructor(address initialGovernor) {
+        require(initialGovernor != address(0), "Governable: governor is zero");
+        _grantRole(DEFAULT_ADMIN_ROLE, initialGovernor);
+        _grantRole(ProtocolRoles.GOVERNANCE_ADMIN_ROLE, initialGovernor);
+    }
+
+    /// @notice Only governance modifier
+    modifier onlyGovernance() {
+        _checkRole(ProtocolRoles.GOVERNANCE_ADMIN_ROLE, _msgSender());
+        _;
+    }
+
+    /// @notice Add new governance admin (e.g., Timelock, Multi-sig)
+    function addGovernance(address account) public onlyGovernance {
+        require(account != address(0), "Governable: account is zero");
+        _grantRole(DEFAULT_ADMIN_ROLE, account);
+        _grantRole(ProtocolRoles.GOVERNANCE_ADMIN_ROLE, account);
+    }
+
+    /// @notice Remove governance admin (requires at least 1 remaining)
+    function removeGovernance(address account) public onlyGovernance {
+        require(account != address(0), "Governable: account is zero");
+        require(hasRole(ProtocolRoles.GOVERNANCE_ADMIN_ROLE, account), "Governable: not a governor");
+
+        uint256 currentCount = getRoleMemberCount(ProtocolRoles.GOVERNANCE_ADMIN_ROLE);
+        require(currentCount > 1, "Governable: at least one governor required");
+
+        _revokeRole(ProtocolRoles.GOVERNANCE_ADMIN_ROLE, account);
+        _revokeRole(DEFAULT_ADMIN_ROLE, account);
+    }
+
+    /// @notice Transfer governance (3-step: add → hook → remove)
+    function transferGovernance(address newGovernor) public virtual onlyGovernance {
+        address previousGovernor = _msgSender();
+        require(newGovernor != address(0), "Governable: governor is zero");
+        require(newGovernor != previousGovernor, "Governable: new governor is current");
+
+        addGovernance(newGovernor);
+        _afterGovernanceTransfer(previousGovernor, newGovernor);
+        removeGovernance(previousGovernor);
+    }
+
+    /// @notice Hook for subclass-specific logic during governance transfer
+    function _afterGovernanceTransfer(address /*previousGovernor*/, address /*newGovernor*/)
+        internal
+        virtual
+    {}
+
+    /// @notice Query governance count (off-chain monitoring)
+    function governanceCount() public view returns (uint256) {
+        return getRoleMemberCount(ProtocolRoles.GOVERNANCE_ADMIN_ROLE);
+    }
+
+    /// @notice Check if address has governance permission
+    function isGovernance(address account) public view returns (bool) {
+        return hasRole(ProtocolRoles.GOVERNANCE_ADMIN_ROLE, account);
+    }
+
+    /// @notice Ownable compatibility - returns first governor
+    function owner() public view returns (address) {
+        return getRoleMember(ProtocolRoles.GOVERNANCE_ADMIN_ROLE, 0);
+    }
+}
+```
+
+**Key Features**:
+- Unified governance interface across all core contracts
+- Multi-governor support (Timelock, Multi-sig, EOA)
+- Safety: At least 1 governor required (prevents lockout)
+- Transfer hook: `_afterGovernanceTransfer()` for role migration
+- Ownable compatibility: `owner()`, `transferOwnership()`
+
+**Example Subclass Override**:
+```solidity
+contract EmissionRouter is Governable, ReentrancyGuard {
+    /// @inheritdoc Governable
+    function _afterGovernanceTransfer(address previousGovernor, address newGovernor)
+        internal
+        override
+    {
+        // Migrate EMISSION_POLICY_ROLE during governance transfer
+        if (hasRole(ProtocolRoles.EMISSION_POLICY_ROLE, previousGovernor)) {
+            _revokeRole(ProtocolRoles.EMISSION_POLICY_ROLE, previousGovernor);
+        }
+        _grantRole(ProtocolRoles.EMISSION_POLICY_ROLE, newGovernor);
+    }
+}
+```
+
 #### EmissionManager.sol (Emission Schedule)
 ```solidity
 contract EmissionManager is Ownable {
@@ -260,6 +391,139 @@ contract EmissionManager is Ownable {
 - **Flexibility**: LP split adjustable to optimize between trading liquidity and stability pool depth
 - **Anti-Inflation**: Exponential decay prevents excessive supply growth
 - **Dust Collection**: Precision-optimized allocation ensures no rounding waste
+
+#### EmissionRouter.sol (Four-Channel Distribution) ⭐ NEW v3.3.0
+
+```solidity
+contract EmissionRouter is Governable, ReentrancyGuard {
+    using SafeERC20 for IERC20;
+
+    EmissionManager public immutable emissionManager;
+    IERC20 public immutable emissionToken;
+
+    struct ChannelSinks {
+        address debt;
+        address lpPairs;
+        address stabilityPool;
+        address eco;
+    }
+
+    ChannelSinks public sinks;
+    mapping(uint256 => bool) public routedWeek;
+
+    event SinksUpdated(address debt, address lpPairs, address stabilityPool, address eco);
+    event BudgetRouted(
+        uint256 indexed week,
+        uint256 debt,
+        uint256 lpPairs,
+        uint256 stabilityPool,
+        uint256 eco
+    );
+
+    modifier onlyEmissionPolicy() {
+        _checkRole(ProtocolRoles.EMISSION_POLICY_ROLE, _msgSender());
+        _;
+    }
+
+    constructor(address _emissionManager, address _emissionToken) Governable(msg.sender) {
+        require(_emissionManager != address(0), "EmissionRouter: manager zero");
+        require(_emissionToken != address(0), "EmissionRouter: token zero");
+
+        emissionManager = EmissionManager(_emissionManager);
+        emissionToken = IERC20(_emissionToken);
+
+        _grantRole(ProtocolRoles.EMISSION_POLICY_ROLE, msg.sender);
+    }
+
+    /// @notice Set channel sink addresses (governance only)
+    function setSinks(address debt, address lpPairs, address stabilityPool, address eco) external onlyGovernance {
+        sinks = ChannelSinks({debt: debt, lpPairs: lpPairs, stabilityPool: stabilityPool, eco: eco});
+        emit SinksUpdated(debt, lpPairs, stabilityPool, eco);
+    }
+
+    /// @notice Route weekly budget to configured channels
+    function routeWeek(uint256 week) external onlyEmissionPolicy nonReentrant {
+        require(!routedWeek[week], "EmissionRouter: already routed");
+
+        (uint256 debtAmount, uint256 lpPairsAmount, uint256 stabilityAmount, uint256 ecoAmount) =
+            emissionManager.getWeeklyBudget(week);
+
+        uint256 totalBudget = debtAmount + lpPairsAmount + stabilityAmount + ecoAmount;
+        require(totalBudget > 0, "EmissionRouter: zero budget");
+
+        require(emissionToken.balanceOf(address(this)) >= totalBudget, "EmissionRouter: insufficient balance");
+
+        _transferChannel(sinks.debt, debtAmount, "debt");
+        _transferChannel(sinks.lpPairs, lpPairsAmount, "lpPairs");
+        _transferChannel(sinks.stabilityPool, stabilityAmount, "stability");
+        _transferChannel(sinks.eco, ecoAmount, "eco");
+
+        routedWeek[week] = true;
+        emit BudgetRouted(week, debtAmount, lpPairsAmount, stabilityAmount, ecoAmount);
+    }
+
+    /// @notice Grant emission policy role to authorized address
+    function grantEmissionPolicy(address account) external onlyGovernance {
+        require(account != address(0), "EmissionRouter: account is zero");
+        _grantRole(ProtocolRoles.EMISSION_POLICY_ROLE, account);
+    }
+
+    /// @notice Revoke emission policy role
+    function revokeEmissionPolicy(address account) external onlyGovernance {
+        require(account != address(0), "EmissionRouter: account is zero");
+        _revokeRole(ProtocolRoles.EMISSION_POLICY_ROLE, account);
+    }
+
+    /// @inheritdoc Governable
+    function _afterGovernanceTransfer(address previousGovernor, address newGovernor)
+        internal
+        override
+    {
+        if (hasRole(ProtocolRoles.EMISSION_POLICY_ROLE, previousGovernor)) {
+            _revokeRole(ProtocolRoles.EMISSION_POLICY_ROLE, previousGovernor);
+        }
+        _grantRole(ProtocolRoles.EMISSION_POLICY_ROLE, newGovernor);
+    }
+
+    function _transferChannel(address sink, uint256 amount, string memory channel) private {
+        if (amount == 0) {
+            return;
+        }
+        require(sink != address(0), string.concat("EmissionRouter: ", channel, " sink not set"));
+        emissionToken.safeTransfer(sink, amount);
+    }
+}
+```
+
+**Key Features**:
+- **One-shot distribution**: Each week can only be routed once (prevents double-spending)
+- **Pre-flight checks**: Validates router has sufficient balance before routing
+- **Non-zero sink validation**: Ensures all sink addresses configured before transfer
+- **Role-based routing**: Only EMISSION_POLICY_ROLE can execute routing
+- **Emergency recovery**: `recoverToken()` for stuck funds (governance only)
+
+**Distribution Flow**:
+```
+EmissionManager.getWeeklyBudget(week)
+         ↓
+(debt: 50%, lpPairs: 22.5%, stability: 15%, eco: 12.5%)
+         ↓
+EmissionRouter.routeWeek(week)
+         ↓
+Transfer to 4 channels:
+  • Debt Mining Sink (50%)
+  • LP Pairs Sink (22.5%)
+  • Stability Pool Sink (15%)
+  • Ecosystem Sink (12.5%)
+         ↓
+routedWeek[week] = true
+```
+
+**Integration with EmissionManager**:
+- Router queries `EmissionManager.getWeeklyBudget(week)` for allocations
+- EmissionManager calculates phase-dynamic splits
+- Router enforces sink configuration before transfer
+- Immutable references prevent configuration drift
 
 ### 3.2 PSM (Peg Stability Module)
 

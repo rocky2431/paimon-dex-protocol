@@ -1,242 +1,503 @@
 # Paimon.dex Deployment Guide
 
-This document provides step-by-step instructions for deploying Paimon.dex contracts to BSC testnet.
+This guide provides step-by-step instructions for deploying Paimon.dex smart contracts to BSC (Binance Smart Chain).
+
+---
 
 ## Prerequisites
 
-1. **Foundry installed**
-   ```bash
-   curl -L https://foundry.paradigm.xyz | bash
-   foundryup
-   ```
-
-2. **Environment variables configured**
-
-   Create a `.env` file in the project root:
-   ```bash
-   # Deployer private key (DO NOT commit this!)
-   PRIVATE_KEY=0x...
-
-   # BSC Testnet RPC
-   BSC_TESTNET_RPC=https://data-seed-prebsc-1-s1.binance.org:8545/
-
-   # BscScan API key for contract verification
-   BSCSCAN_API_KEY=your_api_key_here
-
-   # Multi-sig address for ownership (optional, defaults to deployer)
-   DEPLOYER_ADDRESS=0x...
-   ```
-
-3. **Load environment variables**
-   ```bash
-   source .env
-   ```
-
-## Deployment Steps
-
-### 1. Dry Run Simulation
-
-Test the deployment script without broadcasting transactions:
+### 1. Foundry Installation
 
 ```bash
-forge script script/Deploy.s.sol --rpc-url $BSC_TESTNET_RPC
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
+```
+
+Verify installation:
+```bash
+forge --version
+# Expected output: forge 0.2.0 (...)
+```
+
+### 2. Environment Configuration
+
+Create a `.env` file in the project root:
+
+```bash
+# Deployer private key (NEVER commit this!)
+PRIVATE_KEY=0x...
+
+# BSC Network RPC URLs
+BSC_MAINNET_RPC_URL=https://bsc-dataseed.binance.org/
+BSC_TESTNET_RPC_URL=https://data-seed-prebsc-1-s1.binance.org:8545/
+
+# BscScan API key for contract verification
+BSCSCAN_API_KEY=your_api_key_here
+
+# Multi-sig address for ownership (optional)
+MULTI_SIG_ADDRESS=0x...
+```
+
+### 3. Load Environment Variables
+
+```bash
+source .env
+```
+
+### 4. Fund Deployer Address
+
+Ensure your deployer address has sufficient BNB for gas fees:
+
+**Testnet**:
+- Visit https://testnet.bnbchain.org/faucet-smart
+- Get free testnet BNB
+
+**Mainnet**:
+- Transfer BNB to deployer address
+- Check balance: `cast balance $DEPLOYER_ADDRESS --rpc-url $BSC_MAINNET_RPC_URL`
+
+---
+
+## Deployment Architecture
+
+### Contract Deployment Sequence
+
+```
+1. Core Tokens
+   ├── USDP (Synthetic Stablecoin)
+   └── PAIMON (Governance Token)
+
+2. DEX Infrastructure
+   ├── DEXFactory
+   └── DEXRouter
+
+3. Stablecoin Module
+   └── PSMParameterized (USDC ↔ USDP 1:1)
+
+4. Treasury System
+   ├── Treasury (RWA Collateral Vault)
+   └── RWAPriceOracle (Dual-source pricing)
+
+5. Governance Infrastructure
+   ├── VotingEscrow (vePAIMON NFT)
+   └── GaugeController (Liquidity mining weights)
+
+6. Emission System
+   ├── EmissionManager (3-phase emission scheduler)
+   └── EmissionRouter (4-channel distribution pipeline)
+
+7. Launchpad
+   ├── ProjectRegistry (veNFT governance)
+   └── IssuanceController (Token sales)
+
+8. Presale (Optional - Phase 1)
+   ├── RWABondNFT (Gamified bond certificates)
+   └── RemintController (Dice rolling + social tasks)
+       └── Chainlink VRF setup required
+```
+
+### Key Infrastructure Components
+
+**Governable Base Class**:
+- All governance-enabled contracts inherit from `Governable`
+- Supports multiple governors (Timelock, Multi-sig)
+- Unified role-based access control
+
+**ProtocolConstants**:
+- `BASIS_POINTS = 10,000` (Percentage base)
+- `WEEK = 7 days` (Governance cycle)
+- `EPOCH_DURATION = 7 days`
+
+**ProtocolRoles**:
+- `GOVERNANCE_ADMIN_ROLE` - Governance administrators
+- `EMISSION_POLICY_ROLE` - Emission policy managers
+- `INCENTIVE_MANAGER_ROLE` - Incentive managers
+- `TREASURY_MANAGER_ROLE` - Treasury managers
+
+**EpochUtils**:
+- `computeEpoch(start, duration, timestamp)` - Calculate epoch number
+- `currentEpoch(start, duration)` - Get current epoch
+
+---
+
+## Step-by-Step Deployment
+
+### Step 1: Dry Run Simulation
+
+Test deployment without broadcasting transactions:
+
+```bash
+forge script script/DeployComplete.s.sol \
+  --rpc-url $BSC_TESTNET_RPC_URL \
+  -vvvv
 ```
 
 This will:
 - Simulate all contract deployments
-- Check constructor parameters
-- Verify configuration steps
+- Validate constructor parameters
 - Display deployment addresses
+- Estimate gas costs
 
-### 2. Deploy to BSC Testnet
+### Step 2: Deploy to BSC Testnet
 
-Deploy all contracts to BSC testnet:
+Deploy and verify all contracts:
 
 ```bash
-forge script script/Deploy.s.sol \
-  --rpc-url $BSC_TESTNET_RPC \
+forge script script/DeployComplete.s.sol \
+  --rpc-url $BSC_TESTNET_RPC_URL \
   --broadcast \
   --verify \
   --etherscan-api-key $BSCSCAN_API_KEY \
   -vvvv
 ```
 
-**Flags explanation:**
-- `--broadcast`: Actually send transactions to the network
+**Flags**:
+- `--broadcast`: Execute transactions on network
 - `--verify`: Verify contracts on BscScan
-- `-vvvv`: Verbose output for debugging
+- `-vvvv`: Maximum verbosity for debugging
 
-### 3. Save Deployment Addresses
-
-After successful deployment, addresses will be saved to:
+**Expected Output**:
 ```
-deployments/bsc-testnet-97.json
+[⠒] Compiling...
+[⠆] Compiling 50 files with 0.8.24
+[⠰] Solc 0.8.24 finished in 2.43s
+
+== Logs ==
+Deploying to: BSC Testnet (ChainID 97)
+Deployer: 0x...
+
+1/12 Deploying USDP...
+  ✅ Deployed at: 0x...
+
+2/12 Deploying PAIMON...
+  ✅ Deployed at: 0x...
+
+...
+
+12/12 Configuring EmissionRouter...
+  ✅ Configuration complete
+
+✅ All contracts deployed successfully!
+Deployment addresses saved to: deployments/bsc-testnet-97.json
 ```
 
-## Deployed Contracts
+### Step 3: Verify Deployment
 
-The script deploys the following contracts in order:
+Check saved deployment addresses:
 
-### Core Contracts
-1. **HYD Token** - Stablecoin pegged to USD
-2. **PAIMON Token** - Platform utility token (10B max supply)
-3. **PSM** - Peg Stability Module for HYD/USDC swaps
+```bash
+cat deployments/bsc-testnet-97.json
+```
 
-### Governance Contracts
-4. **VotingEscrow** - veNFT for time-weighted voting
-5. **GaugeController** - Manages liquidity gauges and vote weights
-6. **RewardDistributor** - Distributes PAIMON rewards via Merkle tree
-7. **BribeMarketplace** - Bribe marketplace for vote incentives
+Verify on BscScan:
+- Visit https://testnet.bscscan.com/
+- Search for each contract address
+- Verify "Contract" tab shows verified source code
 
-### DEX Contracts
-8. **DEXFactory** - Creates liquidity pairs
-9. **HYD/USDC Pair** - Initial liquidity pair
+### Step 4: Post-Deployment Configuration
 
-### DeFi Integration
-10. **PriceOracle** - Multi-source price oracle (Pyth)
-11. **Treasury** - Protocol fee collection
+#### 4.1 Configure EmissionManager
 
-### Test Tokens (Testnet Only)
-12. **Mock USDC** - USDC mock for testing (6 decimals)
+Set LP split parameters (default: 60% Pairs, 40% Stability Pool):
 
-## Post-Deployment Configuration
+```bash
+cast send $EMISSION_MANAGER_ADDRESS \
+  "setLpSplitParams(uint256,uint256)" \
+  6000 4000 \
+  --private-key $PRIVATE_KEY \
+  --rpc-url $BSC_TESTNET_RPC_URL
+```
 
-The script automatically performs the following configuration:
+#### 4.2 Configure EmissionRouter
 
-1. **Role Grants**
-   - Grant MINTER_ROLE to RewardDistributor for PAIMON token
+Set channel sinks:
 
-2. **Gauge Setup**
-   - Add HYD/USDC pair as initial gauge
+```bash
+cast send $EMISSION_ROUTER_ADDRESS \
+  "setSinks(address,address,address,address)" \
+  $DEBT_SINK_ADDRESS \
+  $LP_PAIRS_SINK_ADDRESS \
+  $STABILITY_POOL_SINK_ADDRESS \
+  $ECO_SINK_ADDRESS \
+  --private-key $PRIVATE_KEY \
+  --rpc-url $BSC_TESTNET_RPC_URL
+```
 
-3. **Token Whitelist**
-   - Whitelist USDC in BribeMarketplace
-   - Whitelist HYD in BribeMarketplace
+Grant emission policy role:
 
-4. **Ownership Transfer** (if DEPLOYER_ADDRESS is set)
-   - Transfer PSM ownership to multi-sig
-   - Transfer GaugeController ownership to multi-sig
-   - Transfer BribeMarketplace ownership to multi-sig
-   - Transfer Treasury ownership to multi-sig
-   - Transfer PAIMON admin role to multi-sig
+```bash
+cast send $EMISSION_ROUTER_ADDRESS \
+  "grantEmissionPolicy(address)" \
+  $AUTHORIZED_ADDRESS \
+  --private-key $PRIVATE_KEY \
+  --rpc-url $BSC_TESTNET_RPC_URL
+```
 
-## Verification
+#### 4.3 Add Initial Gauges
 
-After deployment, verify the following:
+Add first liquidity pair gauge:
 
-1. **Contract Addresses**
-   ```bash
-   cat deployments/bsc-testnet-97.json
-   ```
+```bash
+cast send $GAUGE_CONTROLLER_ADDRESS \
+  "addGauge(address,uint256)" \
+  $PAIR_ADDRESS \
+  100 \
+  --private-key $PRIVATE_KEY \
+  --rpc-url $BSC_TESTNET_RPC_URL
+```
 
-2. **BscScan Verification**
-   - Visit https://testnet.bscscan.com/
-   - Search for each contract address
-   - Verify "Contract" tab shows verified source code
+#### 4.4 Transfer Ownership (Production Only)
 
-3. **Configuration Checks**
-   ```bash
-   # Check PAIMON minter role
-   cast call <PAIMON_ADDRESS> "hasRole(bytes32,address)" \
-     $(cast keccak "MINTER_ROLE") <REWARD_DISTRIBUTOR_ADDRESS> \
-     --rpc-url $BSC_TESTNET_RPC
+Transfer governance to multi-sig:
 
-   # Check gauge exists
-   cast call <GAUGE_CONTROLLER_ADDRESS> "gaugeExists(address)" \
-     <PAIR_ADDRESS> \
-     --rpc-url $BSC_TESTNET_RPC
+```bash
+# Transfer EmissionManager
+cast send $EMISSION_MANAGER_ADDRESS \
+  "transferGovernance(address)" \
+  $MULTI_SIG_ADDRESS \
+  --private-key $PRIVATE_KEY \
+  --rpc-url $BSC_MAINNET_RPC_URL
 
-   # Check token whitelisted
-   cast call <BRIBE_MARKETPLACE_ADDRESS> "isWhitelisted(address)" \
-     <USDC_ADDRESS> \
-     --rpc-url $BSC_TESTNET_RPC
-   ```
+# Transfer EmissionRouter
+cast send $EMISSION_ROUTER_ADDRESS \
+  "transferGovernance(address)" \
+  $MULTI_SIG_ADDRESS \
+  --private-key $PRIVATE_KEY \
+  --rpc-url $BSC_MAINNET_RPC_URL
+
+# Transfer PSM
+cast send $PSM_ADDRESS \
+  "transferGovernance(address)" \
+  $MULTI_SIG_ADDRESS \
+  --private-key $PRIVATE_KEY \
+  --rpc-url $BSC_MAINNET_RPC_URL
+```
+
+---
+
+## Deployment Verification
+
+### Contract Verification Checks
+
+```bash
+# 1. Verify USDP total supply is 0
+cast call $USDP_ADDRESS "totalSupply()" --rpc-url $BSC_TESTNET_RPC_URL
+
+# 2. Verify EmissionManager phase parameters
+cast call $EMISSION_MANAGER_ADDRESS "PHASE_A_END()" --rpc-url $BSC_TESTNET_RPC_URL
+# Expected: 12
+
+# 3. Verify EmissionRouter has 4 sinks configured
+cast call $EMISSION_ROUTER_ADDRESS "sinks()" --rpc-url $BSC_TESTNET_RPC_URL
+
+# 4. Verify VotingEscrow token name
+cast call $VOTING_ESCROW_ADDRESS "name()" --rpc-url $BSC_TESTNET_RPC_URL
+# Expected: "Vote-escrowed PAIMON"
+
+# 5. Verify GaugeController epoch start
+cast call $GAUGE_CONTROLLER_ADDRESS "epochStart()" --rpc-url $BSC_TESTNET_RPC_URL
+```
+
+### Governance Verification
+
+```bash
+# Check governance count (should be 1 initially)
+cast call $EMISSION_MANAGER_ADDRESS \
+  "governanceCount()" \
+  --rpc-url $BSC_TESTNET_RPC_URL
+
+# Check if deployer is governance
+cast call $EMISSION_MANAGER_ADDRESS \
+  "isGovernance(address)" \
+  $DEPLOYER_ADDRESS \
+  --rpc-url $BSC_TESTNET_RPC_URL
+# Expected: true (1)
+
+# Check emission policy role
+cast call $EMISSION_ROUTER_ADDRESS \
+  "hasRole(bytes32,address)" \
+  $(cast keccak "EMISSION_POLICY_ROLE") \
+  $DEPLOYER_ADDRESS \
+  --rpc-url $BSC_TESTNET_RPC_URL
+# Expected: true (1)
+```
+
+---
+
+## Mainnet Deployment Checklist
+
+Before deploying to BSC mainnet:
+
+### Pre-Deployment
+
+- [ ] All testnet tests passing (980/990 tests, 98.99%)
+- [ ] Deployment script dry run successful
+- [ ] Multi-sig wallet configured (3-of-5 recommended)
+- [ ] Timelock contract deployed (48-hour delay)
+- [ ] Emergency pause multi-sig ready (4-of-7 recommended)
+- [ ] Chainlink VRF subscription funded
+- [ ] Oracle price feeds configured
+- [ ] Legal review completed (RWA compliance)
+
+### Deployment
+
+- [ ] Deploy all contracts in correct sequence
+- [ ] Verify all contracts on BscScan
+- [ ] Configure emission parameters
+- [ ] Set up channel sinks
+- [ ] Add initial gauges
+- [ ] Transfer ownership to multi-sig
+- [ ] Fund PSM with initial USDC reserve
+- [ ] Add initial DEX liquidity
+
+### Post-Deployment
+
+- [ ] Run integration tests on mainnet
+- [ ] Monitor first epoch execution
+- [ ] Set up alerting (Forta, Tenderly)
+- [ ] Publish deployment addresses
+- [ ] Update frontend contract addresses
+- [ ] Community announcement
+
+---
 
 ## Troubleshooting
 
 ### Issue: "Compiler run failed"
-**Solution**: Run `forge build` to check for compilation errors
 
-### Issue: "Insufficient funds"
-**Solution**: Ensure deployer address has enough BNB for gas fees
+**Solution**:
+```bash
+forge clean
+forge build
+```
+
+### Issue: "Insufficient funds for gas"
+
+**Solution**:
 ```bash
 # Check balance
-cast balance $DEPLOYER_ADDRESS --rpc-url $BSC_TESTNET_RPC
+cast balance $DEPLOYER_ADDRESS --rpc-url $BSC_TESTNET_RPC_URL
+
+# Get testnet BNB
+# Visit: https://testnet.bnbchain.org/faucet-smart
 ```
 
 ### Issue: "Nonce too high"
-**Solution**: Reset nonce or wait for pending transactions to confirm
+
+**Solution**:
+```bash
+# Get current nonce
+cast nonce $DEPLOYER_ADDRESS --rpc-url $BSC_TESTNET_RPC_URL
+
+# Wait for pending transactions or use --nonce flag
+forge script script/DeployComplete.s.sol \
+  --nonce <SPECIFIC_NONCE> \
+  ...
+```
 
 ### Issue: "Verification failed"
-**Solution**: Manually verify contracts on BscScan using Foundry:
+
+**Solution**:
 ```bash
-forge verify-contract <CONTRACT_ADDRESS> <CONTRACT_NAME> \
+# Manually verify contract
+forge verify-contract \
+  <CONTRACT_ADDRESS> \
+  <CONTRACT_PATH>:<CONTRACT_NAME> \
   --chain-id 97 \
   --etherscan-api-key $BSCSCAN_API_KEY \
   --constructor-args $(cast abi-encode "constructor(address)" <ARG>)
 ```
 
+---
+
 ## Security Considerations
 
-⚠️ **IMPORTANT SECURITY NOTES**:
+### Private Key Management
 
-1. **Private Key Security**
-   - NEVER commit `.env` file to git
-   - Use hardware wallet or multi-sig for mainnet deployment
-   - Consider using `cast wallet` for safer key management
+⚠️ **CRITICAL SECURITY**:
+- NEVER commit `.env` file to git
+- Use hardware wallet (Ledger/Trezor) for mainnet deployment
+- Consider using `cast wallet` for key management
+- Rotate keys after deployment
 
-2. **Mock Oracle Addresses**
-   - Current deployment uses placeholder Pyth address (0x1)
-   - MUST configure real Pyth oracle before mainnet
-   - Update oracle addresses via `PriceOracle.setPyth()`
+### Multi-sig Setup
 
-3. **Multi-sig Ownership**
-   - Set `DEPLOYER_ADDRESS` to Gnosis Safe or multi-sig
-   - Test ownership transfer on testnet first
-   - Use 2-step ownership transfer (Ownable2Step)
+**Production Requirements**:
+- Treasury operations: 3-of-5 multi-sig + 48-hour timelock
+- Emergency pause: 4-of-7 multi-sig (instant)
+- Ownership transfer: 2-step process (Ownable2Step pattern)
 
-4. **Initial Liquidity**
-   - Script funds PSM with 1M USDC reserve
-   - Add liquidity to HYD/USDC pair after deployment
-   - Monitor peg stability before mainnet
+**Recommended Multi-sig Providers**:
+- Gnosis Safe (https://safe.global/)
+- Multi-sig wallet on BSC
 
-## Next Steps
+### Oracle Configuration
 
-After successful deployment:
+**Testnet** (Placeholder):
+- Currently uses mock oracle addresses
+- Replace before mainnet deployment
 
-1. **Add Liquidity**
-   - Add initial liquidity to HYD/USDC pair
-   - Test swaps and fee collection
+**Mainnet** (Required):
+- Chainlink Price Feeds for RWA assets
+- Custodian NAV feed integration
+- Circuit breaker configuration (>20% deviation)
 
-2. **Configure Oracle**
-   - Update Pyth oracle address for mainnet
-   - Set price feeds for supported assets
+### Initial Liquidity
 
-3. **Set Parameters**
-   - Adjust PSM fees (feeIn/feeOut)
-   - Set mint caps (maxMintedHYD)
-   - Configure reward distribution rates
+**Recommendations**:
+- Fund PSM with >$1M USDC reserve (mainnet)
+- Add >$500K liquidity to USDP/USDC pair
+- Bootstrap PAIMON/USDP pair with >$100K
+- Monitor peg stability for first 7 days
 
-4. **Integration Testing**
-   - Test end-to-end flows
-   - Verify governance mechanisms
-   - Test emergency pause functions
+---
 
-5. **Documentation**
-   - Update contract addresses in frontend
-   - Provide API documentation
-   - Create user guides
+## Gas Optimization
+
+### Deployment Gas Costs (Estimated)
+
+| Contract | Gas Used | USD Cost @ 3 Gwei |
+|----------|----------|-------------------|
+| USDP | ~1.2M | ~$0.50 |
+| PAIMON | ~1.5M | ~$0.62 |
+| PSMParameterized | ~2.3M | ~$0.95 |
+| Treasury | ~3.5M | ~$1.45 |
+| VotingEscrow | ~4.2M | ~$1.74 |
+| EmissionManager | ~3.8M | ~$1.57 |
+| EmissionRouter | ~1.8M | ~$0.75 |
+| GaugeController | ~2.9M | ~$1.20 |
+| **Total** | **~21M** | **~$8.70** |
+
+*Gas costs are estimates and may vary based on network congestion.*
+
+### Gas-Saving Tips
+
+1. **Batch Configuration**: Group related configuration calls into single transaction
+2. **Constructor Parameters**: Pre-calculate complex parameters off-chain
+3. **Multicall**: Use Multicall3 for batch reads/writes
+4. **Foundry Optimizer**: Deployment script uses `--optimize --optimizer-runs 200`
+
+---
 
 ## Resources
 
 - **Foundry Book**: https://book.getfoundry.sh/
 - **BSC Testnet Faucet**: https://testnet.bnbchain.org/faucet-smart
 - **BscScan Testnet**: https://testnet.bscscan.com/
+- **BscScan Mainnet**: https://bscscan.com/
 - **Gnosis Safe**: https://safe.global/
+- **Chainlink VRF**: https://vrf.chain.link/
+- **Chainlink Price Feeds**: https://data.chain.link/
+
+---
 
 ## Contact
 
-For questions or issues, please:
-- Open an issue on GitHub
-- Join our Discord
-- Email: dev@paimon.dex
+For deployment issues or questions:
+- **GitHub Issues**: https://github.com/rocky2431/paimon-dex-protocol/issues
+- **Email**: rocky243@example.com
+
+---
+
+**Last Updated**: 2025-11-06
+**Deployment Status**: Testnet Ready, Mainnet Preparation

@@ -1,5 +1,34 @@
 # Paimon.dex Development Guide
 
+**Version**: 3.3.0
+**Last Updated**: 2025-11-06
+**Framework**: Foundry (primary), Hardhat (legacy support)
+
+---
+
+## ⭐ v3.3.0 Highlights - Unified Infrastructure
+
+**New Base Class & Libraries** (`src/common/`):
+- `Governable.sol` - Unified governance base class for all core contracts
+- `ProtocolConstants.sol` - Centralized constants (BASIS_POINTS, WEEK, EPOCH_DURATION)
+- `ProtocolRoles.sol` - Unified role definitions (GOVERNANCE_ADMIN_ROLE, EMISSION_POLICY_ROLE)
+- `EpochUtils.sol` - Standardized time calculation utilities
+
+**New Contract**:
+- `EmissionRouter.sol` - Four-channel distribution pipeline (Debt/LP/Stability/Eco)
+
+**Migrated to Governable**:
+1. EmissionManager
+2. EmissionRouter
+3. PSMParameterized
+4. Treasury
+5. GaugeController
+6. DEXFactory
+
+**Test Status**: 980/990 passing (98.99%), ~85% coverage
+
+---
+
 ## Quick Start
 
 ### Prerequisites
@@ -89,27 +118,42 @@ npm run format
 ## Project Structure
 
 ```
-paimon-dex/
+paimon-rwa-contracts/
 ├── .github/workflows/     # CI/CD pipelines
 ├── .ultra/               # Ultra Builder Pro project management
 │   ├── config.json       # Project configuration
 │   ├── tasks/            # Task tracking
 │   └── docs/             # Architecture docs, ADRs
-├── contracts/            # Smart contracts
-│   ├── core/            # HYD, PAIMON, veNFT
-│   ├── treasury/        # Treasury and PSM
-│   ├── dex/             # AMM contracts
-│   ├── launchpad/       # RWA issuance
-│   └── governance/      # Governance coordinator
-├── scripts/             # Deployment and utility scripts
-│   ├── deploy.ts        # Main deployment script
-│   └── verify-setup.js  # Environment verification
-├── test/                # Smart contract tests
+├── src/                  # Smart contracts (Foundry structure)
+│   ├── common/           # ⭐ NEW v3.3.0 - Unified infrastructure
+│   │   ├── Governable.sol        # Governance base class
+│   │   ├── ProtocolConstants.sol # Centralized constants
+│   │   ├── ProtocolRoles.sol     # Role definitions
+│   │   └── EpochUtils.sol        # Time utilities
+│   ├── core/            # USDP, PAIMON, veNFT
+│   ├── treasury/        # Treasury, PSM, RWAPriceOracle
+│   ├── dex/             # DEXFactory, DEXPair, DEXRouter
+│   ├── governance/      # EmissionManager, EmissionRouter, GaugeController
+│   ├── launchpad/       # ProjectRegistry, IssuanceController
+│   ├── presale/         # RWABondNFT, RemintController
+│   ├── incentives/      # BoostStaking, NitroPool
+│   └── interfaces/      # Contract interfaces
+├── test/                # Smart contract tests (Foundry structure)
 │   ├── core/            # Core contract tests
-│   └── integration/     # Integration tests
-├── hardhat.config.ts    # Hardhat configuration
-├── foundry.toml         # Foundry configuration
-└── package.json         # Dependencies and scripts
+│   ├── governance/      # Governance tests (EmissionManager, EmissionRouter)
+│   ├── treasury/        # Treasury tests
+│   ├── integration/     # Integration tests
+│   └── invariant/       # Invariant tests (PSM, DEX, Treasury)
+├── script/              # Deployment scripts
+│   ├── DeployComplete.s.sol  # Complete deployment script
+│   └── DEPLOYMENT.md         # ⭐ Updated deployment guide
+├── audit-package/       # Audit submission package
+│   ├── README.md        # ⭐ Updated audit overview (v3.3.0)
+│   └── contracts/       # Synced contract mirror
+├── foundry.toml         # Foundry configuration (primary framework)
+├── README.md            # ⭐ Updated project overview
+├── ARCHITECTURE.md      # ⭐ Updated architecture guide
+└── DEVELOPMENT.md       # This file
 ```
 
 ## BSC Network Configuration

@@ -350,7 +350,9 @@ contract EmissionManager is Governable {
     /**
      * @notice Allocate total budget to four channels with phase-specific ratios
      * @param totalBudget Total weekly budget to allocate
-     * @param week Week number to determine phase-specific allocation
+     * @param debtBps Debt channel basis points
+     * @param lpBps LP total basis points
+     * @param ecoBps Eco channel basis points
      * @return debt Debt channel allocation (phase-dependent: 30%/50%/55%)
      * @return lpPairs LP Pairs channel allocation (governance-adjustable split)
      * @return stabilityPool Stability Pool channel allocation (governance-adjustable split)
