@@ -27,7 +27,7 @@ export default function StabilityPoolPage() {
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
       {/* Top navigation bar */}
-      <Navigation activePage="savings" />
+      <Navigation />
 
       {/* Main content area */}
       <Container

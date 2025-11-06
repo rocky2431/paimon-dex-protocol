@@ -14,7 +14,7 @@ export default function TreasuryDepositPage() {
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
       {/* Top navigation bar */}
-      <Navigation activePage="treasury" />
+      <Navigation />
 
       {/* Main content area */}
       <Container

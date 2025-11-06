@@ -8,7 +8,7 @@ export default function AddLiquidityPage() {
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
       {/* Top navigation bar */}
-      <Navigation activePage="liquidity" />
+      <Navigation />
 
       {/* Main content area (centered AddLiquidityCard) */}
       <Container

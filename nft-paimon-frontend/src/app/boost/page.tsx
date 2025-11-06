@@ -215,7 +215,7 @@ export default function BoostPage() {
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
       {/* Top navigation bar */}
-      <Navigation activePage="boost" />
+      <Navigation />
 
       {/* Main content area */}
       <Container

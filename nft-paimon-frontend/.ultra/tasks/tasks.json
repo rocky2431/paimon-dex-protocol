@@ -8,10 +8,10 @@
   },
   "stats": {
     "totalTasks": 20,
-    "completed": 2,
-    "inProgress": 0,
-    "pending": 18,
-    "progressPercentage": 10,
+    "completed": 6,
+    "inProgress": 1,
+    "pending": 13,
+    "progressPercentage": 30,
     "paused": 0
   },
   "tasks": [
@@ -57,7 +57,9 @@
       "priority": "P0",
       "dependencies": ["refactor-0.2"],
       "estimated_days": 0.4,
-      "status": "pending",
+      "status": "completed",
+      "completedAt": "2025-11-07T14:00:00Z",
+      "notes": "已创建 scripts/sync-addresses.ts，可从合约部署配置自动同步地址到前端。",
       "tags": [
         "configuration",
         "automation"
@@ -71,7 +73,9 @@
       "priority": "P0",
       "dependencies": ["refactor-1.1"],
       "estimated_days": 0.25,
-      "status": "pending",
+      "status": "completed",
+      "completedAt": "2025-11-07T14:15:00Z",
+      "notes": "已重构 src/config/chains/testnet.ts 使用生成的地址配置，集成 Feature Flags。",
       "tags": [
         "configuration"
       ]
@@ -84,7 +88,9 @@
       "priority": "P1",
       "dependencies": ["refactor-1.2"],
       "estimated_days": 0.25,
-      "status": "pending",
+      "status": "completed",
+      "completedAt": "2025-11-07T14:30:00Z",
+      "notes": "已验证所有 40 个合约地址正确加载（包括 Phase 2），Feature Flags 正常工作。",
       "tags": [
         "configuration",
         "testing"
@@ -98,7 +104,9 @@
       "priority": "P0",
       "dependencies": ["refactor-1.3"],
       "estimated_days": 0.5,
-      "status": "pending",
+      "status": "completed",
+      "completedAt": "2025-11-07T15:00:00Z",
+      "notes": "已创建 src/config/navigation.ts，实现 6 栏导航配置（Trade|Earn|Borrow|Governance|Launch|Analytics），集成 Feature Flags 和活动状态检测。",
       "tags": [
         "navigation",
         "architecture"
@@ -112,7 +120,9 @@
       "priority": "P0",
       "dependencies": ["refactor-2.1"],
       "estimated_days": 0.75,
-      "status": "pending",
+      "status": "in_progress",
+      "startedAt": "2025-11-07T15:05:00Z",
+      "notes": "正在重写 Navigation.tsx 组件，从硬编码的 4 个下拉菜单改为配置驱动的 6 栏结构。",
       "tags": [
         "navigation",
         "ui-component"

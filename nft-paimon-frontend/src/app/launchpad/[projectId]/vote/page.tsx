@@ -69,7 +69,7 @@ export default function VotingPage({
   if (isNaN(projectId)) {
     return (
       <>
-        <Navigation activePage="launchpad" />
+        <Navigation />
         <Container maxWidth="xl" sx={{ py: 4 }}>
           <Alert severity="error">Invalid project ID</Alert>
           <Button
@@ -88,7 +88,7 @@ export default function VotingPage({
   if (project.status !== ProjectStatus.Voting) {
     return (
       <>
-        <Navigation activePage="launchpad" />
+        <Navigation />
         <Container maxWidth="xl" sx={{ py: 4 }}>
           <Alert severity="warning">
             This project is not in voting phase. Voting is only available for projects
@@ -112,7 +112,7 @@ export default function VotingPage({
 
   return (
     <>
-      <Navigation activePage="launchpad" />
+      <Navigation />
       <Container maxWidth="xl" sx={{ py: 4 }}>
         {/* Breadcrumbs */}
         <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 3 }}>

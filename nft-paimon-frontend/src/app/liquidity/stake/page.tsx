@@ -18,7 +18,7 @@ export default function StakePage() {
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
       {/* Top navigation bar */}
-      <Navigation activePage="liquidity" />
+      <Navigation />
 
       {/* Main content area */}
       <Container

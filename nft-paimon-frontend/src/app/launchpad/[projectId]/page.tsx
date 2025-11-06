@@ -66,7 +66,7 @@ export default function ProjectDetailsPage({
   if (isNaN(projectId)) {
     return (
       <>
-        <Navigation activePage="launchpad" />
+        <Navigation />
         <Container maxWidth="xl" sx={{ py: 4 }}>
           <Alert severity="error">Invalid project ID</Alert>
           <Button
@@ -87,7 +87,7 @@ export default function ProjectDetailsPage({
 
   return (
     <>
-      <Navigation activePage="launchpad" />
+      <Navigation />
       <Container maxWidth="xl" sx={{ py: 4 }}>
         {/* Back Button */}
         <Button

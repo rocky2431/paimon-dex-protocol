@@ -16,7 +16,7 @@ import { LeaderboardDashboard } from '@/components/presale/LeaderboardDashboard'
 export default function PresaleLeaderboardsPage() {
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
-      <Navigation activePage="presale" />
+      <Navigation />
       <Container
         maxWidth="lg"
         sx={{

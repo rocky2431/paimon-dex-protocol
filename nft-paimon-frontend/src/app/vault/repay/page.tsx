@@ -72,7 +72,7 @@ export default function RepayPage() {
   if (!isConnected) {
     return (
       <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
-        <Navigation activePage="vault" />
+        <Navigation />
         <Container maxWidth="md" sx={{ py: 8 }}>
           <Card>
             <CardContent sx={{ textAlign: 'center', py: 8 }}>
@@ -91,7 +91,7 @@ export default function RepayPage() {
 
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
-      <Navigation activePage="vault" />
+      <Navigation />
 
       <Container maxWidth="md" sx={{ py: 4 }}>
         <Box sx={{ mb: 2 }}>

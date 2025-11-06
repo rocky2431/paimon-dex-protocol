@@ -40,7 +40,7 @@ export default function VaultPage() {
   if (!isConnected) {
     return (
       <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
-        <Navigation activePage="vault" />
+        <Navigation />
         <Container maxWidth="lg" sx={{ py: 8 }}>
           <Card>
             <CardContent sx={{ textAlign: 'center', py: 8 }}>
@@ -59,7 +59,7 @@ export default function VaultPage() {
 
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
-      <Navigation activePage="vault" />
+      <Navigation />
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Typography variant="h3" sx={{ mb: 4, fontWeight: 'bold' }}>

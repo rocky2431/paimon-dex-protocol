@@ -8,7 +8,7 @@ export default function VotePage() {
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
       {/* Top navigation bar */}
-      <Navigation activePage="vote" />
+      <Navigation />
 
       {/* Main content area (centered VotingCard) */}
       <Container

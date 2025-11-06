@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
       {/* Top navigation bar */}
-      <Navigation activePage="swap" />
+      <Navigation />
 
       {/* Main content area */}
       <Container

@@ -8,7 +8,7 @@ export default function LockPage() {
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
       {/* Top navigation bar */}
-      <Navigation activePage="lock" />
+      <Navigation />
 
       {/* Main content area */}
       <Container

@@ -17,7 +17,7 @@ import { BondDashboard } from '@/components/presale/BondDashboard';
 export default function BondsPage() {
   return (
     <>
-      <Navigation activePage="presale" />
+      <Navigation />
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <BondDashboard />
       </Container>

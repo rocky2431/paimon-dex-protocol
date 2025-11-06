@@ -18,7 +18,7 @@ export default function RewardsPage() {
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
       {/* Top navigation bar */}
-      <Navigation activePage="vote" />
+      <Navigation />
 
       {/* Main content area */}
       <Container

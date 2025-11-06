@@ -20,7 +20,7 @@ import { ProjectList } from '@/components/launchpad/ProjectList';
 export default function LaunchpadPage() {
   return (
     <>
-      <Navigation activePage="launchpad" />
+      <Navigation />
       <Container maxWidth="xl" sx={{ py: 4 }}>
         <ProjectList />
       </Container>

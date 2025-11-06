@@ -25,7 +25,7 @@ export default function SettlePage({ params }: SettlePageProps) {
 
   return (
     <>
-      <Navigation activePage="presale" />
+      <Navigation />
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <SettlementPage tokenId={tokenId} />
       </Container>

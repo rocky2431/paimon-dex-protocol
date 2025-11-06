@@ -12,7 +12,7 @@ export default function PresaleMintPage() {
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
       {/* Top navigation bar */}
-      <Navigation activePage="presale" />
+      <Navigation />
 
       {/* Main content area */}
       <Container
