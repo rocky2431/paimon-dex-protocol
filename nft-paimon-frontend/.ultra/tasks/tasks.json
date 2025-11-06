@@ -7,12 +7,11 @@
     "description": "前端重构方案 V2 - 务实版 (基于团队评审调整): 修复构建错误、配置自动化、导航重构、核心功能补全、Bug修复"
   },
   "stats": {
-    "totalTasks": 20,
-    "completed": 10,
+    "totalTasks": 21,
+    "completed": 11,
     "inProgress": 0,
-    "pending": 11,
-    "progressPercentage": 50,
-    "paused": 0
+    "pending": 10,
+    "progressPercentage": 52
   },
   "tasks": [
     {
@@ -207,12 +206,13 @@
         "refactor-3.2"
       ],
       "estimated_days": 0.125,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "vault",
         "borrow",
         "repay"
-      ]
+      ],
+      "notes": "✅ Borrow 和 Repay 页面验证通过\n\n**验证结果**:\n- 导航集成: ✅ /vault → Borrow/Repay buttons\n- 计算逻辑: ✅ 80% LTV (Borrow), formatEther (Repay)\n- 交易执行: ✅ useVaultBorrow, useVaultRepay hooks\n- UI反馈: ✅ Loading/Success/Error states\n- TypeScript: ✅ 0 errors\n- 边界处理: ✅ 无债务提示, MAX按钮, 金额验证\n\n**详细报告**: /tmp/borrow-repay-verification.md"
     },
     {
       "id": "refactor-3.4",
@@ -381,5 +381,6 @@
         "delivery"
       ]
     }
-  ]
+  ],
+  "lastModified": "2025-11-06T22:13:14.517Z"
 }
