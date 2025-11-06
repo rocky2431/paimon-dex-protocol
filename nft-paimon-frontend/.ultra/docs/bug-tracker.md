@@ -33,13 +33,111 @@ None reported.
 
 ### P2 - Medium Priority Bugs
 
-None reported.
+#### BUG-2025-11-07-001
+
+**Priority:** P2
+
+**Component:** Navigation component tests
+
+**Description:**
+Navigation component tests are failing with "getByText" errors - multiple elements with "Paimon DEX" text found
+
+**Steps to Reproduce:**
+1. Run `npm test`
+2. Check Navigation.test.tsx results
+3. See 66 failing tests out of 904 total (7.3% failure rate)
+
+**Expected Behavior:**
+All navigation tests should pass without errors
+
+**Actual Behavior:**
+```
+Error: Found multiple elements with the text: Paimon DEX
+```
+
+**Environment:**
+- Test Runner: Jest 29
+- Testing Library: @testing-library/react
+- Node: 18.x
+
+**Impact:** Test suite reliability affected
+
+**Possible Fix:**
+Use `getAllByText` or add more specific test selectors (data-testid)
+
+**Reported By:** Claude / 2025-11-07
 
 ---
 
 ### P3 - Low Priority Bugs
 
-None reported.
+#### BUG-2025-11-07-002
+
+**Priority:** P3
+
+**Component:** Multiple files (codebase-wide)
+
+**Description:**
+51 console.log/console.error statements found in codebase - should be removed for production
+
+**Steps to Reproduce:**
+1. Run: `grep -r "console\." src/ --include="*.tsx" --include="*.ts"`
+2. Count 51 instances
+
+**Expected Behavior:**
+No console statements in production code
+
+**Actual Behavior:**
+Console statements present for debugging purposes
+
+**Environment:**
+- All components
+
+**Impact:** Console pollution, potential performance impact
+
+**Possible Fix:**
+1. Remove console statements
+2. Use proper logging library (e.g., pino, winston)
+3. Add ESLint rule to prevent future console statements
+
+**Reported By:** Claude / 2025-11-07
+
+---
+
+#### BUG-2025-11-07-003
+
+**Priority:** P3
+
+**Component:** Multiple files (codebase-wide)
+
+**Description:**
+99 TODO/FIXME comments found indicating incomplete features or technical debt
+
+**Steps to Reproduce:**
+1. Run: `grep -r "TODO\|FIXME" src/ --include="*.tsx" --include="*.ts"`
+2. Count 99 instances
+
+**Expected Behavior:**
+All features complete, no pending TODOs
+
+**Actual Behavior:**
+Key TODOs include:
+- Replace mock data with real API calls (savings, launchpad, treasury)
+- Update mainnet contract addresses (15 placeholder addresses)
+- Add locale support (i18n missing in some components)
+- Implement real wagmi hooks for blockchain data
+
+**Environment:**
+- All components
+
+**Impact:** Technical debt, incomplete features
+
+**Possible Fix:**
+1. Create task list from TODO comments
+2. Prioritize by feature importance
+3. Address systematically
+
+**Reported By:** Claude / 2025-11-07
 
 ---
 
@@ -162,6 +260,7 @@ For bug reports or questions:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.1 | 2025-11-07 | Added 3 bugs from codebase scan (1 P2, 2 P3) |
 | 1.0 | 2025-11-07 | Initial bug tracker creation |
 
 ---
