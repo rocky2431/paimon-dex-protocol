@@ -456,7 +456,35 @@ docs: update deployment guide for v3.3.0
 - RPC: https://data-seed-prebsc-1-s1.binance.org:8545/
 - Explorer: https://testnet.bscscan.com/
 - Faucet: https://testnet.bnbchain.org/faucet-smart
-- **✅ 已部署**: 查看 [TESTNET_DEPLOYMENT_SUMMARY.md](TESTNET_DEPLOYMENT_SUMMARY.md) 获取完整合约地址
+- **✅ 已部署** (2025-11-07)
+
+#### 测试网核心合约地址
+
+| 合约 | 地址 | BscScan |
+|------|------|---------|
+| **USDP** | `0x69cA4879c52A0935561F9D8165e4CB3b91f951a6` | [查看](https://testnet.bscscan.com/address/0x69cA4879c52A0935561F9D8165e4CB3b91f951a6) |
+| **PAIMON** | `0x4FfBD9CC8e5E26Ec1559D754cC71a061D1820fDF` | [查看](https://testnet.bscscan.com/address/0x4FfBD9CC8e5E26Ec1559D754cC71a061D1820fDF) |
+| **esPAIMON** | `0xA848c9F841bB2deDC160DCb5108F2aac610CA02a` | [查看](https://testnet.bscscan.com/address/0xA848c9F841bB2deDC160DCb5108F2aac610CA02a) |
+| **PSM** | `0x46eB7627024cEd13826359a5c0aEc57c7255b330` | [查看](https://testnet.bscscan.com/address/0x46eB7627024cEd13826359a5c0aEc57c7255b330) |
+| **DEXRouter** | `0x066Db99AE64B1524834a1f97aa1613e2411E13AC` | [查看](https://testnet.bscscan.com/address/0x066Db99AE64B1524834a1f97aa1613e2411E13AC) |
+| **Treasury** | `0x8CA5Cd0293b9d3C8BC796083E806bc5bC381772A` | [查看](https://testnet.bscscan.com/address/0x8CA5Cd0293b9d3C8BC796083E806bc5bC381772A) |
+| **VotingEscrowPaimon** | `0xdEe148Cd27a9923DE1986399a6629aB375F244e1` | [查看](https://testnet.bscscan.com/address/0xdEe148Cd27a9923DE1986399a6629aB375F244e1) |
+| **GaugeController** | `0x4fDF9e1640722455cdA32dC2cceD85AeA8a3dB1A` | [查看](https://testnet.bscscan.com/address/0x4fDF9e1640722455cdA32dC2cceD85AeA8a3dB1A) |
+| **EmissionManager** | `0x13536aDe0a7b8Ec6B07FcFc29a6915881c50EA38` | [查看](https://testnet.bscscan.com/address/0x13536aDe0a7b8Ec6B07FcFc29a6915881c50EA38) |
+
+#### 测试网 Mock 合约 (仅用于测试)
+
+| Mock 合约 | 地址 | 说明 |
+|----------|------|------|
+| **Mock USDC** | `0xA1112f596A73111E102b4a9c39064b2b2383EC38` | 1B供应，6位小数 |
+| **Mock WBNB** | `0xe3402BAd7951c00e2B077A745C9e8B14122f05ED` | 1万供应 |
+| **Mock USDC Price Feed** | `0xD36eff69950c1eE2713BB1d204f875434Da28aB7` | USDC价格预言机 |
+| **Mock BNB Price Feed** | `0x6D0a11083DCe3Fe5a2498b4B37f8edb30b29645B` | BNB价格预言机 |
+| **Mock HYD Price Feed** | `0x536608101E17e4C2c7b0d5eCc4e5659a75fE1489` | RWA价格预言机 |
+| **Mock Pyth** | `0x4B4a7949694c9bcb7B4731dA60C511DD73f7FBB8` | 备用价格源 |
+| **Mock VRF Coordinator** | `0xeAcAa0e6c5965f680fc6470745dE63E53A5D249c` | 随机数生成器 |
+
+📄 **完整地址清单**: [deployments/testnet/addresses.json](deployments/testnet/addresses.json)
 
 ### 部署顺序
 
