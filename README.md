@@ -456,6 +456,7 @@ docs: update deployment guide for v3.3.0
 - RPC: https://data-seed-prebsc-1-s1.binance.org:8545/
 - Explorer: https://testnet.bscscan.com/
 - Faucet: https://testnet.bnbchain.org/faucet-smart
+- **✅ 已部署**: 查看 [TESTNET_DEPLOYMENT_SUMMARY.md](TESTNET_DEPLOYMENT_SUMMARY.md) 获取完整合约地址
 
 ### 部署顺序
 

@@ -636,9 +636,11 @@ If deployment fails mid-process:
 **Mock Contracts (Testnet Only)**:
 - **Mock USDC**: `0xA1112f596A73111E102b4a9c39064b2b2383EC38` (1B supply, 6 decimals)
 - **Mock WBNB**: `0xe3402BAd7951c00e2B077A745C9e8B14122f05ED` (10,000 supply)
-- **USDC Price Feed**: `0xD36eff69950c1eE2713BB1d204f875434Da28aB7`
-- **BNB Price Feed**: `0x6D0a11083DCe3Fe5a2498b4B37f8edb30b29645B`
-- **HYD Price Feed**: `0x536608101E17e4C2c7b0d5eCc4e5659a75fE1489`
+- **Mock USDC Price Feed**: `0xD36eff69950c1eE2713BB1d204f875434Da28aB7`
+- **Mock BNB Price Feed**: `0x6D0a11083DCe3Fe5a2498b4B37f8edb30b29645B`
+- **Mock HYD Price Feed**: `0x536608101E17e4C2c7b0d5eCc4e5659a75fE1489`
+- **Mock Pyth**: `0x4B4a7949694c9bcb7B4731dA60C511DD73f7FBB8`
+- **Mock VRF Coordinator**: `0xeAcAa0e6c5965f680fc6470745dE63E53A5D249c`
 
 **Links**:
 - Deployment Details: `deployments/testnet/addresses.json`

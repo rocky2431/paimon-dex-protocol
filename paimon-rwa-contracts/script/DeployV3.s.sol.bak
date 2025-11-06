@@ -1,0 +1,615 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "forge-std/Script.sol";
+import "forge-std/console.sol";
+
+// Core Tokens
+import "../src/core/USDP.sol";
+import "../src/core/PAIMON.sol";
+import "../src/core/esPaimon.sol";
+import "../src/core/HYD.sol";
+
+// USDP Infrastructure
+import "../src/core/PSMParameterized.sol";
+import "../src/core/USDPVault.sol";
+import "../src/core/USDPStabilityPool.sol";
+import "../src/treasury/SavingRate.sol";
+
+// veNFT & Governance
+import "../src/core/VotingEscrow.sol";
+import "../src/core/VotingEscrowPaimon.sol";
+import "../src/governance/GaugeController.sol";
+import "../src/governance/RewardDistributor.sol";
+import "../src/governance/BribeMarketplace.sol";
+
+// Emission System (v3.3.0)
+import "../src/governance/EmissionManager.sol";
+import "../src/governance/EmissionRouter.sol";
+
+// Incentives
+import "../src/incentives/BoostStaking.sol";
+import "../src/incentives/NitroPool.sol";
+
+// DEX
+import "../src/dex/DEXFactory.sol";
+import "../src/dex/DEXRouter.sol";
+
+// Treasury & Oracle
+import "../src/treasury/Treasury.sol";
+import "../src/oracle/RWAPriceOracle.sol";
+import "../src/oracle/PriceOracle.sol";
+
+// Launchpad
+import "../src/launchpad/ProjectRegistry.sol";
+import "../src/launchpad/IssuanceController.sol";
+
+// Presale
+// TODO: Presale contracts (RWABondNFT, RemintController, SettlementRouter) have circular import issues
+// They are excluded from this deployment script and should be deployed separately
+// import "../src/presale/RWABondNFT.sol";
+// import "../src/presale/RemintController.sol";
+// import "../src/presale/SettlementRouter.sol";
+
+// Mocks (testnet only)
+import "../src/mocks/MockERC20.sol";
+import "../src/mocks/MockChainlinkAggregator.sol";
+import "../src/mocks/MockPyth.sol";
+import "../src/mocks/MockVRFCoordinatorV2.sol";
+
+/**
+ * @title Paimon DEX v3.3.0 Complete Deployment Script
+ * @notice Deploys all contracts for BSC testnet/mainnet based on unified infrastructure
+ * @dev Follows the deployment sequence from ARCHITECTURE.md v3.3.0
+ *
+ * Key Changes in v3.3.0:
+ * - Unified Governable base class (replaces Ownable)
+ * - ProtocolConstants, ProtocolRoles, EpochUtils libraries
+ * - EmissionManager + EmissionRouter (4-channel distribution)
+ * - HYD token repositioned as RWA collateral
+ * - Treasury/USDPVault separation (protocol fees vs user lending)
+ *
+ * Usage:
+ *   Dry run:  forge script script/DeployV3.s.sol --rpc-url $BSC_TESTNET_RPC --private-key $PRIVATE_KEY -vvv
+ *   Deploy:   forge script script/DeployV3.s.sol --rpc-url $BSC_TESTNET_RPC --private-key $PRIVATE_KEY --broadcast --verify
+ *
+ * Environment Variables Required:
+ * - PRIVATE_KEY: Deployer private key (with 0x prefix)
+ * - DEPLOYER_ADDRESS: Deployer address (must match private key)
+ * - MULTISIG_ADDRESS: Multi-sig governance address (optional, defaults to deployer)
+ * - BSC_TESTNET_RPC or BSC_MAINNET_RPC: RPC URL
+ * - BSCSCAN_API_KEY: BscScan API key for verification
+ * - IS_TESTNET: "true" for testnet, "false" for mainnet (defaults to true)
+ */
+contract DeployV3Script is Script {
+    // ==================== Configuration ====================
+
+    bool public isTestnet;
+    address public deployer;
+    address public multiSig;
+
+    // ==================== Core Tokens ====================
+
+    USDP public usdp;
+    PAIMON public paimon;
+    esPaimon public esPaimonToken;
+    HYD public hyd;
+
+    // ==================== USDP Infrastructure ====================
+
+    PSMParameterized public psm;
+    USDPVault public usdpVault;
+    USDPStabilityPool public stabilityPool;
+    SavingRate public savingRate;
+
+    // ==================== veNFT & Governance ====================
+
+    VotingEscrow public votingEscrow;
+    VotingEscrowPaimon public votingEscrowPaimon;
+    GaugeController public gaugeController;
+    RewardDistributor public rewardDistributor;
+    BribeMarketplace public bribeMarketplace;
+
+    // ==================== Emission System ====================
+
+    EmissionManager public emissionManager;
+    EmissionRouter public emissionRouter;
+
+    // ==================== Incentives ====================
+
+    BoostStaking public boostStaking;
+    NitroPool public nitroPool;
+
+    // ==================== DEX ====================
+
+    DEXFactory public dexFactory;
+    DEXRouter public dexRouter;
+
+    // ==================== Treasury & Oracle ====================
+
+    Treasury public treasury;
+    RWAPriceOracle public rwaOracle;
+    PriceOracle public priceOracle;
+
+    // ==================== Launchpad ====================
+
+    ProjectRegistry public projectRegistry;
+    IssuanceController public issuanceController;
+
+    // ==================== Presale ====================
+    // TODO: Deploy separately due to circular import issues
+    // RWABondNFT public rwaBondNFT;
+    // RemintController public remintController;
+    // SettlementRouter public settlementRouter;
+
+    // ==================== Mocks (Testnet Only) ====================
+
+    MockERC20 public usdc;
+    MockChainlinkAggregator public mockChainlinkAggregator;
+    MockPyth public mockPyth;
+    MockVRFCoordinatorV2 public mockVRFCoordinator;
+
+    // ==================== Constants ====================
+
+    uint256 public constant PAIMON_MAX_SUPPLY = 10_000_000_000 * 1e18; // 10B PAIMON
+    uint256 public constant HYD_MAX_SUPPLY = 1_000_000_000 * 1e18; // 1B HYD
+    uint256 public constant INITIAL_USDC_RESERVE = 1_000_000 * 1e6; // 1M USDC (6 decimals)
+
+    // PSM Parameters
+    uint256 public constant PSM_FEE_IN = 10; // 0.1% (10 basis points)
+    uint256 public constant PSM_FEE_OUT = 10; // 0.1% (10 basis points)
+
+    // VRF Configuration (will be set up separately on BSC mainnet)
+    uint64 public constant VRF_SUBSCRIPTION_ID = 0;
+    bytes32 public constant VRF_KEY_HASH = 0x0;
+    uint32 public constant VRF_CALLBACK_GAS_LIMIT = 500000;
+    uint16 public constant VRF_REQUEST_CONFIRMATIONS = 3;
+
+    // ==================== Main Deployment Function ====================
+
+    function run() public {
+        // Load configuration
+        loadConfiguration();
+
+        // Print deployment header
+        printDeploymentHeader();
+
+        // Start broadcast with deployer account (private key provided via --private-key flag)
+        vm.startBroadcast(deployer);
+
+        console.log("\n============================================================");
+        console.log("Phase 1: Mock Contracts (Testnet Only)");
+        console.log("============================================================");
+        if (isTestnet) {
+            deployMockContracts();
+        } else {
+            console.log("Skipped (mainnet deployment)");
+        }
+
+        console.log("\n============================================================");
+        console.log("Phase 2: Core Tokens");
+        console.log("============================================================");
+        deployCoreTokens();
+
+        console.log("\n============================================================");
+        console.log("Phase 3: USDP Infrastructure");
+        console.log("============================================================");
+        deployUSDPInfrastructure();
+
+        console.log("\n============================================================");
+        console.log("Phase 4: veNFT & Governance");
+        console.log("============================================================");
+        deployGovernance();
+
+        console.log("\n============================================================");
+        console.log("Phase 5: Emission System (v3.3.0)");
+        console.log("============================================================");
+        deployEmissionSystem();
+
+        console.log("\n============================================================");
+        console.log("Phase 6: Incentives");
+        console.log("============================================================");
+        deployIncentives();
+
+        console.log("\n============================================================");
+        console.log("Phase 7: DEX");
+        console.log("============================================================");
+        deployDEX();
+
+        console.log("\n============================================================");
+        console.log("Phase 8: Treasury & Oracle");
+        console.log("============================================================");
+        deployTreasuryAndOracle();
+
+        console.log("\n============================================================");
+        console.log("Phase 9: Launchpad");
+        console.log("============================================================");
+        deployLaunchpad();
+
+        console.log("\n============================================================");
+        console.log("Phase 10: Presale (Skipped - Deploy Separately)");
+        console.log("============================================================");
+        console.log("Presale contracts (RWABondNFT, RemintController, SettlementRouter) have circular");
+        console.log("import issues and must be deployed separately.");
+        // deployPresale();
+
+        console.log("\n============================================================");
+        console.log("Phase 11: Post-Deployment Configuration");
+        console.log("============================================================");
+        configureContracts();
+
+        console.log("\n============================================================");
+        console.log("Phase 12: Transfer Ownership");
+        console.log("============================================================");
+        transferOwnership();
+
+        vm.stopBroadcast();
+
+        console.log("\n============================================================");
+        console.log("Phase 13: Save Deployment Addresses");
+        console.log("============================================================");
+        saveDeploymentAddresses();
+
+        console.log("\n============================================================");
+        console.log("Deployment Complete!");
+        console.log("============================================================");
+        printDeploymentSummary();
+    }
+
+    // ==================== Configuration ====================
+
+    function loadConfiguration() internal {
+        // Get deployer address from environment (must match the private key used)
+        deployer = vm.envAddress("DEPLOYER_ADDRESS");
+        // Use deployer as multisig if MULTISIG_ADDRESS not provided
+        multiSig = vm.envOr("MULTISIG_ADDRESS", deployer);
+        isTestnet = vm.envOr("IS_TESTNET", true);
+    }
+
+    function printDeploymentHeader() internal view {
+        console.log("============================================================");
+        console.log("Paimon DEX v3.3.0 Complete Deployment Script");
+        console.log("============================================================");
+        console.log("Network:", isTestnet ? "BSC Testnet" : "BSC Mainnet");
+        console.log("Chain ID:", block.chainid);
+        console.log("Deployer:", deployer);
+        console.log("Multi-sig:", multiSig);
+        console.log("============================================================\n");
+    }
+
+    // ==================== Phase 1: Mock Contracts ====================
+
+    function deployMockContracts() internal {
+        console.log("Deploying mock contracts for testnet...");
+
+        // Deploy Mock USDC (6 decimals)
+        usdc = new MockERC20("USD Coin", "USDC", 6);
+        console.log("  MockERC20 (USDC):", address(usdc));
+
+        // Mint initial USDC to deployer for testing
+        usdc.mint(deployer, INITIAL_USDC_RESERVE);
+        console.log("  Minted USDC to deployer:", INITIAL_USDC_RESERVE / 1e6, "USDC");
+
+        // Deploy Mock Chainlink Aggregator
+        mockChainlinkAggregator = new MockChainlinkAggregator(8, "USDC / USD"); // 8 decimals
+        console.log("  MockChainlinkAggregator:", address(mockChainlinkAggregator));
+
+        // Deploy Mock Pyth
+        mockPyth = new MockPyth();
+        console.log("  MockPyth:", address(mockPyth));
+
+        // Deploy Mock VRF Coordinator
+        mockVRFCoordinator = new MockVRFCoordinatorV2();
+        console.log("  MockVRFCoordinatorV2:", address(mockVRFCoordinator));
+    }
+
+    // ==================== Phase 2: Core Tokens ====================
+
+    function deployCoreTokens() internal {
+        console.log("Deploying core tokens...");
+
+        // Deploy USDP (synthetic stablecoin)
+        usdp = new USDP();
+        console.log("  USDP:", address(usdp));
+
+        // Deploy PAIMON (governance token)
+        paimon = new PAIMON(3_500_000_000 * 1e18); // Max supply: 3.5B PAIMON
+        console.log("  PAIMON:", address(paimon));
+
+        // Deploy esPaimon (vesting token)
+        esPaimonToken = new esPaimon(address(paimon));
+        console.log("  esPaimon:", address(esPaimonToken));
+
+        // Deploy HYD (RWA collateral token)
+        hyd = new HYD();
+        console.log("  HYD:", address(hyd));
+    }
+
+    // ==================== Phase 3: USDP Infrastructure ====================
+
+    function deployUSDPInfrastructure() internal {
+        console.log("Deploying USDP infrastructure...");
+
+        // Get USDC address (mock on testnet, real on mainnet)
+        address usdcAddress = isTestnet ? address(usdc) : vm.envAddress("USDC_ADDRESS");
+
+        // Deploy PSM (USDC ↔ USDP 1:1 swap)
+        psm = new PSMParameterized(address(usdp), usdcAddress);
+        console.log("  PSMParameterized:", address(psm));
+
+        // Grant PSM minting rights for USDP
+        usdp.setAuthorizedMinter(address(psm), true);
+        console.log("  Granted MINTER_ROLE to PSM");
+
+        // Deploy USDPVault (borrowing vault)
+        usdpVault = new USDPVault(address(usdp));
+        console.log("  USDPVault:", address(usdpVault));
+
+        // Grant USDPVault minting rights
+        usdp.setAuthorizedMinter(address(usdpVault), true);
+        console.log("  Granted MINTER_ROLE to USDPVault");
+
+        // Deploy USDPStabilityPool
+        stabilityPool = new USDPStabilityPool(address(usdp));
+        console.log("  USDPStabilityPool:", address(stabilityPool));
+
+        // Deploy SavingRate
+        savingRate = new SavingRate(address(usdp));
+        console.log("  SavingRate:", address(savingRate));
+    }
+
+    // ==================== Phase 4: veNFT & Governance ====================
+
+    function deployGovernance() internal {
+        console.log("Deploying governance contracts...");
+
+        // Deploy VotingEscrow (base veNFT)
+        votingEscrow = new VotingEscrow();
+        console.log("  VotingEscrow:", address(votingEscrow));
+
+        // Deploy VotingEscrowPaimon (PAIMON-specific veNFT)
+        votingEscrowPaimon = new VotingEscrowPaimon(address(paimon), address(votingEscrow));
+        console.log("  VotingEscrowPaimon:", address(votingEscrowPaimon));
+
+        // Deploy GaugeController
+        gaugeController = new GaugeController(address(votingEscrowPaimon));
+        console.log("  GaugeController:", address(gaugeController));
+
+        // Deploy RewardDistributor
+        rewardDistributor = new RewardDistributor(address(paimon), address(gaugeController));
+        console.log("  RewardDistributor:", address(rewardDistributor));
+
+        // Deploy BribeMarketplace
+        bribeMarketplace = new BribeMarketplace(address(gaugeController));
+        console.log("  BribeMarketplace:", address(bribeMarketplace));
+    }
+
+    // ==================== Phase 5: Emission System ====================
+
+    function deployEmissionSystem() internal {
+        console.log("Deploying emission system (v3.3.0)...");
+
+        // Deploy EmissionManager (3-phase scheduler)
+        emissionManager = new EmissionManager();
+        console.log("  EmissionManager:", address(emissionManager));
+
+        // Deploy EmissionRouter (4-channel distribution pipeline)
+        emissionRouter = new EmissionRouter(address(paimon), address(emissionManager));
+        console.log("  EmissionRouter:", address(emissionRouter));
+
+        // Grant MINTER_ROLE to EmissionRouter
+        paimon.grantRole(paimon.MINTER_ROLE(), address(emissionRouter));
+        console.log("  Granted MINTER_ROLE to EmissionRouter");
+    }
+
+    // ==================== Phase 6: Incentives ====================
+
+    function deployIncentives() internal {
+        console.log("Deploying incentive contracts...");
+
+        // Deploy BoostStaking
+        boostStaking = new BoostStaking(address(paimon), address(esPaimonToken));
+        console.log("  BoostStaking:", address(boostStaking));
+
+        // Deploy NitroPool
+        nitroPool = new NitroPool(address(paimon), address(rewardDistributor));
+        console.log("  NitroPool:", address(nitroPool));
+    }
+
+    // ==================== Phase 7: DEX ====================
+
+    function deployDEX() internal {
+        console.log("Deploying DEX contracts...");
+
+        // Deploy DEXFactory
+        dexFactory = new DEXFactory(deployer);
+        console.log("  DEXFactory:", address(dexFactory));
+
+        // Get WBNB address
+        address wbnbAddress = isTestnet
+            ? address(new MockERC20("Wrapped BNB", "WBNB", 18))
+            : vm.envAddress("WBNB_ADDRESS");
+
+        // Deploy DEXRouter
+        dexRouter = new DEXRouter(address(dexFactory), wbnbAddress);
+        console.log("  DEXRouter:", address(dexRouter));
+    }
+
+    // ==================== Phase 8: Treasury & Oracle ====================
+
+    function deployTreasuryAndOracle() internal {
+        console.log("Deploying treasury and oracle contracts...");
+
+        // Deploy PriceOracle (base oracle)
+        priceOracle = new PriceOracle();
+        console.log("  PriceOracle:", address(priceOracle));
+
+        // Deploy RWAPriceOracle (dual-source: Chainlink + NAV)
+        address chainlinkFeed = isTestnet ? address(mockChainlinkAggregator) : vm.envAddress("CHAINLINK_FEED");
+        rwaOracle = new RWAPriceOracle(chainlinkFeed);
+        console.log("  RWAPriceOracle:", address(rwaOracle));
+
+        // Deploy Treasury (RWA collateral vault)
+        treasury = new Treasury(address(usdp), address(rwaOracle));
+        console.log("  Treasury:", address(treasury));
+
+        // Grant Treasury minting rights
+        usdp.setAuthorizedMinter(address(treasury), true);
+        console.log("  Granted MINTER_ROLE to Treasury");
+    }
+
+    // ==================== Phase 9: Launchpad ====================
+
+    function deployLaunchpad() internal {
+        console.log("Deploying launchpad contracts...");
+
+        // Deploy ProjectRegistry
+        projectRegistry = new ProjectRegistry(address(votingEscrowPaimon));
+        console.log("  ProjectRegistry:", address(projectRegistry));
+
+        // Deploy IssuanceController
+        issuanceController = new IssuanceController(
+            address(projectRegistry),
+            address(usdc) // Payment token
+        );
+        console.log("  IssuanceController:", address(issuanceController));
+    }
+
+    // ==================== Phase 10: Presale ====================
+    // TODO: Deploy separately due to circular import issues
+    /*
+    function deployPresale() internal {
+        console.log("Deploying presale contracts...");
+
+        address vrfCoordinator = isTestnet ? address(mockVRFCoordinator) : vm.envAddress("VRF_COORDINATOR");
+
+        // Deploy RWABondNFT (gamified bond system)
+        rwaBondNFT = new RWABondNFT(
+            address(usdp),
+            vrfCoordinator,
+            VRF_SUBSCRIPTION_ID,
+            VRF_KEY_HASH,
+            VRF_CALLBACK_GAS_LIMIT,
+            VRF_REQUEST_CONFIRMATIONS
+        );
+        console.log("  RWABondNFT:", address(rwaBondNFT));
+
+        // Deploy RemintController (dice + social tasks)
+        remintController = new RemintController(address(rwaBondNFT));
+        console.log("  RemintController:", address(remintController));
+
+        // Deploy SettlementRouter (bond settlement)
+        settlementRouter = new SettlementRouter(address(rwaBondNFT), address(usdp));
+        console.log("  SettlementRouter:", address(settlementRouter));
+    }
+    */
+
+    // ==================== Phase 11: Post-Deployment Configuration ====================
+
+    function configureContracts() internal {
+        console.log("Configuring contracts...");
+
+        // Configure EmissionRouter channels
+        console.log("  Setting EmissionRouter channel sinks...");
+        emissionRouter.setChannelSink(0, address(usdpVault)); // Debt channel
+        emissionRouter.setChannelSink(1, address(gaugeController)); // LP Pairs channel
+        emissionRouter.setChannelSink(2, address(stabilityPool)); // Stability Pool channel
+        emissionRouter.setChannelSink(3, address(treasury)); // Ecosystem channel
+
+        // Add initial gauges to GaugeController
+        // (In production, gauges are added via veNFT governance votes)
+        console.log("  Configuration complete (manual gauge setup required)");
+    }
+
+    // ==================== Phase 12: Transfer Ownership ====================
+
+    function transferOwnership() internal {
+        if (multiSig != deployer) {
+            console.log("Transferring ownership to multi-sig:", multiSig);
+
+            // Transfer governable contracts
+            psm.transferGovernance(multiSig);
+            treasury.transferGovernance(multiSig);
+            emissionManager.transferGovernance(multiSig);
+            emissionRouter.transferGovernance(multiSig);
+            gaugeController.transferGovernance(multiSig);
+            dexFactory.transferGovernance(multiSig);
+
+            console.log("  Ownership transfer complete");
+        } else {
+            console.log("Skipped (deployer == multi-sig)");
+        }
+    }
+
+    // ==================== Phase 13: Save Deployment Addresses ====================
+
+    function saveDeploymentAddresses() internal view {
+        console.log("Deployment addresses:");
+        console.log("");
+        console.log("Core Tokens:");
+        console.log("  USDP:", address(usdp));
+        console.log("  PAIMON:", address(paimon));
+        console.log("  esPaimon:", address(esPaimonToken));
+        console.log("  HYD:", address(hyd));
+        console.log("");
+        console.log("USDP Infrastructure:");
+        console.log("  PSM:", address(psm));
+        console.log("  USDPVault:", address(usdpVault));
+        console.log("  USDPStabilityPool:", address(stabilityPool));
+        console.log("  SavingRate:", address(savingRate));
+        console.log("");
+        console.log("Governance:");
+        console.log("  VotingEscrow:", address(votingEscrow));
+        console.log("  VotingEscrowPaimon:", address(votingEscrowPaimon));
+        console.log("  GaugeController:", address(gaugeController));
+        console.log("  RewardDistributor:", address(rewardDistributor));
+        console.log("  BribeMarketplace:", address(bribeMarketplace));
+        console.log("");
+        console.log("Emission System:");
+        console.log("  EmissionManager:", address(emissionManager));
+        console.log("  EmissionRouter:", address(emissionRouter));
+        console.log("");
+        console.log("Incentives:");
+        console.log("  BoostStaking:", address(boostStaking));
+        console.log("  NitroPool:", address(nitroPool));
+        console.log("");
+        console.log("DEX:");
+        console.log("  DEXFactory:", address(dexFactory));
+        console.log("  DEXRouter:", address(dexRouter));
+        console.log("");
+        console.log("Treasury & Oracle:");
+        console.log("  Treasury:", address(treasury));
+        console.log("  RWAPriceOracle:", address(rwaOracle));
+        console.log("  PriceOracle:", address(priceOracle));
+        console.log("");
+        console.log("Launchpad:");
+        console.log("  ProjectRegistry:", address(projectRegistry));
+        console.log("  IssuanceController:", address(issuanceController));
+        console.log("");
+        console.log("Presale: (Deploy Separately)");
+        console.log("  Skipped due to circular import issues");
+        // console.log("  RWABondNFT:", address(rwaBondNFT));
+        // console.log("  RemintController:", address(remintController));
+        // console.log("  SettlementRouter:", address(settlementRouter));
+
+        if (isTestnet) {
+            console.log("");
+            console.log("Mocks (Testnet):");
+            console.log("  USDC:", address(usdc));
+            console.log("  MockChainlinkAggregator:", address(mockChainlinkAggregator));
+            console.log("  MockPyth:", address(mockPyth));
+            console.log("  MockVRFCoordinatorV2:", address(mockVRFCoordinator));
+        }
+    }
+
+    function printDeploymentSummary() internal view {
+        console.log("\nNext Steps:");
+        console.log("1. Verify contracts on BscScan");
+        console.log("2. Configure EmissionManager parameters");
+        console.log("3. Add gauges to GaugeController");
+        console.log("4. Create initial DEX pairs (USDP/USDC, PAIMON/USDP)");
+        console.log("5. Set up Chainlink VRF subscription (if mainnet)");
+        console.log("6. Transfer governance to multi-sig (if not done)");
+        console.log("7. Update frontend contract addresses");
+    }
+}
