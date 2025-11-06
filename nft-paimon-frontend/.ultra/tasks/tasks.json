@@ -8,10 +8,10 @@
   },
   "stats": {
     "totalTasks": 20,
-    "completed": 6,
-    "inProgress": 1,
+    "completed": 7,
+    "inProgress": 0,
     "pending": 13,
-    "progressPercentage": 30,
+    "progressPercentage": 35,
     "paused": 0
   },
   "tasks": [
@@ -120,9 +120,10 @@
       "priority": "P0",
       "dependencies": ["refactor-2.1"],
       "estimated_days": 0.75,
-      "status": "in_progress",
+      "status": "completed",
       "startedAt": "2025-11-07T15:05:00Z",
-      "notes": "正在重写 Navigation.tsx 组件，从硬编码的 4 个下拉菜单改为配置驱动的 6 栏结构。",
+      "completedAt": "2025-11-07T15:45:00Z",
+      "notes": "已重写 Navigation.tsx 为配置驱动（604行→272行，减少55%）。使用 getNavigationColumns() 和 getActiveColumn()，支持嵌套子菜单和徽章显示。删除 activePage prop，自动检测活动状态。TypeScript 0 错误。",
       "tags": [
         "navigation",
         "ui-component"
