@@ -11,13 +11,14 @@ describe('PositionCard Component', () => {
   const defaultPosition: PositionWithMetadata = {
     rwaAsset: '0x1234567890123456789012345678901234567890',
     rwaAmount: 10000000000000000000n, // 10 tokens
-    hydMinted: 6000000000000000000n, // 6 HYD
+    usdpMinted: 6000000000000000000n, // 6 USDP
     depositTime: BigInt(Math.floor(Date.now() / 1000) - 86400 * 8), // 8 days ago
     assetName: 'Lido Staked ETH',
     assetSymbol: 'stETH',
     assetTier: 1,
     rwaPrice: 2500, // $2500 per token
     rwaValueUSD: 25000, // 10 * $2500
+    hydValueUSD: 6, // 6 USDP = $6 (1:1)
     healthFactor: 416.67, // (25000 / 6000) * 100
     collateralizationRatio: 416.67,
     canRedeem: true,

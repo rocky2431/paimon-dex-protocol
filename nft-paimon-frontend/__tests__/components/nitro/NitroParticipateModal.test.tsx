@@ -204,7 +204,7 @@ describe('NitroParticipateModal', () => {
       await user.type(input, '1.123456789012345678999');
 
       // Should truncate to 18 decimals
-      expect(input.value).toMatch(/^1\.1234567890123456789?$/);
+      expect((input as HTMLInputElement).value).toMatch(/^1\.1234567890123456789?$/);
     });
 
     it('should handle negative amounts gracefully', async () => {
@@ -320,8 +320,8 @@ describe('NitroParticipateModal', () => {
 
       const input = screen.getByLabelText(/amount to stake/i);
 
-      // Type quickly
-      await user.type(input, '123456789', { delay: 10 });
+      // Type quickly (delay option removed in user-event v14+)
+      await user.type(input, '123456789');
 
       // Validation should be debounced (not run 9 times)
       await waitFor(() => {

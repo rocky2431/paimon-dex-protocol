@@ -94,7 +94,7 @@ test.describe('veNFT Lock and Voting Flow', () => {
 
     const veNFTCard = page.locator('[data-testid="venft-card"]').first();
     if (await veNFTCard.isVisible()) {
-      await veNFTCard.click('button:has-text("Increase"), button:has-text("增加")');
+      await veNFTCard.locator('button:has-text("Increase"), button:has-text("增加")').click();
 
       const increaseInput = page.locator('input[placeholder*="amount"]');
       await increaseInput.fill('100');
@@ -111,7 +111,7 @@ test.describe('veNFT Lock and Voting Flow', () => {
 
     const veNFTCard = page.locator('[data-testid="venft-card"]').first();
     if (await veNFTCard.isVisible()) {
-      await veNFTCard.click('button:has-text("Extend"), button:has-text("延长")');
+      await veNFTCard.locator('button:has-text("Extend"), button:has-text("延长")').click();
 
       await page.click('[data-testid="new-duration-selector"]');
       await page.click('text=/4 years|4年/');

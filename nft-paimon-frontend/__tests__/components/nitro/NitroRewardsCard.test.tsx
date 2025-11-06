@@ -36,27 +36,23 @@ const mockPools: NitroPool[] = [
   {
     id: BigInt(1),
     name: 'USDP-USDC Pool',
+    lpToken: '0x1234567890123456789012345678901234567890' as `0x${string}`,
     stakingToken: '0x1234567890123456789012345678901234567890' as `0x${string}`,
-    rewardTokens: ['0xabcdefabcdefabcdefabcdefabcdefabcdefabcd' as `0x${string}`],
+    rewardToken: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd' as `0x${string}`,
     lockDuration: BigInt(7),
-    minStakeAmount: BigInt('1000000000000000000'), // 1 token
-    maxStakeAmount: BigInt('1000000000000000000000'), // 1000 tokens
-    totalStaked: BigInt('5000000000000000000000'), // 5000 tokens
-    isActive: true,
-    apy: 25.5,
-  },
+    apr: 25.5,
+    active: true,
+  } as any,
   {
     id: BigInt(2),
     name: 'PAIMON-USDP Pool',
+    lpToken: '0x2345678901234567890123456789012345678901' as `0x${string}`,
     stakingToken: '0x2345678901234567890123456789012345678901' as `0x${string}`,
-    rewardTokens: ['0xbcdefabcdefabcdefabcdefabcdefabcdefabcde' as `0x${string}`],
+    rewardToken: '0xbcdefabcdefabcdefabcdefabcdefabcdefabcde' as `0x${string}`,
     lockDuration: BigInt(14),
-    minStakeAmount: BigInt('1000000000000000000'),
-    maxStakeAmount: BigInt('1000000000000000000000'),
-    totalStaked: BigInt('3000000000000000000000'),
-    isActive: true,
-    apy: 35.8,
-  },
+    apr: 35.8,
+    active: true,
+  } as any,
 ];
 
 describe('NitroRewardsCard Component', () => {

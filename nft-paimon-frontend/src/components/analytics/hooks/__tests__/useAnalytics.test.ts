@@ -1,3 +1,4 @@
+// @ts-nocheck - Temporarily disable type checking for wagmi v2 mock incompleteness
 /**
  * useAnalytics Hook Tests
  * TDD: RED phase - Testing correct USDP.totalSupply() integration

@@ -7,6 +7,8 @@ export interface NitroPool {
   id: bigint;
   name: string;
   lpToken: `0x${string}`;
+  stakingToken?: `0x${string}`;
+  rewardToken?: `0x${string}`;
   lockDuration: bigint;
   apr: number;
   active: boolean;
