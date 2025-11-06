@@ -37,7 +37,7 @@ test.describe('Gauge Voting Flow', () => {
     await waitForWalletConnected(page);
 
     const firstGauge = page.locator('[data-testid="gauge-item"]').first();
-    await firstGauge.click('button:has-text("Vote"), button:has-text("投票")');
+    await firstGauge.locator('button:has-text("Vote"), button:has-text("投票")').click();
 
     const weightInput = page.locator('input[placeholder*="weight"]');
     await weightInput.fill('50');

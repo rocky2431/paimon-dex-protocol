@@ -320,8 +320,8 @@ describe('NitroParticipateModal', () => {
 
       const input = screen.getByLabelText(/amount to stake/i);
 
-      // Type quickly
-      await user.type(input, '123456789', { delay: 10 });
+      // Type quickly (delay option removed in user-event v14+)
+      await user.type(input, '123456789');
 
       // Validation should be debounced (not run 9 times)
       await waitFor(() => {

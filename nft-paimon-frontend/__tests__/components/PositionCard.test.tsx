@@ -18,6 +18,7 @@ describe('PositionCard Component', () => {
     assetTier: 1,
     rwaPrice: 2500, // $2500 per token
     rwaValueUSD: 25000, // 10 * $2500
+    hydValueUSD: 6, // 6 USDP = $6 (1:1)
     healthFactor: 416.67, // (25000 / 6000) * 100
     collateralizationRatio: 416.67,
     canRedeem: true,

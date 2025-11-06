@@ -128,31 +128,28 @@ test.describe('Core Web Vitals - All Pages', () => {
   });
 
   test('should load critical assets quickly', async ({ page }) => {
-    const resourceTimings: Array<{ name: string; duration: number; size: number }> = [];
-
-    // Collect resource timings
-    page.on('response', async (response) => {
-      const url = response.url();
-      const timing = await response.timing();
-
-      // Track critical resources
-      if (
-        url.includes('.js') ||
-        url.includes('.css') ||
-        url.includes('.woff') ||
-        url.includes('/api/')
-      ) {
-        const size = parseInt(response.headers()['content-length'] || '0');
-        resourceTimings.push({
-          name: url.split('/').pop() || url,
-          duration: timing.responseEnd,
-          size,
-        });
-      }
-    });
-
     await page.goto('/');
     await page.waitForLoadState('networkidle');
+
+    // Use Performance API to get resource timings
+    const resourceTimings = await page.evaluate(() => {
+      const entries = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
+      return entries
+        .filter((entry) => {
+          const url = entry.name;
+          return (
+            url.includes('.js') ||
+            url.includes('.css') ||
+            url.includes('.woff') ||
+            url.includes('/api/')
+          );
+        })
+        .map((entry) => ({
+          name: entry.name.split('/').pop() || entry.name,
+          duration: entry.duration,
+          size: entry.transferSize || 0,
+        }));
+    });
 
     // Log slow resources
     const slowResources = resourceTimings
@@ -167,7 +164,7 @@ test.describe('Core Web Vitals - All Pages', () => {
     }
 
     // No single resource should take more than 3 seconds
-    const maxDuration = Math.max(...resourceTimings.map((r) => r.duration));
+    const maxDuration = Math.max(...resourceTimings.map((r) => r.duration), 0);
     expect(maxDuration).toBeLessThan(3000);
   });
 

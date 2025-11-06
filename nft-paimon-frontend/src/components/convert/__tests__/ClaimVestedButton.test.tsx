@@ -3,6 +3,7 @@
  * ClaimVestedButton 组件测试
  */
 
+import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, jest } from "@jest/globals";
 import ClaimVestedButton from "../ClaimVestedButton";
