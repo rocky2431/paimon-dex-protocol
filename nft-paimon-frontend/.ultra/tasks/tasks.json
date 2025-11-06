@@ -8,10 +8,10 @@
   },
   "stats": {
     "totalTasks": 21,
-    "completed": 12,
+    "completed": 13,
     "inProgress": 0,
-    "pending": 9,
-    "progressPercentage": 57
+    "pending": 8,
+    "progressPercentage": 62
   },
   "tasks": [
     {
@@ -241,14 +241,15 @@
         "refactor-3.4"
       ],
       "estimated_days": 0.2,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "governance",
         "incentives",
         "convert",
         "boost",
         "bribes"
-      ]
+      ],
+      "notes": "✅ Convert, Boost, Bribes 三个页面验证通过\n\n**Convert Page** (/convert):\n- 导航: Trade → Convert esPaimon ✅\n- 功能: esPaimon归属进度, 领取按钮, 早退惩罚警告\n- 数据: Total Vested, Already Vested, Locked, Claimable\n- 边界: 钱包连接, Loading, 无仓位提示\n\n**Boost Page** (/boost):\n- 导航: Earn → Boost Staking (HOT badge) ✅\n- 功能: 质押卡片, Stake/Unstake, 计算器, 历史记录\n- 奖励: 1.0x-1.5x 倍数, 7天锁定期\n- 交易: Approve → Stake, Unstake with refetch\n\n**Bribes Page** (/bribes):\n- 导航: Governance → Bribes Market ✅\n- 功能: BribesMarketplace, VoteTabs集成\n- 组件: BribesList, CreateBribeForm, ClaimBribeButton\n- 架构: 48行精简实现\n\n**TypeScript**: ✅ 0 errors\n**详细报告**: /tmp/convert-boost-bribes-verification.md"
     },
     {
       "id": "refactor-3.6",
@@ -383,5 +384,5 @@
       ]
     }
   ],
-  "lastModified": "2025-11-06T22:16:56.074Z"
+  "lastModified": "2025-11-06T22:20:25.333Z"
 }
