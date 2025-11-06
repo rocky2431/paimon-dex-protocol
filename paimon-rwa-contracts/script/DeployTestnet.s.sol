@@ -144,9 +144,9 @@ contract DeployTestnetScript is Script {
     uint256 public constant INITIAL_PAIMON_MINT = 1_000_000_000 * 1e18; // 1B for initial distribution
 
     // Initial Reserves (Testnet)
-    uint256 public constant INITIAL_USDC_RESERVE = 10_000_000 * 1e6; // 10M USDC
+    uint256 public constant INITIAL_USDC_RESERVE = 1_000_000_000 * 1e6; // 1B USDC (10亿)
     uint256 public constant INITIAL_BNB_LIQUIDITY = 100 * 1e18; // 100 BNB
-    uint256 public constant INITIAL_HYD_SUPPLY = 100_000_000 * 1e18; // 100M HYD
+    uint256 public constant INITIAL_HYD_SUPPLY = 10_000_000 * 1e18; // 10M HYD (1000万)
 
     // PSM Configuration
     uint256 public constant PSM_FEE_IN = 10; // 0.1% (10 basis points)
@@ -275,7 +275,7 @@ contract DeployTestnetScript is Script {
         usdc = new MockERC20("USD Coin (Mock)", "USDC", 6);
         console.log("  MockUSDC deployed:           ", address(usdc));
         usdc.mint(deployer, INITIAL_USDC_RESERVE);
-        console.log("  Minted 10M USDC to deployer");
+        console.log("  Minted 1B USDC to deployer");
 
         // Deploy Mock WBNB (18 decimals)
         wbnb = new MockERC20("Wrapped BNB (Mock)", "WBNB", 18);
@@ -285,15 +285,15 @@ contract DeployTestnetScript is Script {
 
         // Deploy Mock Chainlink Price Feeds
         usdcPriceFeed = new MockChainlinkAggregator(8, "USDC / USD");
-        usdcPriceFeed.updateAnswer(1e8); // $1.00
+        usdcPriceFeed.setLatestAnswer(1e8); // $1.00
         console.log("  USDC Price Feed deployed:    ", address(usdcPriceFeed));
 
         bnbPriceFeed = new MockChainlinkAggregator(8, "BNB / USD");
-        bnbPriceFeed.updateAnswer(600e8); // $600
+        bnbPriceFeed.setLatestAnswer(600e8); // $600
         console.log("  BNB Price Feed deployed:     ", address(bnbPriceFeed));
 
         hydPriceFeed = new MockChainlinkAggregator(8, "HYD / USD");
-        hydPriceFeed.updateAnswer(1e8); // $1.00 (stable RWA asset for testing)
+        hydPriceFeed.setLatestAnswer(1e8); // $1.00 (stable RWA asset for testing)
         console.log("  HYD Price Feed deployed:     ", address(hydPriceFeed));
 
         // Deploy Mock Pyth
@@ -335,8 +335,13 @@ contract DeployTestnetScript is Script {
         // Deploy HYD (test RWA collateral asset)
         hyd = new HYD();
         console.log("  HYD deployed:      ", address(hyd));
+
+        // Authorize deployer as minter for HYD
+        hyd.initTempPsm(deployer);
+        console.log("  Authorized deployer as HYD minter");
+
         hyd.mint(deployer, INITIAL_HYD_SUPPLY);
-        console.log("  Minted 100M HYD to deployer (test RWA collateral)");
+        console.log("  Minted 10M HYD to deployer (test RWA collateral)");
 
         console.log("---------------------------------------------------------------------");
         console.log("[Phase 2/13] Completed - Core tokens deployed");
@@ -365,8 +370,10 @@ contract DeployTestnetScript is Script {
         console.log("  Set PSM swap fees: 0.1% in / 0.1% out");
 
         // Fund PSM with initial USDC reserve
-        usdc.approve(address(psm), INITIAL_USDC_RESERVE);
-        usdc.transfer(address(psm), INITIAL_USDC_RESERVE);
+        // Fund PSM with 10M USDC reserve (not all 1B)
+        uint256 psmReserve = 10_000_000 * 1e6; // 10M USDC for PSM
+        usdc.approve(address(psm), psmReserve);
+        usdc.transfer(address(psm), psmReserve);
         console.log("  Funded PSM with 10M USDC reserve");
 
         console.log("---------------------------------------------------------------------");
@@ -397,7 +404,7 @@ contract DeployTestnetScript is Script {
         emissionManager = new EmissionManager();
         console.log("  EmissionManager deployed:       ", address(emissionManager));
         console.log("  Phase A: Fixed 30K PAIMON/day (2 years)");
-        console.log("  Phase B: Decay 30K→3K (4.77 years)");
+        console.log("  Phase B: Decay 30K->3K (4.77 years)");
         console.log("  Phase C: Fixed 3K PAIMON/day (perpetual)");
 
         // Deploy EmissionRouter (4-channel distribution)
@@ -406,7 +413,7 @@ contract DeployTestnetScript is Script {
         console.log("  Channels: DebtMining(50%), LPGauge(37.5%), StabilityPool(12.5%)");
 
         // Grant EmissionRouter minter role
-        paimon.setMinter(address(emissionRouter), true);
+        paimon.grantRole(paimon.MINTER_ROLE(), address(emissionRouter));
         console.log("  Granted PAIMON minter role to EmissionRouter");
 
         // Deploy BribeMarketplace (bribe aggregator for gauge voting)
@@ -503,27 +510,21 @@ contract DeployTestnetScript is Script {
         console.log("  SavingRate deployed:  ", address(savingRate));
         console.log("  Annual rate: 5%");
 
-        // Deploy PriceOracle (multi-asset oracle)
+        // Deploy PriceOracle (multi-asset oracle with Pyth)
         priceOracle = new PriceOracle(
-            address(usdcPriceFeed),
             address(mockPyth),
-            address(0), // No sequencer feed on testnet
-            address(0)  // No Chainlink automation registry on testnet
+            500,  // 5% deviation threshold
+            3600  // 1 hour staleness threshold
         );
         console.log("  PriceOracle deployed: ", address(priceOracle));
 
         // Deploy RWAPriceOracle (specialized for RWA assets like HYD)
         rwaPriceOracle = new RWAPriceOracle(
-            address(hydPriceFeed),
-            address(mockPyth),
-            PYTH_HYD_PRICE_ID,
-            ORACLE_DEVIATION_THRESHOLD
+            address(hydPriceFeed),      // Chainlink feed for HYD
+            address(0),                  // No sequencer feed on BSC testnet (L1)
+            deployer                     // Trusted oracle (deployer for testnet)
         );
         console.log("  RWAPriceOracle deployed: ", address(rwaPriceOracle));
-
-        // Register HYD as Tier 3 RWA asset in Treasury
-        treasury.addRWAAsset(address(hyd), address(rwaPriceOracle), TIER3_LTV);
-        console.log("  Registered HYD as Tier 3 RWA (60% LTV)");
 
         console.log("---------------------------------------------------------------------");
         console.log("[Phase 7/13] Completed - Treasury & Oracle deployed");
@@ -536,7 +537,7 @@ contract DeployTestnetScript is Script {
         console.log("[Phase 8/13] Deploying Vault & StabilityPool...");
         console.log("---------------------------------------------------------------------");
 
-        // Deploy USDPVault (CDP: collateral → borrow USDP)
+        // Deploy USDPVault (CDP: collateral -> borrow USDP)
         usdpVault = new USDPVault(
             address(usdp),
             address(priceOracle),
@@ -556,6 +557,15 @@ contract DeployTestnetScript is Script {
         usdpVault.setStabilityPool(address(stabilityPool));
         console.log("  Linked Vault with StabilityPool");
 
+        // Add HYD as collateral (Tier 3: 60% LTV)
+        usdpVault.addCollateral(
+            address(hyd),
+            6000,  // 60% LTV
+            7500,  // 75% liquidation threshold
+            500    // 5% liquidation penalty
+        );
+        console.log("  Added HYD as collateral (60% LTV, 75% threshold, 5% penalty)");
+
         console.log("---------------------------------------------------------------------");
         console.log("[Phase 8/13] Completed - Vault & StabilityPool deployed");
         console.log("");
@@ -573,13 +583,12 @@ contract DeployTestnetScript is Script {
 
         // Deploy IssuanceController (token sale mechanism)
         issuanceController = new IssuanceController(
-            address(projectRegistry),
-            address(treasury),
-            deployer, // Treasury receiver (will update)
-            500 // 5% platform fee
+            address(projectRegistry),    // Project registry
+            address(usdc),               // Payment token (USDC)
+            address(treasury),           // Treasury receiver
+            address(votingEscrow)        // veNFT pool for governance
         );
         console.log("  IssuanceController deployed: ", address(issuanceController));
-        console.log("  Platform fee: 5%");
 
         console.log("---------------------------------------------------------------------");
         console.log("[Phase 9/13] Completed - Launchpad deployed");
@@ -596,15 +605,17 @@ contract DeployTestnetScript is Script {
         usdp.setDistributor(address(savingRate));
         console.log("  Set USDP distributor to SavingRate");
 
-        // Set emission router channels
-        emissionRouter.setChannel(0, address(usdpVault)); // DebtMining
-        emissionRouter.setChannel(1, address(gaugeController)); // LPGauge
-        emissionRouter.setChannel(2, address(stabilityPool)); // StabilityPool
-        emissionRouter.setChannel(3, address(rewardDistributor)); // Boost incentives
-        console.log("  Configured EmissionRouter channels");
+        // Set emission router sinks (4 channels: debt, lpPairs, stabilityPool, eco)
+        emissionRouter.setSinks(
+            address(usdpVault),          // Debt mining (50%)
+            address(gaugeController),    // LP Gauge rewards (37.5%)
+            address(stabilityPool),      // Stability Pool (12.5%)
+            address(rewardDistributor)   // Ecosystem/boost incentives
+        );
+        console.log("  Configured EmissionRouter sinks (4 channels)");
 
         // Update Treasury address in contracts that use temporary deployer
-        dexFactory.setFeeTo(address(treasury));
+        dexFactory.setTreasury(address(treasury));
         console.log("  Updated DEXFactory treasury");
 
         nitroPool.transferOwnership(address(treasury));
@@ -629,9 +640,9 @@ contract DeployTestnetScript is Script {
         usdp.setAuthorizedMinter(address(treasury), true);
         console.log("  Granted USDP minter role to Treasury");
 
-        // Set SavingRate as accumulator for USDP
-        usdp.setAuthorizedAccumulator(address(savingRate), true);
-        console.log("  Authorized SavingRate as USDP accumulator");
+        // Authorize SavingRate to mint USDP (for accrued interest)
+        usdp.setAuthorizedMinter(address(savingRate), true);
+        console.log("  Authorized SavingRate as USDP minter (for interest accrual)");
 
         console.log("---------------------------------------------------------------------");
         console.log("[Phase 11/13] Completed - Permissions configured");
@@ -644,11 +655,11 @@ contract DeployTestnetScript is Script {
         console.log("[Phase 12/13] Setting Up Initial Liquidity (Testnet)...");
         console.log("---------------------------------------------------------------------");
 
-        // 1. Mint initial USDP via PSM
+        // 1. Mint initial USDP via PSM (swap USDC for USDP)
         uint256 initialUsdpAmount = 5_000_000 * 1e18; // 5M USDP
         usdc.approve(address(psm), 5_000_000 * 1e6);
-        psm.swapIn(5_000_000 * 1e6);
-        console.log("  Minted 5M USDP via PSM");
+        psm.swapUSDCForUSDP(5_000_000 * 1e6);
+        console.log("  Minted 5M USDP via PSM (swapped 5M USDC)");
 
         // 2. Add USDP/USDC liquidity
         usdp.approve(address(dexRouter), 1_000_000 * 1e18);
@@ -718,7 +729,8 @@ contract DeployTestnetScript is Script {
 
         // Verify DEX liquidity
         (uint112 reserve0, uint112 reserve1,) = usdpUsdcPair.getReserves();
-        console.log("  USDP/USDC liquidity:  ", uint256(reserve0) / 1e18, "USDP /", uint256(reserve1) / 1e6, "USDC");
+        console.log("  USDP/USDC liquidity:   ", uint256(reserve0) / 1e18, "USDP");
+        console.log("                         ", uint256(reserve1) / 1e6, "USDC");
         require(reserve0 > 0 && reserve1 > 0, "USDP/USDC pair has no liquidity");
 
         // Verify Treasury has HYD registered
