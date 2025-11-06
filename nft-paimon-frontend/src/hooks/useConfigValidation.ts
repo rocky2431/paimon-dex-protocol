@@ -50,12 +50,12 @@ const ADDRESSES = {
   56: {
     // BSC Mainnet
     USDC: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d' as `0x${string}`,
-    PSM: '0x0000000000000000000000000000000000000006' as `0x${string}`, // TODO: Update after deployment
+    PSM: '0x0000000000000000000000000000000000000000' as `0x${string}`, // TODO: Update after mainnet deployment
   },
   97: {
-    // BSC Testnet
-    USDC: '0xaa3F4B0cEF6F8f4C584cc6fD3A5e79E68dAa13b2' as `0x${string}`,
-    PSM: '0xBF194c604462168747C66b077F722C7F4a550AdC' as `0x${string}`,
+    // BSC Testnet (2025-11-07 deployment)
+    USDC: '0xA1112f596A73111E102b4a9c39064b2b2383EC38' as `0x${string}`, // Mock USDC (6 decimals)
+    PSM: '0x46eB7627024cEd13826359a5c0aEc57c7255b330' as `0x${string}`, // PSM
   },
 } as const;
 
