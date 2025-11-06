@@ -6,7 +6,7 @@
  * for distributing RWA yield to holders.
  */
 
-export const USDP_ADDRESS = "0x0000000000000000000000000000000000000000" as const;
+export const USDP_ADDRESS = "0x69cA4879c52A0935561F9D8165e4CB3b91f951a6" as const;
 
 // Minimal ABI for USDP contract (only functions needed for frontend)
 export const USDP_ABI = [

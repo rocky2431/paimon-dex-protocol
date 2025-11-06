@@ -7,7 +7,7 @@
  */
 
 export const BOOSTSTAKING_ADDRESS =
-  "0x0000000000000000000000000000000000000000" as const;
+  "0x0998dA12E9A61a7957e37feE9bBdAe7DDA6Ef314" as const;
 
 // Minimal ABI for BoostStaking contract
 export const BOOSTSTAKING_ABI = [

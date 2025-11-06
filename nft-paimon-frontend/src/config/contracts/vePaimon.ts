@@ -7,7 +7,7 @@
  */
 
 export const VEPAIMON_ADDRESS =
-  "0x0000000000000000000000000000000000000000" as const;
+  "0xdEe148Cd27a9923DE1986399a6629aB375F244e1" as const;
 
 // Minimal ABI for VotingEscrowPaimon contract
 export const VEPAIMON_ABI = [

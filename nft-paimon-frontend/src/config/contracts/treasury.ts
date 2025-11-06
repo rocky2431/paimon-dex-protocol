@@ -9,7 +9,7 @@
 // For backward compatibility, export a function that gets the address
 // Users should use getContractAddress from @/config instead
 export const TREASURY_ADDRESS =
-  "0x0000000000000000000000000000000000000000" as const;
+  "0x8CA5Cd0293b9d3C8BC796083E806bc5bC381772A" as const;
 
 // Minimal ABI for Treasury contract (only functions we need for deposit page)
 export const TREASURY_ABI = [

@@ -6,7 +6,7 @@
  */
 
 export const SAVINGRATE_ADDRESS =
-  "0x0000000000000000000000000000000000000000" as const;
+  "0xB89188bD9b635EC9Dd73f73C9E3bE17dB83D01B2" as const;
 
 // Minimal ABI for SavingRate contract
 export const SAVINGRATE_ABI = [

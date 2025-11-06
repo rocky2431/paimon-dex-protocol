@@ -7,7 +7,7 @@
  */
 
 export const NITROPOOL_ADDRESS =
-  "0x0000000000000000000000000000000000000000" as const;
+  "0x89f108938951CF996cD3c26556dAF525aD4d9957" as const;
 
 // Minimal ABI for NitroPool contract
 export const NITROPOOL_ABI = [

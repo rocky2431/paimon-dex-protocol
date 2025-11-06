@@ -7,7 +7,7 @@
  */
 
 export const ESPAIMON_ADDRESS =
-  "0x0000000000000000000000000000000000000000" as const;
+  "0xA848c9F841bB2deDC160DCb5108F2aac610CA02a" as const;
 
 // Minimal ABI for esPaimon contract
 export const ESPAIMON_ABI = [
