@@ -31,7 +31,10 @@
 flowchart LR
   subgraph L[Launchpad 发行层]
     IC[IssuanceController<br/>USDT/USDC募集]
-    SR[SettlementRouter<br/>到期结算]
+  end
+
+  subgraph P2[⏸️ Phase 2 限时活动]
+    SR[SettlementRouter<br/>债券结算]
   end
 
   subgraph RWA[RWA & Treasury 资产层]
@@ -318,10 +321,10 @@ paimon-rwa-contracts/
 │   │   ├── ProjectRegistry.sol       # 项目注册表 (vePaimon 治理)
 │   │   └── IssuanceController.sol    # 发行控制器
 │   │
-│   ├── presale/                       # 预售与债券
+│   ├── presale/                       # ⏸️ 限时活动模块 (Phase 2, 不在测试网部署范围)
 │   │   ├── RWABondNFT.sol           # 债券 NFT (Chainlink VRF 骰子)
 │   │   ├── RemintController.sol      # Remint 控制器
-│   │   ├── SettlementRouter.sol      # 结算路由器 ★
+│   │   ├── SettlementRouter.sol      # 结算路由器
 │   │   └── VRFConfig.sol             # VRF 配置
 │   │
 │   └── oracle/                        # 预言机
@@ -457,7 +460,7 @@ invariant_Emission_PhaseTotal: Σ(阶段周发) == 阶段预算 (rem 补差)
 ### 合约安全
 
 - ✅ **OpenZeppelin 5.x** 库 (ReentrancyGuard, SafeERC20, Pausable, AccessControlEnumerable)
-- ✅ **Chainlink VRF v2** 随机性 (RWABondNFT 骰子游戏)
+- ⏸️ **Chainlink VRF v2** 随机性 (RWABondNFT 骰子游戏) - Phase 2 限时活动
 - ✅ **双源预言机** (Chainlink + 托管方 NAV)
 - ✅ **熔断机制** (>20% 价格偏差触发暂停)
 - ✅ **Multi-sig 钱包** (3-of-5 用于 Treasury 操作)
@@ -497,6 +500,8 @@ uint256 result = step1 × ltvRatio / BASIS_POINTS; // ❌ 精度损失 ~0.01%
 ### 部署顺序
 
 ```
+**测试网部署顺序（29个核心合约）:**
+
 1. 基础设施: Governable (抽象合约)
 2. 代币: USDP, HYD, PAIMON, esPaimon
 3. DEX: DEXFactory, DEXRouter
@@ -506,10 +511,12 @@ uint256 result = step1 × ltvRatio / BASIS_POINTS; // ❌ 精度损失 ~0.01%
 7. 排放: EmissionManager, EmissionRouter
 8. 激励: BoostStaking, NitroPool, RewardDistributor, BribeMarketplace
 9. 启动板: ProjectRegistry, IssuanceController
-10. 预售: RWABondNFT, RemintController, SettlementRouter (+ Chainlink VRF)
+
+**Phase 2（限时活动，主网后期启用）:**
+10. ⏸️ 预售: RWABondNFT, RemintController, SettlementRouter (+ Chainlink VRF) - **不在测试网部署范围**
 ```
 
-完整部署流程见 [script/DEPLOYMENT.md](script/DEPLOYMENT.md)。
+完整部署流程见 [DEPLOYMENT.md](DEPLOYMENT.md) 和 [TESTNET_QUICKSTART.md](TESTNET_QUICKSTART.md)。
 
 ---
 
@@ -538,12 +545,15 @@ uint256 result = step1 × ltvRatio / BASIS_POINTS; // ❌ 精度损失 ~0.01%
 | **/launchpad** | RWA 项目列表 | ProjectRegistry |
 | **/launchpad/[id]** | 项目详情 | ProjectRegistry, IssuanceController |
 | **/launchpad/[id]/vote** | 项目治理投票 | VotingEscrowPaimon |
+| | | |
+| **⏸️ Phase 2 限时活动 (测试网不启用)** | | |
 | **/presale/mint** | 债券 NFT 铸造 | RWABondNFT |
 | **/presale/dice** | 骰子 Remint | RemintController |
 | **/presale/bonds** | 我的债券 | RWABondNFT |
 | **/presale/tasks** | 社交任务 | RemintController |
 | **/presale/leaderboards** | 排行榜 | - |
 | **/presale/settle/[id]** | 债券结算 | SettlementRouter |
+| | | |
 | **/treasury** | 国库总览 | Treasury |
 | **/treasury/deposit** | 存入 RWA | Treasury.depositRWA() |
 | **/treasury/positions** | 我的仓位 | Treasury |

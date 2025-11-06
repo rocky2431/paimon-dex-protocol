@@ -153,8 +153,10 @@ Back to Top ↺
 | **RewardDistributor** | RewardDistributor.sol | Merkle-based reward distribution with boost | ✅ Complete |
 | **Treasury** | Treasury.sol, RWAPriceOracle.sol | RWA collateralization vault | ✅ Complete |
 | **Launchpad** | IssuanceController.sol, ProjectRegistry.sol | RWA token sales platform | ✅ Complete |
-| **Presale** | RWABondNFT.sol, RemintController.sol | Gamified bond NFT system | ✅ Complete |
-| **Settlement** | SettlementRouter.sol, VotingEscrowIntegration.sol | Bond maturity options | ✅ Complete |
+| **Presale** | RWABondNFT.sol, RemintController.sol | Gamified bond NFT system | ⏸️ Phase 2 (限时活动) |
+| **Settlement** | SettlementRouter.sol | Bond maturity options | ⏸️ Phase 2 (限时活动) |
+
+**说明：** Presale和Settlement模块为限时活动功能，不在测试网部署范围内。测试网专注于29个核心长期功能合约。
 
 ### 2.2 Contract Dependency Graph
 
@@ -750,7 +752,9 @@ contract IssuanceController {
 }
 ```
 
-### 3.7 Presale System (Phase 1)
+### 3.7 ⏸️ Presale System (Phase 2 - 限时活动，测试网不部署)
+
+**说明：** Presale模块为限时活动功能，计划在主网特定阶段启用。测试网部署专注于核心长期功能验证。
 
 #### RWABondNFT.sol
 ```solidity
@@ -1197,7 +1201,9 @@ Transfer tokens to user
 Emit Swap event
 ```
 
-### 4.4 Presale Bond → veNFT Conversion (Settlement)
+### 4.4 ⏸️ Presale Bond → veNFT Conversion (Settlement) - Phase 2
+
+**说明：** 此功能为Presale限时活动的一部分，测试网不部署。
 
 ```
 Bond NFT reaches maturity (90 days)
@@ -1422,6 +1428,8 @@ function getPrice(address asset) public view returns (uint256) {
 
 ### 7.1 Deployment Sequence
 
+**测试网部署（29个核心合约）:**
+
 ```
 1. HYD Token
 2. DEXFactory
@@ -1430,11 +1438,19 @@ function getPrice(address asset) public view returns (uint256) {
 5. Treasury + RWAPriceOracle
 6. VotingEscrow
 7. GaugeController
-8. RWABondNFT + Chainlink VRF setup
-9. IssuanceController + ProjectRegistry
-10. RemintController
-11. SettlementRouter
-12. VotingEscrowIntegration
+8. IssuanceController + ProjectRegistry
+9. EmissionManager + EmissionRouter
+10. BoostStaking + NitroPool + RewardDistributor
+11. BribeMarketplace
+12. USDPVault + USDPStabilityPool + SavingRate
+```
+
+**Phase 2（限时活动，主网后期启用）:**
+
+```
+⏸️ 8. RWABondNFT + Chainlink VRF setup
+⏸️ 10. RemintController
+⏸️ 11. SettlementRouter
 ```
 
 ### 7.2 Network Configuration
@@ -1535,8 +1551,10 @@ function invariant_Treasury_Collateralization() public {
 - [ ] DAO treasury diversification
 
 ### Technical Debt
-- [ ] Optimize RemintController leaderboard sorting (O(n²) → O(n log n))
-- [ ] Reduce RWABondNFT minting gas cost (272K → <250K)
+
+**Phase 2 限时活动模块（暂不优先）:**
+- [ ] ⏸️ Optimize RemintController leaderboard sorting (O(n²) → O(n log n))
+- [ ] ⏸️ Reduce RWABondNFT minting gas cost (272K → <250K)
 - [ ] Fix 14 non-critical test failures (gas benchmarks + edge cases)
 - [ ] Implement frontend Core Web Vitals optimizations (LCP < 2.5s)
 

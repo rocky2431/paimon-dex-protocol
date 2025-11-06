@@ -159,7 +159,8 @@ contract DeployCompleteScript is Script {
         // Print deployment info
         printDeploymentHeader();
 
-        vm.startBroadcast(vm.envUint("PRIVATE_KEY"));
+        // Start broadcast with deployer account (private key provided via --private-key flag)
+        vm.startBroadcast(deployer);
 
         // Phase 1: Deploy Mock Contracts (testnet only)
         if (isTestnet) {
@@ -215,8 +216,10 @@ contract DeployCompleteScript is Script {
     // ==================== Configuration ====================
 
     function loadConfiguration() internal {
-        deployer = vm.addr(vm.envUint("PRIVATE_KEY"));
-        multiSig = vm.envOr("DEPLOYER_ADDRESS", deployer);
+        // Get deployer address from environment (must match the private key used)
+        deployer = vm.envAddress("DEPLOYER_ADDRESS");
+        // Use deployer as multisig if MULTISIG_ADDRESS not provided
+        multiSig = vm.envOr("MULTISIG_ADDRESS", deployer);
         isTestnet = vm.envOr("IS_TESTNET", true);
     }
 
