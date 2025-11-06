@@ -38,6 +38,13 @@
 - **GaugeController**: `0x4fDF9e1640722455cdA32dC2cceD85AeA8a3dB1A`
 - **EmissionManager**: `0x13536aDe0a7b8Ec6B07FcFc29a6915881c50EA38`
 
+
+### Mock Contracts (Testnet Only)
+- **Mock USDC**: `0xA1112f596A73111E102b4a9c39064b2b2383EC38` (1B supply, 6 decimals)
+- **Mock WBNB**: `0xe3402BAd7951c00e2B077A745C9e8B14122f05ED` (10,000 supply)
+- **USDC Price Feed**: `0xD36eff69950c1eE2713BB1d204f875434Da28aB7`
+- **BNB Price Feed**: `0x6D0a11083DCe3Fe5a2498b4B37f8edb30b29645B`
+
 📄 **Full Address List**: `deployments/testnet/addresses.json`
 
 ---
