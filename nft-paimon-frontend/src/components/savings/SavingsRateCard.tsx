@@ -195,21 +195,8 @@ export function SavingsRateCard({ locale = 'en', onDepositClick }: SavingsRateCa
     );
   }
 
-  // Error state
-  if (hasError) {
-    return (
-      <Card
-        data-testid="savings-rate-card"
-        sx={{ borderRadius: '24px', border: '1px solid rgba(255,107,0,0.3)' }}
-      >
-        <CardContent>
-          <Alert severity="error">
-            {rateError ? t.failedToLoad : t.networkError}
-          </Alert>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Note: Removed error state early return - show full UI even with network errors
+  // Error will be displayed as alert at top of card
 
   // Loading state
   if (isLoading) {
@@ -240,6 +227,13 @@ export function SavingsRateCard({ locale = 'en', onDepositClick }: SavingsRateCa
         }}
       >
         <CardContent>
+          {/* Network Error Alert - Show but don't block UI */}
+          {hasError && (
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              {rateError ? t.failedToLoad : t.networkError}
+            </Alert>
+          )}
+
           <Box sx={{ textAlign: 'center', py: 4 }}>
             <AccountBalanceIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
             <Typography variant="h6" color="text.secondary">
@@ -280,6 +274,13 @@ export function SavingsRateCard({ locale = 'en', onDepositClick }: SavingsRateCa
       }}
     >
       <CardContent sx={{ p: 3 }}>
+        {/* Network Error Alert - Show but don't block UI */}
+        {hasError && (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            {rateError ? t.failedToLoad : t.networkError}
+          </Alert>
+        )}
+
         {/* Header */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
           <Typography variant="h6" sx={{ fontWeight: 700, color: '#ff6b00' }}>
