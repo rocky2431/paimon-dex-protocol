@@ -10,9 +10,9 @@ import {VotingEscrowHandler} from "./handlers/VotingEscrowHandler.sol";
 
 /**
  * @title InvariantVotingEscrow
- * @notice Invariant tests for VotingEscrow (veNFT)
+ * @notice Invariant tests for VotingEscrow (veNFT) base contract
  * @dev Tests 3 critical invariants:
- *      1. Voting power bounded by total locked HYD
+ *      1. Voting power bounded by total locked tokens (test uses HYD mock, production uses PAIMON)
  *      2. No early withdrawal (before expiry)
  *      3. Linear decay of voting power over time
  *
@@ -20,6 +20,8 @@ import {VotingEscrowHandler} from "./handlers/VotingEscrowHandler.sol";
  * - Runs: 100,000
  * - Depth: 15
  * - Handler: VotingEscrowHandler
+ * - Test Token: HYD (MockERC20) - tests generic base contract logic
+ * - Production: VotingEscrowPaimon locks PAIMON tokens
  */
 contract InvariantVotingEscrow is StdInvariant, Test {
     VotingEscrow public votingEscrow;
@@ -56,8 +58,9 @@ contract InvariantVotingEscrow is StdInvariant, Test {
     // ============================================================
 
     /**
-     * @notice Invariant: Total voting power never exceeds total locked HYD
-     * @dev Formula: sum(balanceOfNFT(tokenId)) <= HYD.balanceOf(VotingEscrow)
+     * @notice Invariant: Total voting power never exceeds total locked tokens
+     * @dev Formula: sum(balanceOfNFT(tokenId)) <= token.balanceOf(VotingEscrow)
+     * @dev Test uses HYD mock token; production VotingEscrowPaimon uses PAIMON
      */
     function invariant_votingPowerBounded() public view {
         uint256 totalLockedHYD = hyd.balanceOf(address(votingEscrow));

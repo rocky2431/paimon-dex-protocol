@@ -92,10 +92,10 @@ export function USDPMintPreview({ preview, isLoading }: USDPMintPreviewProps) {
 
         <Divider sx={{ my: 2, borderColor: TREASURY_THEME.SECONDARY }} />
 
-        {/* HYD Mint Amount */}
+        {/* USDP Mint Amount */}
         <Box sx={{ mb: 2 }}>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-            HYD to be Minted
+            USDP to be Minted
           </Typography>
           <Typography
             variant="h5"

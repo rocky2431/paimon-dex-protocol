@@ -126,8 +126,8 @@ contract InvariantPSM is StdInvariant, Test {
     // ============================================================
 
     /**
-     * @notice Invariant: Total minted HYD never exceeds cap
-     * @dev REMOVED: No mint cap in USDP version of PSM
+     * @notice Invariant: Total minted USDP never exceeds cap
+     * @dev REMOVED: No mint cap in USDP version of PSM (unlimited minting based on USDC backing)
      */
     function invariant_maxMintNotExceeded() public view {
         // No-op: Mint cap removed in USDP version
