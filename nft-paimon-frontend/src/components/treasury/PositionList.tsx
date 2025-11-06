@@ -275,11 +275,9 @@ export function PositionList() {
             <PositionCard
               position={position}
               onRedeem={(assetAddress, amount) => {
-                console.log('Redeem:', assetAddress, amount);
                 // TODO: Implement redeem transaction
               }}
               onAddCollateral={(assetAddress, amount) => {
-                console.log('Add collateral:', assetAddress, amount);
                 // TODO: Implement add collateral transaction
               }}
             />

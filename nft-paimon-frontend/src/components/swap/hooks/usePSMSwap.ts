@@ -106,9 +106,6 @@ export const usePSMSwap = () => {
   const { address, isConnected } = useAccount();
   const { writeContractAsync } = useWriteContract();
 
-  // DEBUG: Verify SCALE is loaded
-  console.log('SWAP_CONFIG.SCALE:', SWAP_CONFIG.SCALE.toString());
-
   // Form state (default: USDC → USDP)
   const [formData, setFormData] = useState<SwapFormData>({
     inputAmount: '',

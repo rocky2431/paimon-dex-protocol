@@ -159,7 +159,6 @@ export function SettlementPage({ tokenId }: SettlementPageProps) {
       // Redirect to success page or bonds dashboard after 2 seconds
       setTimeout(() => {
         // window.location.href = '/presale/bonds';
-        console.log('Settlement successful! Redirecting...');
       }, 2000);
     } catch (err) {
       console.error('Settlement failed:', err);

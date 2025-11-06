@@ -9,8 +9,8 @@
   "stats": {
     "totalTasks": 20,
     "completed": 1,
-    "inProgress": 0,
-    "pending": 19,
+    "inProgress": 1,
+    "pending": 18,
     "progressPercentage": 5,
     "paused": 0
   },
@@ -40,7 +40,7 @@
       "priority": "P0",
       "dependencies": ["refactor-0.1"],
       "estimated_days": 0.25,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "critical",
         "code-quality",
