@@ -8,10 +8,10 @@
   },
   "stats": {
     "totalTasks": 20,
-    "completed": 1,
-    "inProgress": 1,
+    "completed": 2,
+    "inProgress": 0,
     "pending": 18,
-    "progressPercentage": 5,
+    "progressPercentage": 10,
     "paused": 0
   },
   "tasks": [
@@ -40,12 +40,14 @@
       "priority": "P0",
       "dependencies": ["refactor-0.1"],
       "estimated_days": 0.25,
-      "status": "in_progress",
+      "status": "completed",
       "tags": [
         "critical",
         "code-quality",
         "cleanup"
-      ]
+      ],
+      "completedAt": "2025-11-07T13:15:00Z",
+      "notes": "删除 11 个开发调试 console.log。分类 99 个 TODO (P0:32, P1:34, P2:19, P3:14)。创建 bug-tracker.md 和 ComingSoon 组件。所有修改已提交并合并到 main。"
     },
     {
       "id": "refactor-1.1",
