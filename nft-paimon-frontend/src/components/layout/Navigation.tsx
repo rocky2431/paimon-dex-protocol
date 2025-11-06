@@ -9,6 +9,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import * as Icons from '@mui/icons-material';
 
 import { getNavigationColumns, getActiveColumn, type NavColumn, type NavItem } from '@/config/navigation';
+import { MobileNavigation } from './MobileNavigation';
 
 /**
  * Navigation Component (V2 - Config-Driven)
@@ -22,6 +23,7 @@ import { getNavigationColumns, getActiveColumn, type NavColumn, type NavItem } f
  * - Hover dropdown menus
  * - Badge support (NEW, BETA, HOT)
  * - Nested submenus support
+ * - Responsive design (desktop ≥1024px, mobile <1024px)
  */
 export function Navigation() {
   const pathname = usePathname();
@@ -219,53 +221,106 @@ export function Navigation() {
   };
 
   return (
-    <Box
-      component="nav"
-      sx={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 1000,
-        backgroundColor: 'background.paper',
-        borderBottom: 'none',
-        boxShadow: 'inset 0 -1px 0 0 rgba(255, 152, 0, 0.1)',
-        backdropFilter: 'blur(8px)',
-      }}
-    >
-      <Container maxWidth="xl">
-        <Stack
-          direction="row"
-          alignItems="center"
-          sx={{ py: 2, gap: 4 }}
-        >
-          {/* Logo / Brand */}
-          <Link href="/" style={{ textDecoration: 'none' }}>
-            <Typography
-              variant="h6"
-              component="h1"
-              fontWeight={700}
-              color="primary"
-              sx={{ fontSize: '1.5rem', cursor: 'pointer', flexShrink: 0 }}
-            >
-              Paimon DEX
-            </Typography>
-          </Link>
+    <>
+      {/* Mobile Navigation - shows below lg breakpoint (<1024px) */}
+      <Box
+        component="nav"
+        sx={{
+          display: { xs: 'block', lg: 'none' },
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          backgroundColor: 'background.paper',
+          borderBottom: 'none',
+          boxShadow: 'inset 0 -1px 0 0 rgba(255, 152, 0, 0.1)',
+          backdropFilter: 'blur(8px)',
+        }}
+      >
+        <Container maxWidth="xl">
+          <Stack
+            direction="row"
+            alignItems="center"
+            sx={{ py: 2, gap: 2 }}
+          >
+            {/* Hamburger Menu */}
+            <MobileNavigation />
 
-          {/* Navigation Columns (6-column structure) */}
-          <Stack direction="row" spacing={3} alignItems="center" sx={{ flexGrow: 0 }}>
-            {columns.map((column) => renderColumn(column))}
+            {/* Logo / Brand */}
+            <Link href="/" style={{ textDecoration: 'none' }}>
+              <Typography
+                variant="h6"
+                component="h1"
+                fontWeight={700}
+                color="primary"
+                sx={{ fontSize: '1.5rem', cursor: 'pointer', flexShrink: 0 }}
+              >
+                Paimon DEX
+              </Typography>
+            </Link>
+
+            {/* Spacer - pushes wallet button to far right */}
+            <Box sx={{ flexGrow: 1 }} />
+
+            {/* Connect Wallet Button */}
+            <Box sx={{ flexShrink: 0 }}>
+              <ConnectButton />
+            </Box>
           </Stack>
+        </Container>
+      </Box>
 
-          {/* Spacer - pushes wallet button to far right */}
-          <Box sx={{ flexGrow: 1 }} />
+      {/* Desktop Navigation - shows at lg breakpoint and above (≥1024px) */}
+      <Box
+        component="nav"
+        sx={{
+          display: { xs: 'none', lg: 'block' },
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          backgroundColor: 'background.paper',
+          borderBottom: 'none',
+          boxShadow: 'inset 0 -1px 0 0 rgba(255, 152, 0, 0.1)',
+          backdropFilter: 'blur(8px)',
+        }}
+      >
+        <Container maxWidth="xl">
+          <Stack
+            direction="row"
+            alignItems="center"
+            sx={{ py: 2, gap: 4 }}
+          >
+            {/* Logo / Brand */}
+            <Link href="/" style={{ textDecoration: 'none' }}>
+              <Typography
+                variant="h6"
+                component="h1"
+                fontWeight={700}
+                color="primary"
+                sx={{ fontSize: '1.5rem', cursor: 'pointer', flexShrink: 0 }}
+              >
+                Paimon DEX
+              </Typography>
+            </Link>
 
-          {/* Connect Wallet Button */}
-          <Box sx={{ flexShrink: 0 }}>
-            <ConnectButton />
-          </Box>
-        </Stack>
-      </Container>
-    </Box>
+            {/* Navigation Columns (6-column structure) */}
+            <Stack direction="row" spacing={3} alignItems="center" sx={{ flexGrow: 0 }}>
+              {columns.map((column) => renderColumn(column))}
+            </Stack>
+
+            {/* Spacer - pushes wallet button to far right */}
+            <Box sx={{ flexGrow: 1 }} />
+
+            {/* Connect Wallet Button */}
+            <Box sx={{ flexShrink: 0 }}>
+              <ConnectButton />
+            </Box>
+          </Stack>
+        </Container>
+      </Box>
+    </>
   );
 }

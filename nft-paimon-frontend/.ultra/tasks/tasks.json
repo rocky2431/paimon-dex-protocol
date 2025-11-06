@@ -3,15 +3,15 @@
   "metadata": {
     "projectName": "Paimon.dex Frontend Refactor V2",
     "created": "2025-11-07T00:00:00Z",
-    "lastModified": "2025-11-07T00:00:00Z",
+    "lastModified": "2025-11-06T22:01:40.684Z",
     "description": "前端重构方案 V2 - 务实版 (基于团队评审调整): 修复构建错误、配置自动化、导航重构、核心功能补全、Bug修复"
   },
   "stats": {
     "totalTasks": 20,
-    "completed": 7,
+    "completed": 8,
     "inProgress": 0,
     "pending": 13,
-    "progressPercentage": 35,
+    "progressPercentage": 40,
     "paused": 0
   },
   "tasks": [
@@ -38,7 +38,9 @@
       "description": "清理开发调试用的 console.log 和未实现功能的 TODO 注释,提升代码质量。\n\n**执行步骤**:\n1. 移除所有开发调试用 console.log (保留 console.error)\n2. 统计 TODO 数量: grep -r \"TODO\" src --exclude-dir=node_modules | wc -l\n3. TODO 分类处理:\n   - P0 (阻断): 立即修复\n   - P1 (重要): 移入 bug-tracker.md\n   - P2 (优化): 移入 GitHub Issues\n   - P3 (未来): 删除或移入 Backlog\n4. 未实现功能添加 ComingSoon 组件占位\n\n**验收标准**:\n- ✅ 无开发调试用 console.log\n- ✅ 所有 TODO 已分类处理\n- ✅ 未实现功能有友好提示",
       "complexity": 3,
       "priority": "P0",
-      "dependencies": ["refactor-0.1"],
+      "dependencies": [
+        "refactor-0.1"
+      ],
       "estimated_days": 0.25,
       "status": "completed",
       "tags": [
@@ -55,7 +57,9 @@
       "description": "创建自动化脚本,从 paimon-rwa-contracts/deployments/testnet/addresses.json 同步合约地址到前端配置,解决配置漂移问题。\n\n**文件**: scripts/sync-addresses.ts\n\n**功能**:\n1. 读取 ../../paimon-rwa-contracts/deployments/testnet/addresses.json\n2. 生成 TypeScript 配置文件 src/config/chains/generated/testnet.ts\n3. 包含所有 21 个合约地址 (USDP, PAIMON, PSM, VotingEscrow, GaugeController...)\n4. 自动添加类型断言 `0x${string}`\n5. 添加文件头注释: \"Auto-generated, DO NOT EDIT MANUALLY\"\n\n**验收标准**:\n- ✅ 脚本文件创建完成\n- ✅ npm run sync-addresses 成功执行\n- ✅ 生成的配置文件包含所有地址\n- ✅ TypeScript 类型正确",
       "complexity": 4,
       "priority": "P0",
-      "dependencies": ["refactor-0.2"],
+      "dependencies": [
+        "refactor-0.2"
+      ],
       "estimated_days": 0.4,
       "status": "completed",
       "completedAt": "2025-11-07T14:00:00Z",
@@ -71,7 +75,9 @@
       "description": "修改 src/config/index.ts,使用自动生成的合约地址配置,替代硬编码地址。\n\n**实现**:\n1. 导入生成的配置: import { TESTNET_ADDRESSES } from './chains/generated/testnet'\n2. 移除硬编码的地址常量\n3. 导出统一的 config 对象\n4. 添加 chainId 判断逻辑 (testnet/mainnet)\n5. 添加 Feature Flags 控制功能显示\n\n**Feature Flags**:\n```typescript\nfeatures: {\n  psm: true,\n  vault: true,\n  dex: true,\n  governance: true,\n  launchpad: true,\n  treasury: false, // Phase 2\n  presale: false,  // Phase 2\n}\n```\n\n**验收标准**:\n- ✅ config 使用生成的地址\n- ✅ Feature flags 正确配置\n- ✅ 无硬编码地址残留",
       "complexity": 3,
       "priority": "P0",
-      "dependencies": ["refactor-1.1"],
+      "dependencies": [
+        "refactor-1.1"
+      ],
       "estimated_days": 0.25,
       "status": "completed",
       "completedAt": "2025-11-07T14:15:00Z",
@@ -86,7 +92,9 @@
       "description": "系统性验证所有 21 个合约地址在前端正确加载,并编写地址验证测试。\n\n**验证清单**:\n- USDP, PAIMON, esPaimon, HYD (4个代币)\n- PSM, USDPVault, USDPStabilityPool, SavingRate (4个稳定币栈)\n- VotingEscrowPaimon, GaugeController, BribeMarketplace (3个治理)\n- BoostStaking, NitroPool, RewardDistributor (3个激励)\n- EmissionManager, EmissionRouter (2个释放)\n- DEXFactory, DEXRouter (2个DEX)\n- Treasury, RWAPriceOracle (2个Treasury)\n- ProjectRegistry, IssuanceController (2个Launchpad)\n- RWABondNFT, RemintController (2个Phase 2,可选)\n\n**测试**:\n```typescript\n// __tests__/config/addresses.test.ts\ndescribe('Contract Addresses', () => {\n  it('should load all 21 core addresses', () => {\n    expect(config.tokens.USDP).toMatch(/^0x[a-fA-F0-9]{40}$/);\n    // ... 验证所有地址格式\n  });\n});\n```\n\n**验收标准**:\n- ✅ 所有地址格式正确 (0x + 40位hex)\n- ✅ 地址验证测试通过\n- ✅ Feature flags 控制显示正确",
       "complexity": 3,
       "priority": "P1",
-      "dependencies": ["refactor-1.2"],
+      "dependencies": [
+        "refactor-1.2"
+      ],
       "estimated_days": 0.25,
       "status": "completed",
       "completedAt": "2025-11-07T14:30:00Z",
@@ -102,7 +110,9 @@
       "description": "创建新的导航配置文件,实现团队建议的 6 栏导航结构,参考 Camelot/Velodrome 设计。\n\n**文件**: src/config/navigation.ts\n\n**导航结构**:\n1. **Trade** (交易)\n   - Swap (PSM + DEX)\n   - Liquidity (Add, Remove, Stake)\n\n2. **Earn** (赚取)\n   - Savings (USDP利息)\n   - Convert (esPaimon → PAIMON)\n   - Boost (PAIMON质押)\n   - Nitro (外部激励池)\n   - Rewards (统一领取)\n\n3. **Borrow** (借贷)\n   - Vault Dashboard (RWA抵押)\n   - Borrow USDP (开仓)\n   - Repay (还款)\n   - Stability Pool (清算池)\n   - Treasury Deposit (RWA存入, Feature Flag控制)\n\n4. **Governance** (治理)\n   - Lock (vePAIMON NFT)\n   - Vote (Gauge投票)\n   - Bribes (贿选市场)\n\n5. **Launch** (Launchpad, 独立突出)\n   - Projects (项目列表)\n   - My Investments (我的投资)\n\n6. **Analytics** (分析)\n   - Dashboard (总览)\n   - DEX Stats (DEX统计)\n   - Governance Stats (治理统计)\n\n**数据结构**:\n```typescript\ninterface NavColumn {\n  id: string;\n  label: string;\n  items: NavItem[];\n}\n\ninterface NavItem {\n  label: string;\n  href: string;\n  icon: string;\n  badge?: string; // \"NEW\", \"BETA\"\n  featureFlag?: string; // \"treasury\", \"presale\"\n}\n```\n\n**验收标准**:\n- ✅ 配置文件创建完成\n- ✅ 6个主栏结构定义清晰\n- ✅ Feature flags 集成\n- ✅ 图标和标签完整",
       "complexity": 5,
       "priority": "P0",
-      "dependencies": ["refactor-1.3"],
+      "dependencies": [
+        "refactor-1.3"
+      ],
       "estimated_days": 0.5,
       "status": "completed",
       "completedAt": "2025-11-07T15:00:00Z",
@@ -118,7 +128,9 @@
       "description": "使用新的导航配置重写 Navigation 组件,实现配置驱动的架构,支持 Feature Flags。\n\n**组件结构**:\n```typescript\n// src/components/layout/Navigation.tsx\nexport function Navigation() {\n  const { features } = useConfig();\n  const navColumns = getNavigationColumns(features); // 根据 feature flags 过滤\n\n  return (\n    <Box sx={{ bgcolor: 'background.paper' }}>\n      <Container maxWidth=\"xl\">\n        <Stack direction=\"row\" spacing={6} alignItems=\"center\">\n          {/* Logo */}\n          <Logo />\n\n          {/* 6栏导航 */}\n          {navColumns.map(column => (\n            <NavColumn key={column.id} column={column} />\n          ))}\n\n          {/* 钱包连接 */}\n          <Box sx={{ flexGrow: 1 }} />\n          <ConnectButton />\n        </Stack>\n      </Container>\n    </Box>\n  );\n}\n```\n\n**子组件**:\n- NavColumn: 带下拉菜单的栏目\n- NavLink: 单个链接项\n- NavDropdown: 下拉菜单容器\n\n**功能**:\n- Hover 展开下拉菜单\n- Active 状态高亮\n- Feature Flag 控制显示\n- NEW/BETA 徽章显示\n- 响应式设计 (移动端折叠)\n\n**验收标准**:\n- ✅ 组件渲染正确\n- ✅ 下拉菜单交互流畅\n- ✅ Feature flags 生效\n- ✅ 响应式布局正常",
       "complexity": 7,
       "priority": "P0",
-      "dependencies": ["refactor-2.1"],
+      "dependencies": [
+        "refactor-2.1"
+      ],
       "estimated_days": 0.75,
       "status": "completed",
       "startedAt": "2025-11-07T15:05:00Z",
@@ -135,14 +147,18 @@
       "description": "创建移动端导航组件 (抽屉式),适配小屏幕设备,保持与桌面端一致的功能。\n\n**组件**: src/components/layout/MobileNavigation.tsx\n\n**功能**:\n- Hamburger 菜单按钮\n- 侧边抽屉展开\n- 手风琴式折叠栏目\n- 与桌面端共享配置\n- Feature flags 一致性\n\n**响应式断点**:\n- Desktop: >1024px → 显示桌面导航\n- Mobile: <1024px → 显示移动导航\n\n**验收标准**:\n- ✅ 移动端导航正常显示\n- ✅ 抽屉交互流畅\n- ✅ 与桌面端功能一致\n- ✅ 跨设备测试通过",
       "complexity": 5,
       "priority": "P1",
-      "dependencies": ["refactor-2.2"],
+      "dependencies": [
+        "refactor-2.2"
+      ],
       "estimated_days": 0.5,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "navigation",
         "mobile",
         "ui-component"
-      ]
+      ],
+      "completedAt": "2025-11-06T22:01:40.683Z",
+      "notes": "已创建 MobileNavigation.tsx（298行）实现抽屉式移动导航。集成到 Navigation.tsx 实现响应式布局（<1024px 显示移动端，≥1024px 显示桌面端）。共享导航配置，支持手风琴折叠和嵌套菜单。TypeScript 0 错误。"
     },
     {
       "id": "refactor-3.1",
@@ -150,7 +166,9 @@
       "description": "验证 PSM Swap 的 SCALE 修复是否生效,确保 USDC ↔ USDP 计算正确。\n\n**问题回顾**:\n- 输入 10,000 USDC → 输出 0.00000000... USDP (错误)\n- 根因: 缺少 SCALE (10^12) 转换 USDC (6 decimals) ↔ USDP (18 decimals)\n\n**已完成修复**:\n1. ✅ 添加 SWAP_CONFIG.SCALE = BigInt(10) ** BigInt(12)\n2. ✅ 更新 usePSMSwap.ts 计算逻辑\n3. ✅ 更新 handleInputAmountChange 逻辑\n\n**验证步骤**:\n1. 启动 dev server: npm run dev\n2. 访问 http://localhost:4000\n3. 输入 10,000 USDC\n4. 验证输出约 9,990 USDP (0.1% 手续费)\n5. 切换方向测试 USDP → USDC\n6. 测试边界值: 0.01, 1, 100, 1000, 10000, 100000\n\n**合约调用验证**:\n```bash\ncast call $PSM \"getSwapOutput(uint256)\" 10000000000 --rpc-url $RPC\n# 应返回 9990000000000000000000 (9990 USDP with 18 decimals)\n```\n\n**验收标准**:\n- ✅ 10,000 USDC → 9,990 USDP 显示正确\n- ✅ 双向计算准确\n- ✅ 边界值测试通过\n- ✅ console.log 显示 SCALE = 1000000000000",
       "complexity": 2,
       "priority": "P0",
-      "dependencies": ["refactor-2.3"],
+      "dependencies": [
+        "refactor-2.3"
+      ],
       "estimated_days": 0.125,
       "status": "pending",
       "tags": [
@@ -165,7 +183,9 @@
       "description": "将现有的 Vault Dashboard 页面接入新导航,验证 RWA 抵押功能正常。\n\n**页面**: /vault\n\n**功能**:\n- 显示用户抵押的 RWA 资产 (HYD)\n- 显示借出的 USDP 数量\n- 显示抵押率 (Collateral Ratio)\n- 显示清算价格 (Liquidation Price)\n- 快捷操作按钮: Borrow, Repay, Add Collateral\n\n**验证步骤**:\n1. 从导航进入 Borrow → Vault Dashboard\n2. 连接钱包\n3. 验证数据加载正确\n4. 测试按钮跳转\n\n**合约交互**:\n- USDPVault.getUserPosition(address)\n- RWAPriceOracle.getPrice(HYD)\n\n**验收标准**:\n- ✅ 页面从导航可访问\n- ✅ 用户数据显示正确\n- ✅ 按钮跳转正常\n- ✅ 无 console 错误",
       "complexity": 3,
       "priority": "P0",
-      "dependencies": ["refactor-3.1"],
+      "dependencies": [
+        "refactor-3.1"
+      ],
       "estimated_days": 0.125,
       "status": "pending",
       "tags": [
@@ -179,7 +199,9 @@
       "description": "将 Borrow 和 Repay 页面接入导航,验证借贷功能完整性。\n\n**页面**: /vault/borrow, /vault/repay\n\n**Borrow 功能**:\n- 选择抵押资产 (HYD)\n- 输入抵押数量\n- 计算可借 USDP (80% LTV)\n- 显示新抵押率\n- 执行 borrow 交易\n\n**Repay 功能**:\n- 显示当前债务\n- 输入还款数量 (USDP)\n- 选择是否提取抵押品\n- 显示还款后抵押率\n- 执行 repay 交易\n\n**合约调用**:\n```solidity\nUSDPVault.borrow(uint256 collateralAmount, uint256 usdpAmount)\nUSDPVault.repay(uint256 usdpAmount, bool withdrawCollateral)\n```\n\n**验收标准**:\n- ✅ 两个页面从导航可访问\n- ✅ 计算逻辑正确 (LTV, 抵押率)\n- ✅ 交易可成功执行\n- ✅ UI 反馈清晰",
       "complexity": 4,
       "priority": "P0",
-      "dependencies": ["refactor-3.2"],
+      "dependencies": [
+        "refactor-3.2"
+      ],
       "estimated_days": 0.125,
       "status": "pending",
       "tags": [
@@ -194,7 +216,9 @@
       "description": "验证 Stability Pool 页面功能,确保清算机制相关功能正常。\n\n**页面**: /stability-pool\n\n**功能**:\n- 存入 USDP 到稳定池\n- 查看当前存款\n- 显示清算奖励 (RWA 资产)\n- 提取 USDP + 奖励\n\n**合约交互**:\n```solidity\nUSDPStabilityPool.deposit(uint256 amount)\nUSDPStabilityPool.withdraw(uint256 amount)\nUSDPStabilityPool.getDepositorGains(address depositor) // HYD gains\n```\n\n**验收标准**:\n- ✅ 页面从导航可访问\n- ✅ 存取款功能正常\n- ✅ 奖励显示正确\n- ✅ 交易成功执行",
       "complexity": 3,
       "priority": "P0",
-      "dependencies": ["refactor-3.3"],
+      "dependencies": [
+        "refactor-3.3"
+      ],
       "estimated_days": 0.125,
       "status": "pending",
       "tags": [
@@ -208,7 +232,9 @@
       "description": "验证治理与激励相关的 3 个页面: Convert (esPaimon转换), Boost (PAIMON质押), Bribes (贿选市场)。\n\n**Convert (/convert)**:\n- esPaimon → PAIMON 线性释放\n- 选择释放时间 (1周-1年)\n- 显示释放计划\n- 执行转换\n\n**Boost (/boost)**:\n- 质押 PAIMON 获得 Boost (1.0x-1.5x)\n- 显示当前 Boost 倍数\n- 显示质押收益 (esPAIMON)\n- 执行质押/取消质押\n\n**Bribes (/bribes)**:\n- 查看 Gauge 贿选列表\n- 为 Gauge 添加贿选奖励\n- 领取贿选奖励\n- 显示 APR\n\n**验收标准**:\n- ✅ 3个页面从导航可访问\n- ✅ 核心功能可用\n- ✅ 合约交互正确\n- ✅ UI 反馈友好",
       "complexity": 5,
       "priority": "P1",
-      "dependencies": ["refactor-3.4"],
+      "dependencies": [
+        "refactor-3.4"
+      ],
       "estimated_days": 0.2,
       "status": "pending",
       "tags": [
@@ -225,7 +251,9 @@
       "description": "验证外部激励和统一奖励领取功能。\n\n**Nitro (/nitro)**:\n- 显示外部激励池列表\n- 质押 LP Token 到 Nitro Pool\n- 查看奖励 (外部代币)\n- 领取奖励\n- 取消质押\n\n**Rewards (/rewards)**:\n- 统一显示所有待领取奖励:\n  - DEX LP 手续费\n  - Gauge 投票奖励\n  - Boost 质押收益\n  - Nitro Pool 奖励\n  - Bribe 奖励\n- 一键领取所有奖励\n- 显示历史奖励记录\n\n**验收标准**:\n- ✅ 2个页面从导航可访问\n- ✅ 奖励数据准确\n- ✅ 领取功能正常\n- ✅ 批量领取成功",
       "complexity": 4,
       "priority": "P1",
-      "dependencies": ["refactor-3.5"],
+      "dependencies": [
+        "refactor-3.5"
+      ],
       "estimated_days": 0.2,
       "status": "pending",
       "tags": [
@@ -240,7 +268,9 @@
       "description": "为测试网未部署的 Phase 2 功能添加 Coming Soon 占位组件,避免报错。\n\n**创建组件**: src/components/common/ComingSoon.tsx\n\n```typescript\nexport function ComingSoon({ feature }: { feature: string }) {\n  return (\n    <Box sx={{ textAlign: 'center', py: 8 }}>\n      <RocketLaunchIcon sx={{ fontSize: 80, color: 'text.disabled', mb: 2 }} />\n      <Typography variant=\"h5\" gutterBottom>\n        {feature} Coming Soon\n      </Typography>\n      <Typography variant=\"body2\" color=\"text.secondary\">\n        This feature is under development. Stay tuned!\n      </Typography>\n    </Box>\n  );\n}\n```\n\n**应用页面**:\n- /treasury/deposit (if !config.features.treasury)\n- /treasury/positions (if !config.features.treasury)\n- /presale/* (if !config.features.presale)\n\n**验收标准**:\n- ✅ ComingSoon 组件创建\n- ✅ 未完成页面显示友好提示\n- ✅ 无报错或白屏",
       "complexity": 2,
       "priority": "P1",
-      "dependencies": ["refactor-3.6"],
+      "dependencies": [
+        "refactor-3.6"
+      ],
       "estimated_days": 0.125,
       "status": "pending",
       "tags": [
@@ -254,7 +284,9 @@
       "description": "创建系统性的 Bug 追踪文档,分级管理所有发现的问题。\n\n**文件**: .ultra/docs/bug-tracker.md\n\n**分级标准**:\n- **P0 - CRITICAL**: 阻断核心功能 (如 PSM Swap 显示为0)\n- **P1 - HIGH**: 影响体验但有 workaround (如导航缺少入口)\n- **P2 - MEDIUM**: UI/UX 问题 (如样式错乱)\n- **P3 - LOW**: 优化建议 (如性能优化)\n\n**记录格式**:\n```markdown\n### Bug #1: [标题]\n- **页面**: /xxx\n- **错误**: 详细描述\n- **根因**: 技术原因\n- **修复**: 解决方案\n- **验证**: 测试步骤\n- **负责人**: xxx\n- **截止日期**: YYYY-MM-DD\n- **状态**: 🔄/✅/❌\n```\n\n**初始记录**:\n1. ✅ PSM Swap 输出为0 (已修复)\n2. 🔄 TypeScript 构建失败 34 个错误\n3. 🔄 导航缺少 7 个核心功能\n\n**验收标准**:\n- ✅ 文档创建完成\n- ✅ 现有 Bug 已记录\n- ✅ 分级明确",
       "complexity": 2,
       "priority": "P1",
-      "dependencies": ["refactor-3.7"],
+      "dependencies": [
+        "refactor-3.7"
+      ],
       "estimated_days": 0.2,
       "status": "pending",
       "tags": [
@@ -268,7 +300,9 @@
       "description": "遍历所有 29 个功能页面,记录 Console 错误、Network 失败、合约 Revert、UI 异常。\n\n**排查清单** (20+ 页面):\n1. / (Swap)\n2. /vault, /vault/borrow, /vault/repay\n3. /stability-pool\n4. /convert, /boost, /bribes, /nitro, /rewards\n5. /savings, /lock, /vote\n6. /liquidity/add, /liquidity/remove, /liquidity/stake\n7. /launchpad, /launchpad/projects/[id]\n8. /treasury, /treasury/deposit, /treasury/positions\n9. /analytics\n10. /presale/* (Phase 2)\n\n**记录内容**:\n- ✅ 页面正常加载\n- ❌ Console 错误 (类型/数量)\n- ❌ Network 请求失败 (API/RPC)\n- ❌ 合约调用 Revert (原因)\n- ❌ UI 渲染异常 (白屏/错位)\n\n**输出**: 更新 bug-tracker.md 新发现的问题\n\n**验收标准**:\n- ✅ 所有页面已访问\n- ✅ 问题已记录到 bug-tracker.md\n- ✅ 优先级已标注",
       "complexity": 5,
       "priority": "P1",
-      "dependencies": ["refactor-4.1"],
+      "dependencies": [
+        "refactor-4.1"
+      ],
       "estimated_days": 0.5,
       "status": "pending",
       "tags": [
@@ -283,7 +317,9 @@
       "description": "根据 bug-tracker.md 记录,优先修复 P0 和 P1 级别的 Bug。\n\n**修复策略**:\n1. **P0 Bug**: 立即修复 (阻断核心功能)\n2. **P1 Bug**: 本周内修复 (影响体验)\n3. **P2 Bug**: 下周修复 (UI/UX)\n4. **P3 Bug**: Backlog (优化)\n\n**预期 Bug 类型**:\n- 合约地址错误 → 使用自动生成配置\n- 类型错误 → 添加类型断言\n- 网络请求失败 → 添加错误处理\n- UI 渲染异常 → 修复组件逻辑\n\n**验收标准**:\n- ✅ 所有 P0 Bug 已修复\n- ✅ 80% P1 Bug 已修复\n- ✅ bug-tracker.md 状态更新\n- ✅ 验证测试通过",
       "complexity": 6,
       "priority": "P0",
-      "dependencies": ["refactor-4.2"],
+      "dependencies": [
+        "refactor-4.2"
+      ],
       "estimated_days": 0.5,
       "status": "pending",
       "tags": [
@@ -297,7 +333,9 @@
       "description": "使用 Playwright 编写 E2E 测试,覆盖核心用户旅程。\n\n**测试用例**:\n\n1. **Core Flow 1: USDC → USDP Swap**\n   - 连接钱包\n   - 输入 100 USDC\n   - 验证输出 ~99.9 USDP\n   - 执行 Swap\n   - 验证交易成功\n\n2. **Core Flow 2: Vault Borrow**\n   - 存入 1000 HYD\n   - 借出 800 USDP (80% LTV)\n   - 验证抵押率显示\n   - 验证余额变化\n\n3. **Core Flow 3: Lock → Vote**\n   - Lock 100 PAIMON (1年)\n   - 获得 vePAIMON NFT\n   - 为 Gauge 投票\n   - 验证投票权重\n\n4. **Core Flow 4: LP Stake → Rewards**\n   - 添加 USDC-USDP LP\n   - 质押 LP Token\n   - 等待 1 epoch\n   - 领取奖励\n\n**文件**: e2e/core-flows.spec.ts\n\n**验收标准**:\n- ✅ 4个核心流程测试编写完成\n- ✅ 测试可本地执行\n- ✅ 通过率 ≥90%\n- ✅ 集成到 CI/CD",
       "complexity": 6,
       "priority": "P1",
-      "dependencies": ["refactor-4.3"],
+      "dependencies": [
+        "refactor-4.3"
+      ],
       "estimated_days": 0.4,
       "status": "pending",
       "tags": [
@@ -312,7 +350,9 @@
       "description": "更新 README.md 和用户文档,反映前端重构后的最新状态。\n\n**更新内容**:\n\n1. **README.md**:\n   - 更新导航结构说明 (6栏)\n   - 更新功能列表 (23个核心功能)\n   - 更新开发命令 (npm run sync-addresses)\n   - 更新部署说明\n   - 更新 Feature Flags 配置\n\n2. **USER_GUIDE.md** (如果存在):\n   - 更新用户操作指南\n   - 添加核心流程截图\n   - 更新常见问题 FAQ\n\n3. **DEVELOPMENT.md**:\n   - 更新本地开发流程\n   - 添加地址同步说明\n   - 更新测试指南\n\n**验收标准**:\n- ✅ README.md 更新完成\n- ✅ 文档与实际功能一致\n- ✅ 链接有效\n- ✅ 截图清晰",
       "complexity": 3,
       "priority": "P2",
-      "dependencies": ["refactor-5.1"],
+      "dependencies": [
+        "refactor-5.1"
+      ],
       "estimated_days": 0.25,
       "status": "pending",
       "tags": [
@@ -326,7 +366,9 @@
       "description": "完成所有阶段后,进行最终的完整性检查和验收测试。\n\n**验证清单**:\n\n1. **构建与部署**\n   - ✅ npm run type-check → 0 errors\n   - ✅ npm run lint → 0 warnings\n   - ✅ npm run build → Success\n   - ✅ npm run test → All pass\n\n2. **功能完整性**\n   - ✅ 导航 6 栏结构正确\n   - ✅ 23 个核心功能页面可访问\n   - ✅ Phase 2 功能正确隐藏/显示 Coming Soon\n   - ✅ 所有合约地址加载正确\n\n3. **用户体验**\n   - ✅ 页面加载速度 <3s\n   - ✅ 交互响应流畅\n   - ✅ 错误提示友好\n   - ✅ 移动端适配正常\n\n4. **质量保障**\n   - ✅ E2E 测试通过\n   - ✅ 无 P0/P1 Bug 残留\n   - ✅ Core Web Vitals 达标 (LCP<2.5s, INP<200ms, CLS<0.1)\n   - ✅ 文档完整更新\n\n5. **配置管理**\n   - ✅ 地址同步脚本正常\n   - ✅ Feature Flags 生效\n   - ✅ 环境变量配置正确\n\n**输出**: 交付报告 (Delivery Report)\n\n**验收标准**:\n- ✅ 所有检查项通过\n- ✅ 交付报告完成\n- ✅ 用户验收通过",
       "complexity": 4,
       "priority": "P0",
-      "dependencies": ["refactor-5.2"],
+      "dependencies": [
+        "refactor-5.2"
+      ],
       "estimated_days": 0.25,
       "status": "pending",
       "tags": [
