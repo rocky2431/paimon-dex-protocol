@@ -3,15 +3,15 @@
   "metadata": {
     "projectName": "Paimon.dex Frontend Refactor V2",
     "created": "2025-11-07T00:00:00Z",
-    "lastModified": "2025-11-06T22:01:40.684Z",
+    "lastModified": "2025-11-06T22:05:01.902Z",
     "description": "前端重构方案 V2 - 务实版 (基于团队评审调整): 修复构建错误、配置自动化、导航重构、核心功能补全、Bug修复"
   },
   "stats": {
     "totalTasks": 20,
-    "completed": 8,
+    "completed": 9,
     "inProgress": 0,
-    "pending": 13,
-    "progressPercentage": 40,
+    "pending": 12,
+    "progressPercentage": 45,
     "paused": 0
   },
   "tasks": [
@@ -170,12 +170,14 @@
         "refactor-2.3"
       ],
       "estimated_days": 0.125,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "swap",
         "bug-fix",
         "verification"
-      ]
+      ],
+      "completedAt": "2025-11-06T22:05:01.901Z",
+      "notes": "✅ SCALE 修复已验证通过。SCALE = 10^12 正确定义在 constants.ts:59。计算逻辑在 usePSMSwap.ts:162-178 正确实现。边界值测试（0.01 ~ 100,000）全部通过。10,000 USDC → 9,990 USDP (0.1% 手续费) 计算准确。"
     },
     {
       "id": "refactor-3.2",
