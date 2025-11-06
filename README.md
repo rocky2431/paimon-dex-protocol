@@ -481,12 +481,6 @@ docs: update deployment guide for v3.3.0
 
 ### 核心设计文档
 
-- **[系统工程实现白皮书](.ultra/docs/usdp-camelot-lybra-system-guide.md)** - 架构 & 经济模型权威参考
-- **[产品需求文档 (PRD)](.ultra/docs/prd.md)** - 功能规格与用户故事
-- **[技术设计文档](.ultra/docs/tech.md)** - 数据流与接口规范
-
-### 子项目文档
-
 - [智能合约详细文档](paimon-rwa-contracts/README.md)
 - [前端开发指南](nft-paimon-frontend/README.md)
 - [分发服务文档](distribution-service/README.md)
