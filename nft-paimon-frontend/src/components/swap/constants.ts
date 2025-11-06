@@ -54,6 +54,10 @@ export const SWAP_CONFIG = {
   BPS_DIVISOR: BigInt(10000), // 100% = 10000 basis points
   FEE_PERCENTAGE: "0.1", // Display value
 
+  // SCALE factor for USDC (6 decimals) ↔ USDP (18 decimals) conversion
+  // SCALE = 10^(18 - 6) = 10^12
+  SCALE: BigInt(10) ** BigInt(12),
+
   // Minimum amounts
   MIN_SWAP_AMOUNT: "0.01",
 

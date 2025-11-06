@@ -106,6 +106,9 @@ export const usePSMSwap = () => {
   const { address, isConnected } = useAccount();
   const { writeContractAsync } = useWriteContract();
 
+  // DEBUG: Verify SCALE is loaded
+  console.log('SWAP_CONFIG.SCALE:', SWAP_CONFIG.SCALE.toString());
+
   // Form state (default: USDC → USDP)
   const [formData, setFormData] = useState<SwapFormData>({
     inputAmount: '',
@@ -152,14 +155,30 @@ export const usePSMSwap = () => {
         inputToken.decimals
       );
 
-      // PSM 1:1 swap with 0.1% fee
-      // outputAmount = inputAmount * (10000 - 10) / 10000
-      const outputAmountBigInt =
-        (inputAmountBigInt * (SWAP_CONFIG.BPS_DIVISOR - SWAP_CONFIG.FEE_BPS)) /
-        SWAP_CONFIG.BPS_DIVISOR;
+      // PSM 1:1 swap with 0.1% fee, considering decimals difference
+      // USDC (6 decimals) ↔ USDP (18 decimals) requires SCALE = 10^12
+      const isUSDCtoUSDP = formData.inputToken === Token.USDC;
 
-      const feeBigInt =
-        (inputAmountBigInt * SWAP_CONFIG.FEE_BPS) / SWAP_CONFIG.BPS_DIVISOR;
+      let outputAmountBigInt: bigint;
+      let feeBigInt: bigint;
+
+      if (isUSDCtoUSDP) {
+        // USDC → USDP: scale up then apply fee
+        // output = (input * SCALE * (10000 - 10)) / 10000
+        outputAmountBigInt =
+          (inputAmountBigInt * SWAP_CONFIG.SCALE * (SWAP_CONFIG.BPS_DIVISOR - SWAP_CONFIG.FEE_BPS)) /
+          SWAP_CONFIG.BPS_DIVISOR;
+        feeBigInt =
+          (inputAmountBigInt * SWAP_CONFIG.SCALE * SWAP_CONFIG.FEE_BPS) / SWAP_CONFIG.BPS_DIVISOR;
+      } else {
+        // USDP → USDC: apply fee then scale down
+        // output = (input * (10000 - 10)) / (10000 * SCALE)
+        outputAmountBigInt =
+          (inputAmountBigInt * (SWAP_CONFIG.BPS_DIVISOR - SWAP_CONFIG.FEE_BPS)) /
+          (SWAP_CONFIG.BPS_DIVISOR * SWAP_CONFIG.SCALE);
+        feeBigInt =
+          (inputAmountBigInt * SWAP_CONFIG.FEE_BPS) / (SWAP_CONFIG.BPS_DIVISOR * SWAP_CONFIG.SCALE);
+      }
 
       // Format exchange rate
       const exchangeRate = `1 ${inputToken.symbol} = ${(
@@ -213,12 +232,25 @@ export const usePSMSwap = () => {
 
       try {
         const inputToken = TOKEN_CONFIG[prev.inputToken];
-        const inputAmountBigInt = parseUnits(amount, inputToken.decimals);
-        const outputAmountBigInt =
-          (inputAmountBigInt *
-            (SWAP_CONFIG.BPS_DIVISOR - SWAP_CONFIG.FEE_BPS)) /
-          SWAP_CONFIG.BPS_DIVISOR;
         const outputToken = TOKEN_CONFIG[prev.outputToken];
+        const inputAmountBigInt = parseUnits(amount, inputToken.decimals);
+
+        // Calculate output considering SCALE factor
+        const isUSDCtoUSDP = prev.inputToken === Token.USDC;
+        let outputAmountBigInt: bigint;
+
+        if (isUSDCtoUSDP) {
+          // USDC → USDP: scale up then apply fee
+          outputAmountBigInt =
+            (inputAmountBigInt * SWAP_CONFIG.SCALE * (SWAP_CONFIG.BPS_DIVISOR - SWAP_CONFIG.FEE_BPS)) /
+            SWAP_CONFIG.BPS_DIVISOR;
+        } else {
+          // USDP → USDC: apply fee then scale down
+          outputAmountBigInt =
+            (inputAmountBigInt * (SWAP_CONFIG.BPS_DIVISOR - SWAP_CONFIG.FEE_BPS)) /
+            (SWAP_CONFIG.BPS_DIVISOR * SWAP_CONFIG.SCALE);
+        }
+
         const outputAmount = formatUnits(
           outputAmountBigInt,
           outputToken.decimals
