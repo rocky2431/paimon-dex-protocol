@@ -22,7 +22,7 @@
 paimon 1111111/
 ├── paimon-rwa-contracts/         # 🔐 智能合约层 (Solidity + Foundry)
 │   ├── src/common/               # 统一基础设施 (Governable、Constants、Epoch工具)
-│   ├── src/core/                 # USDP、HYD、PSM、Vault、StabilityPool、esPaimon
+│   ├── src/core/                 # USDP、PAIMON、PSM、Vault、StabilityPool、esPaimon
 │   ├── src/governance/           # EmissionManager、EmissionRouter、GaugeController、RewardDistributor
 │   ├── src/incentives/           # BoostStaking、NitroPool
 │   ├── src/launchpad/            # ProjectRegistry、IssuanceController
@@ -62,7 +62,7 @@ flowchart TB
 
   subgraph Contracts[🔐 Smart Contracts Layer]
     subgraph RWA[RWA & Treasury]
-      RWA1[Whitelisted RWA<br/>HYD/其他]
+      RWA1[Whitelisted RWA<br/>测试示例:HYD]
       TR[Treasury<br/>国库]
       OR[RWAPriceOracle<br/>Chainlink+NAV]
     end
@@ -145,7 +145,7 @@ flowchart TB
 | 合约模块 | 主要合约 | 功能 | 测试数 |
 |---------|---------|------|--------|
 | **稳定币层** | USDP, PSMParameterized, USDPVault, USDPStabilityPool, SavingRate | 铸币/销毁/借贷/清算/储蓄 | 102 |
-| **代币层** | PAIMON, HYD, esPaimon, VotingEscrowPaimon | 治理代币/合成资产/归属/veNFT | 58 |
+| **代币层** | PAIMON, esPaimon, VotingEscrowPaimon | 治理代币/归属/veNFT | 58 |
 | **排放层** | EmissionManager, EmissionRouter | 三阶段调度 + 四通道分发 | 52 |
 | **治理层** | GaugeController, RewardDistributor, BribeMarketplace | 投票权重/Merkle分发/贿选 | 68 |
 | **激励层** | BoostStaking, NitroPool | PAIMON质押加成/外部激励 | 36 |
@@ -288,7 +288,8 @@ python workspace/emission_backtest.py
 | **esPaimon** | ERC-20 归属代币 | 无上限 | 365 天线性解锁,每周 Boost 衰减 1% |
 | **vePAIMON** | ERC-721 治理 NFT | 无上限 | 锁仓 1周~4年,投票权线性衰减,**可转让** |
 | **USDP** | ERC-20 合成稳定币 | 无上限 | Vault/Treasury/PSM 铸造,PSM 1:1 锚定 USDC |
-| **HYD** | ERC-20 合成资产 | 无上限 | 低波动 RWA 合成代币,PSM 铸造/销毁 |
+
+> **注**：HYD 为测试/演示用 RWA 代币示例，非核心协议资产。
 
 ### 排放时间表
 
@@ -459,7 +460,7 @@ docs: update deployment guide for v3.3.0
 ### 部署顺序
 
 ```
-1. 代币: USDP, HYD, PAIMON, esPaimon
+1. 代币: USDP, PAIMON, esPaimon
 2. DEX: DEXFactory, DEXRouter
 3. 稳定币: PSMParameterized, USDPVault, USDPStabilityPool, SavingRate
 4. 国库: Treasury, RWAPriceOracle

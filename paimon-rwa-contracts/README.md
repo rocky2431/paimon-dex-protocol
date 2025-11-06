@@ -35,7 +35,7 @@ flowchart LR
   end
 
   subgraph RWA[RWA & Treasury 资产层]
-    RWA1[Whitelisted RWA<br/>HYD/其他]
+    RWA1[Whitelisted RWA<br/>测试示例:HYD]
     TR[Treasury<br/>国库]
     OR[RWAPriceOracle<br/>Chainlink+NAV双源]
   end
@@ -123,7 +123,7 @@ pie title PAIMON 分配 (总量 10B)
 | **PAIMON** | ERC-20 治理代币 | Cap 10B, 三阶段排放 6.77 年 |
 | **esPaimon** | ERC-20 归属代币 | 365 天线性解锁,提前退出罚则,**每周 Boost 衰减 1%** |
 | **vePAIMON** | ERC-721 治理 NFT | 锁定 1 周~4 年,**投票权线性衰减,可转让** |
-| **HYD** | ERC-20 合成资产 | 低波动 RWA 合成代币,PSM 铸造/销毁 |
+| **HYD** | ERC-20 测试代币 | 用于测试/演示的 RWA 代币示例,非核心资产 |
 
 ---
 
@@ -285,7 +285,7 @@ paimon-rwa-contracts/
 │   │
 │   ├── core/                          # 核心代币与稳定币层
 │   │   ├── USDP.sol                  # 合成稳定币 (份额×指数,默认关闭指数)
-│   │   ├── HYD.sol                   # 合成资产 (低波动 RWA) ★
+│   │   ├── HYD.sol                   # 测试用 RWA 代币示例 (非核心资产)
 │   │   ├── PSMParameterized.sol      # 锚定稳定模块 (支持 6/18 decimals)
 │   │   ├── USDPVault.sol             # 抵押借款 Vault
 │   │   ├── USDPStabilityPool.sol     # 稳定池 (清算缓冲 + 激励) ★

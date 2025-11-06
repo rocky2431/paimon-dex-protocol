@@ -6,7 +6,7 @@ import "./VotingEscrow.sol";
 /**
  * @title VotingEscrowPaimon (vePAIMON)
  * @notice Lock PAIMON tokens to receive vePAIMON NFT with time-weighted voting power
- * @dev Inherits VotingEscrow base contract, binds to PAIMON token instead of HYD
+ * @dev Inherits VotingEscrow base contract, implements veNFT for PAIMON token
  *
  * Key Features:
  * - Lock PAIMON for 1 week to 4 years → receive ERC-721 vePAIMON NFT
@@ -16,7 +16,7 @@ import "./VotingEscrow.sol";
  * - Compatible with GaugeController for ve33 governance
  *
  * Differences from Base VotingEscrow:
- * - Binds to PAIMON token instead of HYD
+ * - Binds to PAIMON token (passed via constructor)
  * - NFT name: "Vote-Escrowed PAIMON"
  * - NFT symbol: "vePAIMON"
  *

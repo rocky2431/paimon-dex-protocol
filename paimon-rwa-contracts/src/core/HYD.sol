@@ -8,16 +8,18 @@ import "@openzeppelin/contracts/utils/Pausable.sol";
 
 /**
  * @title HYD Token
- * @notice HYD (Hydra) is the low-volatility synthetic asset for Paimon.dex protocol
+ * @notice HYD is a demo/test RWA (Real World Asset) token for Paimon.dex protocol testing
  * @dev BEP-20 token with:
- *      - Mint/burn controlled exclusively by PSM (Peg Stability Module)
+ *      - Mint/burn controlled by authorized minters (PSM, SettlementRouter, etc.)
  *      - Pausable by emergency admin
  *      - Blacklist functionality for compliance
  *      - Gas-optimized with immutable PSM address
  *
+ * IMPORTANT: HYD is NOT a core protocol asset. It is used for testing and demonstration purposes only.
+ *
  * Security Features:
- * - Only PSM contract can mint new tokens
- * - Only PSM contract can burn tokens
+ * - Only authorized contracts can mint new tokens
+ * - Only authorized contracts can burn tokens
  * - Admin can pause all transfers in emergency
  * - Admin can blacklist malicious addresses
  *

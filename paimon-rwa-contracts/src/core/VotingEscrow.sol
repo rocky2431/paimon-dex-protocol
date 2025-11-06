@@ -7,12 +7,16 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
- * @title VotingEscrow (veNFT)
- * @notice Lock HYD tokens to receive veNFT with time-weighted voting power
+ * @title VotingEscrow (veNFT Base Contract)
+ * @notice Generic base contract: Lock ERC20 tokens to receive veNFT with time-weighted voting power
  * @dev Implements ve33 tokenomics model inspired by Curve Finance and Velodrome
  *
+ * IMPORTANT: This is a BASE CONTRACT. Actual implementations:
+ * - VotingEscrowPaimon: Locks PAIMON tokens
+ * - Token address is passed via constructor parameter
+ *
  * Key Features:
- * - Lock HYD for 1 week to 4 years → receive ERC-721 veNFT
+ * - Lock ERC20 tokens for 1 week to 4 years → receive ERC-721 veNFT
  * - Voting power = locked amount × (remaining time / MAXTIME)
  * - Linear decay: power decreases as lock approaches expiry
  * - NFT transferable, but voting power tied to lock
@@ -49,11 +53,11 @@ contract VotingEscrow is ERC721, ReentrancyGuard {
     /// @notice Locked balance structure with storage packing
     /// @dev Packed into single 256-bit slot: uint128 + uint128 = 256 bits
     struct LockedBalance {
-        uint128 amount;     // Amount of HYD locked (max 3.4e38, sufficient for all cases)
+        uint128 amount;     // Amount of tokens locked (max 3.4e38, sufficient for all cases)
         uint128 end;        // Unlock timestamp (max 10^29 years, far beyond uint64)
     }
 
-    /// @notice HYD token address
+    /// @notice ERC20 token address to be locked (set by constructor)
     IERC20 public immutable token;
 
     /// @notice Next token ID to mint
@@ -100,17 +104,18 @@ contract VotingEscrow is ERC721, ReentrancyGuard {
     event ContractAuthorized(address indexed contractAddress, bool authorized);
 
     /**
-     * @notice Constructor initializes veNFT with HYD token
-     * @param _token Address of HYD token contract
+     * @notice Constructor initializes veNFT with specified ERC20 token
+     * @param _token Address of ERC20 token contract to be locked
+     * @dev Subclasses should override ERC721 name/symbol in their constructor
      */
-    constructor(address _token) ERC721("Vote-Escrowed HYD", "veHYD") {
+    constructor(address _token) ERC721("Vote-Escrowed Token", "veToken") {
         require(_token != address(0), "Invalid token address");
         token = IERC20(_token);
     }
 
     /**
      * @notice Create new lock position and mint veNFT
-     * @param _value Amount of HYD to lock
+     * @param _value Amount of tokens to lock
      * @param _lockDuration Duration to lock (in seconds)
      * @return Current token ID that was minted
      */
