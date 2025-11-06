@@ -14,7 +14,6 @@ import {
   Box,
   Chip,
 } from "@mui/material";
-import { useTranslations } from "next-intl";
 import { formatUnits } from "viem";
 import {
   formatLargeNumber,
@@ -96,8 +95,7 @@ const determinePoolHealth = (
  * @returns Display text and color
  */
 const getPoolHealthInfo = (
-  status: PoolHealthStatus,
-  t: (key: string) => string
+  status: PoolHealthStatus
 ): { text: string; color: string } => {
   switch (status) {
     case "healthy":
@@ -132,8 +130,6 @@ export const SavingRateCard: React.FC<SavingRateCardProps> = ({
   stats,
   isLoading,
 }) => {
-  const t = useTranslations();
-
   // ==================== Formatted Data ====================
 
   const annualRateFormatted = formatAnnualRate(stats.annualRate);
@@ -143,7 +139,7 @@ export const SavingRateCard: React.FC<SavingRateCardProps> = ({
   const totalFundedFormatted = formatLargeNumber(totalFundedValue);
   const lastUpdateFormatted = formatTimestamp(stats.lastRateUpdateTime);
   const poolHealth = determinePoolHealth(stats.totalFunded);
-  const poolHealthInfo = getPoolHealthInfo(poolHealth, t);
+  const poolHealthInfo = getPoolHealthInfo(poolHealth);
 
   // ==================== Render ====================
 
