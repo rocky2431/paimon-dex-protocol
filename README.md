@@ -456,35 +456,85 @@ docs: update deployment guide for v3.3.0
 - RPC: https://data-seed-prebsc-1-s1.binance.org:8545/
 - Explorer: https://testnet.bscscan.com/
 - Faucet: https://testnet.bnbchain.org/faucet-smart
-- **✅ 已部署** (2025-11-07)
+- **✅ 已部署** (2025-11-07) - **34个合约**
 
-#### 测试网核心合约地址
+---
 
-| 合约 | 地址 | BscScan |
-|------|------|---------|
-| **USDP** | `0x69cA4879c52A0935561F9D8165e4CB3b91f951a6` | [查看](https://testnet.bscscan.com/address/0x69cA4879c52A0935561F9D8165e4CB3b91f951a6) |
-| **PAIMON** | `0x4FfBD9CC8e5E26Ec1559D754cC71a061D1820fDF` | [查看](https://testnet.bscscan.com/address/0x4FfBD9CC8e5E26Ec1559D754cC71a061D1820fDF) |
-| **esPAIMON** | `0xA848c9F841bB2deDC160DCb5108F2aac610CA02a` | [查看](https://testnet.bscscan.com/address/0xA848c9F841bB2deDC160DCb5108F2aac610CA02a) |
-| **PSM** | `0x46eB7627024cEd13826359a5c0aEc57c7255b330` | [查看](https://testnet.bscscan.com/address/0x46eB7627024cEd13826359a5c0aEc57c7255b330) |
-| **DEXRouter** | `0x066Db99AE64B1524834a1f97aa1613e2411E13AC` | [查看](https://testnet.bscscan.com/address/0x066Db99AE64B1524834a1f97aa1613e2411E13AC) |
-| **Treasury** | `0x8CA5Cd0293b9d3C8BC796083E806bc5bC381772A` | [查看](https://testnet.bscscan.com/address/0x8CA5Cd0293b9d3C8BC796083E806bc5bC381772A) |
-| **VotingEscrowPaimon** | `0xdEe148Cd27a9923DE1986399a6629aB375F244e1` | [查看](https://testnet.bscscan.com/address/0xdEe148Cd27a9923DE1986399a6629aB375F244e1) |
-| **GaugeController** | `0x4fDF9e1640722455cdA32dC2cceD85AeA8a3dB1A` | [查看](https://testnet.bscscan.com/address/0x4fDF9e1640722455cdA32dC2cceD85AeA8a3dB1A) |
-| **EmissionManager** | `0x13536aDe0a7b8Ec6B07FcFc29a6915881c50EA38` | [查看](https://testnet.bscscan.com/address/0x13536aDe0a7b8Ec6B07FcFc29a6915881c50EA38) |
+### 📋 测试网完整合约清单
 
-#### 测试网 Mock 合约 (仅用于测试)
+#### 1️⃣ 核心代币与稳定币层 (9个合约)
 
-| Mock 合约 | 地址 | 说明 |
-|----------|------|------|
-| **Mock USDC** | `0xA1112f596A73111E102b4a9c39064b2b2383EC38` | 1B供应，6位小数 |
-| **Mock WBNB** | `0xe3402BAd7951c00e2B077A745C9e8B14122f05ED` | 1万供应 |
-| **Mock USDC Price Feed** | `0xD36eff69950c1eE2713BB1d204f875434Da28aB7` | USDC价格预言机 |
-| **Mock BNB Price Feed** | `0x6D0a11083DCe3Fe5a2498b4B37f8edb30b29645B` | BNB价格预言机 |
-| **Mock HYD Price Feed** | `0x536608101E17e4C2c7b0d5eCc4e5659a75fE1489` | RWA价格预言机 |
-| **Mock Pyth** | `0x4B4a7949694c9bcb7B4731dA60C511DD73f7FBB8` | 备用价格源 |
-| **Mock VRF Coordinator** | `0xeAcAa0e6c5965f680fc6470745dE63E53A5D249c` | 随机数生成器 |
+| 合约名称 | 地址 | 功能说明 | BscScan |
+|---------|------|---------|---------|
+| **USDP** | `0x69cA4879c52A0935561F9D8165e4CB3b91f951a6` | 合成稳定币，锚定USD，由RWA抵押品和USDC储备支持 | [查看](https://testnet.bscscan.com/address/0x69cA4879c52A0935561F9D8165e4CB3b91f951a6) |
+| **PAIMON** | `0x4FfBD9CC8e5E26Ec1559D754cC71a061D1820fDF` | 协议治理代币，总量10B，三阶段排放 | [查看](https://testnet.bscscan.com/address/0x4FfBD9CC8e5E26Ec1559D754cC71a061D1820fDF) |
+| **esPAIMON** | `0xA848c9F841bB2deDC160DCb5108F2aac610CA02a` | 归属代币，365天线性解锁为PAIMON，奖励代币 | [查看](https://testnet.bscscan.com/address/0xA848c9F841bB2deDC160DCb5108F2aac610CA02a) |
+| **HYD** | `0xbBeAE7204fab9ae9F9eF67866C0eB6274db0549c` | 测试用RWA代币（10M供应），60% LTV抵押品 | [查看](https://testnet.bscscan.com/address/0xbBeAE7204fab9ae9F9eF67866C0eB6274db0549c) |
+| **PSM** | `0x46eB7627024cEd13826359a5c0aEc57c7255b330` | 1:1 USDC↔USDP互换模块，稳定币锚定机制 | [查看](https://testnet.bscscan.com/address/0x46eB7627024cEd13826359a5c0aEc57c7255b330) |
+| **VotingEscrow** | `0x8CC8a97Cf7a05d5308b49CFdF24De5Fa66F696B7` | veNFT基础合约，管理锁仓和投票权 | [查看](https://testnet.bscscan.com/address/0x8CC8a97Cf7a05d5308b49CFdF24De5Fa66F696B7) |
+| **VotingEscrowPaimon** | `0xdEe148Cd27a9923DE1986399a6629aB375F244e1` | vePAIMON NFT，锁定PAIMON获得治理权，可转让 | [查看](https://testnet.bscscan.com/address/0xdEe148Cd27a9923DE1986399a6629aB375F244e1) |
+| **USDPVault** | `0xF98B41CD89e5434Cae982d4b7EB326D2C1222867` | RWA抵押借款Vault，存入RWA铸造USDP | [查看](https://testnet.bscscan.com/address/0xF98B41CD89e5434Cae982d4b7EB326D2C1222867) |
+| **StabilityPool** | `0x4f40786fB0722A10822E3929d331c07042B68838` | 清算缓冲池，存USDP赚取清算收益 | [查看](https://testnet.bscscan.com/address/0x4f40786fB0722A10822E3929d331c07042B68838) |
 
-📄 **完整地址清单**: [deployments/testnet/addresses.json](deployments/testnet/addresses.json)
+#### 2️⃣ 治理与排放层 (5个合约)
+
+| 合约名称 | 地址 | 功能说明 | BscScan |
+|---------|------|---------|---------|
+| **GaugeController** | `0x4fDF9e1640722455cdA32dC2cceD85AeA8a3dB1A` | Gauge投票权重控制器，veNFT投票分配流动性激励 | [查看](https://testnet.bscscan.com/address/0x4fDF9e1640722455cdA32dC2cceD85AeA8a3dB1A) |
+| **RewardDistributor** | `0x94c9E4eb5F82D381e889178d322b7b36601AD11a` | Merkle奖励分发器，LP/债务/Stability奖励领取 | [查看](https://testnet.bscscan.com/address/0x94c9E4eb5F82D381e889178d322b7b36601AD11a) |
+| **BribeMarketplace** | `0x748800E079eC6605D23d9803A6248613e80253B1` | Bribe贿选市场，协议购买投票权 | [查看](https://testnet.bscscan.com/address/0x748800E079eC6605D23d9803A6248613e80253B1) |
+| **EmissionManager** | `0x13536aDe0a7b8Ec6B07FcFc29a6915881c50EA38` | 三阶段排放调度器，管理PAIMON释放速率 | [查看](https://testnet.bscscan.com/address/0x13536aDe0a7b8Ec6B07FcFc29a6915881c50EA38) |
+| **EmissionRouter** | `0x0B6638cb031b880238DC5793aD1B3CFCE10DA852` | 四通道排放路由，分配Debt/LP/Stability/Eco奖励 | [查看](https://testnet.bscscan.com/address/0x0B6638cb031b880238DC5793aD1B3CFCE10DA852) |
+
+#### 3️⃣ 激励层 (2个合约)
+
+| 合约名称 | 地址 | 功能说明 | BscScan |
+|---------|------|---------|---------|
+| **BoostStaking** | `0x0998dA12E9A61a7957e37feE9bBdAe7DDA6Ef314` | PAIMON质押池，1-1.5x奖励加成 | [查看](https://testnet.bscscan.com/address/0x0998dA12E9A61a7957e37feE9bBdAe7DDA6Ef314) |
+| **NitroPool** | `0x89f108938951CF996cD3c26556dAF525aD4d9957` | 外部激励池，协议/项目额外奖励 | [查看](https://testnet.bscscan.com/address/0x89f108938951CF996cD3c26556dAF525aD4d9957) |
+
+#### 4️⃣ DEX 去中心化交易所 (5个合约)
+
+| 合约名称 | 地址 | 功能说明 | BscScan |
+|---------|------|---------|---------|
+| **DEXFactory** | `0x1c1339F5A11f462A354D49ee03377D55B03E7f3D` | DEX工厂合约，创建交易对 | [查看](https://testnet.bscscan.com/address/0x1c1339F5A11f462A354D49ee03377D55B03E7f3D) |
+| **DEXRouter** | `0x066Db99AE64B1524834a1f97aa1613e2411E13AC` | DEX路由合约，处理所有swap和流动性操作 | [查看](https://testnet.bscscan.com/address/0x066Db99AE64B1524834a1f97aa1613e2411E13AC) |
+| **USDP_USDC_Pair** | `0x3B8D3c266B2BbE588188cA70525a2da456a848d2` | USDP/USDC交易对，稳定币流动性池 | [查看](https://testnet.bscscan.com/address/0x3B8D3c266B2BbE588188cA70525a2da456a848d2) |
+| **PAIMON_BNB_Pair** | `0xc625Ab8646582100D48Ae4FC68c1E8B0976111fA` | PAIMON/BNB交易对，治理代币流动性池 | [查看](https://testnet.bscscan.com/address/0xc625Ab8646582100D48Ae4FC68c1E8B0976111fA) |
+| **HYD_USDP_Pair** | `0x2361484f586eEf76dCbaE9e4dD37C2b3d10d9110` | HYD/USDP交易对，RWA代币流动性池 | [查看](https://testnet.bscscan.com/address/0x2361484f586eEf76dCbaE9e4dD37C2b3d10d9110) |
+
+#### 5️⃣ 国库与预言机层 (4个合约)
+
+| 合约名称 | 地址 | 功能说明 | BscScan |
+|---------|------|---------|---------|
+| **Treasury** | `0x8CA5Cd0293b9d3C8BC796083E806bc5bC381772A` | RWA国库金库，管理抵押品和USDP铸造（T1/T2/T3分层LTV） | [查看](https://testnet.bscscan.com/address/0x8CA5Cd0293b9d3C8BC796083E806bc5bC381772A) |
+| **SavingRate** | `0xB89188bD9b635EC9Dd73f73C9E3bE17dB83D01B2` | USDP储蓄利率模块，存USDP赚利息 | [查看](https://testnet.bscscan.com/address/0xB89188bD9b635EC9Dd73f73C9E3bE17dB83D01B2) |
+| **PriceOracle** | `0x5Ae36173EA62B33590857eD2E77580A9680d4d33` | 通用价格预言机聚合器 | [查看](https://testnet.bscscan.com/address/0x5Ae36173EA62B33590857eD2E77580A9680d4d33) |
+| **RWAPriceOracle** | `0xa6dD28dfCa8448965BE9D97BBBAaf82c45CE25C7` | RWA价格预言机，Chainlink+NAV双源定价，>20%偏差熔断 | [查看](https://testnet.bscscan.com/address/0xa6dD28dfCa8448965BE9D97BBBAaf82c45CE25C7) |
+
+#### 6️⃣ Launchpad RWA发行平台 (2个合约)
+
+| 合约名称 | 地址 | 功能说明 | BscScan |
+|---------|------|---------|---------|
+| **ProjectRegistry** | `0x764a546351cc7C74f68D10b15C18b8d4D7bBB08A` | RWA项目注册表，veNFT治理投票审批 | [查看](https://testnet.bscscan.com/address/0x764a546351cc7C74f68D10b15C18b8d4D7bBB08A) |
+| **IssuanceController** | `0xd7b22158801C22fFc0Ff81a1C5B000f29779530E` | RWA代币发行控制器，募资和代币分配 | [查看](https://testnet.bscscan.com/address/0xd7b22158801C22fFc0Ff81a1C5B000f29779530E) |
+
+#### 7️⃣ Mock 测试合约 (7个合约 - 仅测试网)
+
+| Mock合约名称 | 地址 | 功能说明 | BscScan |
+|------------|------|---------|---------|
+| **Mock USDC** | `0xA1112f596A73111E102b4a9c39064b2b2383EC38` | 测试用稳定币（1B供应，6位小数） | [查看](https://testnet.bscscan.com/address/0xA1112f596A73111E102b4a9c39064b2b2383EC38) |
+| **Mock WBNB** | `0xe3402BAd7951c00e2B077A745C9e8B14122f05ED` | 测试用包装BNB（1万供应） | [查看](https://testnet.bscscan.com/address/0xe3402BAd7951c00e2B077A745C9e8B14122f05ED) |
+| **Mock USDC Price Feed** | `0xD36eff69950c1eE2713BB1d204f875434Da28aB7` | USDC价格数据源（固定$1.00），用于PSM和Treasury | [查看](https://testnet.bscscan.com/address/0xD36eff69950c1eE2713BB1d204f875434Da28aB7) |
+| **Mock BNB Price Feed** | `0x6D0a11083DCe3Fe5a2498b4B37f8edb30b29645B` | BNB价格数据源，用于DEX交易对估值 | [查看](https://testnet.bscscan.com/address/0x6D0a11083DCe3Fe5a2498b4B37f8edb30b29645B) |
+| **Mock HYD Price Feed** | `0x536608101E17e4C2c7b0d5eCc4e5659a75fE1489` | RWA资产价格数据源，用于抵押品估值和LTV计算 | [查看](https://testnet.bscscan.com/address/0x536608101E17e4C2c7b0d5eCc4e5659a75fE1489) |
+| **Mock Pyth** | `0x4B4a7949694c9bcb7B4731dA60C511DD73f7FBB8` | 备用价格预言机，与Chainlink双重验证防止操纵 | [查看](https://testnet.bscscan.com/address/0x4B4a7949694c9bcb7B4731dA60C511DD73f7FBB8) |
+| **Mock VRF Coordinator** | `0xeAcAa0e6c5965f680fc6470745dE63E53A5D249c` | 可验证随机数生成器，用于掷骰子/抽奖（防作弊） | [查看](https://testnet.bscscan.com/address/0xeAcAa0e6c5965f680fc6470745dE63E53A5D249c) |
+
+---
+
+📄 **完整JSON地址清单**: [deployments/testnet/addresses.json](deployments/testnet/addresses.json)
+📖 **详细部署报告**: [TESTNET_DEPLOYMENT_SUMMARY.md](TESTNET_DEPLOYMENT_SUMMARY.md)
 
 ### 部署顺序
 
