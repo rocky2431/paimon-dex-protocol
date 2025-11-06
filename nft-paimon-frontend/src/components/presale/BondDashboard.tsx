@@ -93,8 +93,6 @@ export function BondDashboard() {
   const handleSettle = async (tokenId: number, option: 'veNFT' | 'cash') => {
     try {
       // TODO: Call settlement contract
-      console.log(`Settling bond ${tokenId} to ${option}`);
-
       // Mock success
       await new Promise((resolve) => setTimeout(resolve, 2000));
 

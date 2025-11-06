@@ -87,8 +87,6 @@ export function VoteExecutionPanel({ project }: VoteExecutionPanelProps) {
       // });
       // await waitForTransaction({ hash });
 
-      console.log('Execute vote transaction:', { projectId: project.id });
-
       // Mock delay
       await new Promise((resolve) => setTimeout(resolve, 2000));
 

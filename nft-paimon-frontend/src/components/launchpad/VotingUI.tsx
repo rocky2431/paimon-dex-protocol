@@ -79,12 +79,6 @@ export function VotingUI({ project }: VotingUIProps) {
       // });
       // await waitForTransaction({ hash });
 
-      console.log('Vote transaction:', {
-        projectId: project.id,
-        voteType,
-        votingPower,
-      });
-
       // Mock delay for demo
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
@@ -127,7 +121,6 @@ export function VotingUI({ project }: VotingUIProps) {
               }}
               onClick={() => {
                 // TODO: Trigger wallet connection
-                console.log('Connect wallet clicked');
               }}
             >
               Connect Wallet

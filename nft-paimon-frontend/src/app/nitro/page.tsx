@@ -67,7 +67,6 @@ export default function NitroPage() {
 
   const handleSuccess = () => {
     // Refresh data after successful participation
-    console.log('Participation successful');
   };
 
   return (

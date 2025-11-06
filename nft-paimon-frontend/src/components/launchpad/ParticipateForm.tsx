@@ -104,8 +104,6 @@ export function ParticipateForm({ project }: ParticipateFormProps) {
       // });
       // await waitForTransaction({ hash });
 
-      console.log('Participate transaction:', { projectId: project.id, amount: amountBigInt });
-
       // Mock delay for demo
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
@@ -150,7 +148,6 @@ export function ParticipateForm({ project }: ParticipateFormProps) {
               }}
               onClick={() => {
                 // TODO: Trigger wallet connection
-                console.log('Connect wallet clicked');
               }}
             >
               Connect Wallet
