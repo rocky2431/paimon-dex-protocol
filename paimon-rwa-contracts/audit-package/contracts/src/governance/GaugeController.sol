@@ -5,6 +5,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "../core/VotingEscrow.sol";
 import "../interfaces/IGaugeControllerForBribes.sol";
+import "../common/ProtocolConstants.sol";
+import "../common/EpochUtils.sol";
 
 /**
  * @title GaugeController
@@ -41,7 +43,7 @@ contract GaugeController is IGaugeControllerForBribes, Ownable, ReentrancyGuard 
     VotingEscrow public immutable votingEscrow;
 
     /// @notice Epoch duration (7 days)
-    uint256 public constant EPOCH_DURATION = 7 days;
+    uint256 public constant EPOCH_DURATION = ProtocolConstants.EPOCH_DURATION;
 
     /// @notice Weight precision (100% = 10000 basis points)
     uint256 public constant WEIGHT_PRECISION = 10000;
@@ -169,12 +171,10 @@ contract GaugeController is IGaugeControllerForBribes, Ownable, ReentrancyGuard 
      * @dev Can be called by anyone, auto-advances if conditions met
      */
     function advanceEpoch() public {
-        uint256 timeElapsed = block.timestamp - epochStartTime;
-
-        if (timeElapsed >= EPOCH_DURATION) {
-            // Calculate how many epochs have passed
-            uint256 epochsPassed = timeElapsed / EPOCH_DURATION;
-            currentEpoch += epochsPassed;
+        uint256 computedEpoch = EpochUtils.currentEpoch(epochStartTime, EPOCH_DURATION);
+        if (computedEpoch > currentEpoch) {
+            uint256 epochsPassed = computedEpoch - currentEpoch;
+            currentEpoch = computedEpoch;
             epochStartTime += epochsPassed * EPOCH_DURATION;
         }
     }
@@ -184,13 +184,10 @@ contract GaugeController is IGaugeControllerForBribes, Ownable, ReentrancyGuard 
      * @return Current epoch number
      */
     function getCurrentEpoch() public view returns (uint256) {
-        uint256 timeElapsed = block.timestamp - epochStartTime;
-
-        if (timeElapsed >= EPOCH_DURATION) {
-            uint256 epochsPassed = timeElapsed / EPOCH_DURATION;
-            return currentEpoch + epochsPassed;
+        uint256 computedEpoch = EpochUtils.currentEpoch(epochStartTime, EPOCH_DURATION);
+        if (computedEpoch > currentEpoch) {
+            return computedEpoch;
         }
-
         return currentEpoch;
     }
 

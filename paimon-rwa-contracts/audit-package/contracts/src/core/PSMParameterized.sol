@@ -5,9 +5,11 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import {Math as OZMath} from "@openzeppelin/contracts/utils/math/Math.sol";
 import "../interfaces/IUSDP.sol";
+import "../common/Governable.sol";
+import "../common/ProtocolConstants.sol";
+import "../common/ProtocolRoles.sol";
 
 /**
  * @title PSMParameterized (Peg Stability Module - Parameterized Version)
@@ -38,7 +40,7 @@ import "../interfaces/IUSDP.sol";
  * - BSC Mainnet: PSMParameterized(usdp, 0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d) → auto-detects 18 decimals
  * - BSC Testnet: PSMParameterized(usdp, 0xaa3F4B0cEF6F8f4C584cc6fD3A5e79E68dAa13b2) → auto-detects 6 decimals
  */
-contract PSMParameterized is ReentrancyGuard, Ownable {
+contract PSMParameterized is ReentrancyGuard, Governable {
     using SafeERC20 for IERC20;
 
     // ==================== State Variables ====================
@@ -62,10 +64,10 @@ contract PSMParameterized is ReentrancyGuard, Ownable {
     uint256 public feeOut;
 
     /// @notice Maximum fee allowed (100% = 10000 basis points)
-    uint256 public constant MAX_FEE = 10000;
+    uint256 public constant MAX_FEE = ProtocolConstants.BASIS_POINTS;
 
     /// @notice Basis points denominator (100% = 10000)
-    uint256 private constant BP_DENOMINATOR = 10000;
+    uint256 private constant BP_DENOMINATOR = ProtocolConstants.BASIS_POINTS;
 
     // ==================== Events ====================
 
@@ -98,7 +100,7 @@ contract PSMParameterized is ReentrancyGuard, Ownable {
      * @param _usdc Address of USDC token contract (must implement IERC20Metadata)
      * @dev Automatically queries USDC decimals via IERC20Metadata.decimals()
      */
-    constructor(address _usdp, address _usdc) Ownable(msg.sender) {
+    constructor(address _usdp, address _usdc) Governable(msg.sender) {
         require(_usdp != address(0), "PSM: USDP address cannot be zero");
         require(_usdc != address(0), "PSM: USDC address cannot be zero");
 
@@ -116,6 +118,37 @@ contract PSMParameterized is ReentrancyGuard, Ownable {
         // Initialize with 0.1% fee (10 basis points)
         feeIn = 10;
         feeOut = 10;
+
+        _grantRole(ProtocolRoles.TREASURY_MANAGER_ROLE, msg.sender);
+    }
+
+    /// @notice 仅允许金库管理员（或治理）执行的操作。
+    modifier onlyTreasuryManager() {
+        _checkRole(ProtocolRoles.TREASURY_MANAGER_ROLE, _msgSender());
+        _;
+    }
+
+    /// @notice 治理添加新的金库管理员（例如运营多签）。
+    function grantTreasuryManager(address account) external onlyGovernance {
+        require(account != address(0), "PSM: account is zero");
+        _grantRole(ProtocolRoles.TREASURY_MANAGER_ROLE, account);
+    }
+
+    /// @notice 治理移除金库管理员。
+    function revokeTreasuryManager(address account) external onlyGovernance {
+        require(account != address(0), "PSM: account is zero");
+        _revokeRole(ProtocolRoles.TREASURY_MANAGER_ROLE, account);
+    }
+
+    /// @inheritdoc Governable
+    function _afterGovernanceTransfer(address previousGovernor, address newGovernor)
+        internal
+        override
+    {
+        if (hasRole(ProtocolRoles.TREASURY_MANAGER_ROLE, previousGovernor)) {
+            _revokeRole(ProtocolRoles.TREASURY_MANAGER_ROLE, previousGovernor);
+        }
+        _grantRole(ProtocolRoles.TREASURY_MANAGER_ROLE, newGovernor);
     }
 
     // ==================== Core Functions ====================
@@ -151,13 +184,14 @@ contract PSMParameterized is ReentrancyGuard, Ownable {
         uint256 usdcAfterFee = usdcAmount - feeUSDC;
 
         // Convert USDC decimals to USDP decimals dynamically
-        // Using OZMath.mulDiv for scaling to prevent overflow with extreme amounts
+        // ✅ Task 83: Optimized scaling - use direct multiplication instead of mulDiv(a,b,1)
         if (usdcDecimals < USDP_DECIMALS) {
             // Scale up: USDC (6) → USDP (18) requires * 10^12
-            // Previously: usdpReceived = usdcAfterFee * scaleFactor
-            // With extreme amounts, this multiplication could overflow
+            // Safe to use unchecked: max USDC (1e18 * 1e12) = 1e30, well below uint256.max
             uint256 scaleFactor = 10 ** (USDP_DECIMALS - usdcDecimals);
-            usdpReceived = OZMath.mulDiv(usdcAfterFee, scaleFactor, 1);
+            unchecked {
+                usdpReceived = usdcAfterFee * scaleFactor;
+            }
         } else if (usdcDecimals > USDP_DECIMALS) {
             // Scale down: USDC (20) → USDP (18) requires / 10^2
             uint256 scaleFactor = 10 ** (usdcDecimals - USDP_DECIMALS);
@@ -174,12 +208,14 @@ contract PSMParameterized is ReentrancyGuard, Ownable {
         USDP.mint(msg.sender, usdpReceived);
 
         // Calculate fee in USDP decimals for event
-        // Using OZMath.mulDiv for consistency with main calculations
+        // ✅ Task 83: Use direct multiplication for better gas efficiency
         uint256 feeUSDP;
         if (usdcDecimals < USDP_DECIMALS) {
             uint256 scaleFactor = 10 ** (USDP_DECIMALS - usdcDecimals);
-            // Use OZMath.mulDiv for safety, though feeUSDC is typically small
-            feeUSDP = OZMath.mulDiv(feeUSDC, scaleFactor, 1);
+            // Safe: feeUSDC is small (max 0.1% of amount), won't overflow
+            unchecked {
+                feeUSDP = feeUSDC * scaleFactor;
+            }
         } else if (usdcDecimals > USDP_DECIMALS) {
             uint256 scaleFactor = 10 ** (usdcDecimals - USDP_DECIMALS);
             feeUSDP = feeUSDC / scaleFactor;
@@ -218,17 +254,18 @@ contract PSMParameterized is ReentrancyGuard, Ownable {
         uint256 usdpAfterFee = usdpAmount - feeUSDP;
 
         // Convert USDP decimals to USDC decimals dynamically
-        // Using OZMath.mulDiv for scaling to prevent overflow with extreme amounts
+        // ✅ Task 83: Optimized scaling - use direct multiplication instead of mulDiv(a,b,1)
         if (usdcDecimals < USDP_DECIMALS) {
             // Scale down: USDP (18) → USDC (6) requires / 10^12
             uint256 scaleFactor = 10 ** (USDP_DECIMALS - usdcDecimals);
             usdcReceived = usdpAfterFee / scaleFactor;
         } else if (usdcDecimals > USDP_DECIMALS) {
             // Scale up: USDP (18) → USDC (20) requires * 10^2
-            // Previously: usdcReceived = usdpAfterFee * scaleFactor
-            // With extreme amounts, this multiplication could overflow
+            // Safe to use unchecked: max USDP (1e30) * scaleFactor (1e2) = 1e32, well below uint256.max
             uint256 scaleFactor = 10 ** (usdcDecimals - USDP_DECIMALS);
-            usdcReceived = OZMath.mulDiv(usdpAfterFee, scaleFactor, 1);
+            unchecked {
+                usdcReceived = usdpAfterFee * scaleFactor;
+            }
         } else {
             // Same decimals: 1:1 conversion
             usdcReceived = usdpAfterFee;
@@ -254,7 +291,7 @@ contract PSMParameterized is ReentrancyGuard, Ownable {
      * @dev Only callable by owner
      * @param newFeeIn New fee in basis points (max 10000 = 100%)
      */
-    function setFeeIn(uint256 newFeeIn) external onlyOwner {
+    function setFeeIn(uint256 newFeeIn) external onlyTreasuryManager {
         require(newFeeIn <= MAX_FEE, "PSM: Fee cannot exceed 100%");
         feeIn = newFeeIn;
         emit FeeUpdated("feeIn", newFeeIn);
@@ -265,7 +302,7 @@ contract PSMParameterized is ReentrancyGuard, Ownable {
      * @dev Only callable by owner
      * @param newFeeOut New fee in basis points (max 10000 = 100%)
      */
-    function setFeeOut(uint256 newFeeOut) external onlyOwner {
+    function setFeeOut(uint256 newFeeOut) external onlyTreasuryManager {
         require(newFeeOut <= MAX_FEE, "PSM: Fee cannot exceed 100%");
         feeOut = newFeeOut;
         emit FeeUpdated("feeOut", newFeeOut);

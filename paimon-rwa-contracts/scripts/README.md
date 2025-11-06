@@ -1,148 +1,51 @@
-# Emission Schedule Scripts
+# Tooling Scripts
 
-This directory contains scripts for generating and validating the 352-week PAIMON emission schedule.
+该目录收纳了链上排放模型与审计打包流程相关的辅助脚本。
 
-## Scripts
+## 1. `sync_audit_package.sh`
 
-### 1. `generate-emission-schedule.py`
+> **目标**：保持 `audit-package/contracts/src` 与主合约目录 `src` 100% 一致，避免平行修改。
 
-Generates the complete 352-week emission schedule JSON file based on EmissionManager.sol formula.
+**用法**
 
-**Usage:**
 ```bash
-cd scripts
-python3 generate-emission-schedule.py
+./scripts/sync_audit_package.sh
 ```
 
-**Output:**
-- File: `../.ultra/docs/emission-schedule.json`
-- Total emission: ~9.94B PAIMON over 352 weeks (6.77 years)
+**行为**
 
-**Emission Formula:**
-- **Phase A (Week 1-12)**: Fixed 64.08M PAIMON/week
-- **Phase B (Week 13-248)**: Linear decay from 64.08M to 7.39M
-- **Phase C (Week 249-352)**: Fixed 7.39M PAIMON/week
+- 使用 `rsync` 将 `src` 中的 Solidity 合约同步到审计包镜像目录。
+- 启用 `--delete`，确保删除主目录文件时镜像同步删除，彻底杜绝漂移。
+- 该目录被视为生成物；任何直接修改都会在下一次同步时被覆盖。
 
-**Channel Allocation:**
-- Debt: 10%
-- LP Pairs: 42% (60% of 70% LP total)
-- Stability Pool: 28% (40% of 70% LP total)
-- Eco: 20%
+建议在 CI 中新增一步执行此脚本并调用 `git diff --exit-code`，确保提交前两棵树完全一致。
 
-### 2. `test-emission-schedule.py`
+## 2. `generate-phase-b-table.py`
 
-Validates the generated emission schedule against 6-dimensional test coverage:
+- 状态：**Legacy**。在最新的链上实现中，Phase-B 排放已改为实时指数公式，不再依赖查表常量。
+- 保留原因：便于审计或离线对照历史数组值，如需复现旧版本数据仍可运行该脚本。
+- 依赖：Python ≥3.8，无第三方库。
 
-1. **Functional**: Core logic correctness
-2. **Boundary**: Edge cases (week 1, 12, 13, 248, 249, 352)
-3. **Conservation**: Phase totals == grand total
-4. **Allocation**: Channel percentages
-5. **Security**: No negative values, no overflow
-6. **Compatibility**: Valid JSON schema
+## 3. `generate-emission-schedule.py`
 
-**Usage:**
-```bash
-cd scripts
-python3 test-emission-schedule.py
-```
+- 功能：生成 352 周排放 JSON，便于前端或运营核对。
+- 当前实现遵循链上版本：
+  - Phase A（Week 1-12）：固定 `37,500,000` PAIMON/周。
+  - Phase B（Week 13-248）：指数衰减，初始 `37,500,000 × 0.985^(week-13)`。
+  - Phase C（Week 249-352）：固定 `4,326,923.076923` PAIMON/周。
+- 输出路径：`../.ultra/docs/emission-schedule.json`。
 
-**Expected Output:**
-```
-============================================================
-🧪 Emission Schedule Validation Test Suite
-============================================================
+## 4. `test-emission-schedule.py`
 
-📋 Test 1: Functional - Core logic correctness
-✅ Total emission: 9942634884 PAIMON (within 0.5737% of target)
-✅ Functional tests passed
+- 覆盖：阶段边界、守恒校验、分流比例以及 JSON Schema。
+- 执行：`python3 scripts/test-emission-schedule.py`。
+- 推荐在修改排放逻辑或参数后运行，确保 off-chain 数据与链上一致。
 
-📋 Test 2: Boundary - Edge cases
-✅ Boundary tests passed
+## 开发准则
 
-📋 Test 3: Conservation - Phase totals match grand total
-✅ Conservation verified
+- **KISS**：脚本仅封装流程所需最小逻辑，复杂计算保留在合约或专门模块中。
+- **DRY**：所有排放参数均从白皮书与合约单一来源读取，脚本不重复硬编码常量。
+- **SOLID**：同步脚本只负责文件复制，不掺杂业务校验；生成与校验脚本各自独立。
+- **YAGNI**：暂不引入虚拟环境或依赖管理工具，后续确有需要时再扩展。
 
-📋 Test 4: Allocation - Channel percentages
-✅ Allocation tests passed
-
-📋 Test 5: Security - No negative values, no overflow
-✅ Security tests passed
-
-📋 Test 6: Compatibility - JSON schema
-✅ Compatibility tests passed
-
-============================================================
-📊 Test Summary
-============================================================
-Total tests: 6
-Passed: 6
-Failed: 0
-
-✅ All tests passed!
-```
-
-## TDD Workflow
-
-These scripts were developed using Test-Driven Development:
-
-1. **RED**: Write tests first (`test-emission-schedule.py`) - Tests fail
-2. **GREEN**: Implement logic (`generate-emission-schedule.py`) - Tests pass
-3. **REFACTOR**: Optimize code quality (SOLID/DRY/KISS/YAGNI)
-
-## Output Schema
-
-```json
-{
-  "metadata": {
-    "version": "1.0.0",
-    "generatedAt": "ISO timestamp",
-    "totalWeeks": 352,
-    "totalEmission": "9942634884",
-    "description": "...",
-    "contract": "EmissionManager.sol",
-    "phases": {...}
-  },
-  "allocation": {
-    "debt": "10.0%",
-    "lpPairs": "42.0%",
-    "stabilityPool": "28.0%",
-    "eco": "20.0%"
-  },
-  "weeklySchedule": [
-    {
-      "week": 1,
-      "phase": "A",
-      "total": "64080000",
-      "debt": "6408000",
-      "lpPairs": "26913600",
-      "stabilityPool": "17942400",
-      "eco": "12816000"
-    },
-    ...
-  ],
-  "phaseSummaries": {
-    "phaseA": {...},
-    "phaseB": {...},
-    "phaseC": {...}
-  }
-}
-```
-
-## Integration
-
-This JSON file is used by:
-- **Frontend**: Emission visualization page (displays weekly/phase data)
-- **Contracts**: EmissionManager.sol validation
-- **Auditors**: Off-chain verification of emission logic
-
-## Dependencies
-
-- Python 3.8+
-- Standard library only (no external dependencies)
-
-## Notes
-
-- Emission values calibrated by 1.7088x scale factor to achieve 10B target
-- Linear interpolation used for Phase B (production-ready, gas-efficient)
-- Maintains original ratio: Phase A / Phase C ≈ 8.67:1
-- Small rounding errors (<1000 wei) due to integer division are expected
+如需新增脚本，请在本文件登记用途、输入输出与依赖，保持同事可快速上手。 

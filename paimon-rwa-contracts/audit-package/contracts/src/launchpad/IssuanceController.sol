@@ -221,13 +221,9 @@ contract IssuanceController is Ownable, ReentrancyGuard {
         require(_minimumRaise > 0 && _minimumRaise <= _maximumRaise, "Invalid raise limits");
         require(_minContribution > 0 && _minContribution <= _maxContribution, "Invalid contribution limits");
 
-        // Calculate required RWA token amount
-        // Assuming 1 USDC = 1 RWA token (1:1 price)
-        // Both USDC and RWA token have same decimals (6), so 1:1 ratio
-        uint256 requiredRwaTokens = _maximumRaise;
-
-        // Transfer RWA tokens from issuer to this contract
-        IERC20(rwa).safeTransferFrom(msg.sender, address(this), requiredRwaTokens);
+        // ✅ Task 82: Direct use of _maximumRaise saves gas (avoid intermediate variable)
+        // Transfer RWA tokens from issuer (1 USDC = 1 RWA token, both 6 decimals)
+        IERC20(rwa).safeTransferFrom(msg.sender, address(this), _maximumRaise);
 
         // Create sale
         sales[_projectId] = Sale({

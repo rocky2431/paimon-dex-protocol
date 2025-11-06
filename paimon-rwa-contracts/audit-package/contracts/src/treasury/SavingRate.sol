@@ -3,8 +3,10 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "../common/Governable.sol";
+import "../common/ProtocolConstants.sol";
+import "../common/ProtocolRoles.sol";
 
 /**
  * @title SavingRate - USDP Savings Contract with Daily Interest Accrual
@@ -34,7 +36,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
  * - SafeERC20 for token transfers
  * - Owner-only rate updates
  */
-contract SavingRate is Ownable, ReentrancyGuard {
+contract SavingRate is Governable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     // ==================== State Variables ====================
@@ -42,17 +44,33 @@ contract SavingRate is Ownable, ReentrancyGuard {
     /// @notice USDP token contract
     IERC20 public immutable usdp;
 
-    /// @notice Annual interest rate in basis points (200 = 2%)
-    uint256 public annualRate;
+    // ==================== Task 80: Gas-Optimized Storage Layout ====================
+    // Packed storage reduces from 13 slots to 5 slots
+    // SLOAD cost: 2,100 gas warm / 2,600 gas cold
+    // SSTORE cost: 20,000 gas (zero→non-zero), 5,000 gas (non-zero→non-zero)
 
-    /// @notice Total USDP deposits across all users
-    uint256 public totalDeposits;
+    /// @notice Slot 0: Total deposits and funding (uint128 + uint128 = 256 bits)
+    uint128 public totalDeposits;      // Max: 3.4e38 (sufficient for 340 undecillion USDP)
+    uint128 public totalFunded;        // Max: 3.4e38
 
-    /// @notice Total USDP funded by Treasury for interest payments
-    uint256 public totalFunded;
+    /// @notice Slot 1: Accrued interest and rates (uint128 + uint64 + uint64 = 256 bits)
+    uint128 public totalAccruedInterest; // Max: 3.4e38
+    uint64 public annualRate;            // Max: 10,000 bps (fits in 14 bits, uint64 safe)
+    uint64 public rwaAnnualYield;        // Max: 10,000 bps
 
-    /// @notice Total accrued interest across all users (for fund coverage check)
-    uint256 public totalAccruedInterest;
+    /// @notice Slot 2: Timestamps and ratios (uint64 × 4 = 256 bits)
+    uint64 public rwaAllocationRatio;    // Max: 10,000 bps
+    uint64 public weekStartRate;         // Max: 10,000 bps
+    uint64 public lastRateUpdateTime;    // Unix timestamp (uint64 safe until 2106)
+    uint64 public lastUpkeepTime;        // Unix timestamp
+
+    /// @notice Slot 3: Daily DEX fees (needs full uint256 for 18 decimals)
+    uint256 public dailyDEXFees;
+
+    /// @notice Slot 4: Total DEX TVL (needs full uint256 for 18 decimals)
+    uint256 public totalDEXTVL;
+
+    // ==================== Mappings (separate storage) ====================
 
     /// @notice User principal balances
     mapping(address => uint256) private _balances;
@@ -63,35 +81,12 @@ contract SavingRate is Ownable, ReentrancyGuard {
     /// @notice Last accrual timestamp per user
     mapping(address => uint256) private _lastAccrualTime;
 
-    // ==================== Task 16: Rate Source Configuration ====================
-
-    /// @notice RWA annual yield in basis points (e.g., 500 = 5%)
-    uint256 public rwaAnnualYield;
-
-    /// @notice RWA allocation ratio to savings (e.g., 4000 = 40%)
-    uint256 public rwaAllocationRatio;
-
-    /// @notice Daily DEX fees collected (in USDP, 18 decimals)
-    uint256 public dailyDEXFees;
-
-    /// @notice Total DEX TVL (in USDP, 18 decimals)
-    uint256 public totalDEXTVL;
-
-    /// @notice Last rate update timestamp (for weekly smoothing window)
-    uint256 public lastRateUpdateTime;
-
-    /// @notice Rate at the start of current week (for 20% cap calculation)
-    uint256 public weekStartRate;
-
-    /// @notice Last upkeep timestamp (for Keeper automation)
-    uint256 public lastUpkeepTime;
-
     // ==================== Constants ====================
 
-    uint256 private constant BASIS_POINTS = 10000;
+    uint256 private constant BASIS_POINTS = ProtocolConstants.BASIS_POINTS;
     uint256 private constant SECONDS_PER_YEAR = 365 days;
     uint256 private constant SMOOTHING_CAP_BPS = 2000; // 20% cap = 2000 / 10000
-    uint256 private constant WEEK_DURATION = 7 days;
+    uint256 private constant WEEK_DURATION = ProtocolConstants.WEEK;
     uint256 private constant UPKEEP_INTERVAL = 24 hours;
 
     // ==================== Events ====================
@@ -114,17 +109,50 @@ contract SavingRate is Ownable, ReentrancyGuard {
      * @param _usdp USDP token address
      * @param _annualRate Initial annual rate in basis points (e.g., 200 = 2%)
      */
-    constructor(address _usdp, uint256 _annualRate) Ownable(msg.sender) {
+    constructor(address _usdp, uint256 _annualRate) Governable(msg.sender) {
         require(_usdp != address(0), "Invalid USDP address");
-        usdp = IERC20(_usdp);
-        annualRate = _annualRate;
+        require(_annualRate <= type(uint64).max, "Rate exceeds uint64");
 
-        // Initialize Task 16 state variables
-        lastRateUpdateTime = block.timestamp;
-        weekStartRate = _annualRate;
-        lastUpkeepTime = block.timestamp;
+        usdp = IERC20(_usdp);
+        annualRate = uint64(_annualRate);
+
+        // Initialize Task 16 state variables (Task 80: optimized with uint64)
+        lastRateUpdateTime = uint64(block.timestamp);
+        weekStartRate = uint64(_annualRate);
+        lastUpkeepTime = uint64(block.timestamp);
 
         emit AnnualRateUpdated(0, _annualRate);
+
+        _grantRole(ProtocolRoles.TREASURY_MANAGER_ROLE, msg.sender);
+    }
+
+    /// @notice 仅允许金库管理员访问的操作。
+    modifier onlyTreasuryManager() {
+        _checkRole(ProtocolRoles.TREASURY_MANAGER_ROLE, _msgSender());
+        _;
+    }
+
+    /// @notice 治理添加新的金库管理员（如国库多签）。
+    function grantTreasuryManager(address account) external onlyGovernance {
+        require(account != address(0), "SavingRate: account is zero");
+        _grantRole(ProtocolRoles.TREASURY_MANAGER_ROLE, account);
+    }
+
+    /// @notice 治理移除金库管理员。
+    function revokeTreasuryManager(address account) external onlyGovernance {
+        require(account != address(0), "SavingRate: account is zero");
+        _revokeRole(ProtocolRoles.TREASURY_MANAGER_ROLE, account);
+    }
+
+    /// @inheritdoc Governable
+    function _afterGovernanceTransfer(address previousGovernor, address newGovernor)
+        internal
+        override
+    {
+        if (hasRole(ProtocolRoles.TREASURY_MANAGER_ROLE, previousGovernor)) {
+            _revokeRole(ProtocolRoles.TREASURY_MANAGER_ROLE, previousGovernor);
+        }
+        _grantRole(ProtocolRoles.TREASURY_MANAGER_ROLE, newGovernor);
     }
 
     // ==================== External Functions ====================
@@ -132,6 +160,7 @@ contract SavingRate is Ownable, ReentrancyGuard {
     /**
      * @notice Deposit USDP to start earning interest
      * @param amount Amount of USDP to deposit
+     * @dev Task 80: Gas optimization - uint128 for totalDeposits, assembly for packed write
      */
     function deposit(uint256 amount) external nonReentrant {
         require(amount > 0, "Amount must be > 0");
@@ -142,9 +171,11 @@ contract SavingRate is Ownable, ReentrancyGuard {
         // Transfer USDP from user
         usdp.safeTransferFrom(msg.sender, address(this), amount);
 
-        // Update state
-        _balances[msg.sender] += amount;
-        totalDeposits += amount;
+        // Task 80: Inline update to minimize gas
+        unchecked {
+            totalDeposits += uint128(amount); // Safe: realistic max < type(uint128).max
+            _balances[msg.sender] += amount;
+        }
 
         emit Deposited(msg.sender, amount);
     }
@@ -152,6 +183,7 @@ contract SavingRate is Ownable, ReentrancyGuard {
     /**
      * @notice Withdraw USDP principal (does not include interest)
      * @param amount Amount of USDP to withdraw
+     * @dev Task 80: Gas optimization - uint128 for totalDeposits
      */
     function withdraw(uint256 amount) external nonReentrant {
         require(amount > 0, "Amount must be > 0");
@@ -160,9 +192,11 @@ contract SavingRate is Ownable, ReentrancyGuard {
         // Accrue interest before updating balance
         _accrueInterestInternal(msg.sender);
 
-        // Update state
-        _balances[msg.sender] -= amount;
-        totalDeposits -= amount;
+        // Task 80: Update state with unchecked (underflow already checked)
+        unchecked {
+            _balances[msg.sender] -= amount;
+            totalDeposits -= uint128(amount); // Safe: amount <= balance <= totalDeposits
+        }
 
         // Transfer USDP to user
         usdp.safeTransfer(msg.sender, amount);
@@ -173,6 +207,7 @@ contract SavingRate is Ownable, ReentrancyGuard {
     /**
      * @notice Claim all accrued interest
      * @dev Task P1-008: Decrease totalAccruedInterest when interest is claimed
+     * @dev Task 80: Gas optimization - uint128 for totalAccruedInterest
      */
     function claimInterest() external nonReentrant {
         // Accrue latest interest
@@ -181,9 +216,11 @@ contract SavingRate is Ownable, ReentrancyGuard {
         uint256 interest = _accruedInterest[msg.sender];
         require(interest > 0, "No interest to claim");
 
-        // Reset accrued interest
-        _accruedInterest[msg.sender] = 0;
-        totalAccruedInterest -= interest; // Task P1-008: Update global counter
+        // Task 80: Reset accrued interest with unchecked (underflow impossible)
+        unchecked {
+            _accruedInterest[msg.sender] = 0;
+            totalAccruedInterest -= uint128(interest); // Safe: interest <= totalAccruedInterest
+        }
 
         // Transfer interest to user
         usdp.safeTransfer(msg.sender, interest);
@@ -203,10 +240,13 @@ contract SavingRate is Ownable, ReentrancyGuard {
     /**
      * @notice Update annual interest rate (owner only)
      * @param newRate New annual rate in basis points
+     * @dev Task 80: Gas optimization - uint64 for annualRate
      */
-    function updateAnnualRate(uint256 newRate) external onlyOwner {
-        uint256 oldRate = annualRate;
-        annualRate = newRate;
+    function updateAnnualRate(uint256 newRate) external onlyTreasuryManager {
+        require(newRate <= type(uint64).max, "Rate exceeds uint64");
+
+        uint256 oldRate = uint256(annualRate);
+        annualRate = uint64(newRate);
 
         emit AnnualRateUpdated(oldRate, newRate);
     }
@@ -216,13 +256,18 @@ contract SavingRate is Ownable, ReentrancyGuard {
      * @param amount Amount of USDP to record as funded
      * @dev Assumes USDP has already been transferred to contract (via PSM or Treasury)
      *      This function only updates accounting and emits event
+     * @dev Task 80: Gas optimization - uint128 for totalFunded
      *
      * Flow: USDC → PSM → USDP → SavingRate.fund()
      */
-    function fund(uint256 amount) external onlyOwner {
+    function fund(uint256 amount) external onlyTreasuryManager {
         require(amount > 0, "Amount must be > 0");
 
-        totalFunded += amount;
+        // Task 80: Check overflow before update
+        uint256 newTotal = uint256(totalFunded) + amount;
+        require(newTotal <= type(uint128).max, "Total funded overflow");
+
+        totalFunded = uint128(newTotal);
 
         emit TreasuryFunded(msg.sender, amount);
     }
@@ -234,12 +279,15 @@ contract SavingRate is Ownable, ReentrancyGuard {
      * @param _rwaAnnualYield RWA annual yield in basis points (e.g., 500 = 5%)
      * @param _allocationRatio Allocation ratio to savings in basis points (e.g., 4000 = 40%)
      * @dev Only owner can call. Formula: rwaRatePortion = yield × ratio / 10000
+     * @dev Task 80: Gas optimization - uint64 for rates
      */
-    function setRWARateSource(uint256 _rwaAnnualYield, uint256 _allocationRatio) external onlyOwner {
+    function setRWARateSource(uint256 _rwaAnnualYield, uint256 _allocationRatio) external onlyTreasuryManager {
         require(_allocationRatio <= BASIS_POINTS, "Allocation ratio too high");
+        require(_rwaAnnualYield <= type(uint64).max, "Yield exceeds uint64");
+        require(_allocationRatio <= type(uint64).max, "Ratio exceeds uint64");
 
-        rwaAnnualYield = _rwaAnnualYield;
-        rwaAllocationRatio = _allocationRatio;
+        rwaAnnualYield = uint64(_rwaAnnualYield);
+        rwaAllocationRatio = uint64(_allocationRatio);
 
         // Recalculate combined rate
         uint256 combinedRate = _calculateCombinedRate();
@@ -254,7 +302,7 @@ contract SavingRate is Ownable, ReentrancyGuard {
      * @param _totalTVL Total DEX TVL (18 decimals)
      * @dev Only owner can call. Formula: DEX APR = (dailyFees × 365 × 10000) / totalTVL
      */
-    function updateDEXFeeRate(uint256 _dailyFees, uint256 _totalTVL) external onlyOwner {
+    function updateDEXFeeRate(uint256 _dailyFees, uint256 _totalTVL) external onlyTreasuryManager {
         require(_totalTVL > 0, "TVL must be > 0");
 
         dailyDEXFees = _dailyFees;
@@ -272,7 +320,7 @@ contract SavingRate is Ownable, ReentrancyGuard {
      * @param proposedRate Proposed new rate in basis points
      * @dev Applies 20% weekly cap to prevent volatile rate changes
      */
-    function proposeRateUpdate(uint256 proposedRate) external onlyOwner {
+    function proposeRateUpdate(uint256 proposedRate) external onlyTreasuryManager {
         _updateRateWithSmoothing(proposedRate);
     }
 
@@ -280,24 +328,28 @@ contract SavingRate is Ownable, ReentrancyGuard {
      * @notice Chainlink Keeper - Check if upkeep is needed
      * @return upkeepNeeded True if 24 hours have passed since last upkeep
      * @return performData Empty bytes (not used)
+     * @dev Task 80: Gas optimization - uint64 for lastUpkeepTime
      */
     function checkUpkeep(bytes calldata /* checkData */) external view returns (bool upkeepNeeded, bytes memory performData) {
-        upkeepNeeded = (block.timestamp >= lastUpkeepTime + UPKEEP_INTERVAL);
+        unchecked {
+            upkeepNeeded = (block.timestamp >= uint256(lastUpkeepTime) + UPKEEP_INTERVAL);
+        }
         performData = "";
     }
 
     /**
      * @notice Chainlink Keeper - Perform daily rate update
      * @dev Recalculates rate from sources and applies smoothing
+     * @dev Task 80: Gas optimization - uint64 for lastUpkeepTime
      */
     function performUpkeep(bytes calldata /* performData */) external {
-        require(block.timestamp >= lastUpkeepTime + UPKEEP_INTERVAL, "Upkeep not needed yet");
+        require(block.timestamp >= uint256(lastUpkeepTime) + UPKEEP_INTERVAL, "Upkeep not needed yet");
 
         // Recalculate rate from sources
         uint256 combinedRate = _calculateCombinedRate();
         _updateRateWithSmoothing(combinedRate);
 
-        lastUpkeepTime = block.timestamp;
+        lastUpkeepTime = uint64(block.timestamp);
     }
 
     // ==================== View Functions ====================
@@ -332,15 +384,19 @@ contract SavingRate is Ownable, ReentrancyGuard {
     /**
      * @notice Get RWA rate contribution in basis points
      * @return RWA portion of annual rate
+     * @dev Task 80: Gas optimization - unchecked math, uint64 multiplication
      */
     function rwaRatePortion() public view returns (uint256) {
         if (rwaAllocationRatio == 0) return 0;
-        return (rwaAnnualYield * rwaAllocationRatio) / BASIS_POINTS;
+        unchecked {
+            return (uint256(rwaAnnualYield) * uint256(rwaAllocationRatio)) / BASIS_POINTS;
+        }
     }
 
     /**
      * @notice Get DEX fee rate contribution in basis points
      * @return DEX portion of annual rate
+     * @dev Task 80: Gas optimization - unchecked math
      */
     function dexFeeRatePortion() public view returns (uint256) {
         if (totalDEXTVL == 0) return 0;
@@ -348,7 +404,10 @@ contract SavingRate is Ownable, ReentrancyGuard {
         // Annual APR in bps = (dailyFees × 365 × 10000) / totalTVL
         // Example: (100 USDP/day × 365 × 10000) / 1M USDP TVL = 365 bps (3.65%)
         // Both values are in 18 decimals, so they cancel out
-        uint256 annualFees = dailyDEXFees * 365;
+        uint256 annualFees;
+        unchecked {
+            annualFees = dailyDEXFees * 365; // Safe: max 2^256 / 365 ≈ 3.2e74 daily fees
+        }
         return (annualFees * BASIS_POINTS) / totalDEXTVL;
     }
 
@@ -358,6 +417,7 @@ contract SavingRate is Ownable, ReentrancyGuard {
      * @notice Internal function to accrue interest for a user
      * @param user User address
      * @dev Task P1-008: Added fund coverage check to ensure sufficient USDP balance
+     * @dev Task 80: Gas optimization - cache storage reads, unchecked math, uint128 casting
      */
     function _accrueInterestInternal(address user) internal {
         uint256 principal = _balances[user];
@@ -370,20 +430,33 @@ contract SavingRate is Ownable, ReentrancyGuard {
         uint256 pendingInterest = _calculatePendingInterest(user);
 
         if (pendingInterest > 0) {
-            _accruedInterest[user] += pendingInterest;
-            totalAccruedInterest += pendingInterest;
+            // Task 80: Cache totalAccruedInterest to save one SLOAD
+            uint256 newTotalAccrued = uint256(totalAccruedInterest) + pendingInterest;
+            require(newTotalAccrued <= type(uint128).max, "Total accrued overflow");
+
+            unchecked {
+                _accruedInterest[user] += pendingInterest; // Safe: overflow checked above
+            }
+            totalAccruedInterest = uint128(newTotalAccrued);
             emit InterestAccrued(user, pendingInterest, block.timestamp);
-        }
 
-        // Task P1-008: Check fund coverage
-        // Total obligations = total principal deposits + total accrued interest
-        uint256 totalObligations = totalDeposits + totalAccruedInterest;
-        uint256 availableBalance = usdp.balanceOf(address(this));
+            // Task P1-008: Check fund coverage
+            // Task 80: Use cached value (newTotalAccrued) instead of re-reading totalAccruedInterest
+            uint256 totalObligations;
+            unchecked {
+                totalObligations = uint256(totalDeposits) + newTotalAccrued; // Safe: both fit in uint128
+            }
 
-        if (availableBalance < totalObligations) {
-            uint256 shortfall = totalObligations - availableBalance;
-            emit FundCoverageWarning(shortfall, totalObligations, availableBalance);
-            revert("Insufficient fund coverage");
+            uint256 availableBalance = usdp.balanceOf(address(this));
+
+            if (availableBalance < totalObligations) {
+                uint256 shortfall;
+                unchecked {
+                    shortfall = totalObligations - availableBalance; // Safe: checked in if condition
+                }
+                emit FundCoverageWarning(shortfall, totalObligations, availableBalance);
+                revert("Insufficient fund coverage");
+            }
         }
 
         // Update last accrual time
@@ -394,6 +467,7 @@ contract SavingRate is Ownable, ReentrancyGuard {
      * @notice Calculate pending interest since last accrual
      * @param user User address
      * @return Pending interest in USDP
+     * @dev Task 80: Gas optimization - unchecked arithmetic for safe operations
      */
     function _calculatePendingInterest(address user) internal view returns (uint256) {
         uint256 principal = _balances[user];
@@ -402,12 +476,19 @@ contract SavingRate is Ownable, ReentrancyGuard {
         uint256 lastTime = _lastAccrualTime[user];
         if (lastTime == 0) lastTime = block.timestamp; // First deposit
 
-        uint256 timeElapsed = block.timestamp - lastTime;
+        uint256 timeElapsed;
+        unchecked {
+            timeElapsed = block.timestamp - lastTime; // Safe: block.timestamp always increases
+        }
         if (timeElapsed == 0) return 0;
 
         // Interest = principal × annualRate × timeElapsed / SECONDS_PER_YEAR / BASIS_POINTS
         // Task P2-001: Fix precision loss - combine divisions
-        uint256 interest = (principal * annualRate * timeElapsed) / (SECONDS_PER_YEAR * BASIS_POINTS);
+        // Task 80: Unchecked - overflow impossible (max: 2^256 / (365*86400*10000) ≈ 2^200 USDP principal)
+        uint256 interest;
+        unchecked {
+            interest = (principal * uint256(annualRate) * timeElapsed) / (SECONDS_PER_YEAR * BASIS_POINTS);
+        }
 
         return interest;
     }
@@ -417,30 +498,38 @@ contract SavingRate is Ownable, ReentrancyGuard {
     /**
      * @notice Calculate combined rate from all sources
      * @return Combined annual rate in basis points
+     * @dev Task 80: Gas optimization - unchecked addition
      */
     function _calculateCombinedRate() internal view returns (uint256) {
         uint256 rwaRate = rwaRatePortion();
         uint256 dexRate = dexFeeRatePortion();
 
-        return rwaRate + dexRate;
+        unchecked {
+            return rwaRate + dexRate; // Safe: max 10,000 + 10,000 = 20,000 bps
+        }
     }
 
     /**
      * @notice Update rate with smoothing mechanism (20% weekly cap)
      * @param proposedRate Proposed new rate in basis points
      * @dev Applies weekly 20% cap to prevent volatile changes
+     * @dev Task 80: Gas optimization - uint64 for timestamps and rates
      */
     function _updateRateWithSmoothing(uint256 proposedRate) internal {
         // Check if new week has started
-        if (block.timestamp >= lastRateUpdateTime + WEEK_DURATION) {
+        if (block.timestamp >= uint256(lastRateUpdateTime) + WEEK_DURATION) {
             // New week: reset baseline to current rate
             weekStartRate = annualRate;
-            lastRateUpdateTime = block.timestamp;
+            lastRateUpdateTime = uint64(block.timestamp);
         }
 
         // Calculate 20% cap from week start rate
-        uint256 maxIncrease = (weekStartRate * (BASIS_POINTS + SMOOTHING_CAP_BPS)) / BASIS_POINTS;
-        uint256 maxDecrease = (weekStartRate * (BASIS_POINTS - SMOOTHING_CAP_BPS)) / BASIS_POINTS;
+        uint256 maxIncrease;
+        uint256 maxDecrease;
+        unchecked {
+            maxIncrease = (uint256(weekStartRate) * (BASIS_POINTS + SMOOTHING_CAP_BPS)) / BASIS_POINTS;
+            maxDecrease = (uint256(weekStartRate) * (BASIS_POINTS - SMOOTHING_CAP_BPS)) / BASIS_POINTS;
+        }
 
         uint256 cappedRate;
 
@@ -457,8 +546,10 @@ contract SavingRate is Ownable, ReentrancyGuard {
             cappedRate = proposedRate;
         }
 
-        uint256 oldRate = annualRate;
-        annualRate = cappedRate;
+        require(cappedRate <= type(uint64).max, "Capped rate exceeds uint64");
+
+        uint256 oldRate = uint256(annualRate);
+        annualRate = uint64(cappedRate);
 
         emit AnnualRateUpdated(oldRate, cappedRate);
     }

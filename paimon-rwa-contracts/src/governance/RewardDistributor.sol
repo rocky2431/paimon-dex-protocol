@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -10,6 +9,10 @@ import "../core/VotingEscrow.sol";
 import "../incentives/BoostStaking.sol";
 import "../core/esPaimon.sol";
 import "../interfaces/IStabilityPoolGauge.sol";
+import "../common/Governable.sol";
+import "../common/ProtocolRoles.sol";
+import "../common/ProtocolConstants.sol";
+import "../common/EpochUtils.sol";
 
 /**
  * @title RewardDistributor
@@ -41,7 +44,7 @@ import "../interfaces/IStabilityPoolGauge.sol";
  * - Bitmap for claimed status (1 bit per user per epoch per token)
  * - No historical data storage (events only)
  */
-contract RewardDistributor is Ownable, ReentrancyGuard {
+contract RewardDistributor is Governable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     /// @notice VotingEscrow contract for veNFT verification
@@ -73,7 +76,7 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
     uint256 public constant GAUGE_WEIGHT_PRECISION = 10000;
 
     /// @notice Epoch duration (7 days, aligned with GaugeController)
-    uint256 public constant EPOCH_DURATION = 7 days;
+    uint256 public constant EPOCH_DURATION = ProtocolConstants.EPOCH_DURATION;
 
     /// @notice Epoch start timestamp
     uint256 public epochStartTime;
@@ -113,7 +116,7 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
      * @param _boostStaking BoostStaking contract address
      * @param _treasury Treasury address
      */
-    constructor(address _votingEscrow, address _boostStaking, address _treasury) Ownable(msg.sender) {
+    constructor(address _votingEscrow, address _boostStaking, address _treasury) Governable(msg.sender) {
         require(_votingEscrow != address(0), "Invalid votingEscrow");
         require(_boostStaking != address(0), "Invalid boostStaking");
         require(_treasury != address(0), "Invalid treasury");
@@ -123,6 +126,33 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
         treasury = _treasury;
         epochStartTime = block.timestamp;
         currentEpoch = 0;
+
+        _grantRole(ProtocolRoles.INCENTIVE_MANAGER_ROLE, msg.sender);
+    }
+
+    modifier onlyIncentiveManager() {
+        _checkRole(ProtocolRoles.INCENTIVE_MANAGER_ROLE, _msgSender());
+        _;
+    }
+
+    function grantIncentiveManager(address account) external onlyGovernance {
+        require(account != address(0), "RewardDistributor: account is zero");
+        _grantRole(ProtocolRoles.INCENTIVE_MANAGER_ROLE, account);
+    }
+
+    function revokeIncentiveManager(address account) external onlyGovernance {
+        require(account != address(0), "RewardDistributor: account is zero");
+        _revokeRole(ProtocolRoles.INCENTIVE_MANAGER_ROLE, account);
+    }
+
+    function _afterGovernanceTransfer(address previousGovernor, address newGovernor)
+        internal
+        override
+    {
+        if (hasRole(ProtocolRoles.INCENTIVE_MANAGER_ROLE, previousGovernor)) {
+            _revokeRole(ProtocolRoles.INCENTIVE_MANAGER_ROLE, previousGovernor);
+        }
+        _grantRole(ProtocolRoles.INCENTIVE_MANAGER_ROLE, newGovernor);
     }
 
     /**
@@ -131,7 +161,7 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
      * @param token Reward token address
      * @param merkleRoot Merkle tree root
      */
-    function setMerkleRoot(uint256 epoch, address token, bytes32 merkleRoot) external onlyOwner {
+    function setMerkleRoot(uint256 epoch, address token, bytes32 merkleRoot) external onlyIncentiveManager {
         require(token != address(0), "Invalid token address");
         require(merkleRoot != bytes32(0), "Invalid merkle root");
 
@@ -201,9 +231,9 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
      * @notice Advance epoch if duration has passed
      */
     function advanceEpoch() public {
-        uint256 epochsPassed = (block.timestamp - epochStartTime) / EPOCH_DURATION;
-        if (epochsPassed > currentEpoch) {
-            currentEpoch = epochsPassed;
+        uint256 computedEpoch = EpochUtils.currentEpoch(epochStartTime, EPOCH_DURATION);
+        if (computedEpoch > currentEpoch) {
+            currentEpoch = computedEpoch;
             emit EpochAdvanced(currentEpoch, block.timestamp);
         }
     }
@@ -213,8 +243,7 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
      * @return Current epoch number
      */
     function getCurrentEpoch() external view returns (uint256) {
-        uint256 epochsPassed = (block.timestamp - epochStartTime) / EPOCH_DURATION;
-        return epochsPassed;
+        return EpochUtils.currentEpoch(epochStartTime, EPOCH_DURATION);
     }
 
     /**
@@ -222,7 +251,7 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
      * @param token Token address
      * @param amount Amount to withdraw
      */
-    function emergencyWithdraw(address token, uint256 amount) external onlyOwner {
+    function emergencyWithdraw(address token, uint256 amount) external onlyIncentiveManager {
         IERC20(token).safeTransfer(treasury, amount);
     }
 
@@ -230,7 +259,7 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
      * @notice Update treasury address (owner only)
      * @param _treasury New treasury address
      */
-    function setTreasury(address _treasury) external onlyOwner {
+    function setTreasury(address _treasury) external onlyIncentiveManager {
         require(_treasury != address(0), "Invalid treasury");
         treasury = _treasury;
     }
@@ -240,7 +269,7 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
      * @param _esPaimon esPaimon contract address
      * @dev Required for es vesting distribution mode
      */
-    function setEsPaimon(address _esPaimon) external onlyOwner {
+    function setEsPaimon(address _esPaimon) external onlyIncentiveManager {
         require(_esPaimon != address(0), "esPaimon not configured");
         esPaimonAddress = _esPaimon;
     }
@@ -250,7 +279,7 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
      * @param _paimonToken PAIMON token address
      * @dev Required to identify PAIMON rewards for es vesting
      */
-    function setPaimonToken(address _paimonToken) external onlyOwner {
+    function setPaimonToken(address _paimonToken) external onlyIncentiveManager {
         require(_paimonToken != address(0), "Invalid paimonToken");
         paimonToken = _paimonToken;
     }
@@ -261,7 +290,7 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
      * @dev When enabled, PAIMON rewards are vested via esPaimon.vestFor()
      *      When disabled, PAIMON rewards are transferred directly
      */
-    function setUseEsVesting(bool _useEsVesting) external onlyOwner {
+    function setUseEsVesting(bool _useEsVesting) external onlyIncentiveManager {
         useEsVesting = _useEsVesting;
     }
 
@@ -272,7 +301,7 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
      * @param weight Weight in basis points (10000 = 100%)
      * @dev Task 53.1 - StabilityPool Gauge weight management
      */
-    function setStabilityPoolWeight(uint256 weight) external onlyOwner {
+    function setStabilityPoolWeight(uint256 weight) external onlyIncentiveManager {
         require(weight <= GAUGE_WEIGHT_PRECISION, "Weight exceeds maximum");
 
         stabilityPoolWeight = weight;
@@ -283,7 +312,7 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
             // For now, we store the weight and emit event
         }
 
-        uint256 currentEpochNumber = (block.timestamp - epochStartTime) / EPOCH_DURATION;
+        uint256 currentEpochNumber = EpochUtils.currentEpoch(epochStartTime, EPOCH_DURATION);
         emit GaugeWeightUpdated(stabilityPoolGauge, weight, currentEpochNumber);
     }
 
@@ -292,7 +321,7 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
      * @param _stabilityPoolGauge StabilityPool contract address
      * @dev Task 53.1 - Required before distributing rewards
      */
-    function setStabilityPoolGauge(address _stabilityPoolGauge) external onlyOwner {
+    function setStabilityPoolGauge(address _stabilityPoolGauge) external onlyIncentiveManager {
         require(_stabilityPoolGauge != address(0), "Invalid gauge address");
         stabilityPoolGauge = _stabilityPoolGauge;
     }
@@ -321,11 +350,11 @@ contract RewardDistributor is Ownable, ReentrancyGuard {
      * 2. Transfer tokens to StabilityPool
      * 3. Call StabilityPool.notifyRewardAmount() to distribute to depositors
      */
-    function distributeRewards(address token, uint256 totalAmount) external onlyOwner nonReentrant {
+    function distributeRewards(address token, uint256 totalAmount) external onlyIncentiveManager nonReentrant {
         require(token != address(0), "Invalid token");
         require(totalAmount > 0, "Amount must be > 0");
 
-        uint256 currentEpochNumber = (block.timestamp - epochStartTime) / EPOCH_DURATION;
+        uint256 currentEpochNumber = EpochUtils.currentEpoch(epochStartTime, EPOCH_DURATION);
 
         // Distribute to StabilityPool if weight > 0 and gauge is set
         if (stabilityPoolWeight > 0 && stabilityPoolGauge != address(0)) {

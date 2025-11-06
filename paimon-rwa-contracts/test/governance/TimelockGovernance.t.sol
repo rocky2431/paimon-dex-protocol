@@ -3,6 +3,8 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "@openzeppelin/contracts/governance/TimelockController.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/access/IAccessControl.sol";
 import "../../src/governance/EmissionManager.sol";
 import "../../src/core/PSMParameterized.sol";
 import "../../src/core/USDPStabilityPool.sol";
@@ -10,6 +12,7 @@ import "../../src/treasury/SavingRate.sol";
 import "../../src/treasury/Treasury.sol";
 import "../../src/core/HYD.sol";
 import "../../src/core/USDP.sol";
+import "../../src/common/ProtocolRoles.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 /**
@@ -304,7 +307,7 @@ contract TimelockGovernanceTest is Test {
         timelock = new TimelockController(TIMELOCK_DELAY, proposers, executors, address(this));
 
         // Act: Transfer ownership of all governance contracts to Timelock
-        emissionManager.transferOwnership(address(timelock));
+        emissionManager.transferGovernance(address(timelock));
         psm.transferOwnership(address(timelock));
         stabilityPool.transferOwnership(address(timelock));
         savingRate.transferOwnership(address(timelock));
@@ -315,17 +318,30 @@ contract TimelockGovernanceTest is Test {
         treasury.acceptOwnership();
 
         // Assert: Verify ownership transfer
-        assertEq(emissionManager.owner(), address(timelock), "EmissionManager owner should be Timelock");
+        assertTrue(emissionManager.isGovernance(address(timelock)), "EmissionManager governor should be Timelock");
+        assertFalse(emissionManager.isGovernance(address(this)), "Deployer should no longer be governor");
         assertEq(psm.owner(), address(timelock), "PSM owner should be Timelock");
         assertEq(stabilityPool.owner(), address(timelock), "StabilityPool owner should be Timelock");
         assertEq(savingRate.owner(), address(timelock), "SavingRate owner should be Timelock");
         assertEq(treasury.owner(), address(timelock), "Treasury owner should be Timelock");
 
-        // Verify: Direct calls to governance functions are now blocked
-        vm.expectRevert(); // OpenZeppelin uses OwnableUnauthorizedAccount custom error
+        // Verify: Direct calls到治理受控方法触发 AccessControl
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                address(this),
+                ProtocolRoles.EMISSION_POLICY_ROLE
+            )
+        );
         emissionManager.setLpSplitParams(7000, 3000);
 
-        vm.expectRevert(); // OpenZeppelin uses OwnableUnauthorizedAccount custom error
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                address(this),
+                ProtocolRoles.TREASURY_MANAGER_ROLE
+            )
+        );
         psm.setFeeIn(50);
     }
 
@@ -563,7 +579,7 @@ contract TimelockGovernanceTest is Test {
         );
 
         // Transfer ownership of governance contracts to Timelock
-        emissionManager.transferOwnership(address(timelock));
+        emissionManager.transferGovernance(address(timelock));
         psm.transferOwnership(address(timelock));
         stabilityPool.transferOwnership(address(timelock));
         savingRate.transferOwnership(address(timelock));

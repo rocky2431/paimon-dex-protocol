@@ -5,14 +5,13 @@ import "forge-std/Test.sol";
 import "../../src/governance/EmissionManager.sol";
 
 /**
- * @title EmissionManager Phase-B Lookup Table Test Suite (Task P1-001)
- * @notice Tests for Phase-B exponential decay with pre-computed lookup table
- * @dev Validates O(1) lookup table implementation vs O(log n) formula calculation
+ * @title EmissionManager Phase-B Decay Test Suite
+ * @notice Tests for Phase-B exponential decay computed entirely on-chain
+ * @dev Validates the _fastPower based implementation against the analytical formula
  *
  * Background:
- * - Current implementation uses _fastPower() for real-time calculation (O(log n))
- * - New implementation will use pre-computed array for O(1) lookup
- * - Pre-computation done offline in Python script
+ * - 当前实现通过 `_fastPower` 实时计算指数衰减（O(log n)）
+ * - 不再依赖离线查表，从源头杜绝参数漂移
  *
  * Test Coverage (6-dimensional):
  * 1. Functional - Exact values match mathematical formula

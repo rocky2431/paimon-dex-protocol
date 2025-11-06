@@ -3,8 +3,10 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "../common/Governable.sol";
+import "../common/ProtocolConstants.sol";
+import "../common/ProtocolRoles.sol";
 
 /**
  * @title SavingRate - USDP Savings Contract with Daily Interest Accrual
@@ -34,7 +36,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
  * - SafeERC20 for token transfers
  * - Owner-only rate updates
  */
-contract SavingRate is Ownable, ReentrancyGuard {
+contract SavingRate is Governable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     // ==================== State Variables ====================
@@ -81,10 +83,10 @@ contract SavingRate is Ownable, ReentrancyGuard {
 
     // ==================== Constants ====================
 
-    uint256 private constant BASIS_POINTS = 10000;
+    uint256 private constant BASIS_POINTS = ProtocolConstants.BASIS_POINTS;
     uint256 private constant SECONDS_PER_YEAR = 365 days;
     uint256 private constant SMOOTHING_CAP_BPS = 2000; // 20% cap = 2000 / 10000
-    uint256 private constant WEEK_DURATION = 7 days;
+    uint256 private constant WEEK_DURATION = ProtocolConstants.WEEK;
     uint256 private constant UPKEEP_INTERVAL = 24 hours;
 
     // ==================== Events ====================
@@ -107,7 +109,7 @@ contract SavingRate is Ownable, ReentrancyGuard {
      * @param _usdp USDP token address
      * @param _annualRate Initial annual rate in basis points (e.g., 200 = 2%)
      */
-    constructor(address _usdp, uint256 _annualRate) Ownable(msg.sender) {
+    constructor(address _usdp, uint256 _annualRate) Governable(msg.sender) {
         require(_usdp != address(0), "Invalid USDP address");
         require(_annualRate <= type(uint64).max, "Rate exceeds uint64");
 
@@ -120,6 +122,37 @@ contract SavingRate is Ownable, ReentrancyGuard {
         lastUpkeepTime = uint64(block.timestamp);
 
         emit AnnualRateUpdated(0, _annualRate);
+
+        _grantRole(ProtocolRoles.TREASURY_MANAGER_ROLE, msg.sender);
+    }
+
+    /// @notice 仅允许金库管理员访问的操作。
+    modifier onlyTreasuryManager() {
+        _checkRole(ProtocolRoles.TREASURY_MANAGER_ROLE, _msgSender());
+        _;
+    }
+
+    /// @notice 治理添加新的金库管理员（如国库多签）。
+    function grantTreasuryManager(address account) external onlyGovernance {
+        require(account != address(0), "SavingRate: account is zero");
+        _grantRole(ProtocolRoles.TREASURY_MANAGER_ROLE, account);
+    }
+
+    /// @notice 治理移除金库管理员。
+    function revokeTreasuryManager(address account) external onlyGovernance {
+        require(account != address(0), "SavingRate: account is zero");
+        _revokeRole(ProtocolRoles.TREASURY_MANAGER_ROLE, account);
+    }
+
+    /// @inheritdoc Governable
+    function _afterGovernanceTransfer(address previousGovernor, address newGovernor)
+        internal
+        override
+    {
+        if (hasRole(ProtocolRoles.TREASURY_MANAGER_ROLE, previousGovernor)) {
+            _revokeRole(ProtocolRoles.TREASURY_MANAGER_ROLE, previousGovernor);
+        }
+        _grantRole(ProtocolRoles.TREASURY_MANAGER_ROLE, newGovernor);
     }
 
     // ==================== External Functions ====================
@@ -209,7 +242,7 @@ contract SavingRate is Ownable, ReentrancyGuard {
      * @param newRate New annual rate in basis points
      * @dev Task 80: Gas optimization - uint64 for annualRate
      */
-    function updateAnnualRate(uint256 newRate) external onlyOwner {
+    function updateAnnualRate(uint256 newRate) external onlyTreasuryManager {
         require(newRate <= type(uint64).max, "Rate exceeds uint64");
 
         uint256 oldRate = uint256(annualRate);
@@ -227,7 +260,7 @@ contract SavingRate is Ownable, ReentrancyGuard {
      *
      * Flow: USDC → PSM → USDP → SavingRate.fund()
      */
-    function fund(uint256 amount) external onlyOwner {
+    function fund(uint256 amount) external onlyTreasuryManager {
         require(amount > 0, "Amount must be > 0");
 
         // Task 80: Check overflow before update
@@ -248,7 +281,7 @@ contract SavingRate is Ownable, ReentrancyGuard {
      * @dev Only owner can call. Formula: rwaRatePortion = yield × ratio / 10000
      * @dev Task 80: Gas optimization - uint64 for rates
      */
-    function setRWARateSource(uint256 _rwaAnnualYield, uint256 _allocationRatio) external onlyOwner {
+    function setRWARateSource(uint256 _rwaAnnualYield, uint256 _allocationRatio) external onlyTreasuryManager {
         require(_allocationRatio <= BASIS_POINTS, "Allocation ratio too high");
         require(_rwaAnnualYield <= type(uint64).max, "Yield exceeds uint64");
         require(_allocationRatio <= type(uint64).max, "Ratio exceeds uint64");
@@ -269,7 +302,7 @@ contract SavingRate is Ownable, ReentrancyGuard {
      * @param _totalTVL Total DEX TVL (18 decimals)
      * @dev Only owner can call. Formula: DEX APR = (dailyFees × 365 × 10000) / totalTVL
      */
-    function updateDEXFeeRate(uint256 _dailyFees, uint256 _totalTVL) external onlyOwner {
+    function updateDEXFeeRate(uint256 _dailyFees, uint256 _totalTVL) external onlyTreasuryManager {
         require(_totalTVL > 0, "TVL must be > 0");
 
         dailyDEXFees = _dailyFees;
@@ -287,7 +320,7 @@ contract SavingRate is Ownable, ReentrancyGuard {
      * @param proposedRate Proposed new rate in basis points
      * @dev Applies 20% weekly cap to prevent volatile rate changes
      */
-    function proposeRateUpdate(uint256 proposedRate) external onlyOwner {
+    function proposeRateUpdate(uint256 proposedRate) external onlyTreasuryManager {
         _updateRateWithSmoothing(proposedRate);
     }
 

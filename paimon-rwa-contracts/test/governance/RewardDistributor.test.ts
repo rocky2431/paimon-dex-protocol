@@ -29,6 +29,7 @@ describe("RewardDistributor", function () {
   const WEEK = 7n * 24n * 60n * 60n;
   const MAXTIME = 4n * 365n * 24n * 60n * 60n; // 4 years
   const EPOCH_DURATION = WEEK;
+  const INCENTIVE_MANAGER_ROLE = ethers.id("INCENTIVE_MANAGER_ROLE");
 
   // Test fixtures
   async function deployRewardDistributorFixture() {
@@ -52,10 +53,16 @@ describe("RewardDistributor", function () {
     const votingEscrow = await VotingEscrow.deploy(await hyd.getAddress());
     await votingEscrow.waitForDeployment();
 
+    // Deploy BoostStaking (required for reward multiplier)
+    const BoostStaking = await ethers.getContractFactory("BoostStaking");
+    const boostStaking = await BoostStaking.deploy(await paimon.getAddress());
+    await boostStaking.waitForDeployment();
+
     // Deploy RewardDistributor
     const RewardDistributor = await ethers.getContractFactory("RewardDistributor");
     const rewardDistributor = await RewardDistributor.deploy(
       await votingEscrow.getAddress(),
+      await boostStaking.getAddress(),
       treasury.address
     );
     await rewardDistributor.waitForDeployment();
@@ -76,6 +83,7 @@ describe("RewardDistributor", function () {
     return {
       rewardDistributor,
       votingEscrow,
+      boostStaking,
       hyd,
       usdc,
       paimon,
@@ -580,7 +588,9 @@ describe("RewardDistributor", function () {
 
       await expect(
         rewardDistributor.connect(user1).setMerkleRoot(0, await usdc.getAddress(), tree.root)
-      ).to.be.revertedWithCustomError(rewardDistributor, "OwnableUnauthorizedAccount");
+      )
+        .to.be.revertedWithCustomError(rewardDistributor, "AccessControlUnauthorizedAccount")
+        .withArgs(user1.address, INCENTIVE_MANAGER_ROLE);
     });
 
     it("Should revert if zero address token", async function () {

@@ -20,6 +20,7 @@ import "../src/governance/GaugeController.sol";
 import "../src/governance/RewardDistributor.sol";
 import "../src/governance/BribeMarketplace.sol";
 import "../src/governance/EmissionManager.sol";
+import "../src/governance/EmissionRouter.sol";
 
 // Incentives
 import "../src/incentives/BoostStaking.sol";
@@ -98,6 +99,7 @@ contract DeployCompleteScript is Script {
     RewardDistributor public rewardDistributor;
     BribeMarketplace public bribeMarketplace;
     EmissionManager public emissionManager;
+    EmissionRouter public emissionRouter;
 
     // ==================== Incentive Contracts ====================
 
@@ -331,6 +333,9 @@ contract DeployCompleteScript is Script {
         emissionManager = new EmissionManager(); // No parameters - emission schedule is hardcoded
         console.log("  EmissionManager deployed:", address(emissionManager));
 
+        emissionRouter = new EmissionRouter(address(emissionManager), address(paimon));
+        console.log("  EmissionRouter deployed:", address(emissionRouter));
+
         // Deploy BribeMarketplace
         bribeMarketplace = new BribeMarketplace(address(gaugeController), deployer);
         console.log("  BribeMarketplace deployed:", address(bribeMarketplace));
@@ -534,14 +539,27 @@ contract DeployCompleteScript is Script {
     function configurePermissions() internal {
         console.log("[Phase 12] Configuring Permissions...");
 
-        // Grant MINTER_ROLE to RewardDistributor for PAIMON
+        // Grant MINTER_ROLE to RewardDistributor, EmissionManager, EmissionRouter
         bytes32 MINTER_ROLE = paimon.MINTER_ROLE();
         paimon.grantRole(MINTER_ROLE, address(rewardDistributor));
         console.log("  Granted PAIMON MINTER_ROLE to RewardDistributor");
-
-        // Grant MINTER_ROLE to EmissionManager for PAIMON
         paimon.grantRole(MINTER_ROLE, address(emissionManager));
         console.log("  Granted PAIMON MINTER_ROLE to EmissionManager");
+        paimon.grantRole(MINTER_ROLE, address(emissionRouter));
+        console.log("  Granted PAIMON MINTER_ROLE to EmissionRouter");
+
+        // Allow router to act as emission policy operator
+        emissionManager.grantEmissionPolicy(address(emissionRouter));
+        console.log("  Granted EmissionManager policy role to EmissionRouter");
+
+        // Configure default sinks: debt & eco -> Treasury, LP/Stability -> RewardDistributor
+        emissionRouter.setSinks(
+            address(treasury),
+            address(rewardDistributor),
+            address(rewardDistributor),
+            address(treasury)
+        );
+        console.log("  Configured EmissionRouter sinks");
 
         // Note: RewardDistributor and GaugeController work independently
         // No explicit linking needed as they both reference VotingEscrow
@@ -558,6 +576,13 @@ contract DeployCompleteScript is Script {
         }
 
         console.log("[Phase 13] Transferring Ownership to Multi-sig...");
+
+        // Transfer Emission stack governance
+        emissionManager.transferOwnership(multiSig);
+        console.log("  EmissionManager governance transferred");
+
+        emissionRouter.transferOwnership(multiSig);
+        console.log("  EmissionRouter governance transferred");
 
         // Transfer PSM ownership
         psm.transferOwnership(multiSig);
@@ -610,6 +635,7 @@ contract DeployCompleteScript is Script {
         vm.serializeAddress(json, "rewardDistributor", address(rewardDistributor));
         vm.serializeAddress(json, "bribeMarketplace", address(bribeMarketplace));
         vm.serializeAddress(json, "emissionManager", address(emissionManager));
+        vm.serializeAddress(json, "emissionRouter", address(emissionRouter));
 
         // Incentives
         vm.serializeAddress(json, "boostStaking", address(boostStaking));
@@ -684,6 +710,7 @@ contract DeployCompleteScript is Script {
         console.log("  RewardDistributor:", address(rewardDistributor));
         console.log("  BribeMarketplace: ", address(bribeMarketplace));
         console.log("  EmissionManager:  ", address(emissionManager));
+        console.log("  EmissionRouter:   ", address(emissionRouter));
         console.log("");
         console.log("Incentives:");
         console.log("  BoostStaking:     ", address(boostStaking));
