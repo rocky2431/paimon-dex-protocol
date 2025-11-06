@@ -104,7 +104,7 @@ describe('SavingsDepositModal', () => {
 
       // Should fill with balance
       expect(input).toHaveValue();
-      expect(parseFloat(input.value)).toBeGreaterThan(0);
+      expect(parseFloat((input as HTMLInputElement).value)).toBeGreaterThan(0);
     });
 
     it('should call deposit on confirm', async () => {
@@ -222,7 +222,7 @@ describe('SavingsDepositModal', () => {
 
       const input = screen.getByPlaceholderText(/Enter amount/i);
       expect(input).toHaveValue();
-      expect(parseFloat(input.value)).toBeGreaterThan(0);
+      expect(parseFloat((input as HTMLInputElement).value)).toBeGreaterThan(0);
     });
   });
 
@@ -345,7 +345,7 @@ describe('SavingsDepositModal', () => {
 
       const input = screen.getByPlaceholderText(/Enter amount/i);
       expect(input).toHaveValue();
-      expect(parseFloat(input.value)).toBeGreaterThan(0);
+      expect(parseFloat((input as HTMLInputElement).value)).toBeGreaterThan(0);
     });
   });
 

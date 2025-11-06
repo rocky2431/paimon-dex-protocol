@@ -367,7 +367,7 @@ describe('PSMSwapCard - Boundary Tests', () => {
     // Should handle without precision loss
     waitFor(() => {
       const outputs = screen.getAllByRole('textbox');
-      expect(outputs[1].value).toBeTruthy();
+      expect((outputs[1] as HTMLInputElement).value).toBeTruthy();
     });
   });
 });
