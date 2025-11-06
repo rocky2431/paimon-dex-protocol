@@ -141,6 +141,7 @@ export function NitroParticipateModal({
 
   // Handle participate (moved before early returns)
   const handleParticipate = useCallback(() => {
+    if (!pool) return; // Guard: ensure pool exists
     if (!validateAmount()) return;
 
     // Show confirmation for large amounts
@@ -152,10 +153,10 @@ export function NitroParticipateModal({
     // Execute transaction
     const amountBigInt = parseUnits(amount, 18);
     writeContract({
-      address: pool?.lpToken,
+      address: pool.lpToken,
       abi: ERC20_ABI,
       functionName: 'approve',
-      args: [pool?.lpToken, amountBigInt], // Simplified for testing
+      args: [pool.lpToken, amountBigInt], // Simplified for testing
     });
 
     // Reset state
@@ -166,7 +167,7 @@ export function NitroParticipateModal({
     if (onSuccess) {
       onSuccess();
     }
-  }, [validateAmount, isLargeAmount, showConfirmation, amount, pool?.lpToken, writeContract, onSuccess]);
+  }, [validateAmount, isLargeAmount, showConfirmation, amount, pool, writeContract, onSuccess]);
 
   // Validate pool data
   if (!pool) {

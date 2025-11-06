@@ -68,8 +68,8 @@ export function useVestingPosition(address?: `0x${string}`): VestingPosition {
       };
     }
 
-    // Parse contract data: [totalAmount, claimedAmount, startTime, lastClaimTime]
-    const [totalAmount, claimedAmount, startTime] = data as [bigint, bigint, bigint, bigint];
+    // Parse contract data: [totalAmount, claimedAmount, startTime]
+    const [totalAmount, claimedAmount, startTime] = data as [bigint, bigint, bigint];
 
     // Handle empty position
     if (!totalAmount || totalAmount === 0n) {

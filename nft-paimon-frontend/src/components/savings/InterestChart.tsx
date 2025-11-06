@@ -77,6 +77,21 @@ function formatDate(timestamp: number, locale: 'en' | 'zh'): string {
 }
 
 /**
+ * Custom tooltip component props
+ */
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    value: number;
+    dataKey: string;
+    name: string;
+    color: string;
+  }>;
+  label?: string | number;
+  locale?: 'en' | 'zh';
+}
+
+/**
  * Custom tooltip component
  */
 function CustomTooltip({
@@ -84,7 +99,7 @@ function CustomTooltip({
   payload,
   label,
   locale = 'en',
-}: TooltipProps<ValueType, NameType> & { locale?: 'en' | 'zh' }) {
+}: CustomTooltipProps) {
   const t = translations[locale];
 
   if (!active || !payload || !payload.length) {
@@ -102,7 +117,7 @@ function CustomTooltip({
       }}
     >
       <Typography variant="caption" sx={{ display: 'block', mb: 0.5, fontWeight: 600 }}>
-        {formatDate(label, locale)}
+        {formatDate(typeof label === 'number' ? label : 0, locale)}
       </Typography>
       {payload.map((entry, index) => (
         <Typography

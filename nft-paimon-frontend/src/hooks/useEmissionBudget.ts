@@ -43,6 +43,18 @@ export function useEmissionPhaseParams(
 }
 
 /**
+ * Mapping from constant names to ABI function names
+ * 从常量名到 ABI 函数名的映射
+ */
+const PARAM_NAME_MAP = {
+  "LP_TOTAL_BPS": "lpPairsBps",
+  "DEBT_BPS": "DEBT_BPS",
+  "STABILITY_POOL_BPS": "stabilityPoolBps",
+  "ECO_BPS": "ECO_BPS",
+  "BASIS_POINTS": "BASIS_POINTS",
+} as const;
+
+/**
  * Hook to read emission distribution basis points
  * 读取排放分配比例的Hook (basis points: 10000 = 100%)
  */
@@ -57,6 +69,6 @@ export function useEmissionDistributionBps(
   return useReadContract({
     address: testnet.tokens.emissionManager,
     abi: EMISSION_MANAGER_ABI,
-    functionName: paramName,
+    functionName: PARAM_NAME_MAP[paramName],
   });
 }

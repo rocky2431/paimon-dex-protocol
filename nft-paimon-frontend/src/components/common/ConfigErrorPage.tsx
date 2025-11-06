@@ -168,7 +168,7 @@ export function ConfigErrorPage({
           </Paper>
 
           {/* Technical Details (Collapsible) */}
-          {(usdcDecimals !== null || psmUsdcDecimals !== null) && (
+          {(usdcDecimals != null || psmUsdcDecimals != null) && (
             <Accordion sx={{ marginBottom: 3 }}>
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
@@ -185,7 +185,7 @@ export function ConfigErrorPage({
               </AccordionSummary>
               <AccordionDetails sx={{ backgroundColor: '#FFFBF5' }}>
                 <Box component="dl" sx={{ margin: 0 }}>
-                  {usdcDecimals !== null && (
+                  {usdcDecimals != null && (
                     <>
                       <Typography component="dt" variant="body2" sx={{ fontWeight: 600, mt: 1 }}>
                         On-chain USDC decimals:
@@ -195,7 +195,7 @@ export function ConfigErrorPage({
                       </Typography>
                     </>
                   )}
-                  {psmUsdcDecimals !== null && (
+                  {psmUsdcDecimals != null && (
                     <>
                       <Typography component="dt" variant="body2" sx={{ fontWeight: 600, mt: 1 }}>
                         PSM cached USDC decimals:
@@ -205,25 +205,25 @@ export function ConfigErrorPage({
                       </Typography>
                     </>
                   )}
-                  {expectedScale !== null && (
+                  {expectedScale != null && (
                     <>
                       <Typography component="dt" variant="body2" sx={{ fontWeight: 600, mt: 1 }}>
                         Expected SCALE factor:
                       </Typography>
                       <Typography component="dd" variant="body2" color="text.secondary" sx={{ ml: 2 }}>
                         {expectedScale.toString()} (10^
-                        {usdcDecimals !== null ? 18 - usdcDecimals : '?'})
+                        {usdcDecimals != null ? 18 - usdcDecimals : '?'})
                       </Typography>
                     </>
                   )}
-                  {psmScale !== null && (
+                  {psmScale != null && (
                     <>
                       <Typography component="dt" variant="body2" sx={{ fontWeight: 600, mt: 1 }}>
                         Actual PSM SCALE factor:
                       </Typography>
                       <Typography component="dd" variant="body2" color="text.secondary" sx={{ ml: 2 }}>
                         {psmScale.toString()} (10^
-                        {psmUsdcDecimals !== null ? 18 - psmUsdcDecimals : '?'})
+                        {psmUsdcDecimals != null ? 18 - psmUsdcDecimals : '?'})
                       </Typography>
                     </>
                   )}
