@@ -3,15 +3,15 @@
   "metadata": {
     "projectName": "Paimon.dex Frontend Refactor V2",
     "created": "2025-11-07T00:00:00Z",
-    "lastModified": "2025-11-06T22:05:01.902Z",
+    "lastModified": "2025-11-06T22:08:18.485Z",
     "description": "前端重构方案 V2 - 务实版 (基于团队评审调整): 修复构建错误、配置自动化、导航重构、核心功能补全、Bug修复"
   },
   "stats": {
     "totalTasks": 20,
-    "completed": 9,
+    "completed": 10,
     "inProgress": 0,
-    "pending": 12,
-    "progressPercentage": 45,
+    "pending": 11,
+    "progressPercentage": 50,
     "paused": 0
   },
   "tasks": [
@@ -189,11 +189,13 @@
         "refactor-3.1"
       ],
       "estimated_days": 0.125,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "vault",
         "navigation"
-      ]
+      ],
+      "completedAt": "2025-11-06T22:08:18.485Z",
+      "notes": "✅ Vault Dashboard 验证通过。导航配置正确（Borrow → Vault Dashboard），页面结构完整（Position Overview + Health Factor + Quick Actions），依赖组件存在（useVaultPosition hook + HealthFactorIndicator），按钮跳转正常（/vault/borrow, /vault/repay），TypeScript 0 errors。"
     },
     {
       "id": "refactor-3.3",
