@@ -12,6 +12,7 @@ import { formatUnits } from 'viem';
 import { useVestingPosition } from '@/hooks/useVestingPosition';
 import VestingProgressBar from '@/components/convert/VestingProgressBar';
 import ClaimVestedButton from '@/components/convert/ClaimVestedButton';
+import { Navigation } from '@/components/layout/Navigation';
 
 /**
  * Convert page displaying esPaimon vesting progress and claim functionality
@@ -24,39 +25,46 @@ export default function ConvertPage() {
   // Show connection prompt if wallet not connected
   if (!isConnected) {
     return (
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Alert severity="info">
-          Please connect your wallet to view your vesting position.
-        </Alert>
-      </Container>
+      <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
+        <Navigation />
+        <Container maxWidth="md" sx={{ pt: 12, py: 4 }}>
+          <Alert severity="info">
+            Please connect your wallet to view your vesting position.
+          </Alert>
+        </Container>
+      </Box>
     );
   }
 
   // Show loading state
   if (position.isLoading) {
     return (
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Typography>Loading vesting position...</Typography>
-      </Container>
+      <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
+        <Navigation />
+        <Container maxWidth="md" sx={{ pt: 12, py: 4 }}>
+          <Typography>Loading vesting position...</Typography>
+        </Container>
+      </Box>
     );
   }
 
-  // Show empty state if no vesting position
-  if (position.totalVested === 0n) {
-    return (
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Alert severity="info">
-          You don&apos;t have any esPAIMON vesting position yet.
-        </Alert>
-      </Container>
-    );
-  }
+  // Check if user has vesting position
+  const hasPosition = position.totalVested > 0n;
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography variant="h4" sx={{ mb: 4, fontWeight: 700, color: '#8B4513' }}>
-        esPAIMON Convert
-      </Typography>
+    <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
+      <Navigation />
+      <Container maxWidth="md" sx={{ pt: 12, py: 4 }}>
+        <Typography variant="h4" sx={{ mb: 4, fontWeight: 700, color: '#8B4513' }}>
+          esPAIMON Convert
+        </Typography>
+
+      {/* Show info alert if no position, but still display the full UI */}
+      {!hasPosition && (
+        <Alert severity="info" sx={{ mb: 4 }}>
+          You don&apos;t have any esPAIMON vesting position yet. All values will show as 0.
+        </Alert>
+      )}
 
       {/* Vesting Progress */}
       <Box sx={{ mb: 4 }}>
@@ -158,6 +166,7 @@ export default function ConvertPage() {
           </Typography>
         </Alert>
       )}
-    </Container>
+      </Container>
+    </Box>
   );
 }
