@@ -2,7 +2,6 @@
 
 import { Box, Card, CardContent, Typography, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Alert } from '@mui/material';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
 import { REWARDS_DESIGN_TOKENS } from './constants';
 
 interface VestingModeIndicatorProps {
@@ -28,8 +27,6 @@ export const VestingModeIndicator: React.FC<VestingModeIndicatorProps> = ({
   useEsVesting,
   loading,
 }) => {
-  const t = useTranslations();
-
   // Handle loading state
   if (loading) {
     return (
@@ -68,13 +65,13 @@ export const VestingModeIndicator: React.FC<VestingModeIndicatorProps> = ({
 
   const vestingMode = useEsVesting
     ? {
-        label: t('vesting.mode.enabled'),
-        description: t('vesting.description.365days'),
+        label: 'Vesting Enabled',
+        description: 'Rewards vest over 365 days as esPAIMON tokens',
         color: '#ff9800' as const,
       }
     : {
-        label: t('vesting.mode.disabled'),
-        description: t('vesting.description.immediate'),
+        label: 'Direct Distribution',
+        description: 'Rewards distributed immediately as PAIMON tokens',
         color: '#ffa726' as const,
       };
 
@@ -96,7 +93,7 @@ export const VestingModeIndicator: React.FC<VestingModeIndicatorProps> = ({
             variant="h6"
             sx={{ fontWeight: 600, color: '#ff9800', mr: 2 }}
           >
-            {t('vesting.title')}
+            Vesting Mode
           </Typography>
           <Chip
             label={vestingMode.label}
@@ -116,27 +113,27 @@ export const VestingModeIndicator: React.FC<VestingModeIndicatorProps> = ({
         {/* Comparison table */}
         <Box sx={{ mb: 3 }}>
           <Typography role="heading" variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-            {t('vesting.comparison')}
+            Comparison
           </Typography>
           <TableContainer>
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell>{t('vesting.mode')}</TableCell>
-                  <TableCell>{t('vesting.pros')}</TableCell>
-                  <TableCell>{t('vesting.cons')}</TableCell>
+                  <TableCell>Mode</TableCell>
+                  <TableCell>Pros</TableCell>
+                  <TableCell>Cons</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 <TableRow>
-                  <TableCell>{t('vesting.mode.enabled')}</TableCell>
-                  <TableCell>{t('vesting.pros.vesting')}</TableCell>
-                  <TableCell>{t('vesting.cons.vesting')}</TableCell>
+                  <TableCell>Vesting Enabled</TableCell>
+                  <TableCell>Full reward amount (100%), long-term value</TableCell>
+                  <TableCell>365-day lock period</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell>{t('vesting.mode.disabled')}</TableCell>
-                  <TableCell>{t('vesting.pros.immediate')}</TableCell>
-                  <TableCell>{t('vesting.cons.immediate')}</TableCell>
+                  <TableCell>Direct Distribution</TableCell>
+                  <TableCell>Immediate liquidity, no lock</TableCell>
+                  <TableCell>Reduced reward (50% penalty)</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -157,7 +154,7 @@ export const VestingModeIndicator: React.FC<VestingModeIndicatorProps> = ({
                   },
                 }}
               >
-                {t('vesting.link.convert')} →
+                Go to Convert Page →
               </Typography>
             </Link>
           </Box>
