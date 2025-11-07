@@ -1,28 +1,28 @@
 'use client';
 
-import { Container, Typography, Box, Stack, Menu, MenuItem, Chip } from '@mui/material';
+import { Container, Typography, Box, Stack } from '@mui/material';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Link from 'next/link';
-import { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import * as Icons from '@mui/icons-material';
 
-import { getNavigationColumns, getActiveColumn, type NavColumn, type NavItem } from '@/config/navigation';
+import { getNavigationColumns, getActiveColumn, type NavColumn } from '@/config/navigation';
 import { MobileNavigation } from './MobileNavigation';
 
 /**
- * Navigation Component (V2 - Config-Driven)
+ * Navigation Component (V3 - Flat Structure)
  *
- * 6-column structure: Trade | Earn | Borrow | Governance | Launch | Analytics
+ * New 6-entry flat structure: Swap | Borrow | Liquidity | Vote | RWA | Portfolio
+ *
+ * Changes from V2:
+ * - Removed dropdown menus (all entries are direct links)
+ * - Tab navigation handled in pages, not in top nav
+ * - Simplified active state logic
+ * - Improved mobile responsiveness
  *
  * Features:
  * - Configuration-driven (src/config/navigation.ts)
  * - Feature flags auto-filtering
  * - Active state highlighting
- * - Hover dropdown menus
- * - Badge support (NEW, BETA, HOT)
- * - Nested submenus support
  * - Responsive design (desktop ≥1024px, mobile <1024px)
  */
 export function Navigation() {
@@ -30,193 +30,42 @@ export function Navigation() {
   const columns = getNavigationColumns();
   const activeColumnId = getActiveColumn(pathname);
 
-  const [anchorEls, setAnchorEls] = useState<Record<string, HTMLElement | null>>({});
-
-  const handleMenuOpen = (columnId: string, event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEls(prev => ({ ...prev, [columnId]: event.currentTarget }));
-  };
-
-  const handleMenuClose = (columnId: string) => {
-    setAnchorEls(prev => ({ ...prev, [columnId]: null }));
-  };
-
-  // Helper function to get Material-UI icon component by name
-  const getIcon = (iconName: string) => {
-    const IconComponent = (Icons as any)[iconName];
-    return IconComponent ? <IconComponent sx={{ mr: 1.5, color: 'primary.main', fontSize: 20 }} /> : null;
-  };
-
-  // Render a single navigation column
-  const renderColumn = (column: NavColumn) => {
+  // V3: Simplified - All entries are direct links (no dropdown menus)
+  const renderNavLink = (column: NavColumn) => {
     const isActive = activeColumnId === column.id;
-    const isMenuOpen = Boolean(anchorEls[column.id]);
 
-    // If column has direct href (e.g., Analytics), render as simple link
-    if (column.href) {
-      return (
-        <Link key={column.id} href={column.href} style={{ textDecoration: 'none' }}>
-          <Typography
-            variant="body1"
-            fontWeight={600}
-            sx={{
-              color: isActive ? 'primary.main' : 'text.secondary',
-              cursor: 'pointer',
-              transition: 'color 0.3s',
-              whiteSpace: 'nowrap',
-              '&:hover': {
-                color: 'primary.main',
-              },
-            }}
-          >
-            {column.label}
-          </Typography>
-        </Link>
-      );
-    }
-
-    // Column with dropdown menu
     return (
-      <Box key={column.id}>
-        <Box
-          onClick={(e) => handleMenuOpen(column.id, e)}
+      <Link key={column.id} href={column.href} style={{ textDecoration: 'none' }}>
+        <Typography
+          variant="body1"
+          fontWeight={600}
           sx={{
-            display: 'flex',
-            alignItems: 'center',
+            color: isActive ? 'primary.main' : 'text.secondary',
             cursor: 'pointer',
+            transition: 'color 0.3s',
+            whiteSpace: 'nowrap',
+            position: 'relative',
+            '&:hover': {
+              color: 'primary.main',
+            },
+            // Active indicator underline
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              bottom: -8,
+              left: 0,
+              right: 0,
+              height: 3,
+              backgroundColor: 'primary.main',
+              borderRadius: '3px 3px 0 0',
+              opacity: isActive ? 1 : 0,
+              transition: 'opacity 0.3s',
+            },
           }}
         >
-          <Typography
-            variant="body1"
-            fontWeight={600}
-            sx={{
-              color: isActive ? 'primary.main' : 'text.secondary',
-              transition: 'color 0.3s',
-              whiteSpace: 'nowrap',
-              '&:hover': {
-                color: 'primary.main',
-              },
-            }}
-          >
-            {column.label}
-          </Typography>
-          {column.items && (
-            <ArrowDropDownIcon
-              sx={{
-                color: isActive ? 'primary.main' : 'text.secondary',
-                transition: 'transform 0.3s',
-                transform: isMenuOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-              }}
-            />
-          )}
-        </Box>
-
-        {column.items && (
-          <Menu
-            anchorEl={anchorEls[column.id]}
-            open={isMenuOpen}
-            onClose={() => handleMenuClose(column.id)}
-            disableScrollLock
-            sx={{
-              '& .MuiPaper-root': {
-                borderRadius: '12px',
-                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
-                mt: 1,
-                minWidth: 220,
-              },
-            }}
-          >
-            {column.items.map((item) => renderMenuItem(item, column.id))}
-          </Menu>
-        )}
-      </Box>
-    );
-  };
-
-  // Render a menu item (supports nested children)
-  const renderMenuItem = (item: NavItem, parentColumnId: string) => {
-    // If item has children, render as submenu header
-    if (item.children && item.children.length > 0) {
-      return (
-        <Box key={item.id}>
-          {/* Submenu header */}
-          <MenuItem
-            disabled
-            sx={{
-              py: 1,
-              px: 2,
-              opacity: 1,
-              cursor: 'default',
-              '&:hover': {
-                backgroundColor: 'transparent',
-              },
-            }}
-          >
-            {getIcon(item.icon)}
-            <Typography variant="body2" fontWeight={700} color="text.primary">
-              {item.label}
-            </Typography>
-          </MenuItem>
-
-          {/* Submenu items */}
-          {item.children.map((child) => (
-            <MenuItem
-              key={child.id}
-              component={Link}
-              href={child.href!}
-              onClick={() => handleMenuClose(parentColumnId)}
-              sx={{
-                py: 1.5,
-                px: 2,
-                pl: 5, // Indent child items
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 152, 0, 0.08)',
-                },
-              }}
-            >
-              {getIcon(child.icon)}
-              <Typography variant="body2" fontWeight={600}>
-                {child.label}
-              </Typography>
-            </MenuItem>
-          ))}
-        </Box>
-      );
-    }
-
-    // Regular menu item with optional badge
-    return (
-      <MenuItem
-        key={item.id}
-        component={Link}
-        href={item.href!}
-        onClick={() => handleMenuClose(parentColumnId)}
-        sx={{
-          py: 1.5,
-          px: 2,
-          '&:hover': {
-            backgroundColor: 'rgba(255, 152, 0, 0.08)',
-          },
-        }}
-      >
-        {getIcon(item.icon)}
-        <Typography variant="body2" fontWeight={600} sx={{ flexGrow: 1 }}>
-          {item.label}
+          {column.label}
         </Typography>
-        {item.badge && (
-          <Chip
-            label={item.badge}
-            size="small"
-            sx={{
-              height: 20,
-              fontSize: '0.65rem',
-              fontWeight: 700,
-              ml: 1,
-              bgcolor: item.badge === 'HOT' ? 'error.main' : 'info.main',
-              color: 'white',
-            }}
-          />
-        )}
-      </MenuItem>
+      </Link>
     );
   };
 
@@ -306,9 +155,9 @@ export function Navigation() {
               </Typography>
             </Link>
 
-            {/* Navigation Columns (6-column structure) */}
-            <Stack direction="row" spacing={3} alignItems="center" sx={{ flexGrow: 0 }}>
-              {columns.map((column) => renderColumn(column))}
+            {/* Navigation Links (6 flat entries) */}
+            <Stack direction="row" spacing={4} alignItems="center" sx={{ flexGrow: 0 }}>
+              {columns.map((column) => renderNavLink(column))}
             </Stack>
 
             {/* Spacer - pushes wallet button to far right */}
