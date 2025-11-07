@@ -50,31 +50,17 @@ const features = {
 };
 
 /**
- * V2 扁平化导航结构 - 6个核心入口
- * Swap | Borrow | Liquidity | Vote | RWA | Portfolio
+ * V3 Hub 架构 - 5个核心 Hub + 1个首页
+ * Home | Liquidity | USDP | Governance | Discover | Portfolio
+ *
+ * 参考:
+ * - Camelot: 模块化 Hub (Pools/Nitro/Rewards 集中管理)
+ * - Velodrome: Tab 切换内容,侧栏固定上下文信息
  */
 export const NAV_COLUMNS: NavColumn[] = [
-  // 1. Swap (交易 - PSM + DEX)
-  {
-    id: 'swap',
-    label: 'Swap',
-    icon: 'SwapHoriz',
-    href: '/swap',
-    enabled: features.psm,
-  },
-
-  // 2. Borrow (借贷 - Dashboard + Stability Pool)
-  // Tabs: Dashboard (Vault + RWA Deposit) | Stability Pool
-  {
-    id: 'borrow',
-    label: 'Borrow',
-    icon: 'AccountBalance',
-    href: '/borrow',
-    enabled: features.vault || features.stabilityPool,
-  },
-
-  // 3. Liquidity (流动性 - Pools + My Liquidity)
-  // Tabs: Pools (主入口) | My Liquidity
+  // 1. Liquidity Hub (流动性中心 - Swap + Pools + My Liquidity + Nitro & Boost)
+  // Tabs: Swap | Pools | My Liquidity | Nitro & Boost
+  // 核心流程: Swap → Add LP → Stake → Boost → Earn
   {
     id: 'liquidity',
     label: 'Liquidity',
@@ -82,27 +68,42 @@ export const NAV_COLUMNS: NavColumn[] = [
     href: '/liquidity',
   },
 
-  // 4. Vote (治理 - Vote + Lock + Bribes)
-  // Tabs: Vote (主入口) | Lock | Bribes
+  // 2. USDP Hub (稳定币中心 - Vault + PSM + Stability + Savings)
+  // Tabs: Vault | PSM | Stability | Savings
+  // 核心流程: Deposit RWA → Borrow USDP / Swap USDC → Earn Savings / Stability
   {
-    id: 'vote',
-    label: 'Vote',
-    icon: 'HowToVote',
-    href: '/vote',
-    enabled: features.gaugeVoting || features.veNFT,
+    id: 'usdp',
+    label: 'USDP',
+    icon: 'AccountBalance',
+    href: '/usdp',
+    enabled: features.vault || features.psm || features.stabilityPool || features.savings,
   },
 
-  // 5. RWA (RWA Launchpad - 核心差异化)
+  // 3. Governance Hub (治理中心 - Lock + Vote + Bribes + Rewards)
+  // Tabs: Vote | Lock | Bribes | Rewards
+  // 核心流程: Lock PAIMON → Vote Gauges → Earn Bribes + Rewards
   {
-    id: 'rwa',
-    label: 'RWA',
+    id: 'governance',
+    label: 'Governance',
+    icon: 'HowToVote',
+    href: '/governance',
+    enabled: features.veNFT || features.gaugeVoting || features.bribes || features.rewards,
+  },
+
+  // 4. Discover Hub (探索中心 - Launchpad + Analytics)
+  // Tabs: Projects | Analytics
+  // 核心流程: Browse RWA → Vote Approve → Participate → Settle
+  {
+    id: 'discover',
+    label: 'Discover',
     icon: 'RocketLaunch',
-    href: '/rwa',
+    href: '/launchpad',
     enabled: features.launchpad,
   },
 
-  // 6. Portfolio (个人中心 - Overview + Rewards + Savings)
-  // Tabs: Overview (仪表板) | Rewards (合并Convert+Boost) | Savings (合并SavingRate)
+  // 5. Portfolio (个人中心 - 跨 Hub 聚合视图)
+  // Tabs: Overview | Positions | Rewards
+  // 核心功能: 资产聚合 + 风险监控 + 一键领取
   {
     id: 'portfolio',
     label: 'Portfolio',
@@ -138,44 +139,48 @@ export function getNavigationColumns(): NavColumn[] {
 }
 
 /**
- * V2: 根据 pathname 获取 active 状态的栏目 ID
- * 新路由映射:
- * - /swap → swap
- * - /borrow, /vault, /stability-pool, /treasury → borrow
- * - /liquidity, /pool, /liquidity/* → liquidity
- * - /vote, /lock, /bribes → vote
- * - /rwa, /launchpad → rwa
- * - /portfolio, /rewards, /convert, /boost, /savings → portfolio
+ * V3: 根据 pathname 获取 active 状态的栏目 ID
+ * Hub 路由映射:
+ * - / → 首页 (不高亮任何 Hub)
+ * - /liquidity, /swap, /pool → liquidity
+ * - /usdp, /vault, /borrow, /stability-pool, /savings, /treasury → usdp
+ * - /governance, /vote, /lock, /bribes, /rewards → governance
+ * - /launchpad, /rwa → discover
+ * - /portfolio, /convert, /boost → portfolio
  */
 export function getActiveColumn(pathname: string): string {
-  // Swap
-  if (pathname === '/' || pathname === '/swap') return 'swap';
+  // 首页不高亮任何 Hub
+  if (pathname === '/') return '';
 
-  // Borrow (合并 Vault + Treasury + Stability Pool)
-  if (pathname.startsWith('/borrow')) return 'borrow';
-  if (pathname.startsWith('/vault')) return 'borrow';
-  if (pathname.startsWith('/stability-pool')) return 'borrow';
-  if (pathname.startsWith('/treasury')) return 'borrow';
-
-  // Liquidity
+  // Liquidity Hub (合并 Swap + Pools + My Liquidity + Nitro/Boost)
   if (pathname.startsWith('/liquidity')) return 'liquidity';
+  if (pathname.startsWith('/swap')) return 'liquidity';
   if (pathname.startsWith('/pool')) return 'liquidity';
 
-  // Vote (合并 Lock + Bribes)
-  if (pathname.startsWith('/vote')) return 'vote';
-  if (pathname.startsWith('/lock')) return 'vote';
-  if (pathname.startsWith('/bribes')) return 'vote';
+  // USDP Hub (合并 Vault + PSM + Stability + Savings)
+  if (pathname.startsWith('/usdp')) return 'usdp';
+  if (pathname.startsWith('/vault')) return 'usdp';
+  if (pathname.startsWith('/borrow')) return 'usdp';
+  if (pathname.startsWith('/stability-pool')) return 'usdp';
+  if (pathname.startsWith('/savings')) return 'usdp';
+  if (pathname.startsWith('/treasury')) return 'usdp';
 
-  // RWA (原 Launchpad)
-  if (pathname.startsWith('/rwa')) return 'rwa';
-  if (pathname.startsWith('/launchpad')) return 'rwa';
+  // Governance Hub (合并 Lock + Vote + Bribes + Rewards)
+  if (pathname.startsWith('/governance')) return 'governance';
+  if (pathname.startsWith('/vote')) return 'governance';
+  if (pathname.startsWith('/lock')) return 'governance';
+  if (pathname.startsWith('/bribes')) return 'governance';
+  if (pathname.startsWith('/rewards')) return 'governance';
 
-  // Portfolio (合并 Rewards + Convert + Boost + Savings)
+  // Discover Hub (Launchpad + Analytics)
+  if (pathname.startsWith('/launchpad')) return 'discover';
+  if (pathname.startsWith('/rwa')) return 'discover';
+  if (pathname.startsWith('/analytics')) return 'discover';
+
+  // Portfolio (跨 Hub 聚合视图)
   if (pathname.startsWith('/portfolio')) return 'portfolio';
-  if (pathname.startsWith('/rewards')) return 'portfolio';
   if (pathname.startsWith('/convert')) return 'portfolio';
   if (pathname.startsWith('/boost')) return 'portfolio';
-  if (pathname.startsWith('/savings')) return 'portfolio';
 
   // Phase 2: Presale
   if (pathname.startsWith('/presale')) return 'presale';

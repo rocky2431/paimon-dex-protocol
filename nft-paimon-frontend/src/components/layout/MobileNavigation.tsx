@@ -8,29 +8,25 @@ import {
   List,
   ListItemButton,
   ListItemText,
-  Collapse,
-  Chip,
   Divider,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import * as Icons from '@mui/icons-material';
 import Link from 'next/link';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 
-import { getNavigationColumns, getActiveColumn, type NavColumn, type NavItem } from '@/config/navigation';
+import { getNavigationColumns, getActiveColumn, type NavColumn } from '@/config/navigation';
 
 /**
- * Mobile Navigation Component
+ * Mobile Navigation Component (V3 - Flat Navigation)
  * Drawer-style navigation for mobile devices (<1024px)
  *
  * Features:
  * - Hamburger menu button
  * - Slide-in drawer from left
- * - Accordion-style collapsible sections
+ * - Flat navigation (no dropdowns/accordions)
  * - Shared configuration with desktop
  * - Feature flags auto-filtering
  * - Active state highlighting
@@ -41,17 +37,9 @@ export function MobileNavigation() {
   const activeColumnId = getActiveColumn(pathname);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [expandedColumns, setExpandedColumns] = useState<Record<string, boolean>>({});
 
   const toggleDrawer = () => {
     setDrawerOpen(!drawerOpen);
-  };
-
-  const toggleColumn = (columnId: string) => {
-    setExpandedColumns(prev => ({
-      ...prev,
-      [columnId]: !prev[columnId],
-    }));
   };
 
   const closeDrawer = () => {
@@ -64,179 +52,36 @@ export function MobileNavigation() {
     return IconComponent ? <IconComponent sx={sx} /> : null;
   };
 
-  // Render a navigation column as accordion
+  // Render a navigation column as simple link (V3 flat navigation)
   const renderColumn = (column: NavColumn) => {
     const isActive = activeColumnId === column.id;
-    const isExpanded = expandedColumns[column.id];
 
-    // If column has direct href (e.g., Analytics), render as simple link
-    if (column.href) {
-      return (
-        <ListItemButton
-          key={column.id}
-          component={Link}
-          href={column.href}
-          onClick={closeDrawer}
-          sx={{
-            py: 2,
-            px: 3,
-            backgroundColor: isActive ? 'rgba(255, 152, 0, 0.1)' : 'transparent',
-            borderLeft: isActive ? '4px solid' : '4px solid transparent',
-            borderColor: isActive ? 'primary.main' : 'transparent',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 152, 0, 0.05)',
-            },
-          }}
-        >
-          {getIcon(column.icon, { mr: 2, color: isActive ? 'primary.main' : 'text.secondary' })}
-          <ListItemText
-            primary={column.label}
-            primaryTypographyProps={{
-              fontWeight: isActive ? 700 : 600,
-              color: isActive ? 'primary.main' : 'text.primary',
-            }}
-          />
-        </ListItemButton>
-      );
-    }
-
-    // Column with accordion
-    return (
-      <Box key={column.id}>
-        <ListItemButton
-          onClick={() => toggleColumn(column.id)}
-          sx={{
-            py: 2,
-            px: 3,
-            backgroundColor: isActive ? 'rgba(255, 152, 0, 0.1)' : 'transparent',
-            borderLeft: isActive ? '4px solid' : '4px solid transparent',
-            borderColor: isActive ? 'primary.main' : 'transparent',
-          }}
-        >
-          {getIcon(column.icon, { mr: 2, color: isActive ? 'primary.main' : 'text.secondary' })}
-          <ListItemText
-            primary={column.label}
-            primaryTypographyProps={{
-              fontWeight: isActive ? 700 : 600,
-              color: isActive ? 'primary.main' : 'text.primary',
-            }}
-          />
-          {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-        </ListItemButton>
-
-        <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            {column.items?.map((item) => renderMenuItem(item))}
-          </List>
-        </Collapse>
-      </Box>
-    );
-  };
-
-  // Render a menu item (supports nested children)
-  const renderMenuItem = (item: NavItem) => {
-    // If item has children, render as nested accordion
-    if (item.children && item.children.length > 0) {
-      const isExpanded = expandedColumns[item.id];
-
-      return (
-        <Box key={item.id}>
-          {/* Submenu header */}
-          <ListItemButton
-            onClick={() => toggleColumn(item.id)}
-            sx={{
-              py: 1.5,
-              pl: 7,
-              pr: 3,
-              backgroundColor: 'rgba(0, 0, 0, 0.02)',
-            }}
-          >
-            {getIcon(item.icon, { mr: 1.5, fontSize: 20, color: 'text.secondary' })}
-            <ListItemText
-              primary={item.label}
-              primaryTypographyProps={{
-                fontWeight: 600,
-                fontSize: '0.9rem',
-              }}
-            />
-            {isExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
-          </ListItemButton>
-
-          {/* Submenu items */}
-          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              {item.children.map((child) => (
-                <ListItemButton
-                  key={child.id}
-                  component={Link}
-                  href={child.href!}
-                  onClick={closeDrawer}
-                  sx={{
-                    py: 1.5,
-                    pl: 11,
-                    pr: 3,
-                    backgroundColor: pathname === child.href ? 'rgba(255, 152, 0, 0.05)' : 'transparent',
-                    '&:hover': {
-                      backgroundColor: 'rgba(255, 152, 0, 0.08)',
-                    },
-                  }}
-                >
-                  {getIcon(child.icon, { mr: 1.5, fontSize: 18, color: 'text.secondary' })}
-                  <ListItemText
-                    primary={child.label}
-                    primaryTypographyProps={{
-                      fontSize: '0.85rem',
-                      fontWeight: pathname === child.href ? 600 : 400,
-                      color: pathname === child.href ? 'primary.main' : 'text.secondary',
-                    }}
-                  />
-                </ListItemButton>
-              ))}
-            </List>
-          </Collapse>
-        </Box>
-      );
-    }
-
-    // Regular menu item with optional badge
+    // All columns now have direct href (flat navigation design)
     return (
       <ListItemButton
-        key={item.id}
+        key={column.id}
         component={Link}
-        href={item.href!}
+        href={column.href}
         onClick={closeDrawer}
         sx={{
-          py: 1.5,
-          pl: 7,
-          pr: 3,
-          backgroundColor: pathname === item.href ? 'rgba(255, 152, 0, 0.05)' : 'transparent',
+          py: 2,
+          px: 3,
+          backgroundColor: isActive ? 'rgba(255, 152, 0, 0.1)' : 'transparent',
+          borderLeft: isActive ? '4px solid' : '4px solid transparent',
+          borderColor: isActive ? 'primary.main' : 'transparent',
           '&:hover': {
-            backgroundColor: 'rgba(255, 152, 0, 0.08)',
+            backgroundColor: 'rgba(255, 152, 0, 0.05)',
           },
         }}
       >
-        {getIcon(item.icon, { mr: 1.5, fontSize: 20, color: 'text.secondary' })}
+        {getIcon(column.icon, { mr: 2, color: isActive ? 'primary.main' : 'text.secondary' })}
         <ListItemText
-          primary={item.label}
+          primary={column.label}
           primaryTypographyProps={{
-            fontSize: '0.9rem',
-            fontWeight: pathname === item.href ? 600 : 400,
-            color: pathname === item.href ? 'primary.main' : 'text.primary',
+            fontWeight: isActive ? 700 : 600,
+            color: isActive ? 'primary.main' : 'text.primary',
           }}
         />
-        {item.badge && (
-          <Chip
-            label={item.badge}
-            size="small"
-            sx={{
-              height: 20,
-              fontSize: '0.65rem',
-              fontWeight: 700,
-              bgcolor: item.badge === 'HOT' ? 'error.main' : 'info.main',
-              color: 'white',
-            }}
-          />
-        )}
       </ListItemButton>
     );
   };
