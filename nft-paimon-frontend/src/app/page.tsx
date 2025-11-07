@@ -1,53 +1,21 @@
 'use client';
 
-import { Container, Typography, Box } from '@mui/material';
-import { SwapCard } from '@/components/swap/SwapCard';
-import { Navigation } from '@/components/layout/Navigation';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
+/**
+ * Homepage - Redirect to /swap
+ *
+ * V3架构: 首页自动跳转到 /swap (PSM + DEX入口)
+ * 原因: 交易是核心功能，PSM是新用户最友好的入口
+ */
 export default function Home() {
-  return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
-      {/* Top navigation bar */}
-      <Navigation />
+  const router = useRouter();
 
-      {/* Main content area */}
-      <Container
-        maxWidth="lg"
-        sx={{
-          pt: 12, // Account for fixed navbar
-          pb: 8,
-          px: {
-            xs: 2,
-            sm: 3,
-          },
-          minHeight: '100vh',
-        }}
-      >
-        {/* Huge whitespace (OlympusDAO style) */}
-        <Box sx={{ height: { xs: 40, sm: 60 } }} />
+  useEffect(() => {
+    router.replace('/swap');
+  }, [router]);
 
-        {/* Spacer to match VoteTabs/LiquidityTabs height for consistent card position */}
-        <Box sx={{ height: 80, mb: 0 }} />
-
-        {/* SwapCard */}
-        <SwapCard />
-
-        {/* Huge whitespace (OlympusDAO style) */}
-        <Box sx={{ height: { xs: 40, sm: 60 } }} />
-
-        {/* Footer info */}
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{
-            mt: 4,
-            textAlign: 'center',
-            fontSize: '0.875rem',
-          }}
-        >
-          ve33 Decentralized Exchange • BSC Network
-        </Typography>
-      </Container>
-    </Box>
-  );
+  // 显示加载状态（瞬间跳转，用户基本看不到）
+  return null;
 }
