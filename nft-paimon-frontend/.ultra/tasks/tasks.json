@@ -9,8 +9,8 @@
   "stats": {
     "totalTasks": 32,
     "completed": 2,
-    "inProgress": 0,
-    "pending": 30,
+    "inProgress": 1,
+    "pending": 29,
     "progressPercentage": 6.25
   },
   "tasks": [
@@ -48,8 +48,9 @@
       "priority": "P0",
       "dependencies": ["gap-1.1.2"],
       "estimated_days": 0.5,
-      "status": "pending",
-      "tags": ["swap", "ui-component"]
+      "status": "in_progress",
+      "tags": ["swap", "ui-component"],
+      "startedAt": "2025-11-11T09:40:00Z"
     },
     {
       "id": "gap-1.1.4",
