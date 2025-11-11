@@ -4,8 +4,11 @@
  */
 
 import { RWAAsset } from '@/types/treasury';
+import { TESTNET_ADDRESSES } from '@/config/chains/generated/testnet';
 
-// Whitelisted RWA Assets (demo addresses - to be updated with actual deployed contracts)
+// Whitelisted RWA Assets
+// Note: Only HYD is currently deployed on testnet
+// Other RWA tokens are placeholder configurations for future deployment
 export const RWA_ASSETS: RWAAsset[] = [
   {
     address: '0x0000000000000000000000000000000000000001',
@@ -14,7 +17,7 @@ export const RWA_ASSETS: RWAAsset[] = [
     tier: 1,
     ltvRatio: 60, // 60% LTV for T1
     mintDiscount: 0,
-    isActive: true,
+    isActive: false, // Not yet deployed
   },
   {
     address: '0x0000000000000000000000000000000000000002',
@@ -23,7 +26,7 @@ export const RWA_ASSETS: RWAAsset[] = [
     tier: 2,
     ltvRatio: 50, // 50% LTV for T2
     mintDiscount: 0,
-    isActive: true,
+    isActive: false, // Not yet deployed
   },
   {
     address: '0x0000000000000000000000000000000000000003',
@@ -32,16 +35,16 @@ export const RWA_ASSETS: RWAAsset[] = [
     tier: 3,
     ltvRatio: 40, // 40% LTV for T3
     mintDiscount: 0,
-    isActive: true,
+    isActive: false, // Not yet deployed
   },
   {
-    address: '0x0000000000000000000000000000000000000004',
+    address: TESTNET_ADDRESSES.core.hyd, // Real deployed address from testnet
     name: 'HYD Real World Asset Token',
     symbol: 'HYD',
     tier: 1,
     ltvRatio: 60, // 60% LTV for T1 (high-quality RWA)
     mintDiscount: 0,
-    isActive: true,
+    isActive: true, // Deployed and active
   },
 ];
 
