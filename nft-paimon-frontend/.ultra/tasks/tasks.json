@@ -9,10 +9,10 @@
   "stats": {
     "totalTasks": 32,
     "completed": 19,
-    "inProgress": 0,
-    "pending": 13,
+    "inProgress": 1,
+    "pending": 12,
     "progressPercentage": 59.375,
-    "lastUpdated": "2025-11-11T18:30:00.000Z"
+    "lastUpdated": "2025-11-11T18:35:00.000Z"
   },
   "tasks": [
     {
@@ -599,7 +599,8 @@
         "gap-3.2.2"
       ],
       "estimated_days": 0.75,
-      "status": "pending",
+      "status": "in_progress",
+      "startedAt": "2025-11-11T18:35:00.000Z",
       "tags": [
         "rewards",
         "governance"

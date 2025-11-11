@@ -17,6 +17,7 @@ import {
 import { LIQUIDITY_POOLS } from "../../liquidity/constants";
 import { config } from "@/config";
 import { calculateAverageAPR } from "../constants";
+import { useBribes } from "../../bribes/hooks/useBribes";
 
 // Helper function to get gauge address from pool name
 function getGaugeAddressFromPoolName(
@@ -87,6 +88,11 @@ export const useRewards = () => {
     RewardsDashboardState.LOADING
   );
   const [errorMessage, setErrorMessage] = useState<string>("");
+
+  // ==================== Query Bribe Rewards ====================
+  // Note: Bribe rewards require veNFT tokenId to query user's claimable amount
+  // For aggregation, we use useBribes hook to get all available bribes
+  const { allBribes, getUserClaimableBribes } = useBribes();
 
   // ==================== Query Pool 0 (USDP/USDC) ====================
   const pool0 = LIQUIDITY_POOLS[0];
@@ -283,20 +289,37 @@ export const useRewards = () => {
     ).length;
     const averageAPR = calculateAverageAPR(poolRewards);
 
+    // Aggregate Bribe rewards by token type
+    // Note: These are total available bribes, not user-specific claimable amounts
+    // To get user-specific amounts, need to call getUserClaimableBribes(tokenId)
+    const bribesAggregated = allBribes.reduce(
+      (acc, bribe) => {
+        if (bribe.tokenSymbol === "USDC") {
+          return { ...acc, usdc: acc.usdc + bribe.amount };
+        } else if (bribe.tokenSymbol === "USDP") {
+          return { ...acc, usdp: acc.usdp + bribe.amount };
+        } else {
+          // Other tokens (future support)
+          return { ...acc, other: acc.other + bribe.amount };
+        }
+      },
+      { usdc: 0n, usdp: 0n, other: 0n }
+    );
+
     // TODO: Query RewardDistributor for multi-asset rewards (esPAIMON, USDC, USDP)
     // This will require:
     // 1. Current epoch from RewardDistributor contract
     // 2. Merkle proof API endpoint to get claimable amounts
     // 3. Integration with backend service
     //
-    // For now, return zeros for multi-asset rewards
-    // Future implementation will query:
+    // For now, use Bribe rewards for USDC/USDP
+    // Future implementation will add RewardDistributor:
     // - claim(epoch, esPAIMON_address, amount, proof[])
     // - claim(epoch, USDC_address, amount, proof[])
     // - claim(epoch, USDP_address, amount, proof[])
-    const totalEarnedESPAIMON = 0n; // Placeholder
-    const totalEarnedUSDC = 0n; // Placeholder
-    const totalEarnedUSDP = 0n; // Placeholder
+    const totalEarnedESPAIMON = 0n; // Placeholder - from RewardDistributor
+    const totalEarnedUSDC = bribesAggregated.usdc; // From Bribes
+    const totalEarnedUSDP = bribesAggregated.usdp; // From Bribes
 
     return {
       totalEarnedPAIMON,
@@ -311,7 +334,7 @@ export const useRewards = () => {
       averageAPR,
       activePositions,
     };
-  }, [poolRewards]);
+  }, [poolRewards, allBribes]);
 
   // ==================== Validation ====================
 
