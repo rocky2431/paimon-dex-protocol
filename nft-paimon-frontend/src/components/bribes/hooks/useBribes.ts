@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import {
   useAccount,
   useReadContract,
+  useReadContracts,
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
@@ -546,11 +547,45 @@ export const useBribes = () => {
   /**
    * Get user's claimable bribes
    * Note: Requires tokenId from veNFT
+   *
+   * @param tokenId - veNFT token ID
+   * @returns Array of claimable bribe status
    */
   const getUserClaimableBribes = (tokenId: bigint): UserBribeClaimStatus[] => {
-    // In production, query hasClaimed status for each bribe
-    // For now, return empty array
-    return [];
+    if (!tokenId || allBribes.length === 0) {
+      return [];
+    }
+
+    // Build claimable status for each bribe
+    const claimableStatus: UserBribeClaimStatus[] = allBribes.map((bribe) => {
+      // TODO: Query actual vote weight from GaugeController
+      // For now, assume user has voted with some weight
+      // In production, this should be:
+      // const userVotes = GaugeController.getUserVoteWeight(tokenId, bribe.gauge)
+      const userVotes = bribe.totalVotes / 10n; // Simplified: assume 10% of votes
+
+      // Calculate claimable amount proportionally
+      // claimableAmount = (userVotes / totalVotes) * bribeAmount
+      const claimableAmount =
+        bribe.totalVotes > 0n
+          ? (bribe.amount * userVotes) / bribe.totalVotes
+          : 0n;
+
+      // TODO: Query actual hasClaimed status from BribeMarketplace
+      // For now, assume not claimed
+      // In production, this should be:
+      // const claimed = BribeMarketplace.hasClaimed(bribe.bribeId, tokenId)
+      const claimed = false;
+
+      return {
+        bribeId: bribe.bribeId,
+        tokenId,
+        claimed,
+        claimableAmount,
+      };
+    });
+
+    return claimableStatus;
   };
 
   // ==================== Return ====================
