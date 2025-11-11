@@ -129,10 +129,15 @@ export function useDepositPreview({
       }
 
       // Health factor = (totalCollateralValue / totalDebt) * 100
+      // where totalCollateralValue = totalRwaValue * ltvRatio / 100
+      // Convert LTV percentage to BigInt (e.g., 60% -> 6000 / 10000)
+      const ltvBasisPoints = BigInt(Math.floor(effectiveLtvRatio * 100));
+      const totalCollateralValue = (totalRwaValue * ltvBasisPoints) / 10000n;
+
       // Avoid division by zero
       const healthFactor =
         totalHydMinted > 0n
-          ? Number((totalRwaValue * 100n) / totalHydMinted) / 100
+          ? Number((totalCollateralValue * 100n) / totalHydMinted) / 100
           : 999; // Very high health factor for no debt
 
       return {
