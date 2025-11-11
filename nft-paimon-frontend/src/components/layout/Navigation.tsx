@@ -8,6 +8,10 @@ import { usePathname } from 'next/navigation';
 import { getNavigationColumns, getActiveColumn, type NavColumn } from '@/config/navigation';
 import { MobileNavigation } from './MobileNavigation';
 
+// Fitts' Law compliance: Minimum touch target size (gap-4.1.1)
+const MIN_HOT_ZONE_SIZE = 44;
+const ACTIVE_INDICATOR_HEIGHT = 3;
+
 /**
  * Navigation Component (V3 - Flat Structure)
  *
@@ -19,11 +23,17 @@ import { MobileNavigation } from './MobileNavigation';
  * - Simplified active state logic
  * - Improved mobile responsiveness
  *
+ * Changes from V3 (gap-4.1.1):
+ * - Expanded hot zones to ≥44px for Fitts' Law compliance
+ * - Better touch target usability on mobile and desktop
+ * - Improved clickable area beyond text bounds
+ *
  * Features:
  * - Configuration-driven (src/config/navigation.ts)
  * - Feature flags auto-filtering
  * - Active state highlighting
  * - Responsive design (desktop ≥1024px, mobile <1024px)
+ * - Accessibility-friendly hot zones (≥44x44px)
  */
 export function Navigation() {
   const pathname = usePathname();
@@ -31,31 +41,35 @@ export function Navigation() {
   const activeColumnId = getActiveColumn(pathname);
 
   // V3: Simplified - All entries are direct links (no dropdown menus)
+  // Updated (gap-4.1.1): Expanded hot zones to ≥44px for Fitts' Law compliance
   const renderNavLink = (column: NavColumn) => {
     const isActive = activeColumnId === column.id;
 
     return (
       <Link key={column.id} href={column.href} style={{ textDecoration: 'none' }}>
-        <Typography
-          variant="body1"
-          fontWeight={600}
+        <Box
           sx={{
-            color: isActive ? 'primary.main' : 'text.secondary',
+            minHeight: MIN_HOT_ZONE_SIZE,
+            minWidth: MIN_HOT_ZONE_SIZE,
+            padding: '12px 16px',
+            display: 'flex',
+            alignItems: 'center',
             cursor: 'pointer',
-            transition: 'color 0.3s',
-            whiteSpace: 'nowrap',
             position: 'relative',
+            transition: 'all 0.3s',
             '&:hover': {
-              color: 'primary.main',
+              '& .nav-text': {
+                color: 'primary.main',
+              },
             },
             // Active indicator underline
             '&::after': {
               content: '""',
               position: 'absolute',
-              bottom: -8,
+              bottom: 0,
               left: 0,
               right: 0,
-              height: 3,
+              height: ACTIVE_INDICATOR_HEIGHT,
               backgroundColor: 'primary.main',
               borderRadius: '3px 3px 0 0',
               opacity: isActive ? 1 : 0,
@@ -63,8 +77,19 @@ export function Navigation() {
             },
           }}
         >
-          {column.label}
-        </Typography>
+          <Typography
+            className="nav-text"
+            variant="body1"
+            fontWeight={600}
+            sx={{
+              color: isActive ? 'primary.main' : 'text.secondary',
+              transition: 'color 0.3s',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {column.label}
+          </Typography>
+        </Box>
       </Link>
     );
   };
