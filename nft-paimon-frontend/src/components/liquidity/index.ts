@@ -22,6 +22,7 @@ export { StakingButton } from "./StakingButton";
 export { StakeAmountInput } from "./StakeAmountInput";
 export { StakingStats } from "./StakingStats";
 export { RewardsDisplay } from "./RewardsDisplay";
+export { ClaimRewardsButton } from "./ClaimRewardsButton";
 
 // ==================== Shared Components ====================
 export { PoolSelector } from "./PoolSelector";
@@ -30,6 +31,7 @@ export { PoolSelector } from "./PoolSelector";
 export { useAddLiquidity } from "./hooks/useAddLiquidity";
 export { useRemoveLiquidity } from "./hooks/useRemoveLiquidity";
 export { useStaking } from "./hooks/useStaking";
+export { useClaimRewards } from "./hooks/useClaimRewards";
 
 // ==================== Types ====================
 export type {
