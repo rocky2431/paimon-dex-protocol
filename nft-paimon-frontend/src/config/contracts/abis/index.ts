@@ -11,6 +11,7 @@ export { USDP_TOKEN_ABI, PAIMON_TOKEN_ABI, VE_NFT_ABI } from "./tokens";
 
 // DEX contract ABIs
 export { PANCAKE_ROUTER_ABI, PANCAKE_FACTORY_ABI } from "./dex";
+export { DEX_ROUTER_ABI } from "./dexRouter";
 // export { LIQUIDITY_POOL_ABI } from './liquidity';
 
 // External contract ABIs
