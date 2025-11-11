@@ -42,6 +42,8 @@ import {
   useSavingCurrentInterest,
   useSavingClaimInterest,
 } from '@/hooks/useSavingRate';
+import { testnet } from '@/config/chains/testnet';
+import { SAVINGRATE_ABI } from '@/config/contracts/savingRate';
 
 interface SavingsRateCardProps {
   locale?: 'en' | 'zh';
@@ -155,8 +157,8 @@ export function SavingsRateCard({ locale = 'en', onDepositClick }: SavingsRateCa
     try {
       setError(null);
       await claimInterest({
-        address: address!,
-        abi: [], // Will be filled by hook
+        address: testnet.tokens.savingRate,
+        abi: SAVINGRATE_ABI,
         functionName: 'claimInterest',
       });
     } catch (err) {
