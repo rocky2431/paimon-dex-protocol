@@ -9,10 +9,10 @@
   "stats": {
     "totalTasks": 32,
     "completed": 15,
-    "inProgress": 0,
-    "pending": 17,
+    "inProgress": 1,
+    "pending": 16,
     "progressPercentage": 46.88,
-    "lastUpdated": "2025-11-11T14:30:00.000Z"
+    "lastUpdated": "2025-11-11T14:35:00.000Z"
   },
   "tasks": [
     {
@@ -420,7 +420,8 @@
         "gap-2.1.5"
       ],
       "estimated_days": 0.375,
-      "status": "pending",
+      "status": "in_progress",
+      "startedAt": "2025-11-11T14:35:00.000Z",
       "tags": [
         "liquidity",
         "dex",
