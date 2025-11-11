@@ -1,20 +1,20 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env tsx
 /**
  * Address Verification Script
  *
- * 验证合约地址配置的正确性
+ * 验证所有合约地址配置，确保无零地址和配置错误
  *
  * 用法:
  *   npm run verify-addresses
  *
- * 检查项:
- * 1. 所有地址格式正确 (0x + 40 hex chars)
- * 2. 已部署地址非零
- * 3. Phase 2 地址为零（符合预期）
- * 4. 与 deployment artifacts 一致性
+ * 功能:
+ * 1. 从生成的配置文件读取地址
+ * 2. 递归验证所有地址（包括嵌套结构）
+ * 3. 检测零地址、空地址、格式错误
+ * 4. 生成验证报告
+ * 5. 验证失败时退出码为 1
  */
 
-import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -22,227 +22,113 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Zero address constant
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
+/**
+ * 验证结果接口
+ */
 interface ValidationResult {
-  passed: boolean;
+  isValid: boolean;
   errors: string[];
-  warnings: string[];
-  summary: {
-    totalAddresses: number;
-    deployedAddresses: number;
-    phase2Addresses: number;
-    externalAddresses: number;
-  };
+  totalAddresses: number;
+  validAddresses: number;
 }
 
 /**
- * 验证地址格式
+ * 递归验证所有地址
  */
-function isValidAddress(address: string): boolean {
-  return /^0x[0-9a-fA-F]{40}$/.test(address);
-}
+function validateAddressStructure(
+  obj: any,
+  path: string = ''
+): ValidationResult {
+  const errors: string[] = [];
+  let totalAddresses = 0;
+  let validAddresses = 0;
 
-/**
- * 加载测试网配置
- */
-function loadTestnetConfig(): any {
-  const configPath = path.resolve(__dirname, '../src/config/chains/testnet.ts');
-  console.log(`📖 Reading testnet config from: ${configPath}`);
+  function traverse(current: any, currentPath: string) {
+    if (typeof current === 'string') {
+      // This is an address
+      totalAddresses++;
 
-  if (!fs.existsSync(configPath)) {
-    throw new Error(`❌ Config file not found: ${configPath}`);
-  }
-
-  // 动态导入需要编译，这里我们直接读取生成的地址文件
-  const generatedPath = path.resolve(__dirname, '../src/config/chains/generated/testnet.ts');
-  if (!fs.existsSync(generatedPath)) {
-    throw new Error(`❌ Generated file not found: ${generatedPath}`);
-  }
-
-  return { configPath, generatedPath };
-}
-
-/**
- * 加载部署地址 JSON
- */
-function loadDeploymentAddresses(): any {
-  const deploymentsPath = path.resolve(__dirname, '../../paimon-rwa-contracts/deployments/testnet/addresses.json');
-  console.log(`📖 Reading deployment addresses from: ${deploymentsPath}`);
-
-  if (!fs.existsSync(deploymentsPath)) {
-    throw new Error(`❌ Deployment file not found: ${deploymentsPath}`);
-  }
-
-  const content = fs.readFileSync(deploymentsPath, 'utf-8');
-  return JSON.parse(content);
-}
-
-/**
- * 提取地址配置 (从 TypeScript 文件解析)
- */
-function extractAddressesFromTS(filePath: string): Record<string, any> {
-  const content = fs.readFileSync(filePath, 'utf-8');
-  const addresses: Record<string, string> = {};
-
-  // 简单的正则匹配地址
-  const addressPattern = /"(0x[0-9a-fA-F]{40})"/g;
-  let match;
-
-  while ((match = addressPattern.exec(content)) !== null) {
-    const addr = match[1];
-    if (!addresses[addr]) {
-      addresses[addr] = addr;
-    }
-  }
-
-  return addresses;
-}
-
-/**
- * 验证地址
- */
-function verifyAddresses(): ValidationResult {
-  const result: ValidationResult = {
-    passed: true,
-    errors: [],
-    warnings: [],
-    summary: {
-      totalAddresses: 0,
-      deployedAddresses: 0,
-      phase2Addresses: 0,
-      externalAddresses: 0,
-    },
-  };
-
-  console.log('\\n🔍 Starting address verification...\\n');
-
-  // 1. 加载配置
-  const { configPath, generatedPath } = loadTestnetConfig();
-
-  // 2. 加载部署地址
-  const deployment = loadDeploymentAddresses();
-
-  // 3. 提取所有地址
-  const configAddresses = extractAddressesFromTS(configPath);
-  const generatedAddresses = extractAddressesFromTS(generatedPath);
-
-  console.log(`✅ Found ${Object.keys(configAddresses).length} addresses in testnet.ts`);
-  console.log(`✅ Found ${Object.keys(generatedAddresses).length} addresses in generated/testnet.ts`);
-
-  // 4. 验证地址格式
-  const allAddresses = new Set([...Object.keys(configAddresses), ...Object.keys(generatedAddresses)]);
-
-  allAddresses.forEach((addr) => {
-    result.summary.totalAddresses++;
-
-    if (!isValidAddress(addr)) {
-      result.errors.push(`Invalid address format: ${addr}`);
-      result.passed = false;
-    }
-
-    if (addr.toLowerCase() === ZERO_ADDRESS.toLowerCase()) {
-      result.summary.phase2Addresses++;
-    } else {
-      result.summary.deployedAddresses++;
-    }
-  });
-
-  // 5. 验证部署地址一致性
-  console.log('\\n🔍 Verifying deployment consistency...\\n');
-
-  // 扁平化部署地址
-  const deploymentAddresses = new Set<string>();
-  Object.values(deployment.contracts).forEach((category: any) => {
-    Object.values(category).forEach((addr: any) => {
-      if (typeof addr === 'string' && addr.startsWith('0x')) {
-        deploymentAddresses.add(addr.toLowerCase());
+      if (!current) {
+        errors.push(`${currentPath}: Address is empty or undefined`);
+      } else if (current === ZERO_ADDRESS) {
+        errors.push(`${currentPath}: Address is zero address (${ZERO_ADDRESS})`);
+      } else if (!current.startsWith('0x')) {
+        errors.push(`${currentPath}: Address does not start with 0x (${current})`);
+      } else if (current.length !== 42) {
+        errors.push(`${currentPath}: Address has invalid length (expected 42, got ${current.length})`);
+      } else {
+        validAddresses++;
       }
-    });
-  });
-
-  console.log(`📊 Deployment artifacts contain ${deploymentAddresses.size} unique addresses`);
-
-  // 检查生成文件中的地址是否都在部署文件中
-  Object.keys(generatedAddresses).forEach((addr) => {
-    if (addr.toLowerCase() !== ZERO_ADDRESS.toLowerCase()) {
-      if (!deploymentAddresses.has(addr.toLowerCase())) {
-        result.warnings.push(`Address in generated file but not in deployment: ${addr}`);
+    } else if (typeof current === 'object' && current !== null) {
+      // Recursively traverse nested objects
+      for (const [key, value] of Object.entries(current)) {
+        const newPath = currentPath ? `${currentPath}.${key}` : key;
+        traverse(value, newPath);
       }
     }
-  });
-
-  // 6. 检查关键合约地址
-  const criticalAddresses = [
-    'USDP', 'PAIMON', 'HYD', 'PSM', 'Treasury',
-    'DEXRouter', 'DEXFactory', 'GaugeController'
-  ];
-
-  console.log('\\n🔍 Checking critical contract addresses...\\n');
-
-  criticalAddresses.forEach((name) => {
-    const found = Array.from(allAddresses).some(addr =>
-      addr.toLowerCase() !== ZERO_ADDRESS.toLowerCase()
-    );
-    if (!found) {
-      result.warnings.push(`No valid address found for critical contract: ${name}`);
-    }
-  });
-
-  return result;
-}
-
-/**
- * 打印结果
- */
-function printResults(result: ValidationResult): void {
-  console.log('\\n' + '='.repeat(60));
-  console.log('📊 Verification Results');
-  console.log('='.repeat(60) + '\\n');
-
-  console.log('📈 Summary:');
-  console.log(`  Total Addresses: ${result.summary.totalAddresses}`);
-  console.log(`  ✅ Deployed (non-zero): ${result.summary.deployedAddresses}`);
-  console.log(`  ⏸️  Phase 2 (zero): ${result.summary.phase2Addresses}`);
-  console.log('');
-
-  if (result.errors.length > 0) {
-    console.log('❌ Errors:');
-    result.errors.forEach((err) => console.log(`  - ${err}`));
-    console.log('');
   }
 
-  if (result.warnings.length > 0) {
-    console.log('⚠️  Warnings:');
-    result.warnings.forEach((warn) => console.log(`  - ${warn}`));
-    console.log('');
-  }
+  traverse(obj, path);
 
-  if (result.passed && result.errors.length === 0) {
-    console.log('✅ All address validations passed!');
-    console.log('✅ Addresses are properly loaded from generated config');
-  } else {
-    console.log('❌ Verification failed with errors');
-  }
-
-  console.log('\\n' + '='.repeat(60) + '\\n');
+  return {
+    isValid: errors.length === 0,
+    errors,
+    totalAddresses,
+    validAddresses,
+  };
 }
 
 /**
  * 主函数
  */
-function main(): void {
-  console.log('🚀 Address Verification Tool\\n');
+async function main(): Promise<void> {
+  console.log('🔍 Starting address verification...\n');
 
   try {
-    const result = verifyAddresses();
-    printResults(result);
+    // 动态导入生成的配置文件
+    const configPath = path.resolve(__dirname, '../src/config/chains/generated/testnet.ts');
+    const { TESTNET_ADDRESSES } = await import(configPath);
 
-    if (!result.passed || result.errors.length > 0) {
+    console.log(`📖 Reading addresses from: ${configPath}\n`);
+
+    // 验证地址
+    const result = validateAddressStructure(TESTNET_ADDRESSES);
+
+    // 显示结果
+    if (result.isValid) {
+      console.log('✅ All addresses are valid!\n');
+      console.log('📊 Statistics:');
+      console.log(`  - Total addresses: ${result.totalAddresses}`);
+      console.log(`  - Valid addresses: ${result.validAddresses}`);
+      console.log(`  - Invalid addresses: 0\n`);
+      console.log('🎉 Verification completed successfully!');
+      process.exit(0);
+    } else {
+      console.error('❌ Validation failed! Found the following issues:\n');
+
+      result.errors.forEach((error, index) => {
+        console.error(`  ${index + 1}. ${error}`);
+      });
+
+      console.error('\n📊 Statistics:');
+      console.error(`  - Total addresses: ${result.totalAddresses}`);
+      console.error(`  - Valid addresses: ${result.validAddresses}`);
+      console.error(`  - Invalid addresses: ${result.errors.length}`);
+      console.error(`  - Success rate: ${((result.validAddresses / result.totalAddresses) * 100).toFixed(2)}%\n`);
+
+      console.error('💡 To fix these issues:');
+      console.error('  1. Check the deployment addresses in paimon-rwa-contracts/deployments/testnet/addresses.json');
+      console.error('  2. Run: npm run sync-addresses');
+      console.error('  3. Run: npm run verify-addresses again\n');
+
       process.exit(1);
     }
   } catch (error) {
-    console.error('\\n❌ Verification failed:', error);
+    console.error('\n❌ Verification script failed:', error);
+    console.error('\n💡 Make sure to run "npm run sync-addresses" first to generate the configuration.\n');
     process.exit(1);
   }
 }

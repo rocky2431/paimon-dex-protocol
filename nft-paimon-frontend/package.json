@@ -9,7 +9,7 @@
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "sync-addresses": "tsx scripts/sync-addresses.ts",
-    "verify-addresses": "ts-node scripts/verify-addresses.ts",
+    "verify-addresses": "tsx scripts/verify-addresses.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
