@@ -14,6 +14,7 @@ import { APRCalculator } from './APRCalculator';
 import { TreasuryFundingChart } from './TreasuryFundingChart';
 import { AnalyticsDashboardState } from './types';
 import { useSavingRateStats } from '@/hooks/useSavingRateStats';
+import { DataNotice } from '@/components/common/DataNotice';
 
 // ==================== Component ====================
 
@@ -73,6 +74,12 @@ export const AnalyticsDashboard: React.FC = () => {
 
   return (
     <Container maxWidth="lg" sx={{ paddingY: 4 }}>
+      {/* Data Notice: Mock APR Calculator data */}
+      <DataNotice
+        message="🛈 部分高级指标（如 APR 计算器中的锁定 USDP 总量）暂未完全接入链上，当前显示为示例数据。"
+        severity="info"
+      />
+
       <Grid container spacing={3}>
         {/* Row 1: TVL Card + Price Chart */}
         <Grid item xs={12} md={6}>
