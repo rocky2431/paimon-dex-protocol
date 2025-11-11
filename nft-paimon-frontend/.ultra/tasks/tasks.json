@@ -8,11 +8,11 @@
   },
   "stats": {
     "totalTasks": 32,
-    "completed": 28,
-    "inProgress": 1,
+    "completed": 29,
+    "inProgress": 0,
     "pending": 3,
-    "progressPercentage": 87.5,
-    "lastUpdated": "2025-11-12T09:20:00.000Z"
+    "progressPercentage": 90.625,
+    "lastUpdated": "2025-11-12T09:45:00.000Z"
   },
   "tasks": [
     {
@@ -824,8 +824,11 @@
         "gap-4.2.2"
       ],
       "estimated_days": 0.5,
-      "status": "in_progress",
+      "status": "completed",
       "startedAt": "2025-11-12T09:20:00.000Z",
+      "completedAt": "2025-11-12T09:45:00.000Z",
+      "actualDays": 0.02,
+      "notes": "✅ TDD完成：18个测试全部通过（6维度覆盖）\n✅ 独立的 useRiskWarnings hook 实现\n✅ TypeScript类型检查通过\n✅ 风险检测完整：健康因子、LTV、veNFT到期、大额奖励\n\n风险分类：\n- High: 健康因子 < 1.15 (清算临界), < 1.2 (接近清算), < 1.5 (警告)\n- High/Medium: LTV > 80% (高风险), > 65% (接近阈值)\n- High/Medium: veNFT ≤7天到期 (高), ≤30天 (中)\n- Low: 待领取奖励 > $1000 (提醒)\n\n辅助功能：\n- useHasCriticalRisks: 快速检查高严重性警告\n- useRiskWarningCounts: 按严重程度统计数量\n\n代码质量：\n- useMemo 性能优化\n- 按严重程度排序 (high → medium → low)\n- 清晰的可操作消息\n- 兼容 Portfolio riskAlerts 接口",
       "tags": [
         "portfolio",
         "risk"
