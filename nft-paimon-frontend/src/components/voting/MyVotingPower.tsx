@@ -4,6 +4,7 @@ import { Box, Typography, Stack, LinearProgress } from '@mui/material';
 import { AnimatedNumber } from '../swap/AnimatedNumber';
 import { VotingPower } from './types';
 import { DESIGN_TOKENS, ANIMATION_CONFIG } from './constants';
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 interface MyVotingPowerProps {
   votingPower: VotingPower | null;
@@ -24,6 +25,8 @@ export const MyVotingPower: React.FC<MyVotingPowerProps> = ({
   votingPower,
   isLoading = false,
 }) => {
+  const prefersReducedMotion = usePrefersReducedMotion();
+
   if (!votingPower || isLoading) {
     return null;
   }
@@ -46,7 +49,9 @@ export const MyVotingPower: React.FC<MyVotingPowerProps> = ({
         padding: 4,
         background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)',
         boxShadow: DESIGN_TOKENS.SHADOW_CARD,
-        transition: `all ${ANIMATION_CONFIG.DURATION_NORMAL} ${ANIMATION_CONFIG.EASE_OUT_EXPO}`,
+        transition: prefersReducedMotion
+          ? 'none'
+          : `all ${ANIMATION_CONFIG.DURATION_NORMAL} ${ANIMATION_CONFIG.EASE_OUT_EXPO}`,
         position: 'relative',
         overflow: 'hidden',
 
@@ -60,11 +65,11 @@ export const MyVotingPower: React.FC<MyVotingPowerProps> = ({
           height: '100%',
           background:
             'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-          transition: 'left 0.5s',
+          transition: prefersReducedMotion ? 'none' : 'left 0.5s',
         },
 
         '&:hover::before': {
-          left: '100%',
+          left: prefersReducedMotion ? '-100%' : '100%',
         },
       }}
     >

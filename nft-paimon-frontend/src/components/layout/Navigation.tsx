@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 
 import { getNavigationColumns, getActiveColumn, type NavColumn } from '@/config/navigation';
 import { MobileNavigation } from './MobileNavigation';
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 // Fitts' Law compliance: Minimum touch target size (gap-4.1.1)
 const MIN_HOT_ZONE_SIZE = 44;
@@ -39,6 +40,7 @@ export function Navigation() {
   const pathname = usePathname();
   const columns = getNavigationColumns();
   const activeColumnId = getActiveColumn(pathname);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   // V3: Simplified - All entries are direct links (no dropdown menus)
   // Updated (gap-4.1.1): Expanded hot zones to ≥44px for Fitts' Law compliance
@@ -56,7 +58,7 @@ export function Navigation() {
             alignItems: 'center',
             cursor: 'pointer',
             position: 'relative',
-            transition: 'all 0.3s',
+            transition: prefersReducedMotion ? 'none' : 'all 0.3s',
             '&:hover': {
               '& .nav-text': {
                 color: 'primary.main',
@@ -73,7 +75,7 @@ export function Navigation() {
               backgroundColor: 'primary.main',
               borderRadius: '3px 3px 0 0',
               opacity: isActive ? 1 : 0,
-              transition: 'opacity 0.3s',
+              transition: prefersReducedMotion ? 'none' : 'opacity 0.3s',
             },
           }}
         >
@@ -83,7 +85,7 @@ export function Navigation() {
             fontWeight={600}
             sx={{
               color: isActive ? 'primary.main' : 'text.secondary',
-              transition: 'color 0.3s',
+              transition: prefersReducedMotion ? 'none' : 'color 0.3s',
               whiteSpace: 'nowrap',
             }}
           >

@@ -23,6 +23,7 @@ import {
   BOOST_MULTIPLIER_MAX,
   BOOST_DESIGN_TOKENS,
 } from './constants';
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 /**
  * BoostStakeModal Component
@@ -43,6 +44,7 @@ export function BoostStakeModal({
   onStake,
   staking = false,
 }: BoostStakeModalProps) {
+  const prefersReducedMotion = usePrefersReducedMotion();
   const [amount, setAmount] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [txError, setTxError] = useState<string>('');
@@ -143,6 +145,7 @@ export function BoostStakeModal({
         onClose={staking ? undefined : onClose}
         maxWidth="sm"
         fullWidth
+        transitionDuration={prefersReducedMotion ? 0 : undefined}
         PaperProps={{
           sx: {
             borderRadius: BOOST_DESIGN_TOKENS.RADIUS_LARGE,

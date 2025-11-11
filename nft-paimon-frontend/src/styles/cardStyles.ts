@@ -3,9 +3,25 @@
  * Unified Card Styling System - Uiverse Inspired
  *
  * 用途：确保所有 Card 组件使用统一的现代化样式、玻璃态效果、暖色调
+ *
+ * Accessibility: Supports prefers-reduced-motion
+ * Use getCardVariantWithMotion() to respect user's motion preferences
  */
 
 import { SxProps, Theme } from '@mui/material';
+
+/**
+ * Helper function to get transition value based on motion preference
+ * @param prefersReducedMotion - User's motion preference
+ * @param transition - Transition string to use when motion is enabled
+ * @returns 'none' if reduced motion preferred, otherwise the transition string
+ */
+export const getTransition = (
+  prefersReducedMotion: boolean,
+  transition: string
+): string => {
+  return prefersReducedMotion ? 'none' : transition;
+};
 
 /**
  * Card 样式变体 - Uiverse 风格

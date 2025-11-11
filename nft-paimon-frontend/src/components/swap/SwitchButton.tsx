@@ -3,6 +3,7 @@
 import { IconButton } from '@mui/material';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
 import { DESIGN_TOKENS, ANIMATION_CONFIG } from './constants';
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 interface SwitchButtonProps {
   onClick: () => void;
@@ -22,6 +23,8 @@ export const SwitchButton: React.FC<SwitchButtonProps> = ({
   onClick,
   disabled = false,
 }) => {
+  const prefersReducedMotion = usePrefersReducedMotion();
+
   return (
     <IconButton
       onClick={onClick}
@@ -34,16 +37,18 @@ export const SwitchButton: React.FC<SwitchButtonProps> = ({
         height: 48,
         backgroundColor: 'background.elevated',
         boxShadow: DESIGN_TOKENS.INSET_BORDER_MEDIUM,
-        transition: `all ${ANIMATION_CONFIG.DURATION_NORMAL} ${ANIMATION_CONFIG.EASE_OUT_EXPO}`,
+        transition: prefersReducedMotion
+          ? 'none'
+          : `all ${ANIMATION_CONFIG.DURATION_NORMAL} ${ANIMATION_CONFIG.EASE_OUT_EXPO}`,
 
         '&:hover': {
           backgroundColor: '#FFE0B2', // Peach color
           boxShadow: DESIGN_TOKENS.INSET_BORDER_STRONG,
-          transform: 'rotate(180deg)', // OlympusDAO 180° rotation
+          transform: prefersReducedMotion ? 'none' : 'rotate(180deg)', // OlympusDAO 180° rotation
         },
 
         '&:active': {
-          transform: 'rotate(180deg) scale(0.95)',
+          transform: prefersReducedMotion ? 'scale(0.95)' : 'rotate(180deg) scale(0.95)',
         },
 
         '&.Mui-disabled': {
@@ -57,7 +62,9 @@ export const SwitchButton: React.FC<SwitchButtonProps> = ({
         sx={{
           color: 'primary.main',
           fontSize: '1.5rem',
-          transition: `all ${ANIMATION_CONFIG.DURATION_NORMAL} ${ANIMATION_CONFIG.EASE_OUT_EXPO}`,
+          transition: prefersReducedMotion
+            ? 'none'
+            : `all ${ANIMATION_CONFIG.DURATION_NORMAL} ${ANIMATION_CONFIG.EASE_OUT_EXPO}`,
         }}
       />
     </IconButton>
