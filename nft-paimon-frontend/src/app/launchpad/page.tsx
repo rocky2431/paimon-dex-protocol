@@ -119,7 +119,7 @@ export default function LaunchpadHub() {
           tabs={LAUNCHPAD_TABS}
           currentTab={currentTab}
           onChange={setCurrentTab}
-          variant="standard"
+          variant="scrollable"
         />
 
         {/* Projects Tab */}

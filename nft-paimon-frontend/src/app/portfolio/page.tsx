@@ -184,7 +184,7 @@ export default function PortfolioHub() {
           tabs={PORTFOLIO_TABS}
           currentTab={currentTab}
           onChange={setCurrentTab}
-          variant="standard"
+          variant="scrollable"
         />
 
         {/* Overview Tab */}

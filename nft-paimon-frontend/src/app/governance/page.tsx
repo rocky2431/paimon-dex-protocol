@@ -126,7 +126,7 @@ export default function GovernanceHub() {
           tabs={GOVERNANCE_TABS}
           currentTab={currentTab}
           onChange={setCurrentTab}
-          variant="standard"
+          variant="scrollable"
         />
 
         {/* Vote Tab */}

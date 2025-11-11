@@ -61,7 +61,7 @@ export default function BorrowPage() {
           tabs={BORROW_TABS}
           currentTab={currentTab}
           onChange={setCurrentTab}
-          variant="standard"
+          variant="scrollable"
         />
 
         {/* Dashboard Tab Content */}

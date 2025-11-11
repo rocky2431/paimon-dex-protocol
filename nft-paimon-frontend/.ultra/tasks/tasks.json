@@ -9,10 +9,10 @@
   "stats": {
     "totalTasks": 32,
     "completed": 25,
-    "inProgress": 0,
-    "pending": 7,
+    "inProgress": 1,
+    "pending": 6,
     "progressPercentage": 78.125,
-    "lastUpdated": "2025-11-12T06:30:00.000Z"
+    "lastUpdated": "2025-11-12T06:35:00.000Z"
   },
   "tasks": [
     {
@@ -766,7 +766,8 @@
         "gap-4.1.4"
       ],
       "estimated_days": 0.125,
-      "status": "pending",
+      "status": "in_progress",
+      "startedAt": "2025-11-12T06:35:00.000Z",
       "tags": [
         "ui-ux",
         "navigation"

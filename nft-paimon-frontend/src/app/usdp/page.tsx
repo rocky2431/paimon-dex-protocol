@@ -165,7 +165,7 @@ export default function USDPHub() {
           tabs={USDP_TABS}
           currentTab={currentTab}
           onChange={setCurrentTab}
-          variant="standard"
+          variant="scrollable"
         />
 
         {/* Vault Tab */}
