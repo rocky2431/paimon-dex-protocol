@@ -29,6 +29,8 @@ export const GAUGE_CONTROLLER_ADDRESS: Address =
  * - getUserVote(uint256 tokenId) - Get user's current vote
  * - getGaugeWeightByAddress(uint256 epoch, address) - Get gauge weight by address
  * - getCurrentEpoch() - Get current epoch number (alternative)
+ * - vote(uint256 tokenId, uint256 gaugeId, uint256 weight) - Vote for single gauge
+ * - batchVote(uint256 tokenId, uint256[] gaugeIds, uint256[] weights) - Batch vote
  */
 export const GAUGE_CONTROLLER_ABI = [
   {
@@ -110,5 +112,27 @@ export const GAUGE_CONTROLLER_ABI = [
     ],
     outputs: [{ name: '', type: 'uint256', internalType: 'uint256' }],
     stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    name: 'vote',
+    inputs: [
+      { name: '_tokenId', type: 'uint256', internalType: 'uint256' },
+      { name: '_gaugeId', type: 'uint256', internalType: 'uint256' },
+      { name: '_weight', type: 'uint256', internalType: 'uint256' },
+    ],
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    name: 'batchVote',
+    inputs: [
+      { name: '_tokenId', type: 'uint256', internalType: 'uint256' },
+      { name: '_gaugeIds', type: 'uint256[]', internalType: 'uint256[]' },
+      { name: '_weights', type: 'uint256[]', internalType: 'uint256[]' },
+    ],
+    outputs: [],
+    stateMutability: 'nonpayable',
   },
 ] as const;
