@@ -19,6 +19,7 @@ import { VAULT_ABI } from '@/config/contracts/vault';
 import { STABILITY_POOL_ABI } from '@/config/contracts/stabilityPool';
 import { VEPAIMON_ABI } from '@/config/contracts/vePaimon';
 import { DEX_PAIR_ABI } from '@/config/contracts/dexPair';
+import { SAVINGRATE_ABI, SAVINGRATE_ADDRESS } from '@/config/contracts/savingRate';
 import { useSavingPrincipal, useSavingAccruedInterest } from '@/hooks/useSavingRate';
 
 /**
@@ -216,6 +217,24 @@ export function useUserPortfolio(userAddress?: `0x${string}`): UserPortfolio {
   const { data: savingPrincipal } = useSavingPrincipal(targetAddress);
   const { data: accruedInterest } = useSavingAccruedInterest(targetAddress);
 
+  // Query SavingRate APR
+  const { data: annualRate } = useReadContract({
+    address: SAVINGRATE_ADDRESS,
+    abi: SAVINGRATE_ABI,
+    functionName: 'annualRate',
+  });
+
+  // Query user deposit details (including timestamp)
+  const { data: depositDetails } = useReadContract({
+    address: SAVINGRATE_ADDRESS,
+    abi: SAVINGRATE_ABI,
+    functionName: 'deposits',
+    args: targetAddress ? [targetAddress] : undefined,
+    query: {
+      enabled: !!targetAddress,
+    },
+  });
+
   // Aggregate loading states
   const isLoading =
     isLoadingDebt ||
@@ -230,20 +249,20 @@ export function useUserPortfolio(userAddress?: `0x${string}`): UserPortfolio {
     const totalDebt = vaultDebt ? formatUnits(vaultDebt as bigint, 18) : '0.00';
     const health = healthFactor ? Number(healthFactor) / 1e18 : 0;
 
-    // Mock Vault positions (TODO: Replace with real contract queries)
+    // Vault positions - requires querying all possible collateral types
+    // TODO Phase 3.2+: Implement multi-collateral position queries
+    // Required queries for each collateral type (HYD, USDC, etc.):
+    // - Vault.getCollateralBalance(user, collateral) - Get collateral amount
+    // - Vault.getCollateralValueUSD(user, collateral) - Get collateral value in USD
+    // - Calculate LTV dynamically: (totalDebt / collateralValueUSD) * 100
+    // - Calculate liquidation price from collateral, debt, and liquidation threshold
+    // Implementation approach:
+    // 1. Define supported collateral list [HYD, USDC, ...]
+    // 2. Use useReadContracts to batch-query getCollateralBalance for all collaterals
+    // 3. Filter non-zero positions
+    // 4. For each position, query getCollateralValueUSD
+    // 5. Calculate derived metrics (LTV, liquidation price)
     const vaultPositions: VaultPosition[] = [];
-    if (parseFloat(totalDebt) > 0) {
-      vaultPositions.push({
-        asset: 'HYD',
-        assetAddress: testnet.tokens.hyd,
-        collateral: '1000.00',
-        collateralValueUSD: '1000.00',
-        borrowed: totalDebt,
-        ltv: 60,
-        healthFactor: health,
-        liquidationPrice: '$0.60',
-      });
-    }
 
     // USDP Savings Position
     const savingsPrincipalValue = savingPrincipal
@@ -253,6 +272,17 @@ export function useUserPortfolio(userAddress?: `0x${string}`): UserPortfolio {
       ? formatUnits(accruedInterest as bigint, 18)
       : '0.00';
 
+    // Calculate APR from contract (annualRate is in basis points, e.g., 230 = 2.3%)
+    const currentAPR = annualRate
+      ? Number(annualRate) / 100
+      : 0;
+
+    // Extract deposit timestamp from deposits() return value
+    // deposits returns [principal, accruedInterest, lastAccrualTime]
+    const depositTimestamp = depositDetails && Array.isArray(depositDetails) && depositDetails[2]
+      ? Number(depositDetails[2]) * 1000 // Convert seconds to milliseconds
+      : 0;
+
     const savingsPosition: SavingsPosition | null =
       parseFloat(savingsPrincipalValue) > 0
         ? {
@@ -261,8 +291,8 @@ export function useUserPortfolio(userAddress?: `0x${string}`): UserPortfolio {
             totalValue: (
               parseFloat(savingsPrincipalValue) + parseFloat(interestValue)
             ).toFixed(2),
-            currentAPR: 2.3,
-            depositDate: Date.now() - 30 * 24 * 60 * 60 * 1000,
+            currentAPR,
+            depositDate: depositTimestamp || Date.now(), // Fallback to current time if no deposit data
           }
         : null;
 

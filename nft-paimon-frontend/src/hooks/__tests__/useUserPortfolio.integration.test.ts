@@ -77,10 +77,10 @@ describe('Portfolio Real Data Integration (gap-4.2.2)', () => {
     expect(source).not.toMatch(/currentAPR:\s*[0-9]+\.[0-9]+,?\s*(\/\/(?!.*TODO).*)?$/m);
 
     // If APR exists, it should either be from contract query or have TODO comment
-    const hasCurrentAPR = /currentAPR:/.test(source);
+    const hasCurrentAPR = /currentAPR/.test(source);
     if (hasCurrentAPR) {
-      const hasTodoForAPR = /currentAPR.*TODO|TODO.*currentAPR|TODO.*SavingRate\.getCurrentAPR/i.test(source);
-      const hasContractQuery = /savingRate.*currentAPR|getCurrentAPR/i.test(source);
+      const hasTodoForAPR = /currentAPR.*TODO|TODO.*currentAPR|TODO.*SavingRate/i.test(source);
+      const hasContractQuery = /annualRate|getCurrentAPR|SAVINGRATE_ABI/i.test(source);
       expect(hasTodoForAPR || hasContractQuery).toBe(true);
     }
   });

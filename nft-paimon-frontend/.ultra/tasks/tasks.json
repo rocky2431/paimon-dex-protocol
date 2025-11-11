@@ -9,10 +9,10 @@
   "stats": {
     "totalTasks": 32,
     "completed": 27,
-    "inProgress": 0,
-    "pending": 5,
+    "inProgress": 1,
+    "pending": 4,
     "progressPercentage": 84.375,
-    "lastUpdated": "2025-11-12T07:30:00.000Z"
+    "lastUpdated": "2025-11-12T07:35:00.000Z"
   },
   "tasks": [
     {
@@ -804,7 +804,8 @@
         "gap-4.2.1"
       ],
       "estimated_days": 0.75,
-      "status": "pending",
+      "status": "in_progress",
+      "startedAt": "2025-11-12T07:35:00.000Z",
       "tags": [
         "portfolio",
         "analytics"
