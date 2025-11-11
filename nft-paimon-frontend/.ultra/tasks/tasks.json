@@ -224,7 +224,8 @@
         "gap-1.2.5"
       ],
       "estimated_days": 0.25,
-      "status": "pending",
+      "status": "in_progress",
+      "startedAt": "2025-11-11T08:30:00.000Z",
       "tags": [
         "configuration",
         "automation"

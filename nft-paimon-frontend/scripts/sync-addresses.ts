@@ -48,6 +48,55 @@ interface DeploymentAddresses {
 }
 
 /**
+ * 地址验证结果
+ */
+export interface ValidationResult {
+  isValid: boolean;
+  zeroAddresses: string[];
+  totalContracts: number;
+  validContracts: number;
+}
+
+/**
+ * 验证地址（检查零地址）
+ * Exported for testing
+ */
+export function validateAddresses(addresses: DeploymentAddresses): ValidationResult {
+  const zeroAddress = '0x0000000000000000000000000000000000000000';
+  const zeroAddresses: string[] = [];
+  let totalContracts = 0;
+  let validContracts = 0;
+
+  // Validate contracts object exists
+  if (!addresses.contracts || typeof addresses.contracts !== 'object') {
+    throw new Error('Invalid deployment data: contracts object is missing or malformed');
+  }
+
+  // Check all contract categories
+  for (const [category, contracts] of Object.entries(addresses.contracts)) {
+    if (!contracts || typeof contracts !== 'object') {
+      continue; // Skip invalid categories
+    }
+
+    for (const [name, address] of Object.entries(contracts)) {
+      totalContracts++;
+      if (!address || address === zeroAddress || address === '') {
+        zeroAddresses.push(`${category}.${name}`);
+      } else {
+        validContracts++;
+      }
+    }
+  }
+
+  return {
+    isValid: zeroAddresses.length === 0,
+    zeroAddresses,
+    totalContracts,
+    validContracts,
+  };
+}
+
+/**
  * 读取部署地址 JSON
  */
 function readDeploymentAddresses(): DeploymentAddresses {
@@ -205,13 +254,27 @@ function main(): void {
     const addresses = readDeploymentAddresses();
     console.log(`✅ Loaded ${Object.keys(addresses.contracts).length} contract categories\n`);
 
-    // 2. 生成 TypeScript 配置
+    // 2. 验证地址（零地址检测）
+    console.log('🔍 Validating contract addresses...');
+    const validation = validateAddresses(addresses);
+
+    if (!validation.isValid) {
+      console.warn(`\n⚠️  Found ${validation.zeroAddresses.length} zero address(es):`);
+      validation.zeroAddresses.forEach(addr => {
+        console.warn(`   ❌ ${addr}`);
+      });
+      console.warn(`\n⚠️  Warning: Zero addresses detected! Please check deployment.\n`);
+    } else {
+      console.log(`✅ All ${validation.totalContracts} contract addresses are valid (non-zero)\n`);
+    }
+
+    // 3. 生成 TypeScript 配置
     const configContent = generateTypeScriptConfig(addresses);
 
-    // 3. 写入文件
+    // 4. 写入文件
     writeGeneratedConfig(configContent);
 
-    // 4. 成功消息
+    // 5. 成功消息
     console.log('\n🎉 Address sync completed successfully!');
     console.log(`\n📊 Summary:`);
     console.log(`  - Core contracts: ${Object.keys(addresses.contracts.core).length}`);
@@ -221,7 +284,16 @@ function main(): void {
     console.log(`  - Treasury contracts: ${Object.keys(addresses.contracts.treasury).length}`);
     console.log(`  - Launchpad contracts: ${Object.keys(addresses.contracts.launchpad).length}`);
     console.log(`  - Mock contracts: ${Object.keys(addresses.contracts.mocks).length}`);
-    console.log(`\n✅ Next step: Update src/config/chains/testnet.ts to import from generated/testnet.ts`);
+    console.log(`\n📈 Validation:`);
+    console.log(`  - Total contracts: ${validation.totalContracts}`);
+    console.log(`  - Valid addresses: ${validation.validContracts}`);
+    console.log(`  - Zero addresses: ${validation.zeroAddresses.length}`);
+
+    if (validation.isValid) {
+      console.log(`\n✅ Next step: Update src/config/chains/testnet.ts to import from generated/testnet.ts`);
+    } else {
+      console.log(`\n⚠️  Please fix zero addresses before using in production!`);
+    }
   } catch (error) {
     console.error('\n❌ Address sync failed:', error);
     process.exit(1);
