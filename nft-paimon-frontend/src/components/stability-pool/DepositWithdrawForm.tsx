@@ -33,6 +33,7 @@ import {
   useStabilityPoolWithdraw,
   useStabilityPoolBalance,
 } from '@/hooks/useStabilityPool';
+import { useTokenApproval, ApprovalState } from '@/hooks/useTokenApproval';
 import { testnet } from '@/config/chains/testnet';
 import { USDP_ABI } from '@/config/contracts/usdp';
 
@@ -98,6 +99,22 @@ export function DepositWithdrawForm({ locale = 'en', onSuccess }: DepositWithdra
 
   // Read deposited balance
   const { data: depositedBalanceRaw } = useStabilityPoolBalance(address);
+
+  // Token approval for deposit (USDP → StabilityPool)
+  const depositAmount = useMemo(() => {
+    if (!amount || activeTab !== 0) return undefined;
+    try {
+      return parseUnits(amount, 18);
+    } catch {
+      return undefined;
+    }
+  }, [amount, activeTab]);
+
+  const approval = useTokenApproval({
+    tokenAddress: testnet.tokens.usdp,
+    spenderAddress: testnet.tokens.stabilityPool,
+    amount: depositAmount,
+  });
 
   // Write contracts
   const { writeContract: deposit, data: depositTxHash, isPending: isDepositPending } = useStabilityPoolDeposit();
@@ -207,7 +224,34 @@ export function DepositWithdrawForm({ locale = 'en', onSuccess }: DepositWithdra
     }
   };
 
-  const isProcessing = isDepositPending || isWithdrawPending || isDepositLoading || isWithdrawLoading;
+  const isProcessing = isDepositPending || isWithdrawPending || isDepositLoading || isWithdrawLoading || approval.isLoading;
+
+  // Button text and handler logic
+  const getButtonText = () => {
+    if (!address) return t.connectWallet;
+    if (isProcessing || approval.isLoading) return t.processing;
+
+    if (activeTab === 0) {
+      // Deposit tab
+      if (approval.needsApproval) {
+        return t.approveUsdp;
+      }
+      return t.confirmDeposit;
+    } else {
+      // Withdraw tab
+      return t.confirmWithdraw;
+    }
+  };
+
+  const handleButtonClick = async () => {
+    if (activeTab === 0 && approval.needsApproval) {
+      // Execute approval first
+      await approval.handleApprove();
+    } else {
+      // Execute deposit/withdraw
+      await handleSubmit();
+    }
+  };
 
   return (
     <Card
@@ -280,9 +324,9 @@ export function DepositWithdrawForm({ locale = 'en', onSuccess }: DepositWithdra
         />
 
         {/* Error Alert */}
-        {error && (
+        {(error || approval.error) && (
           <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
+            {error || approval.error}
           </Alert>
         )}
 
@@ -290,7 +334,7 @@ export function DepositWithdrawForm({ locale = 'en', onSuccess }: DepositWithdra
         <Button
           fullWidth
           variant="contained"
-          onClick={handleSubmit}
+          onClick={handleButtonClick}
           disabled={!address || isProcessing || !amount}
           sx={{
             backgroundColor: '#ff6b00',
@@ -307,10 +351,8 @@ export function DepositWithdrawForm({ locale = 'en', onSuccess }: DepositWithdra
               <CircularProgress size={20} sx={{ mr: 1 }} />
               {t.processing}
             </>
-          ) : address ? (
-            activeTab === 0 ? t.confirmDeposit : t.confirmWithdraw
           ) : (
-            t.connectWallet
+            getButtonText()
           )}
         </Button>
       </CardContent>
