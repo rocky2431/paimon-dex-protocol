@@ -1,18 +1,19 @@
 'use client';
 
-import { Card, Typography, Box, Snackbar, Alert } from '@mui/material';
+import { Card, Typography, Box, Snackbar, Alert, Chip } from '@mui/material';
 import { TokenInput } from './TokenInput';
 import { SwitchButton } from './SwitchButton';
 import { SwapDetails } from './SwapDetails';
 import { SwapButton } from './SwapButton';
 import { useSwap } from './hooks/useSwap';
-import { SwapState } from './types';
+import { usePSMSwap } from './hooks/usePSMSwap';
+import { SwapState, Token } from './types';
 import { DESIGN_TOKENS, ANIMATION_CONFIG, MESSAGES } from './constants';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 /**
  * SwapCard Component
- * OlympusDAO-inspired swap interface
+ * OlympusDAO-inspired swap interface with PSM/AMM auto-detection
  *
  * Features:
  * - Large card with 24px border radius
@@ -20,11 +21,35 @@ import { useState, useEffect } from 'react';
  * - 48px internal padding (luxury spacing)
  * - Maximum width 480px
  * - Centered on page
+ * - Automatic PSM/AMM mode detection based on token pair
+ *
+ * Mode Detection:
+ * - PSM Mode: USDC ↔ USDP (1:1 swap with 0.1% fee)
+ * - AMM Mode: All other pairs (DEX Router with slippage)
  */
 export const SwapCard: React.FC = () => {
+  // Detect PSM mode: USDC ↔ USDP only
+  const [formData, setFormData] = useState({
+    inputAmount: '',
+    outputAmount: '',
+    inputToken: Token.USDC,
+    outputToken: Token.USDP,
+  });
+
+  const isPSMMode = useMemo(() => {
+    return (
+      (formData.inputToken === Token.USDC && formData.outputToken === Token.USDP) ||
+      (formData.inputToken === Token.USDP && formData.outputToken === Token.USDC)
+    );
+  }, [formData.inputToken, formData.outputToken]);
+
+  // Use appropriate hook based on mode
+  const psmHook = usePSMSwap();
+  const ammHook = useSwap();
+
   const {
-    formData,
-    setFormData,
+    formData: hookFormData,
+    setFormData: hookSetFormData,
     inputBalance,
     outputBalance,
     calculation,
@@ -35,7 +60,17 @@ export const SwapCard: React.FC = () => {
     handleSwitchTokens,
     handleMaxClick,
     handleSwap,
-  } = useSwap();
+  } = isPSMMode ? psmHook : ammHook;
+
+  // Sync form data between component and hook
+  useEffect(() => {
+    if (
+      hookFormData.inputToken !== formData.inputToken ||
+      hookFormData.outputToken !== formData.outputToken
+    ) {
+      hookSetFormData(formData);
+    }
+  }, [formData, hookFormData, hookSetFormData]);
 
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -76,16 +111,31 @@ export const SwapCard: React.FC = () => {
           },
         }}
       >
-        {/* Card title */}
-        <Typography
-          variant="h5"
-          component="h2"
-          fontWeight={700}
-          color="text.primary"
-          sx={{ mb: 4, fontSize: '1.5rem' }}
-        >
-          Swap
-        </Typography>
+        {/* Card title with mode indicator */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
+          <Typography
+            variant="h5"
+            component="h2"
+            fontWeight={700}
+            color="text.primary"
+            sx={{ fontSize: '1.5rem' }}
+          >
+            {isPSMMode ? 'PSM Swap' : 'Swap'}
+          </Typography>
+          {isPSMMode && (
+            <Chip
+              label="1:1"
+              sx={{
+                backgroundColor: '#FF9800',
+                color: '#FFFFFF',
+                fontWeight: 700,
+                fontSize: '0.875rem',
+                borderRadius: DESIGN_TOKENS.RADIUS_PILL,
+                px: 2,
+              }}
+            />
+          )}
+        </Box>
 
         {/* Input token */}
         <TokenInput
@@ -125,6 +175,27 @@ export const SwapCard: React.FC = () => {
           calculation={calculation}
           isLoading={swapState === SwapState.SWAPPING}
         />
+
+        {/* PSM Info Box (only shown in PSM mode) */}
+        {isPSMMode && (
+          <Box
+            sx={{
+              mt: 3,
+              p: 2,
+              borderRadius: DESIGN_TOKENS.RADIUS_MEDIUM,
+              backgroundColor: 'rgba(255, 152, 0, 0.1)',
+              border: '1px solid rgba(255, 152, 0, 0.3)',
+            }}
+          >
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ fontSize: '0.875rem', lineHeight: 1.6 }}
+            >
+              💡 <strong>PSM (Peg Stability Module):</strong> 1:1 swap between USDC and USDP with only 0.1% fee. No slippage, no price impact.
+            </Typography>
+          </Box>
+        )}
 
         {/* Swap button */}
         <Box sx={{ mt: 4 }}>
