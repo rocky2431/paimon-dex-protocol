@@ -41,6 +41,7 @@ export const SwapDetails: React.FC<SwapDetailsProps> = ({
         justifyContent="space-between"
         alignItems="center"
         sx={{ mb: 1.5 }}
+        data-testid="swap-fee"
       >
         <Typography
           variant="body2"
@@ -65,6 +66,7 @@ export const SwapDetails: React.FC<SwapDetailsProps> = ({
         direction="row"
         justifyContent="space-between"
         alignItems="center"
+        data-testid="exchange-rate"
       >
         <Typography
           variant="body2"

@@ -9,10 +9,10 @@
   "stats": {
     "totalTasks": 32,
     "completed": 4,
-    "inProgress": 0,
-    "pending": 32,
+    "inProgress": 1,
+    "pending": 31,
     "progressPercentage": null,
-    "lastUpdated": "2025-11-11T02:31:18.832Z"
+    "lastUpdated": "2025-11-11T02:55:07.172Z"
   },
   "tasks": [
     {
@@ -107,11 +107,12 @@
         "gap-1.1.4"
       ],
       "estimated_days": 0.5,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "swap",
         "e2e-testing"
-      ]
+      ],
+      "startedAt": "2025-11-11T02:55:07.171Z"
     },
     {
       "id": "gap-1.2.1",

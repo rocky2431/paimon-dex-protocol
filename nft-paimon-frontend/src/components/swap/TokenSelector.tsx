@@ -18,6 +18,7 @@ interface TokenSelectorProps {
   onTokenChange: (token: Token) => void;
   disabled?: boolean;
   excludeToken?: Token; // Hide this token from dropdown
+  'data-testid'?: string; // For E2E testing
 }
 
 /**
@@ -35,6 +36,7 @@ export const TokenSelector: React.FC<TokenSelectorProps> = ({
   onTokenChange,
   disabled = false,
   excludeToken,
+  'data-testid': testId,
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -62,6 +64,7 @@ export const TokenSelector: React.FC<TokenSelectorProps> = ({
   return (
     <>
       <Button
+        data-testid={testId}
         onClick={handleClick}
         disabled={disabled}
         sx={{
@@ -146,6 +149,7 @@ export const TokenSelector: React.FC<TokenSelectorProps> = ({
         {availableTokens.map((token) => (
           <MenuItem
             key={token.symbol}
+            data-testid={`token-option-${token.symbol}`}
             onClick={() => handleTokenSelect(token.symbol)}
             selected={token.symbol === selectedToken}
             sx={{

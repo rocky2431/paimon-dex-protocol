@@ -17,6 +17,7 @@ interface TokenInputProps {
   excludeToken?: Token;
   showMaxButton?: boolean;
   onMaxClick?: () => void;
+  'data-testid-prefix'?: string; // E.g., "from" or "to" for generating test IDs
 }
 
 /**
@@ -41,6 +42,7 @@ export const TokenInput: React.FC<TokenInputProps> = ({
   excludeToken,
   showMaxButton = true,
   onMaxClick,
+  'data-testid-prefix': testIdPrefix,
 }) => {
   const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -101,6 +103,7 @@ export const TokenInput: React.FC<TokenInputProps> = ({
             disabled={readOnly}
             inputProps={{
               'aria-label': `${label} amount`,
+              'data-testid': testIdPrefix ? `${testIdPrefix}-amount-input` : undefined,
               style: { textAlign: 'left' },
             }}
             InputProps={{
@@ -130,6 +133,7 @@ export const TokenInput: React.FC<TokenInputProps> = ({
             onTokenChange={onTokenChange}
             disabled={readOnly}
             excludeToken={excludeToken}
+            data-testid={testIdPrefix ? `${testIdPrefix}-token-selector` : undefined}
           />
         </Box>
 
@@ -145,6 +149,7 @@ export const TokenInput: React.FC<TokenInputProps> = ({
           <Typography
             variant="body2"
             color="text.secondary"
+            data-testid={testIdPrefix ? `${testIdPrefix}-balance` : undefined}
             sx={{ fontSize: '0.875rem' }}
           >
             Balance:{' '}
