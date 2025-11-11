@@ -519,50 +519,6 @@ uint256 result = step1 × ltvRatio / BASIS_POINTS; // ❌ 精度损失 ~0.01%
 完整部署流程见 [DEPLOYMENT.md](DEPLOYMENT.md) 和 [TESTNET_QUICKSTART.md](TESTNET_QUICKSTART.md)。
 
 ---
-
-## 前端界面 (29 个功能页面)
-
-### 核心功能路由
-
-| 路由 | 功能 | 对应合约 |
-|------|------|---------|
-| **/** | 首页仪表盘 | - |
-| **/vault** | Vault 抵押借款 | USDPVault |
-| **/vault/borrow** | 借款 USDP | USDPVault.borrow() |
-| **/vault/repay** | 偿还 USDP | USDPVault.repay() |
-| **/savings** | USDP 储蓄 | SavingRate |
-| **/stability-pool** | 稳定池存款 | USDPStabilityPool |
-| **/convert** | esPaimon 转换 | esPaimon.vest() / .earlyExit() |
-| **/lock** | vePAIMON 锁仓 | VotingEscrowPaimon |
-| **/boost** | PAIMON 质押加成 | BoostStaking |
-| **/vote** | Gauge 投票 | GaugeController |
-| **/bribes** | Bribe 市场 | BribeMarketplace |
-| **/nitro** | Nitro 外部激励 | NitroPool |
-| **/rewards** | 奖励领取 | RewardDistributor |
-| **/liquidity/add** | 添加流动性 | DEXRouter.addLiquidity() |
-| **/liquidity/remove** | 移除流动性 | DEXRouter.removeLiquidity() |
-| **/liquidity/stake** | LP 质押 | GaugeController |
-| **/launchpad** | RWA 项目列表 | ProjectRegistry |
-| **/launchpad/[id]** | 项目详情 | ProjectRegistry, IssuanceController |
-| **/launchpad/[id]/vote** | 项目治理投票 | VotingEscrowPaimon |
-| | | |
-| **⏸️ Phase 2 限时活动 (测试网不启用)** | | |
-| **/presale/mint** | 债券 NFT 铸造 | RWABondNFT |
-| **/presale/dice** | 骰子 Remint | RemintController |
-| **/presale/bonds** | 我的债券 | RWABondNFT |
-| **/presale/tasks** | 社交任务 | RemintController |
-| **/presale/leaderboards** | 排行榜 | - |
-| **/presale/settle/[id]** | 债券结算 | SettlementRouter |
-| | | |
-| **/treasury** | 国库总览 | Treasury |
-| **/treasury/deposit** | 存入 RWA | Treasury.depositRWA() |
-| **/treasury/positions** | 我的仓位 | Treasury |
-| **/analytics** | 数据分析 | - |
-
-**技术栈**: Next.js 14 + wagmi v2 + RainbowKit + Material-UI v5 (暖色主题) + next-intl (EN/CN 双语)
-
----
-
 ## 文档索引
 
 ### 核心设计文档 ★★★
