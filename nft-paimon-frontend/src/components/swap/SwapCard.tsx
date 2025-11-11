@@ -5,11 +5,13 @@ import { TokenInput } from './TokenInput';
 import { SwitchButton } from './SwitchButton';
 import { SwapDetails } from './SwapDetails';
 import { SwapButton } from './SwapButton';
-import { useSwap } from './hooks/useSwap';
+import { RouteDisplay } from './RouteDisplay';
+import { useAMM } from './hooks/useAMM';
 import { usePSMSwap } from './hooks/usePSMSwap';
 import { SwapState, Token } from './types';
 import { DESIGN_TOKENS, ANIMATION_CONFIG, MESSAGES } from './constants';
 import { useState, useEffect, useMemo } from 'react';
+import { config } from '@/config';
 
 /**
  * SwapCard Component
@@ -45,7 +47,7 @@ export const SwapCard: React.FC = () => {
 
   // Use appropriate hook based on mode
   const psmHook = usePSMSwap();
-  const ammHook = useSwap();
+  const ammHook = useAMM();
 
   const {
     formData: hookFormData,
@@ -60,6 +62,7 @@ export const SwapCard: React.FC = () => {
     handleSwitchTokens,
     handleMaxClick,
     handleSwap,
+    route, // AMM-specific: swap route for visualization
   } = isPSMMode ? psmHook : ammHook;
 
   // Sync form data between component and hook
@@ -71,6 +74,18 @@ export const SwapCard: React.FC = () => {
       hookSetFormData(formData);
     }
   }, [formData, hookFormData, hookSetFormData]);
+
+  // Create token address-to-symbol mapping for RouteDisplay (AMM mode)
+  const tokenMap = useMemo(() => {
+    const map: Record<string, string> = {};
+
+    // Add all configured tokens (USDC, USDP, WBNB, HYD, etc.)
+    Object.values(config.tokenConfig).forEach((token) => {
+      map[token.address.toLowerCase()] = token.symbol;
+    });
+
+    return map;
+  }, []);
 
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -194,6 +209,13 @@ export const SwapCard: React.FC = () => {
             >
               💡 <strong>PSM (Peg Stability Module):</strong> 1:1 swap between USDC and USDP with only 0.1% fee. No slippage, no price impact.
             </Typography>
+          </Box>
+        )}
+
+        {/* Route Display (only shown in AMM mode) */}
+        {!isPSMMode && route && (
+          <Box sx={{ mt: 3 }}>
+            <RouteDisplay route={route} tokenMap={tokenMap} />
           </Box>
         )}
 
