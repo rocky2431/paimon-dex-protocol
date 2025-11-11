@@ -89,8 +89,8 @@ export const PoolRewardsList: React.FC<PoolRewardsListProps> = ({
           </Typography>
         </Box>
 
-        <TableContainer>
-          <Table>
+        <TableContainer sx={{ maxHeight: 440 }}>
+          <Table stickyHeader>
             <TableHead>
               <TableRow>
                 <TableCell sx={{ fontWeight: 600, color: 'text.secondary' }}>Pool</TableCell>

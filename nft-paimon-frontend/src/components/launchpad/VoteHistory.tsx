@@ -117,8 +117,8 @@ export function VoteHistory({ userAddress }: VoteHistoryProps) {
           Your Voting History
         </Typography>
 
-        <TableContainer>
-          <Table>
+        <TableContainer sx={{ maxHeight: 440 }}>
+          <Table stickyHeader>
             <TableHead>
               <TableRow>
                 <TableCell>

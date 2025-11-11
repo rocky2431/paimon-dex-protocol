@@ -200,8 +200,8 @@ export const BribesList: React.FC<BribesListProps> = ({ bribes, tokenId, isLoadi
           </Box>
 
           {/* Bribes Table */}
-          <TableContainer>
-            <Table>
+          <TableContainer sx={{ maxHeight: 440 }}>
+            <Table stickyHeader>
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 700 }}>Token</TableCell>

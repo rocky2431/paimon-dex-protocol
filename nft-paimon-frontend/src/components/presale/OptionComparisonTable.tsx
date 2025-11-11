@@ -54,6 +54,7 @@ export function OptionComparisonTable({ metrics }: OptionComparisonTableProps) {
     <TableContainer
       component={Paper}
       sx={{
+        maxHeight: 440,
         borderRadius: 2,
         overflow: 'hidden',
         border: '1px solid',
@@ -61,7 +62,7 @@ export function OptionComparisonTable({ metrics }: OptionComparisonTableProps) {
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
       }}
     >
-      <Table>
+      <Table stickyHeader>
         {/* Header */}
         <TableHead>
           <TableRow
