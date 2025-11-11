@@ -92,7 +92,7 @@ export const RewardsDashboard: React.FC = () => {
               gap: 3,
             }}
           >
-            {/* Left: Pool Rewards List */}
+            {/* Left: Pool Rewards List - handles Loading and no data Empty states */}
             <PoolRewardsList
               poolRewards={poolRewards}
               onClaimSingle={handleClaimSingle}

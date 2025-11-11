@@ -185,7 +185,7 @@ export const BribesMarketplace: React.FC = () => {
 
       {/* Tab Content */}
       <Box>
-        {/* Tab 0: All Bribes */}
+        {/* Tab 0: All Bribes - BribesList handles Loading and Empty states (no data case) */}
         {activeTab === 0 && <BribesList bribes={allBribes} tokenId={mockTokenId} isLoading={isLoading} />}
 
         {/* Tab 1: Create Bribe */}

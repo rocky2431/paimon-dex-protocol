@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Typography, Box, Snackbar, Alert, Stack, Button as MuiButton } from '@mui/material';
+import { Card, Typography, Box, Snackbar, Alert, Stack, Button as MuiButton, Skeleton } from '@mui/material';
 import { GaugeCard } from './GaugeCard';
 import { MyVotingPower } from './MyVotingPower';
 import { EpochCountdown } from './EpochCountdown';
@@ -10,6 +10,7 @@ import { VotingState } from './types';
 import { DESIGN_TOKENS, ANIMATION_CONFIG, VOTING_MESSAGES } from './constants';
 import { useState, useEffect } from 'react';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 /**
  * VotingCard Component
@@ -24,6 +25,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 export const VotingCard: React.FC = () => {
   const {
     gauges,
+    isLoading,
     allocations,
     handleAllocationChange,
     handleResetAllocations,
@@ -140,16 +142,62 @@ export const VotingCard: React.FC = () => {
             )}
           </Stack>
 
-          {/* Gauge Cards List */}
+          {/* Gauge Cards List with Loading/Empty States */}
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mb: 4 }}>
-            {gauges.map((gauge) => (
-              <GaugeCard
-                key={gauge.address}
-                gauge={gauge}
-                allocation={allocations.get(gauge.address) || 0}
-                onAllocationChange={handleAllocationChange}
-              />
-            ))}
+            {/* Loading State (gap-4.1.2) */}
+            {isLoading && (
+              <>
+                <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
+                <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
+                <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
+              </>
+            )}
+
+            {/* Empty State (gap-4.1.2) */}
+            {!isLoading && gauges.length === 0 && (
+              <Box
+                sx={{
+                  py: 8,
+                  px: 4,
+                  textAlign: 'center',
+                  backgroundColor: 'background.default',
+                  borderRadius: 2,
+                  border: '1px dashed',
+                  borderColor: 'divider',
+                }}
+              >
+                <InfoOutlinedIcon
+                  sx={{
+                    fontSize: 64,
+                    color: 'text.secondary',
+                    opacity: 0.5,
+                    mb: 2,
+                  }}
+                />
+                <Typography variant="h6" color="text.secondary" gutterBottom>
+                  No gauges available
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  There are currently no active gauges to vote for.
+                  <br />
+                  Check back later when new gauges are deployed.
+                </Typography>
+              </Box>
+            )}
+
+            {/* Normal State - Render Gauge Cards */}
+            {!isLoading && gauges.length > 0 && (
+              <>
+                {gauges.map((gauge) => (
+                  <GaugeCard
+                    key={gauge.address}
+                    gauge={gauge}
+                    allocation={allocations.get(gauge.address) || 0}
+                    onAllocationChange={handleAllocationChange}
+                  />
+                ))}
+              </>
+            )}
           </Box>
 
           {/* Vote Button */}

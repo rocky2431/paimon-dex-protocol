@@ -254,6 +254,7 @@ export const useVoting = () => {
   return {
     // Gauges
     gauges,
+    isLoading: isLoadingGauges,
 
     // Allocations
     allocations,
