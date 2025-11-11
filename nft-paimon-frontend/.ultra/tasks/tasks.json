@@ -9,10 +9,10 @@
   "stats": {
     "totalTasks": 32,
     "completed": 18,
-    "inProgress": 0,
-    "pending": 14,
+    "inProgress": 1,
+    "pending": 13,
     "progressPercentage": 56.25,
-    "lastUpdated": "2025-11-11T17:00:00.000Z"
+    "lastUpdated": "2025-11-11T17:05:00.000Z"
   },
   "tasks": [
     {
@@ -567,11 +567,12 @@
         "gap-3.2.1"
       ],
       "estimated_days": 0.625,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "governance",
         "bribe"
-      ]
+      ],
+      "startedAt": "2025-11-11T17:05:00.000Z"
     },
     {
       "id": "gap-3.2.3",
