@@ -56,7 +56,7 @@ export default function VotePage() {
           tabs={VOTE_TABS}
           currentTab={currentTab}
           onChange={setCurrentTab}
-          variant="standard"
+          variant="scrollable"
         />
 
         {/* Vote Tab Content */}

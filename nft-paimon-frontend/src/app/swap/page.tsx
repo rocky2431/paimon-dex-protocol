@@ -52,7 +52,7 @@ export default function SwapPage() {
           tabs={SWAP_TABS}
           currentTab={currentTab}
           onChange={setCurrentTab}
-          variant="standard"
+          variant="scrollable"
         />
 
         {/* Tab content */}

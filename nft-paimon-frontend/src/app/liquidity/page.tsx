@@ -199,7 +199,7 @@ export default function LiquidityHub() {
           tabs={LIQUIDITY_TABS}
           currentTab={currentTab}
           onChange={setCurrentTab}
-          variant="standard"
+          variant="scrollable"
         />
 
         {/* Swap Tab */}
