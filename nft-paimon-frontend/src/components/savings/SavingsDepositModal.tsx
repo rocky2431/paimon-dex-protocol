@@ -32,6 +32,7 @@ import {
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
 import { formatUnits, parseUnits } from 'viem';
 import { useSavingPrincipal } from '@/hooks/useSavingRate';
+import { useTokenApproval, ApprovalState } from '@/hooks/useTokenApproval';
 import { testnet } from '@/config/chains/testnet';
 import { USDP_ABI } from '@/config/contracts/usdp';
 import { SAVINGRATE_ABI } from '@/config/contracts/savingRate';
@@ -55,6 +56,7 @@ const translations = {
     max: 'Max',
     confirmDeposit: 'Confirm Deposit',
     confirmWithdraw: 'Confirm Withdraw',
+    approveUsdp: 'Approve USDP',
     cancel: 'Cancel',
     connectWallet: 'Please connect wallet',
     loading: 'Loading...',
@@ -77,6 +79,7 @@ const translations = {
     max: '最大',
     confirmDeposit: '确认存入',
     confirmWithdraw: '确认提取',
+    approveUsdp: '授权 USDP',
     cancel: '取消',
     connectWallet: '请连接钱包',
     loading: '加载中...',
@@ -137,6 +140,22 @@ export function SavingsDepositModal({
   // Read deposited principal (for withdraw)
   const { data: principal, isLoading: loadingPrincipal } = useSavingPrincipal(address);
 
+  // Token approval for deposit (USDP → SavingRate)
+  const depositAmount = useMemo(() => {
+    if (!amount || tab !== 0) return undefined;
+    try {
+      return parseUnits(amount, 18);
+    } catch {
+      return undefined;
+    }
+  }, [amount, tab]);
+
+  const approval = useTokenApproval({
+    tokenAddress: testnet.tokens.usdp,
+    spenderAddress: testnet.tokens.savingRate,
+    amount: depositAmount,
+  });
+
   // Write contracts
   const { writeContract: deposit, isPending: isDepositing } = useWriteContract();
   const { writeContract: withdraw, isPending: isWithdrawing } = useWriteContract();
@@ -156,7 +175,7 @@ export function SavingsDepositModal({
     if (!amount || amount === '') return false;
     try {
       const amountBigInt = parseUnits(amount, 18);
-      return amountBigInt > BigInt(0) && (!currentBalance || amountBigInt <= currentBalance);
+      return amountBigInt > BigInt(0) && currentBalance !== undefined && amountBigInt <= currentBalance;
     } catch {
       return false;
     }
@@ -203,7 +222,7 @@ export function SavingsDepositModal({
     }
   };
 
-  // Handle confirm
+  // Handle confirm (deposit or withdraw)
   const handleConfirm = async () => {
     if (!address || !addressValid) {
       setError(t.invalidAddress);
@@ -246,6 +265,39 @@ export function SavingsDepositModal({
     }
   };
 
+  // Button text logic
+  const getButtonText = () => {
+    if (!address) return t.connectWallet;
+    if (isProcessing || approval.isLoading) return t.processing;
+
+    if (tab === 0) {
+      // Deposit tab
+      if (approval.needsApproval) {
+        return t.approveUsdp;
+      }
+      return t.confirmDeposit;
+    } else {
+      // Withdraw tab (no approval needed)
+      return t.confirmWithdraw;
+    }
+  };
+
+  // Button click handler
+  const handleButtonClick = async () => {
+    if (tab === 0 && approval.needsApproval) {
+      // Execute approval first
+      try {
+        await approval.handleApprove();
+      } catch (err) {
+        // Error handled by approval hook, just prevent propagation
+        console.error('Approval error:', err);
+      }
+    } else {
+      // Execute deposit/withdraw
+      await handleConfirm();
+    }
+  };
+
   // Handle close
   const handleClose = () => {
     setAmount('');
@@ -255,7 +307,7 @@ export function SavingsDepositModal({
 
   // Loading state
   const isLoading = loadingBalance || loadingPrincipal;
-  const isProcessing = isDepositing || isWithdrawing;
+  const isProcessing = isDepositing || isWithdrawing || approval.isLoading;
 
   // Wallet not connected
   if (!address) {
@@ -400,9 +452,9 @@ export function SavingsDepositModal({
         )}
 
         {/* Error Message */}
-        {error && (
+        {(error || approval.error) && (
           <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
+            {error || approval.error}
           </Alert>
         )}
 
@@ -427,7 +479,7 @@ export function SavingsDepositModal({
           {t.cancel}
         </Button>
         <Button
-          onClick={handleConfirm}
+          onClick={handleButtonClick}
           disabled={!amountValid || isProcessing}
           variant="contained"
           sx={{
@@ -444,7 +496,7 @@ export function SavingsDepositModal({
             },
           }}
         >
-          {tab === 0 ? t.confirmDeposit : t.confirmWithdraw}
+          {getButtonText()}
         </Button>
       </DialogActions>
     </Dialog>

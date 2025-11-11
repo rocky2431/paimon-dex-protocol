@@ -9,10 +9,10 @@
   "stats": {
     "totalTasks": 32,
     "completed": 5,
-    "inProgress": 0,
-    "pending": 27,
+    "inProgress": 1,
+    "pending": 26,
     "progressPercentage": 15.625,
-    "lastUpdated": "2025-11-11T04:15:00.000Z"
+    "lastUpdated": "2025-11-11T04:20:00.000Z"
   },
   "tasks": [
     {
@@ -164,7 +164,8 @@
         "gap-1.2.2"
       ],
       "estimated_days": 0.375,
-      "status": "pending",
+      "status": "in_progress",
+      "startedAt": "2025-11-11T04:20:00.000Z",
       "tags": [
         "savings",
         "authorization"
