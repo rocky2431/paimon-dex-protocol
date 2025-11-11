@@ -3,6 +3,7 @@
 import { Box, Typography, Slider, Stack } from '@mui/material';
 import { Gauge } from './types';
 import { DESIGN_TOKENS, ANIMATION_CONFIG, formatWeight } from './constants';
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 interface GaugeCardProps {
   gauge: Gauge;
@@ -17,6 +18,8 @@ export const GaugeCard: React.FC<GaugeCardProps> = ({
   onAllocationChange,
   disabled = false,
 }) => {
+  const prefersReducedMotion = usePrefersReducedMotion();
+
   const handleChange = (_event: Event, value: number | number[]) => {
     onAllocationChange(gauge.address, value as number);
   };
@@ -28,7 +31,9 @@ export const GaugeCard: React.FC<GaugeCardProps> = ({
         padding: 3,
         backgroundColor: 'background.elevated',
         boxShadow: DESIGN_TOKENS.INSET_BORDER_LIGHT,
-        transition: `all ${ANIMATION_CONFIG.DURATION_NORMAL} ${ANIMATION_CONFIG.EASE_OUT_EXPO}`,
+        transition: prefersReducedMotion
+          ? 'none'
+          : `all ${ANIMATION_CONFIG.DURATION_NORMAL} ${ANIMATION_CONFIG.EASE_OUT_EXPO}`,
         '&:hover': {
           boxShadow: DESIGN_TOKENS.INSET_BORDER_MEDIUM,
         },

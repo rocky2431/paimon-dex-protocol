@@ -3,6 +3,7 @@
 import { Tabs, Tab, Box } from '@mui/material';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 /**
  * SubNavigation Tab Component
@@ -60,6 +61,7 @@ export function SubNavigation({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   // Handle tab change with URL sync
   const handleChange = useCallback(
@@ -100,7 +102,7 @@ export function SubNavigation({
             fontSize: '1rem',
             minHeight: 48,
             color: 'text.secondary',
-            transition: 'color 0.3s',
+            transition: prefersReducedMotion ? 'none' : 'color 0.3s',
             '&:hover': {
               color: 'primary.main',
             },
