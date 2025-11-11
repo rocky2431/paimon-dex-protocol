@@ -19,9 +19,13 @@ describe('Token Enum - Functional Tests', () => {
     expect(Token.USDP).toBe('USDP');
   });
 
-  it('should have exactly 2 tokens', () => {
+  it('should have all supported tokens', () => {
     const tokens = Object.values(Token);
-    expect(tokens).toHaveLength(2);
+    expect(tokens).toHaveLength(4); // USDC, USDP, HYD, WBNB
+    expect(tokens).toContain('USDC');
+    expect(tokens).toContain('USDP');
+    expect(tokens).toContain('HYD');
+    expect(tokens).toContain('WBNB');
   });
 });
 
