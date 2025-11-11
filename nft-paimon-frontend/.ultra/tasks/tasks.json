@@ -8,11 +8,11 @@
   },
   "stats": {
     "totalTasks": 32,
-    "completed": 4,
-    "inProgress": 1,
-    "pending": 31,
-    "progressPercentage": null,
-    "lastUpdated": "2025-11-11T02:55:07.172Z"
+    "completed": 5,
+    "inProgress": 0,
+    "pending": 27,
+    "progressPercentage": 15.625,
+    "lastUpdated": "2025-11-11T04:15:00.000Z"
   },
   "tasks": [
     {
@@ -145,7 +145,10 @@
         "gap-1.2.1"
       ],
       "estimated_days": 0.375,
-      "status": "pending",
+      "status": "completed",
+      "startedAt": "2025-11-11T03:50:00.000Z",
+      "completedAt": "2025-11-11T04:15:00.000Z",
+      "implementationNotes": "✅ 完成 Stability Pool 存款流程授权集成：\n\n**核心改动**:\n- 集成 useTokenApproval hook 检查 USDP allowance\n- 实现两步存款流程：Approve USDP → Confirm Deposit\n- 动态按钮文本切换（Connect Wallet → Approve USDP → Confirm Deposit → Processing...）\n- 统一加载状态（approval + deposit/withdraw）\n- 聚合错误显示（approval.error || component error）\n- 优化 depositAmount 计算（useMemo）\n\n**测试覆盖** (10 tests, 100% pass rate):\n- Functional: 授权检测、两步流程、Tab切换\n- Boundary: 零余额、余额不足\n- Exception: 授权拒绝、存款失败后授权重置\n- Performance: 多次重渲染\n- Security: 授权后才能存款\n- Compatibility: wagmi v2集成\n\n**文件**:\n- Modified: src/components/stability-pool/DepositWithdrawForm.tsx\n- Created: src/components/stability-pool/__tests__/DepositWithdrawForm.test.tsx (526 lines)\n\nBranch: feat/task-gap-1.2.2-stability-pool-approval\nCommit: e67546a, merge commit",
       "tags": [
         "stability-pool",
         "authorization"
