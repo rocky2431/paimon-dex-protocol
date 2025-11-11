@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
-import { useAccount, useReadContract, useWriteContract } from 'wagmi';
-import { formatUnits } from 'viem';
+import { useAccount, useReadContract, useWriteContract, useReadContracts } from 'wagmi';
+import { formatUnits, type Address } from 'viem';
 import {
   VotingState,
   VotingFormData,
@@ -15,29 +15,27 @@ import {
   VOTING_ADDRESSES,
   VOTING_CONFIG,
   VOTING_MESSAGES,
-  MOCK_GAUGES,
   calculateVotingPower,
 } from '../constants';
+import { useGauges } from '@/hooks/useGauges';
+import {
+  GAUGE_CONTROLLER_ABI,
+  GAUGE_CONTROLLER_ADDRESS,
+} from '@/config/contracts/gaugeController';
+import { findPoolByAddress } from '@/config/pools';
 
-// GaugeController ABI (simplified for voting)
-const GAUGE_CONTROLLER_ABI = [
-  {
-    inputs: [
-      { name: '_gauges', type: 'address[]' },
-      { name: '_weights', type: 'uint256[]' },
-    ],
-    name: 'vote',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-] as const;
-
-// VotingEscrow ABI (to get user's voting power)
+// VotingEscrow ABI (to get user's voting power and token ID)
 const VOTING_ESCROW_ABI = [
   {
     inputs: [{ name: '_addr', type: 'address' }],
     name: 'balanceOf',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ name: '_owner', type: 'address' }, { name: '_index', type: 'uint256' }],
+    name: 'tokenOfOwnerByIndex',
     outputs: [{ name: '', type: 'uint256' }],
     stateMutability: 'view',
     type: 'function',
@@ -55,7 +53,10 @@ export const useVoting = () => {
   const [votingState, setVotingState] = useState<VotingState>(VotingState.IDLE);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
-  // Get user's voting power from VotingEscrow
+  // Get real gauge data from useGauges hook
+  const { gauges: gaugeData, currentEpoch: currentEpochData, isLoading: isLoadingGauges } = useGauges();
+
+  // Get user's voting power and token ID from VotingEscrow
   const { data: votingPowerData } = useReadContract({
     address: VOTING_ADDRESSES.VOTING_ESCROW,
     abi: VOTING_ESCROW_ABI,
@@ -63,16 +64,56 @@ export const useVoting = () => {
     args: address ? [address] : undefined,
   });
 
-  // Mock gauges (in production, fetch from GaugeController)
-  const gauges: Gauge[] = MOCK_GAUGES;
+  // Get user's first veNFT token ID (for voting)
+  const { data: tokenIdData } = useReadContract({
+    address: VOTING_ADDRESSES.VOTING_ESCROW,
+    abi: VOTING_ESCROW_ABI,
+    functionName: 'tokenOfOwnerByIndex',
+    args: address && votingPowerData && votingPowerData > BigInt(0)
+      ? [address, BigInt(0)]
+      : undefined,
+  });
 
-  // Calculate current epoch (mock - in production, fetch from GaugeController)
+  // Transform GaugeData to Gauge format for UI
+  const gauges: Gauge[] = useMemo(() => {
+    return gaugeData.map((g) => {
+      const pool = findPoolByAddress(g.address);
+      const tokens = g.pool.split('/');
+
+      return {
+        address: g.address,
+        name: g.pool,
+        token0: tokens[0] || '',
+        token1: tokens[1] || '',
+        tvl: 'N/A', // TVL data needs separate data source
+        apr: `${g.apr.toFixed(1)}%`,
+        weight: Number((g.weight * BigInt(10000)) / (g.totalWeight || BigInt(1))),
+      };
+    });
+  }, [gaugeData]);
+
+  // Calculate current epoch from real data
   const currentEpoch = useMemo(() => {
+    if (!currentEpochData) {
+      return {
+        number: 0,
+        endTime: Math.floor(Date.now() / 1000) + 6 * 24 * 60 * 60,
+      };
+    }
+
+    const epochNumber = Number(currentEpochData);
+    const epochDuration = 7 * 24 * 60 * 60; // 7 days in seconds
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    // Calculate epoch end time (assuming epochs start at a known time)
+    // This is a simplified calculation - adjust based on actual contract logic
+    const epochEndTime = currentTime + epochDuration - (currentTime % epochDuration);
+
     return {
-      number: 152,
-      endTime: Math.floor(Date.now() / 1000) + 6 * 24 * 60 * 60, // 6 days from now
+      number: epochNumber,
+      endTime: epochEndTime,
     };
-  }, []);
+  }, [currentEpochData]);
 
   // Calculate voting power breakdown
   const votingPower = useMemo((): VotingPower | null => {
@@ -159,31 +200,41 @@ export const useVoting = () => {
 
   // Submit votes to GaugeController
   const handleSubmitVotes = useCallback(async () => {
-    if (!address || !validation.isValid || allocations.size === 0) return;
+    if (!address || !validation.isValid || allocations.size === 0 || !tokenIdData) {
+      if (!tokenIdData) {
+        setErrorMessage('No veNFT found. Please lock PAIMON to create a veNFT first.');
+      }
+      return;
+    }
 
     try {
       setVotingState(VotingState.VOTING);
 
-      // Convert allocations to arrays for contract call
-      const voteAllocations: VoteAllocation[] = [];
+      // Convert allocations to gauge IDs and weights for contract call
+      const gaugeIds: bigint[] = [];
+      const weights: bigint[] = [];
+
       allocations.forEach((percentage, gaugeAddress) => {
         // Convert percentage to basis points (1% = 100 basis points)
         const weight = Math.floor(percentage * 100);
-        voteAllocations.push({
-          gauge: gaugeAddress as `0x${string}`,
-          weight,
-        });
-      });
 
-      const gaugeAddresses = voteAllocations.map((v) => v.gauge);
-      const weights = voteAllocations.map((v) => BigInt(v.weight));
+        // Find the gauge index in gaugeData (gauge ID = index in controller)
+        const gaugeIndex = gaugeData.findIndex(
+          (g) => g.address.toLowerCase() === gaugeAddress.toLowerCase()
+        );
+
+        if (gaugeIndex >= 0) {
+          gaugeIds.push(BigInt(gaugeIndex));
+          weights.push(BigInt(weight));
+        }
+      });
 
       // Submit batch vote to GaugeController
       await writeContractAsync({
-        address: VOTING_ADDRESSES.GAUGE_CONTROLLER,
+        address: GAUGE_CONTROLLER_ADDRESS,
         abi: GAUGE_CONTROLLER_ABI,
-        functionName: 'vote',
-        args: [gaugeAddresses, weights],
+        functionName: 'batchVote',
+        args: [tokenIdData, gaugeIds, weights],
       });
 
       setVotingState(VotingState.SUCCESS);
@@ -198,7 +249,7 @@ export const useVoting = () => {
       setVotingState(VotingState.ERROR);
       setErrorMessage(VOTING_MESSAGES.VOTE_ERROR);
     }
-  }, [address, validation, allocations, writeContractAsync, handleResetAllocations]);
+  }, [address, validation, allocations, tokenIdData, gaugeData, writeContractAsync, handleResetAllocations]);
 
   return {
     // Gauges
