@@ -32,6 +32,7 @@ import { RewardsDashboard } from '@/components/rewards/RewardsDashboard';
 import { VestingProgressBar, ClaimVestedButton } from '@/components/convert';
 import { BoostStakingCard, BoostCalculator, BoostHistory } from '@/components/boost';
 import { useVestingPosition } from '@/hooks/useVestingPosition';
+import { useBoostData } from '@/hooks/useBoostData';
 
 // Savings Tab components (for reference)
 import { SavingsRateCard } from '@/components/savings/SavingsRateCard';
@@ -64,6 +65,9 @@ export default function PortfolioHub() {
 
   // Portfolio aggregation - replaces MOCK_POSITIONS
   const portfolio = useUserPortfolio(address);
+
+  // Boost data - replaces mock data
+  const { stake: boostStake, userBalance: paimonBalance, currentMultiplier } = useBoostData();
 
   // Format portfolio data for display
   const formattedPositions = useMemo(() => {
@@ -597,10 +601,13 @@ export default function PortfolioHub() {
 
               <Grid container spacing={3}>
                 <Grid item xs={12} lg={6}>
-                  <BoostStakingCard />
+                  <BoostStakingCard stake={boostStake} />
                 </Grid>
                 <Grid item xs={12} lg={6}>
-                  <BoostCalculator userBalance="0" currentMultiplier={10000} />
+                  <BoostCalculator
+                    userBalance={paimonBalance}
+                    currentMultiplier={currentMultiplier}
+                  />
                 </Grid>
                 <Grid item xs={12}>
                   <BoostHistory entries={[]} />
