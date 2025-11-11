@@ -15,7 +15,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Container, Typography, Box, Grid, Card, CardContent, Alert, Chip, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, LinearProgress } from '@mui/material';
+import { Container, Typography, Box, Grid, Card, CardContent, Alert, Chip, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, LinearProgress, Skeleton } from '@mui/material';
 import { useAccount } from 'wagmi';
 import { Navigation } from '@/components/layout/Navigation';
 import { SubNavigation, useTabState } from '@/components/layout/SubNavigation';
@@ -65,6 +65,7 @@ export default function PortfolioHub() {
 
   // Portfolio aggregation - replaces MOCK_POSITIONS
   const portfolio = useUserPortfolio(address);
+  const { isLoading: portfolioLoading } = portfolio;
 
   // Boost data - replaces mock data
   const { stake: boostStake, userBalance: paimonBalance, currentMultiplier } = useBoostData();
@@ -111,6 +112,14 @@ export default function PortfolioHub() {
 
   // Use risk alerts from portfolio hook
   const riskAlerts = portfolio.riskAlerts;
+
+  // Check if user has any assets (for Empty state) (gap-4.1.2)
+  const hasNoAssets = !portfolioLoading &&
+    portfolio.lpPositions.length === 0 &&
+    portfolio.vaultPositions.length === 0 &&
+    portfolio.veNFTPositions.length === 0 &&
+    portfolio.launchpadInvestments.length === 0 &&
+    !portfolio.savingsPosition;
 
   // Handle claim all rewards
   const handleClaimAll = async () => {
@@ -181,7 +190,49 @@ export default function PortfolioHub() {
         {/* Overview Tab */}
         {currentTab === 'overview' && (
           <>
-            {/* Risk Alerts */}
+            {/* Loading State (gap-4.1.2) */}
+            {portfolioLoading && (
+              <Box>
+                <Skeleton variant="rectangular" height={200} sx={{ mb: 3, borderRadius: 2 }} />
+                <Grid container spacing={3}>
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <Grid item xs={12} sm={6} md={4} key={i}>
+                      <Skeleton variant="rectangular" height={150} sx={{ borderRadius: 2 }} />
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+            )}
+
+            {/* Empty State (gap-4.1.2) */}
+            {hasNoAssets && (
+              <Card sx={{ p: 6, textAlign: 'center' }}>
+                <AccountBalanceWalletIcon sx={{ fontSize: 80, color: 'text.secondary', opacity: 0.5, mb: 2 }} />
+                <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+                  No Assets Found
+                </Typography>
+                <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+                  Start your DeFi journey by adding liquidity, borrowing USDP, or locking PAIMON.
+                </Typography>
+                <Grid container spacing={2} sx={{ maxWidth: 600, mx: 'auto' }}>
+                  <Grid item xs={12} sm={6}>
+                    <Button variant="contained" fullWidth href="/liquidity?tab=pools">
+                      Add Liquidity
+                    </Button>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Button variant="outlined" fullWidth href="/usdp?tab=vault">
+                      Borrow USDP
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Card>
+            )}
+
+            {/* Normal State - Show Data */}
+            {!portfolioLoading && !hasNoAssets && (
+              <>
+                {/* Risk Alerts */}
             {riskAlerts.length > 0 && (
               <Box sx={{ mb: 4 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -357,6 +408,8 @@ export default function PortfolioHub() {
                 </Grid>
               </CardContent>
             </Card>
+            </>
+            )}
           </>
         )}
 
