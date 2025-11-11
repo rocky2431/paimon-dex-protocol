@@ -111,6 +111,7 @@ export const SwapCard: React.FC = () => {
   return (
     <>
       <Card
+        data-testid="swap-card"
         sx={{
           maxWidth: 480,
           margin: '0 auto',
@@ -165,6 +166,7 @@ export const SwapCard: React.FC = () => {
           excludeToken={formData.outputToken}
           showMaxButton={true}
           onMaxClick={handleMaxClick}
+          data-testid-prefix="from"
         />
 
         {/* Switch button */}
@@ -183,6 +185,7 @@ export const SwapCard: React.FC = () => {
           readOnly={true}
           excludeToken={formData.inputToken}
           showMaxButton={false}
+          data-testid-prefix="to"
         />
 
         {/* Swap details (fee, price) */}

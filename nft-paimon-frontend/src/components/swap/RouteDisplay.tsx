@@ -85,6 +85,7 @@ export const RouteDisplay: React.FC<RouteDisplayProps> = ({ route, tokenMap }) =
 
   return (
     <Box
+      data-testid="route-display"
       sx={{
         display: 'flex',
         flexDirection: 'column',
@@ -129,6 +130,7 @@ export const RouteDisplay: React.FC<RouteDisplayProps> = ({ route, tokenMap }) =
             {/* Arrow (except after last token) */}
             {index < route.length - 1 && (
               <ArrowForward
+                data-testid="ArrowForwardIcon"
                 sx={{
                   color: 'text.secondary',
                   fontSize: '1rem',
