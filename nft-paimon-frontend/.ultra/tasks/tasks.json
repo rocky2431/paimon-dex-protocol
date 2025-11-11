@@ -9,10 +9,10 @@
   "stats": {
     "totalTasks": 32,
     "completed": 17,
-    "inProgress": 0,
-    "pending": 15,
+    "inProgress": 1,
+    "pending": 14,
     "progressPercentage": 53.125,
-    "lastUpdated": "2025-11-11T16:30:00.000Z"
+    "lastUpdated": "2025-11-11T16:35:00.000Z"
   },
   "tasks": [
     {
@@ -538,11 +538,12 @@
         "gap-3.1.4"
       ],
       "estimated_days": 0.5,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "governance",
         "cleanup"
-      ]
+      ],
+      "startedAt": "2025-11-11T16:35:00.000Z"
     },
     {
       "id": "gap-3.2.2",
