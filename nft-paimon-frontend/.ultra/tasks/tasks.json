@@ -107,12 +107,14 @@
         "gap-1.1.4"
       ],
       "estimated_days": 0.5,
-      "status": "in_progress",
+      "status": "completed",
       "tags": [
         "swap",
         "e2e-testing"
       ],
-      "startedAt": "2025-11-11T02:55:07.171Z"
+      "startedAt": "2025-11-11T02:55:07.171Z",
+      "completedAt": "2025-11-11T03:15:42.000Z",
+      "implementationNotes": "✅ 完成 8 个 E2E 测试用例，覆盖全部 6 个 TDD 维度：\n- [AMM-001] 单跳 Swap (HYD → USDC) + Direct 标签\n- [AMM-002] 多跳 Swap (HYD → WBNB → USDC) + 跳数显示\n- [AMM-003] 滑点保护验证\n- [AMM-004] 路由优化\n- [AMM-005] PSM vs AMM 模式切换\n- [AMM-006] 余额更新验证 (MOCK)\n- [AMM-007] Core Web Vitals 性能指标\n- [AMM-008] 移动端响应式测试\n\n✅ 为所有 Swap 组件添加 data-testid 属性：\n- SwapCard, TokenInput, TokenSelector\n- RouteDisplay, SwapDetails\n- 支持稳定的 E2E 测试选择器\n\nBranch: feat/task-gap-1.1.5-e2e-amm-swap\nCommits: 985ed9a, merge commit"
     },
     {
       "id": "gap-1.2.1",
