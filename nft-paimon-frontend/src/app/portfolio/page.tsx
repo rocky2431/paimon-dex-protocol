@@ -434,8 +434,8 @@ export default function PortfolioHub() {
                     Liquidity Pool Positions
                   </Typography>
                 </Box>
-                <TableContainer>
-                  <Table>
+                <TableContainer sx={{ maxHeight: 440 }}>
+                  <Table stickyHeader>
                     <TableHead>
                       <TableRow>
                         <TableCell sx={{ fontWeight: 700 }}>Pool</TableCell>
@@ -468,8 +468,8 @@ export default function PortfolioHub() {
                     USDP Vault Positions
                   </Typography>
                 </Box>
-                <TableContainer>
-                  <Table>
+                <TableContainer sx={{ maxHeight: 440 }}>
+                  <Table stickyHeader>
                     <TableHead>
                       <TableRow>
                         <TableCell sx={{ fontWeight: 700 }}>Asset</TableCell>
@@ -514,8 +514,8 @@ export default function PortfolioHub() {
                     veNFT Positions
                   </Typography>
                 </Box>
-                <TableContainer>
-                  <Table>
+                <TableContainer sx={{ maxHeight: 440 }}>
+                  <Table stickyHeader>
                     <TableHead>
                       <TableRow>
                         <TableCell sx={{ fontWeight: 700 }}>Token ID</TableCell>
@@ -548,8 +548,8 @@ export default function PortfolioHub() {
                     Launchpad Investments
                   </Typography>
                 </Box>
-                <TableContainer>
-                  <Table>
+                <TableContainer sx={{ maxHeight: 440 }}>
+                  <Table stickyHeader>
                     <TableHead>
                       <TableRow>
                         <TableCell sx={{ fontWeight: 700 }}>Project</TableCell>

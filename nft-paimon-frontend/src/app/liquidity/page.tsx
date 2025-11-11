@@ -267,8 +267,8 @@ export default function LiquidityHub() {
                 <Typography variant="h6" fontWeight={700} sx={{ mb: 3, color: '#ff6b00' }}>
                   All Pools
                 </Typography>
-                <TableContainer>
-                  <Table>
+                <TableContainer sx={{ maxHeight: 440 }}>
+                  <Table stickyHeader>
                     <TableHead>
                       <TableRow>
                         <TableCell sx={{ fontWeight: 700 }}>Pool</TableCell>

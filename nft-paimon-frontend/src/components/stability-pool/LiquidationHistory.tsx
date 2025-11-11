@@ -111,8 +111,8 @@ export function LiquidationHistory({ locale = 'en' }: LiquidationHistoryProps) {
             {t.noHistory}
           </Typography>
         ) : (
-          <TableContainer>
-            <Table size="small">
+          <TableContainer sx={{ maxHeight: 440 }}>
+            <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 600, color: 'text.secondary' }}>{t.time}</TableCell>
