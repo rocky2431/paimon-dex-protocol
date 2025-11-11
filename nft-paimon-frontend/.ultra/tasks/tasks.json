@@ -126,11 +126,12 @@
         "gap-1.1.5"
       ],
       "estimated_days": 0.5,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "authorization",
         "hook"
-      ]
+      ],
+      "startedAt": "2025-11-11T03:18:30.000Z"
     },
     {
       "id": "gap-1.2.2",
