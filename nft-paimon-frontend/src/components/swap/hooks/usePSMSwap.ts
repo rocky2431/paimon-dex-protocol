@@ -377,5 +377,8 @@ export const usePSMSwap = () => {
     handleSwitchTokens,
     handleMaxClick,
     handleSwap,
+
+    // PSM mode has no route (always direct 1:1 swap)
+    route: null,
   };
 };

@@ -85,6 +85,20 @@ export const TOKEN_CONFIG: Record<Token, TokenInfo> = {
     address: config.tokenConfig.usdp.address as `0x${string}`,
     icon: config.tokenConfig.usdp.icon,
   },
+  [Token.HYD]: {
+    symbol: Token.HYD,
+    name: config.tokenConfig.hyd.name,
+    decimals: config.tokenConfig.hyd.decimals,
+    address: config.tokenConfig.hyd.address as `0x${string}`,
+    icon: config.tokenConfig.hyd.icon,
+  },
+  [Token.WBNB]: {
+    symbol: Token.WBNB,
+    name: config.tokenConfig.wbnb.name,
+    decimals: config.tokenConfig.wbnb.decimals,
+    address: config.tokenConfig.wbnb.address as `0x${string}`,
+    icon: config.tokenConfig.wbnb.icon,
+  },
 };
 
 // Contract addresses
