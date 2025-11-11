@@ -126,12 +126,14 @@
         "gap-1.1.5"
       ],
       "estimated_days": 0.5,
-      "status": "in_progress",
+      "status": "completed",
       "tags": [
         "authorization",
         "hook"
       ],
-      "startedAt": "2025-11-11T03:18:30.000Z"
+      "startedAt": "2025-11-11T03:18:30.000Z",
+      "completedAt": "2025-11-11T03:45:20.000Z",
+      "implementationNotes": "✅ 完成 useTokenApproval 通用 hook 实现：\n\n**核心功能**:\n- 自动检查 allowance (useReadContract)\n- 智能状态管理 (idle | checking | approving | approved | error)\n- 防双重授权 (useRef pattern)\n- 完善错误处理\n- 性能优化 (useMemo, useCallback)\n\n**测试覆盖** (14 tests, all passing):\n- Functional: allowance 检查、授权执行、状态转换\n- Boundary: 零值/undefined/最大值、钱包未连接\n- Exception: 交易拒绝、网络错误、allowance 错误\n- Security: 双重授权防护、地址验证\n- Performance: 稳定函数引用\n\n**文件**:\n- src/hooks/useTokenApproval.ts (262 lines)\n- src/hooks/__tests__/useTokenApproval.test.ts (549 lines)\n\nBranch: feat/task-gap-1.2.1-use-token-approval\nCommit: 6cba6f7"
     },
     {
       "id": "gap-1.2.2",
