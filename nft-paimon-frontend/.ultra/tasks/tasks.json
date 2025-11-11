@@ -9,10 +9,10 @@
   "stats": {
     "totalTasks": 32,
     "completed": 6,
-    "inProgress": 0,
-    "pending": 26,
+    "inProgress": 1,
+    "pending": 25,
     "progressPercentage": 18.75,
-    "lastUpdated": "2025-11-11T05:45:00.000Z"
+    "lastUpdated": "2025-11-11T06:00:00.000Z"
   },
   "tasks": [
     {
@@ -184,7 +184,8 @@
         "gap-1.2.3"
       ],
       "estimated_days": 0.125,
-      "status": "pending",
+      "status": "in_progress",
+      "startedAt": "2025-11-11T06:00:00.000Z",
       "tags": [
         "savings",
         "bug-fix"
