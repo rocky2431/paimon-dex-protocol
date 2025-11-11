@@ -14,6 +14,7 @@ import GridViewIcon from '@mui/icons-material/GridView';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import { ProjectCard } from './ProjectCard';
 import { ProjectFilters } from './ProjectFilters';
+import { DataNotice } from '@/components/common/DataNotice';
 import { ViewMode, SortOption, ProjectStatus } from '@/types/launchpad';
 import type { RWAProject, ProjectFilters as ProjectFiltersType } from '@/types/launchpad';
 
@@ -101,6 +102,12 @@ export function ProjectList() {
 
   return (
     <Box>
+      {/* Data Notice: Mock data warning */}
+      <DataNotice
+        message="🛈 Launchpad 项目数据暂未接入链上，当前显示为示例数据。实际项目将在 Phase 3.2 上线后展示。"
+        severity="info"
+      />
+
       {/* Header */}
       <Box
         display="flex"
