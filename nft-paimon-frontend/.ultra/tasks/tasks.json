@@ -9,10 +9,10 @@
   "stats": {
     "totalTasks": 32,
     "completed": 7,
-    "inProgress": 0,
-    "pending": 25,
+    "inProgress": 1,
+    "pending": 24,
     "progressPercentage": 21.875,
-    "lastUpdated": "2025-11-11T06:30:00.000Z"
+    "lastUpdated": "2025-11-11T07:00:00.000Z"
   },
   "tasks": [
     {
@@ -204,7 +204,8 @@
         "gap-1.2.4"
       ],
       "estimated_days": 0.375,
-      "status": "pending",
+      "status": "in_progress",
+      "startedAt": "2025-11-11T07:00:00.000Z",
       "tags": [
         "vault",
         "authorization"

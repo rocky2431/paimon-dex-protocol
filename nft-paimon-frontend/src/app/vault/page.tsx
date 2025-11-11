@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { Navigation } from '@/components/layout/Navigation';
 import { HealthFactorIndicator } from '@/components/vault/HealthFactorIndicator';
+import { VaultDepositModal } from '@/components/vault/VaultDepositModal';
 import { useAccount } from 'wagmi';
 import { useVaultPosition } from '@/hooks/useVaultPosition';
 import { testnet } from '@/config/chains/testnet';
@@ -30,6 +31,7 @@ import { formatEther } from 'viem';
  */
 export default function VaultPage() {
   const { address, isConnected } = useAccount();
+  const [depositModalOpen, setDepositModalOpen] = useState(false);
 
   // For MVP, using a default collateral address (TODO: Add collateral selector)
   // This should be the address of a supported RWA token
@@ -166,11 +168,11 @@ export default function VaultPage() {
                     <Button
                       variant="contained"
                       fullWidth
+                      onClick={() => setDepositModalOpen(true)}
                       sx={{
                         backgroundColor: '#FF6B35',
                         '&:hover': { backgroundColor: '#E85A2A' },
                       }}
-                      disabled
                     >
                       Deposit
                     </Button>
@@ -179,6 +181,7 @@ export default function VaultPage() {
                     <Button
                       variant="outlined"
                       fullWidth
+                      onClick={() => setDepositModalOpen(true)}
                       sx={{
                         borderColor: '#FF6B35',
                         color: '#FF6B35',
@@ -187,7 +190,6 @@ export default function VaultPage() {
                           backgroundColor: 'rgba(255, 107, 53, 0.04)',
                         },
                       }}
-                      disabled
                     >
                       Withdraw
                     </Button>
@@ -227,13 +229,23 @@ export default function VaultPage() {
                 </Grid>
 
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
-                  Note: Deposit/Withdraw functionality coming soon. Borrow and Repay are available.
+                  Manage your RWA collateral (HYD token) and borrow USDP against it.
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
         </Grid>
       </Container>
+
+      {/* Deposit/Withdraw Modal */}
+      <VaultDepositModal
+        open={depositModalOpen}
+        onClose={() => setDepositModalOpen(false)}
+        onSuccess={() => {
+          setDepositModalOpen(false);
+          // Refresh position data would happen automatically via wagmi cache invalidation
+        }}
+      />
     </Box>
   );
 }
