@@ -9,10 +9,10 @@
   "stats": {
     "totalTasks": 32,
     "completed": 20,
-    "inProgress": 0,
-    "pending": 12,
+    "inProgress": 1,
+    "pending": 11,
     "progressPercentage": 62.5,
-    "lastUpdated": "2025-11-11T19:15:00.000Z"
+    "lastUpdated": "2025-11-11T19:20:00.000Z"
   },
   "tasks": [
     {
@@ -628,7 +628,8 @@
         "gap-3.2.3"
       ],
       "estimated_days": 0.5,
-      "status": "pending",
+      "status": "in_progress",
+      "startedAt": "2025-11-11T19:20:00.000Z",
       "tags": [
         "boost",
         "staking"
