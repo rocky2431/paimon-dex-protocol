@@ -45,6 +45,7 @@ export const RWA_ASSETS: RWAAsset[] = [
     ltvRatio: 60, // 60% LTV for T1 (high-quality RWA)
     mintDiscount: 0,
     isActive: true, // Deployed and active
+    oracleAddress: TESTNET_ADDRESSES.treasury.rwaPriceOracle, // RWAPriceOracle for HYD
   },
 ];
 

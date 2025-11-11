@@ -19,6 +19,7 @@ export interface RWAAsset {
   ltvRatio: number; // Percentage (e.g., 60 for 60%)
   mintDiscount: number; // Percentage (e.g., 0 for no discount)
   isActive: boolean;
+  oracleAddress?: string; // RWAPriceOracle contract address for this asset
 }
 
 export interface UserPosition {

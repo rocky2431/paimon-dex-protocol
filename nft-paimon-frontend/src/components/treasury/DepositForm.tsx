@@ -51,7 +51,7 @@ export function DepositForm() {
   const { preview, isLoading: isPreviewLoading } = useDepositPreview({
     assetAddress: selectedAsset || undefined,
     amount,
-    oracleAddress: assetDetails?.address, // TODO: Get oracle address from contract
+    oracleAddress: assetDetails?.oracleAddress, // ✅ Use Oracle address from asset config
     ltvRatio: assetDetails?.ltvRatio,
   });
 
