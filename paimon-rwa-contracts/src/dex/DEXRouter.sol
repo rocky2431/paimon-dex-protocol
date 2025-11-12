@@ -154,4 +154,184 @@ contract DEXRouter {
         (token0, token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
         require(token0 != address(0), "Zero address");
     }
+
+    // ====================
+    // SWAP FUNCTIONS
+    // ====================
+
+    /**
+     * @notice Swap exact tokens for tokens
+     * @param amountIn Exact amount of input tokens
+     * @param amountOutMin Minimum amount of output tokens (slippage protection)
+     * @param path Array of token addresses (route)
+     * @param to Recipient address
+     * @param deadline Transaction deadline
+     * @return amounts Array of amounts for each step in the path
+     */
+    function swapExactTokensForTokens(
+        uint256 amountIn,
+        uint256 amountOutMin,
+        address[] calldata path,
+        address to,
+        uint256 deadline
+    ) external returns (uint256[] memory amounts) {
+        require(deadline >= block.timestamp, "Expired");
+        require(path.length >= 2, "Invalid path");
+
+        amounts = getAmountsOut(amountIn, path);
+        require(amounts[amounts.length - 1] >= amountOutMin, "Insufficient output amount");
+
+        // Transfer input tokens to first pair
+        address firstPair = _pairFor(path[0], path[1]);
+        IERC20(path[0]).safeTransferFrom(msg.sender, firstPair, amounts[0]);
+
+        // Execute swaps
+        _swap(amounts, path, to);
+    }
+
+    /**
+     * @notice Swap tokens for exact tokens
+     * @param amountOut Exact amount of output tokens desired
+     * @param amountInMax Maximum amount of input tokens (slippage protection)
+     * @param path Array of token addresses (route)
+     * @param to Recipient address
+     * @param deadline Transaction deadline
+     * @return amounts Array of amounts for each step in the path
+     */
+    function swapTokensForExactTokens(
+        uint256 amountOut,
+        uint256 amountInMax,
+        address[] calldata path,
+        address to,
+        uint256 deadline
+    ) external returns (uint256[] memory amounts) {
+        require(deadline >= block.timestamp, "Expired");
+        require(path.length >= 2, "Invalid path");
+
+        amounts = getAmountsIn(amountOut, path);
+        require(amounts[0] <= amountInMax, "Excessive input amount");
+
+        // Transfer input tokens to first pair
+        address firstPair = _pairFor(path[0], path[1]);
+        IERC20(path[0]).safeTransferFrom(msg.sender, firstPair, amounts[0]);
+
+        // Execute swaps
+        _swap(amounts, path, to);
+    }
+
+    /**
+     * @notice Execute swaps along the path
+     */
+    function _swap(uint256[] memory amounts, address[] memory path, address _to) internal {
+        for (uint256 i = 0; i < path.length - 1; i++) {
+            (address input, address output) = (path[i], path[i + 1]);
+            (address token0,) = _sortTokens(input, output);
+            uint256 amountOut = amounts[i + 1];
+
+            (uint256 amount0Out, uint256 amount1Out) = input == token0
+                ? (uint256(0), amountOut)
+                : (amountOut, uint256(0));
+
+            address to = i < path.length - 2 ? _pairFor(output, path[i + 2]) : _to;
+            DEXPair(_pairFor(input, output)).swap(amount0Out, amount1Out, to, new bytes(0));
+        }
+    }
+
+    /**
+     * @notice Get pair address for two tokens
+     */
+    function _pairFor(address tokenA, address tokenB) internal view returns (address pair) {
+        pair = factory.getPair(tokenA, tokenB);
+        require(pair != address(0), "Pair does not exist");
+    }
+
+    // ====================
+    // QUOTE FUNCTIONS
+    // ====================
+
+    /**
+     * @notice Calculate output amounts for given input amount
+     * @param amountIn Input amount
+     * @param path Array of token addresses (route)
+     * @return amounts Array of output amounts for each step
+     */
+    function getAmountsOut(uint256 amountIn, address[] memory path) public view returns (uint256[] memory amounts) {
+        require(path.length >= 2, "Invalid path");
+        amounts = new uint256[](path.length);
+        amounts[0] = amountIn;
+
+        for (uint256 i = 0; i < path.length - 1; i++) {
+            address pair = factory.getPair(path[i], path[i + 1]);
+            require(pair != address(0), "Pair does not exist");
+
+            (uint112 reserve0, uint112 reserve1,) = DEXPair(pair).getReserves();
+            (address token0,) = _sortTokens(path[i], path[i + 1]);
+            (uint112 reserveIn, uint112 reserveOut) = path[i] == token0
+                ? (reserve0, reserve1)
+                : (reserve1, reserve0);
+
+            amounts[i + 1] = _getAmountOut(amounts[i], reserveIn, reserveOut);
+        }
+    }
+
+    /**
+     * @notice Calculate input amounts for given output amount
+     * @param amountOut Output amount
+     * @param path Array of token addresses (route)
+     * @return amounts Array of input amounts for each step
+     */
+    function getAmountsIn(uint256 amountOut, address[] memory path) public view returns (uint256[] memory amounts) {
+        require(path.length >= 2, "Invalid path");
+        amounts = new uint256[](path.length);
+        amounts[amounts.length - 1] = amountOut;
+
+        for (uint256 i = path.length - 1; i > 0; i--) {
+            address pair = factory.getPair(path[i - 1], path[i]);
+            require(pair != address(0), "Pair does not exist");
+
+            (uint112 reserve0, uint112 reserve1,) = DEXPair(pair).getReserves();
+            (address token0,) = _sortTokens(path[i - 1], path[i]);
+            (uint112 reserveIn, uint112 reserveOut) = path[i - 1] == token0
+                ? (reserve0, reserve1)
+                : (reserve1, reserve0);
+
+            amounts[i - 1] = _getAmountIn(amounts[i], reserveIn, reserveOut);
+        }
+    }
+
+    /**
+     * @notice Calculate output amount given input amount and reserves
+     * @param amountIn Input amount
+     * @param reserveIn Input token reserve
+     * @param reserveOut Output token reserve
+     * @return amountOut Output amount
+     */
+    function _getAmountOut(uint256 amountIn, uint256 reserveIn, uint256 reserveOut) internal pure returns (uint256 amountOut) {
+        require(amountIn > 0, "Insufficient input amount");
+        require(reserveIn > 0 && reserveOut > 0, "Insufficient liquidity");
+
+        // AMM formula: (amountIn * 997 * reserveOut) / (reserveIn * 1000 + amountIn * 997)
+        // 0.3% fee = 997/1000
+        uint256 amountInWithFee = amountIn * 997;
+        uint256 numerator = amountInWithFee * reserveOut;
+        uint256 denominator = reserveIn * 1000 + amountInWithFee;
+        amountOut = numerator / denominator;
+    }
+
+    /**
+     * @notice Calculate input amount given output amount and reserves
+     * @param amountOut Output amount
+     * @param reserveIn Input token reserve
+     * @param reserveOut Output token reserve
+     * @return amountIn Input amount
+     */
+    function _getAmountIn(uint256 amountOut, uint256 reserveIn, uint256 reserveOut) internal pure returns (uint256 amountIn) {
+        require(amountOut > 0, "Insufficient output amount");
+        require(reserveIn > 0 && reserveOut > 0, "Insufficient liquidity");
+
+        // AMM formula: (reserveIn * amountOut * 1000) / ((reserveOut - amountOut) * 997) + 1
+        uint256 numerator = reserveIn * amountOut * 1000;
+        uint256 denominator = (reserveOut - amountOut) * 997;
+        amountIn = (numerator / denominator) + 1;
+    }
 }
