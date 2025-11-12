@@ -258,10 +258,19 @@ export const useAddLiquidity = () => {
       if (!formData.selectedTokenA || !formData.selectedTokenB || !poolExists || !reserves) return;
 
       try {
+        // Clean input: remove trailing dot and leading zeros
+        let cleanAmount = amount.trim();
+        if (cleanAmount.endsWith('.')) {
+          cleanAmount = cleanAmount.slice(0, -1);
+        }
+        if (cleanAmount === '' || cleanAmount === '.') {
+          cleanAmount = '0';
+        }
+
         const amountParsed =
-          amount === ""
+          cleanAmount === "" || cleanAmount === "0"
             ? 0n
-            : parseUnits(amount, formData.selectedTokenA.decimals);
+            : parseUnits(cleanAmount, formData.selectedTokenA.decimals);
         const [reserve0, reserve1] = reserves;
 
         // Calculate token B amount based on pool ratio

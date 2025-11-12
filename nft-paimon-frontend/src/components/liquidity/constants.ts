@@ -39,45 +39,41 @@ export const LIQUIDITY_ADDRESSES = {
 
 /**
  * Supported tokens for liquidity provision
- * Token configuration from centralized config
+ * Dynamically generated from centralized config
+ *
+ * Only includes tokens suitable for DEX liquidity:
+ * - USDP (stablecoin)
+ * - USDC (external stablecoin)
+ * - WBNB (native wrapped token)
+ * - PAIMON (governance token)
+ *
+ * Excludes:
+ * - HYD (RWA collateral, not for DEX)
+ * - esPAIMON (vesting token, non-transferable)
+ * - BUSD (deprecated by Binance)
  */
-export const SUPPORTED_TOKENS: Record<string, Token> = {
-  USDP: {
-    address: config.tokenConfig.usdp.address as `0x${string}`,
-    symbol: config.tokenConfig.usdp.symbol,
-    name: config.tokenConfig.usdp.name,
-    decimals: config.tokenConfig.usdp.decimals,
-    logoURI: config.tokenConfig.usdp.icon,
-  },
-  USDC: {
-    address: config.tokenConfig.usdc.address as `0x${string}`,
-    symbol: config.tokenConfig.usdc.symbol,
-    name: config.tokenConfig.usdc.name,
-    decimals: config.tokenConfig.usdc.decimals,
-    logoURI: config.tokenConfig.usdc.icon,
-  },
-  BUSD: {
-    address: config.tokenConfig.busd.address as `0x${string}`,
-    symbol: config.tokenConfig.busd.symbol,
-    name: config.tokenConfig.busd.name,
-    decimals: config.tokenConfig.busd.decimals,
-    logoURI: config.tokenConfig.busd.icon,
-  },
-  WBNB: {
-    address: config.tokenConfig.wbnb.address as `0x${string}`,
-    symbol: config.tokenConfig.wbnb.symbol,
-    name: config.tokenConfig.wbnb.name,
-    decimals: config.tokenConfig.wbnb.decimals,
-    logoURI: config.tokenConfig.wbnb.icon,
-  },
-  PAIMON: {
-    address: config.tokenConfig.paimon.address as `0x${string}`,
-    symbol: config.tokenConfig.paimon.symbol,
-    name: config.tokenConfig.paimon.name,
-    decimals: config.tokenConfig.paimon.decimals,
-    logoURI: config.tokenConfig.paimon.icon,
-  },
-} as const;
+const generateSupportedTokens = (): Record<string, Token> => {
+  const { tokenConfig } = config;
+  const tokens: Record<string, Token> = {};
+
+  // Only include liquid tokens suitable for DEX
+  const liquidTokenKeys: Array<keyof typeof tokenConfig> = ['usdp', 'usdc', 'wbnb', 'paimon'];
+
+  for (const key of liquidTokenKeys) {
+    const tokenData = tokenConfig[key];
+    tokens[tokenData.symbol.toUpperCase()] = {
+      address: tokenData.address as `0x${string}`,
+      symbol: tokenData.symbol,
+      name: tokenData.name,
+      decimals: tokenData.decimals,
+      logoURI: tokenData.icon,
+    };
+  }
+
+  return tokens;
+};
+
+export const SUPPORTED_TOKENS = generateSupportedTokens();
 
 // ==================== Pool Configurations ====================
 
