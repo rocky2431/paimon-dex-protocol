@@ -7,6 +7,7 @@ import { StakingStats } from './StakingStats';
 import { RewardsDisplay } from './RewardsDisplay';
 import { StakingButton } from './StakingButton';
 import { useStaking } from './hooks/useStaking';
+import { useUserLPPositions } from './hooks/useUserLPPositions';
 import { LIQUIDITY_DESIGN_TOKENS, ANIMATION_CONFIG } from './constants';
 
 /**
@@ -14,7 +15,7 @@ import { LIQUIDITY_DESIGN_TOKENS, ANIMATION_CONFIG } from './constants';
  * OlympusDAO-inspired main container for liquidity mining staking
  *
  * Features:
- * - Pool selection
+ * - Dynamic pool selection (only shows user's LP positions, not hardcoded)
  * - Stake/Unstake tabs with amount input
  * - Staking statistics
  * - Rewards display with claim button
@@ -34,6 +35,9 @@ export const StakingCard: React.FC = () => {
     handleAction,
     handleClaimRewards,
   } = useStaking();
+
+  // Fetch user's LP positions (only pools where user has LP tokens)
+  const { userPools, isLoading: isLoadingPools } = useUserLPPositions();
 
   return (
     <Box sx={{ maxWidth: 900, margin: '0 auto' }}>
@@ -66,6 +70,8 @@ export const StakingCard: React.FC = () => {
           <PoolSelector
             selectedPool={formData.pool}
             onPoolSelect={handlePoolSelect}
+            pools={userPools}
+            isLoading={isLoadingPools}
             disabled={false}
           />
         </Box>

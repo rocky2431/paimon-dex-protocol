@@ -2,7 +2,7 @@
 
 import { Box, Typography, MenuItem, Select, Stack, Chip } from '@mui/material';
 import { LiquidityPool, PoolType } from './types';
-import { LIQUIDITY_POOLS, LIQUIDITY_DESIGN_TOKENS, ANIMATION_CONFIG } from './constants';
+import { LIQUIDITY_DESIGN_TOKENS, ANIMATION_CONFIG } from './constants';
 
 /**
  * PoolSelector Component Props
@@ -12,8 +12,12 @@ interface PoolSelectorProps {
   selectedPool: LiquidityPool | null;
   /** Callback when pool is selected */
   onPoolSelect: (pool: LiquidityPool) => void;
+  /** Available pools to select from (user's LP positions) */
+  pools: LiquidityPool[];
   /** Whether the component is disabled */
   disabled?: boolean;
+  /** Whether pools are still loading */
+  isLoading?: boolean;
 }
 
 /**
@@ -21,15 +25,18 @@ interface PoolSelectorProps {
  * OlympusDAO-inspired pool selector dropdown
  *
  * Features:
- * - Dropdown list of available pools
+ * - Dropdown list of user's LP positions (not hardcoded pools)
  * - Pool type indicator (Stable/Volatile)
  * - APR and TVL display
  * - Orange gradient styling
+ * - Loading state while fetching positions
  */
 export const PoolSelector: React.FC<PoolSelectorProps> = ({
   selectedPool,
   onPoolSelect,
+  pools,
   disabled = false,
+  isLoading = false,
 }) => {
   return (
     <Box
@@ -58,10 +65,10 @@ export const PoolSelector: React.FC<PoolSelectorProps> = ({
         fullWidth
         value={selectedPool?.address || ''}
         onChange={(e) => {
-          const pool = LIQUIDITY_POOLS.find((p) => p.address === e.target.value);
+          const pool = pools.find((p) => p.address === e.target.value);
           if (pool) onPoolSelect(pool);
         }}
-        disabled={disabled}
+        disabled={disabled || isLoading}
         displayEmpty
         sx={{
           borderRadius: LIQUIDITY_DESIGN_TOKENS.RADIUS_MEDIUM,
@@ -79,10 +86,12 @@ export const PoolSelector: React.FC<PoolSelectorProps> = ({
         }}
       >
         <MenuItem value="" disabled>
-          <Typography color="text.disabled">Choose a pool...</Typography>
+          <Typography color="text.disabled">
+            {isLoading ? 'Loading your positions...' : pools.length === 0 ? 'No LP positions found' : 'Choose a pool...'}
+          </Typography>
         </MenuItem>
 
-        {LIQUIDITY_POOLS.map((pool) => (
+        {pools.map((pool) => (
           <MenuItem key={pool.name} value={pool.address}>
             <Stack direction="row" spacing={2} alignItems="center" sx={{ width: '100%' }}>
               {/* Pool name */}

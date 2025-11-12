@@ -9,6 +9,7 @@ import { LPTokenDisplay } from './LPTokenDisplay';
 import { RemovePreview } from './RemovePreview';
 import { RemoveLiquidityButton } from './RemoveLiquidityButton';
 import { useRemoveLiquidity } from './hooks/useRemoveLiquidity';
+import { useUserLPPositions } from './hooks/useUserLPPositions';
 import { LIQUIDITY_DESIGN_TOKENS, ANIMATION_CONFIG, SLIPPAGE_PRESETS } from './constants';
 
 /**
@@ -85,7 +86,7 @@ const SlippageSettings: React.FC<{
  * OlympusDAO-inspired main container for remove liquidity functionality
  *
  * Features:
- * - Pool selection
+ * - Dynamic pool selection (only shows user's LP positions, not hardcoded)
  * - Percentage slider
  * - LP token display
  * - Slippage settings (collapsible)
@@ -105,6 +106,9 @@ export const RemoveLiquidityCard: React.FC = () => {
     removeLiquidityState,
     errorMessage,
   } = useRemoveLiquidity();
+
+  // Fetch user's LP positions (only pools where user has LP tokens)
+  const { userPools, isLoading: isLoadingPools } = useUserLPPositions();
 
   const [showSettings, setShowSettings] = useState(false);
 
@@ -162,6 +166,8 @@ export const RemoveLiquidityCard: React.FC = () => {
           <PoolSelector
             selectedPool={formData.pool}
             onPoolSelect={handlePoolSelect}
+            pools={userPools}
+            isLoading={isLoadingPools}
             disabled={false}
           />
         </Box>
