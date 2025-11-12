@@ -172,7 +172,10 @@ export const useUserLPPositions = (): {
 
   const { data: pairAddresses, isLoading: pairAddressesLoading } = useReadContracts({
     contracts: pairAddressContracts,
-    query: { enabled: !!factoryAddress },
+    query: {
+      enabled: !!factoryAddress,
+      refetchInterval: 5000, // Refetch every 5 seconds
+    },
   });
 
   // Step 2: Get user's LP balance for each pair
@@ -197,7 +200,10 @@ export const useUserLPPositions = (): {
 
   const { data: balances, isLoading: balancesLoading } = useReadContracts({
     contracts: balanceContracts,
-    query: { enabled: balanceContracts.length > 0 },
+    query: {
+      enabled: balanceContracts.length > 0,
+      refetchInterval: 5000, // Refetch every 5 seconds to detect balance changes
+    },
   });
 
   // Step 3: Get reserves and totalSupply for pairs with balance > 0
@@ -249,7 +255,10 @@ export const useUserLPPositions = (): {
 
   const { data: poolData, isLoading: poolDataLoading } = useReadContracts({
     contracts: poolDataContracts,
-    query: { enabled: poolDataContracts.length > 0 },
+    query: {
+      enabled: poolDataContracts.length > 0,
+      refetchInterval: 5000, // Refetch every 5 seconds
+    },
   });
 
   // Step 4: Construct LiquidityPool objects
