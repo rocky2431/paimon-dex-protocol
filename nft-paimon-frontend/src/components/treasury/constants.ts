@@ -11,31 +11,34 @@ import { TESTNET_ADDRESSES } from '@/config/chains/generated/testnet';
 // Other RWA tokens are placeholder configurations for future deployment
 export const RWA_ASSETS: RWAAsset[] = [
   {
+    // TODO Phase 3.2+: Deploy tUST token contract and update with real address
     address: '0x0000000000000000000000000000000000000001',
     name: 'Tokenized US Treasury Bond',
     symbol: 'tUST',
     tier: 1,
     ltvRatio: 60, // 60% LTV for T1
     mintDiscount: 0,
-    isActive: false, // Not yet deployed
+    isActive: false, // Not yet deployed - will be activated in Phase 3.2+
   },
   {
+    // TODO Phase 3.2+: Deploy tCORPBOND token contract and update with real address
     address: '0x0000000000000000000000000000000000000002',
     name: 'Tokenized Corporate Bond',
     symbol: 'tCORPBOND',
     tier: 2,
     ltvRatio: 50, // 50% LTV for T2
     mintDiscount: 0,
-    isActive: false, // Not yet deployed
+    isActive: false, // Not yet deployed - will be activated in Phase 3.2+
   },
   {
+    // TODO Phase 3.2+: Deploy tRE token contract and update with real address
     address: '0x0000000000000000000000000000000000000003',
     name: 'Tokenized Real Estate',
     symbol: 'tRE',
     tier: 3,
     ltvRatio: 40, // 40% LTV for T3
     mintDiscount: 0,
-    isActive: false, // Not yet deployed
+    isActive: false, // Not yet deployed - will be activated in Phase 3.2+
   },
   {
     address: TESTNET_ADDRESSES.core.hyd, // Real deployed address from testnet
