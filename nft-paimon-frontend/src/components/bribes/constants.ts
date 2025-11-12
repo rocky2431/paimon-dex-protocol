@@ -4,13 +4,13 @@
 
 import { config } from "@/config";
 import { BribeToken } from "./types";
+import { TESTNET_ADDRESSES } from '@/config/chains/generated/testnet';
 
 /**
  * BribeMarketplace contract address
- * TODO: Update with actual deployed address
+ * Auto-synced from deployment (BSC Testnet)
  */
-export const BRIBE_MARKETPLACE_ADDRESS =
-  "0x0000000000000000000000000000000000001000" as `0x${string}`;
+export const BRIBE_MARKETPLACE_ADDRESS = TESTNET_ADDRESSES.governance.bribeMarketplace;
 
 /**
  * Platform fee rate (2%)
