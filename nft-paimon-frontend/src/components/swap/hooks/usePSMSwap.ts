@@ -183,8 +183,11 @@ export const usePSMSwap = () => {
         Number(SWAP_CONFIG.BPS_DIVISOR)
       ).toFixed(4)} ${outputToken.symbol}`;
 
-      // Format fee with correct decimals and token symbol
-      const feeFormatted = `${formatUnits(feeBigInt, inputToken.decimals)} ${inputToken.symbol}`;
+      // Format fee with correct decimals
+      // IMPORTANT: Fee is calculated AFTER scaling, so it's in output token decimals
+      // USDC → USDP: fee in 18 decimals (USDP)
+      // USDP → USDC: fee in 6 decimals (USDC)
+      const feeFormatted = `${formatUnits(feeBigInt, outputToken.decimals)} ${outputToken.symbol}`;
 
       return {
         inputAmount: inputAmountBigInt,

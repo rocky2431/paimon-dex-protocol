@@ -138,7 +138,8 @@ export const useSwap = () => {
       ).toFixed(4)} ${outputToken.symbol}`;
 
       // Format fee with correct decimals
-      const feeFormatted = `${formatUnits(feeBigInt, inputToken.decimals)} ${inputToken.symbol}`;
+      // IMPORTANT: Fee is calculated AFTER scaling, so it's in output token decimals
+      const feeFormatted = `${formatUnits(feeBigInt, outputToken.decimals)} ${outputToken.symbol}`;
 
       return {
         inputAmount: inputAmountBigInt,
