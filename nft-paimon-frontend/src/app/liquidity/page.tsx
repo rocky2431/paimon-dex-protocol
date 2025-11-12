@@ -15,10 +15,11 @@
 
 'use client';
 
-import { Container, Typography, Box, Grid, Card, CardContent, Alert, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button } from '@mui/material';
+import { Container, Typography, Box, Grid, Card, CardContent, Alert, Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Skeleton } from '@mui/material';
 import { Navigation } from '@/components/layout/Navigation';
 import { SubNavigation, useTabState } from '@/components/layout/SubNavigation';
 import { useAccount } from 'wagmi';
+import { useLPPools } from '@/hooks/useLPPools';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import AddIcon from '@mui/icons-material/Add';
@@ -53,45 +54,8 @@ export default function LiquidityHub() {
     { value: 'nitro', label: 'Nitro & Boost' },
   ];
 
-  // Mock pool data (will be replaced with real contract queries)
-  const MOCK_POOLS = [
-    {
-      id: 1,
-      name: 'USDP/USDC',
-      tvl: '$1,200,000',
-      volume24h: '$450,000',
-      apr: '25%',
-      gaugeWeight: '35%',
-      hasNitro: true,
-    },
-    {
-      id: 2,
-      name: 'USDP/ETH',
-      tvl: '$800,000',
-      volume24h: '$320,000',
-      apr: '18%',
-      gaugeWeight: '25%',
-      hasNitro: false,
-    },
-    {
-      id: 3,
-      name: 'USDC/ETH',
-      tvl: '$1,500,000',
-      volume24h: '$680,000',
-      apr: '15%',
-      gaugeWeight: '40%',
-      hasNitro: true,
-    },
-    {
-      id: 4,
-      name: 'PAIMON/USDP',
-      tvl: '$650,000',
-      volume24h: '$180,000',
-      apr: '32%',
-      gaugeWeight: '20%',
-      hasNitro: true,
-    },
-  ];
+  // Real pool data from useLPPools hook
+  const { pools, isLoading: poolsLoading, error: poolsError } = useLPPools();
 
   // Mock Nitro Pools data (符合 NitroPool 接口)
   const MOCK_NITRO_POOLS = [
@@ -267,71 +231,80 @@ export default function LiquidityHub() {
                 <Typography variant="h6" fontWeight={700} sx={{ mb: 3, color: '#ff6b00' }}>
                   All Pools
                 </Typography>
-                <TableContainer sx={{ maxHeight: 440 }}>
-                  <Table stickyHeader>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 700 }}>Pool</TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>TVL</TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>24h Volume</TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>APR</TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>Gauge Weight</TableCell>
-                        <TableCell sx={{ fontWeight: 700 }}>Actions</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {MOCK_POOLS.map((pool) => (
-                        <TableRow key={pool.id} sx={{ '&:hover': { backgroundColor: 'rgba(255, 107, 0, 0.05)' } }}>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Typography fontWeight={600}>{pool.name}</Typography>
-                              {pool.hasNitro && (
-                                <Chip
-                                  label="NITRO"
-                                  size="small"
-                                  icon={<LocalFireDepartmentIcon />}
-                                  sx={{
-                                    backgroundColor: '#FF5722',
-                                    color: 'white',
-                                    fontWeight: 700,
-                                    fontSize: '0.65rem',
-                                  }}
-                                />
-                              )}
-                            </Box>
-                          </TableCell>
-                          <TableCell>
-                            <Typography fontWeight={600}>{pool.tvl}</Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Typography color="text.secondary">{pool.volume24h}</Typography>
-                          </TableCell>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                              <TrendingUpIcon sx={{ color: '#4CAF50', fontSize: 18 }} />
-                              <Typography fontWeight={700} color="success.main">
-                                {pool.apr}
-                              </Typography>
-                            </Box>
-                          </TableCell>
-                          <TableCell>
-                            <Chip label={pool.gaugeWeight} size="small" color="primary" />
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              variant="contained"
-                              size="small"
-                              startIcon={<AddIcon />}
-                              sx={{ fontWeight: 700 }}
-                            >
-                              Add
-                            </Button>
-                          </TableCell>
+
+                {/* Loading State */}
+                {poolsLoading && (
+                  <Box sx={{ py: 4 }}>
+                    <Skeleton variant="rectangular" height={300} />
+                  </Box>
+                )}
+
+                {/* Error State */}
+                {poolsError && (
+                  <Alert severity="error" sx={{ mb: 2 }}>
+                    Failed to load pools: {poolsError.message}
+                  </Alert>
+                )}
+
+                {/* Pools Table */}
+                {!poolsLoading && !poolsError && pools && (
+                  <TableContainer sx={{ maxHeight: 440 }}>
+                    <Table stickyHeader>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell sx={{ fontWeight: 700 }}>Pool</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>TVL</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>APR</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>Actions</TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                      </TableHead>
+                      <TableBody>
+                        {pools.map((pool) => (
+                          <TableRow key={pool.id} sx={{ '&:hover': { backgroundColor: 'rgba(255, 107, 0, 0.05)' } }}>
+                            <TableCell>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Typography fontWeight={600}>{pool.name}</Typography>
+                                {pool.gaugeAddress && (
+                                  <Chip
+                                    label="GAUGE"
+                                    size="small"
+                                    sx={{
+                                      backgroundColor: '#4CAF50',
+                                      color: 'white',
+                                      fontWeight: 700,
+                                      fontSize: '0.65rem',
+                                    }}
+                                  />
+                                )}
+                              </Box>
+                            </TableCell>
+                            <TableCell>
+                              <Typography fontWeight={600}>${pool.tvl}</Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <TrendingUpIcon sx={{ color: '#4CAF50', fontSize: 18 }} />
+                                <Typography fontWeight={700} color="success.main">
+                                  {pool.apr}%
+                                </Typography>
+                              </Box>
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                variant="contained"
+                                size="small"
+                                startIcon={<AddIcon />}
+                                sx={{ fontWeight: 700 }}
+                              >
+                                Add
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
               </CardContent>
             </Card>
 
