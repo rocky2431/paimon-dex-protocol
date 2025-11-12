@@ -83,7 +83,7 @@ export const PoolSelector: React.FC<PoolSelectorProps> = ({
         </MenuItem>
 
         {LIQUIDITY_POOLS.map((pool) => (
-          <MenuItem key={pool.address} value={pool.address}>
+          <MenuItem key={pool.name} value={pool.address}>
             <Stack direction="row" spacing={2} alignItems="center" sx={{ width: '100%' }}>
               {/* Pool name */}
               <Typography variant="body1" fontWeight={600} color="text.primary" sx={{ flexGrow: 1 }}>
