@@ -134,6 +134,9 @@ export const useAddLiquidityWithGauge = () => {
 
   // ========== State ==========
   const [formData, setFormData] = useState<AddLiquidityWithGaugeFormData>({
+    selectedTokenA: null,
+    selectedTokenB: null,
+    pairAddress: null,
     pool: null,
     tokenA: null,
     tokenB: null,

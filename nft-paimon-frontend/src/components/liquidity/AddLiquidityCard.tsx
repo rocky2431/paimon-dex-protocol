@@ -3,7 +3,7 @@
 import { Card, Typography, Box, Stack, IconButton, Collapse } from '@mui/material';
 import { useState } from 'react';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { PoolSelector } from './PoolSelector';
+import { TokenPairSelector } from './TokenPairSelector';
 import { TokenInputPair } from './TokenInputPair';
 import { LiquidityPreview } from './LiquidityPreview';
 import { AddLiquidityButton } from './AddLiquidityButton';
@@ -84,8 +84,9 @@ const SlippageSettings: React.FC<{
  * OlympusDAO-inspired main container for add liquidity functionality
  *
  * Features:
- * - Pool selection
- * - Dual token input
+ * - Token pair selection (dynamic pool detection)
+ * - Pool creation support (if pair doesn't exist)
+ * - Dual token input (only shown if pool exists)
  * - Slippage settings (collapsible)
  * - Liquidity preview
  * - Add liquidity button
@@ -94,12 +95,14 @@ const SlippageSettings: React.FC<{
 export const AddLiquidityCard: React.FC = () => {
   const {
     formData,
-    handlePoolSelect,
+    handleTokenASelect,
+    handleTokenBSelect,
     handleTokenAChange,
     handleSlippageChange,
     handleAction,
     preview,
     validation,
+    poolExists,
     addLiquidityState,
     errorMessage,
   } = useAddLiquidity();
@@ -155,17 +158,21 @@ export const AddLiquidityCard: React.FC = () => {
           <SlippageSettings slippageBps={formData.slippageBps} onChange={handleSlippageChange} />
         </Collapse>
 
-        {/* Pool selector */}
+        {/* Token pair selector */}
         <Box sx={{ mb: 3 }}>
-          <PoolSelector
-            selectedPool={formData.pool}
-            onPoolSelect={handlePoolSelect}
+          <TokenPairSelector
+            selectedTokenA={formData.selectedTokenA}
+            selectedTokenB={formData.selectedTokenB}
+            onTokenASelect={handleTokenASelect}
+            onTokenBSelect={handleTokenBSelect}
+            poolExists={poolExists || false}
+            pool={formData.pool}
             disabled={false}
           />
         </Box>
 
-        {/* Token input pair */}
-        {formData.pool && (
+        {/* Token input pair - only show if pool exists */}
+        {poolExists && formData.pool && (
           <Box sx={{ mb: 3 }}>
             <TokenInputPair
               tokenA={formData.tokenA}

@@ -16,7 +16,7 @@ import {
   Token,
   TokenAmount,
   LiquidityPool,
-  AddLiquidityParams,
+  PoolType,
 } from "../types";
 import {
   calculateAmountMin,
@@ -33,7 +33,33 @@ import {
 import { config } from "@/config";
 
 /**
- * PancakeSwap Router ABI (minimal)
+ * Factory ABI (minimal)
+ */
+const FACTORY_ABI = [
+  {
+    inputs: [
+      { name: "tokenA", type: "address" },
+      { name: "tokenB", type: "address" },
+    ],
+    name: "getPair",
+    outputs: [{ name: "pair", type: "address" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      { name: "tokenA", type: "address" },
+      { name: "tokenB", type: "address" },
+    ],
+    name: "createPair",
+    outputs: [{ name: "pair", type: "address" }],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+] as const;
+
+/**
+ * Router ABI (minimal)
  */
 const ROUTER_ABI = [
   {
@@ -54,17 +80,6 @@ const ROUTER_ABI = [
       { name: "liquidity", type: "uint256" },
     ],
     stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      { name: "amountA", type: "uint256" },
-      { name: "reserveA", type: "uint256" },
-      { name: "reserveB", type: "uint256" },
-    ],
-    name: "quote",
-    outputs: [{ name: "amountB", type: "uint256" }],
-    stateMutability: "pure",
     type: "function",
   },
 ] as const;
@@ -94,25 +109,30 @@ const PAIR_ABI = [
 ] as const;
 
 /**
- * useAddLiquidity Hook
- * Manages the complete add liquidity flow with wagmi integration
+ * useAddLiquidity Hook (Refactored)
+ * Supports dynamic token pair selection and automatic pool creation
  *
- * Features:
- * - Token balance fetching
- * - Allowance checking
- * - Token approval
- * - Pool reserve fetching
- * - Liquidity calculation
- * - Add liquidity transaction
- * - State machine management
+ * Flow:
+ * 1. User selects Token A and Token B
+ * 2. Query Factory.getPair(tokenA, tokenB)
+ * 3. If pair exists (address !== 0x0000...0000):
+ *    - Fetch reserves and proceed to add liquidity
+ * 4. If pair does not exist:
+ *    - Show "Create Pool" button
+ *    - User clicks → Call Factory.createPair()
+ *    - After creation, proceed to add liquidity
  */
 export const useAddLiquidity = () => {
   const { address } = useAccount();
   const routerAddress = config.dex.router as `0x${string}` | undefined;
+  const factoryAddress = config.dex.factory as `0x${string}` | undefined;
   const { writeContractAsync } = useWriteContract();
 
   // ========== State ==========
   const [formData, setFormData] = useState<AddLiquidityFormData>({
+    selectedTokenA: null,
+    selectedTokenB: null,
+    pairAddress: null,
     pool: null,
     tokenA: null,
     tokenB: null,
@@ -126,53 +146,71 @@ export const useAddLiquidity = () => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined);
 
+  // ========== Query Pair Address from Factory ==========
+  const { data: pairAddressFromFactory, refetch: refetchPairAddress } = useReadContract({
+    address: factoryAddress,
+    abi: FACTORY_ABI,
+    functionName: "getPair",
+    args:
+      formData.selectedTokenA && formData.selectedTokenB
+        ? [formData.selectedTokenA.address, formData.selectedTokenB.address]
+        : undefined,
+    query: {
+      enabled: !!factoryAddress && !!formData.selectedTokenA && !!formData.selectedTokenB,
+    },
+  });
+
+  // Check if pool exists (address !== 0x0000...0000)
+  const poolExists =
+    pairAddressFromFactory && pairAddressFromFactory !== ("0x0000000000000000000000000000000000000000" as `0x${string}`);
+
   // ========== Token Balance Queries ==========
   const { data: balanceA } = useReadContract({
-    address: formData.pool?.token0.address,
+    address: formData.selectedTokenA?.address,
     abi: erc20Abi,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
-    query: { enabled: !!address && !!formData.pool },
+    query: { enabled: !!address && !!formData.selectedTokenA },
   });
 
   const { data: balanceB } = useReadContract({
-    address: formData.pool?.token1.address,
+    address: formData.selectedTokenB?.address,
     abi: erc20Abi,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
-    query: { enabled: !!address && !!formData.pool },
+    query: { enabled: !!address && !!formData.selectedTokenB },
   });
 
   // ========== Allowance Queries ==========
   const { data: allowanceA } = useReadContract({
-    address: formData.pool?.token0.address,
+    address: formData.selectedTokenA?.address,
     abi: erc20Abi,
     functionName: "allowance",
     args: address && routerAddress ? [address, routerAddress] : undefined,
-    query: { enabled: !!address && !!formData.pool && !!routerAddress },
+    query: { enabled: !!address && !!formData.selectedTokenA && !!routerAddress },
   });
 
   const { data: allowanceB } = useReadContract({
-    address: formData.pool?.token1.address,
+    address: formData.selectedTokenB?.address,
     abi: erc20Abi,
     functionName: "allowance",
     args: address && routerAddress ? [address, routerAddress] : undefined,
-    query: { enabled: !!address && !!formData.pool && !!routerAddress },
+    query: { enabled: !!address && !!formData.selectedTokenB && !!routerAddress },
   });
 
-  // ========== Pool Reserve Queries ==========
+  // ========== Pool Reserve Queries (only if pool exists) ==========
   const { data: reserves } = useReadContract({
-    address: formData.pool?.address,
+    address: pairAddressFromFactory,
     abi: PAIR_ABI,
     functionName: "getReserves",
-    query: { enabled: !!formData.pool, refetchInterval: 10000 }, // Refresh every 10s
+    query: { enabled: !!poolExists, refetchInterval: 10000 },
   });
 
   const { data: totalSupply } = useReadContract({
-    address: formData.pool?.address,
+    address: pairAddressFromFactory,
     abi: PAIR_ABI,
     functionName: "totalSupply",
-    query: { enabled: !!formData.pool, refetchInterval: 10000 },
+    query: { enabled: !!poolExists, refetchInterval: 10000 },
   });
 
   // ========== Transaction Receipt ==========
@@ -183,26 +221,31 @@ export const useAddLiquidity = () => {
   // ========== Handlers ==========
 
   /**
-   * Handle pool selection
+   * Handle token A selection
    */
-  const handlePoolSelect = useCallback((pool: LiquidityPool) => {
+  const handleTokenASelect = useCallback((token: Token) => {
     setFormData((prev) => ({
       ...prev,
-      pool,
-      tokenA: {
-        token: pool.token0,
-        amount: 0n,
-        amountFormatted: "",
-        balance: 0n,
-        balanceFormatted: "0.00",
-      },
-      tokenB: {
-        token: pool.token1,
-        amount: 0n,
-        amountFormatted: "",
-        balance: 0n,
-        balanceFormatted: "0.00",
-      },
+      selectedTokenA: token,
+      tokenA: null, // Reset amount
+      tokenB: null,
+      pairAddress: null,
+      pool: null,
+    }));
+    setAddLiquidityState(AddLiquidityState.IDLE);
+  }, []);
+
+  /**
+   * Handle token B selection
+   */
+  const handleTokenBSelect = useCallback((token: Token) => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedTokenB: token,
+      tokenA: null, // Reset amount
+      tokenB: null,
+      pairAddress: null,
+      pool: null,
     }));
     setAddLiquidityState(AddLiquidityState.IDLE);
   }, []);
@@ -212,13 +255,13 @@ export const useAddLiquidity = () => {
    */
   const handleTokenAChange = useCallback(
     (amount: string) => {
-      if (!formData.pool || !reserves) return;
+      if (!formData.selectedTokenA || !formData.selectedTokenB || !poolExists || !reserves) return;
 
       try {
         const amountParsed =
           amount === ""
             ? 0n
-            : parseUnits(amount, formData.pool.token0.decimals);
+            : parseUnits(amount, formData.selectedTokenA.decimals);
         const [reserve0, reserve1] = reserves;
 
         // Calculate token B amount based on pool ratio
@@ -230,26 +273,26 @@ export const useAddLiquidity = () => {
         setFormData((prev) => ({
           ...prev,
           tokenA: {
-            token: formData.pool!.token0,
+            token: formData.selectedTokenA!,
             amount: amountParsed,
             amountFormatted: amount,
             balance: balanceA || 0n,
             balanceFormatted: formatUnits(
               balanceA || 0n,
-              formData.pool!.token0.decimals
+              formData.selectedTokenA!.decimals
             ),
           },
           tokenB: {
-            token: formData.pool!.token1,
+            token: formData.selectedTokenB!,
             amount: amountB,
             amountFormatted: formatUnits(
               amountB,
-              formData.pool!.token1.decimals
+              formData.selectedTokenB!.decimals
             ),
             balance: balanceB || 0n,
             balanceFormatted: formatUnits(
               balanceB || 0n,
-              formData.pool!.token1.decimals
+              formData.selectedTokenB!.decimals
             ),
           },
         }));
@@ -257,7 +300,7 @@ export const useAddLiquidity = () => {
         console.error("Invalid amount input:", error);
       }
     },
-    [formData.pool, reserves, balanceA, balanceB]
+    [formData.selectedTokenA, formData.selectedTokenB, poolExists, reserves, balanceA, balanceB]
   );
 
   /**
@@ -266,6 +309,34 @@ export const useAddLiquidity = () => {
   const handleSlippageChange = useCallback((slippageBps: number) => {
     setFormData((prev) => ({ ...prev, slippageBps }));
   }, []);
+
+  /**
+   * Create new pool
+   */
+  const createPool = useCallback(async () => {
+    if (!formData.selectedTokenA || !formData.selectedTokenB || !factoryAddress) return;
+
+    try {
+      setAddLiquidityState(AddLiquidityState.CREATING_POOL);
+      const hash = await writeContractAsync({
+        address: factoryAddress,
+        abi: FACTORY_ABI,
+        functionName: "createPair",
+        args: [formData.selectedTokenA.address, formData.selectedTokenB.address],
+      });
+
+      // Wait for transaction confirmation
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // Refetch pair address
+      await refetchPairAddress();
+
+      setAddLiquidityState(AddLiquidityState.IDLE);
+    } catch (error: any) {
+      setAddLiquidityState(AddLiquidityState.ERROR);
+      setErrorMessage(error.message || "Pool creation failed");
+    }
+  }, [formData.selectedTokenA, formData.selectedTokenB, factoryAddress, writeContractAsync, refetchPairAddress]);
 
   /**
    * Approve Token A
@@ -281,7 +352,7 @@ export const useAddLiquidity = () => {
         functionName: "approve",
         args: [routerAddress, formData.tokenA.amount],
       });
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for confirmation
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     } catch (error: any) {
       setAddLiquidityState(AddLiquidityState.ERROR);
       setErrorMessage(error.message || "Approval failed");
@@ -302,7 +373,7 @@ export const useAddLiquidity = () => {
         functionName: "approve",
         args: [routerAddress, formData.tokenB.amount],
       });
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for confirmation
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     } catch (error: any) {
       setAddLiquidityState(AddLiquidityState.ERROR);
       setErrorMessage(error.message || "Approval failed");
@@ -314,7 +385,8 @@ export const useAddLiquidity = () => {
    */
   const addLiquidity = useCallback(async () => {
     if (
-      !formData.pool ||
+      !formData.selectedTokenA ||
+      !formData.selectedTokenB ||
       !formData.tokenA ||
       !formData.tokenB ||
       !address ||
@@ -326,37 +398,15 @@ export const useAddLiquidity = () => {
     try {
       setAddLiquidityState(AddLiquidityState.ADDING);
 
-      // Check if tokenA matches pool.token0 (token order matching)
-      const isTokenAFirst =
-        formData.tokenA.token.address.toLowerCase() ===
-        formData.pool.token0.address.toLowerCase();
-
-      // Match token addresses and amounts to pool order
-      const routerTokenA = isTokenAFirst
-        ? formData.pool.token0.address
-        : formData.pool.token1.address;
-      const routerTokenB = isTokenAFirst
-        ? formData.pool.token1.address
-        : formData.pool.token0.address;
-      const routerAmountA = isTokenAFirst
-        ? formData.tokenA.amount
-        : formData.tokenB.amount;
-      const routerAmountB = isTokenAFirst
-        ? formData.tokenB.amount
-        : formData.tokenA.amount;
-
-      // Check if this is a new pool (no liquidity yet)
       const [reserve0, reserve1] = reserves;
       const isNewPool = reserve0 === 0n && reserve1 === 0n;
 
-      // For new pools, set amountMin to 0 to avoid ratio issues
-      // For existing pools, apply slippage protection
       const amountAMin = isNewPool
         ? 0n
-        : calculateAmountMin(routerAmountA, formData.slippageBps);
+        : calculateAmountMin(formData.tokenA.amount, formData.slippageBps);
       const amountBMin = isNewPool
         ? 0n
-        : calculateAmountMin(routerAmountB, formData.slippageBps);
+        : calculateAmountMin(formData.tokenB.amount, formData.slippageBps);
 
       const deadline = calculateDeadline(formData.deadlineMinutes);
 
@@ -365,10 +415,10 @@ export const useAddLiquidity = () => {
         abi: ROUTER_ABI,
         functionName: "addLiquidity",
         args: [
-          routerTokenA,
-          routerTokenB,
-          routerAmountA,
-          routerAmountB,
+          formData.selectedTokenA.address,
+          formData.selectedTokenB.address,
+          formData.tokenA.amount,
+          formData.tokenB.amount,
           amountAMin,
           amountBMin,
           address,
@@ -384,25 +434,27 @@ export const useAddLiquidity = () => {
   }, [formData, address, routerAddress, reserves, writeContractAsync]);
 
   /**
-   * Main action handler (routes to appropriate function based on state)
+   * Main action handler
    */
   const handleAction = useCallback(() => {
-    if (addLiquidityState === AddLiquidityState.NEEDS_APPROVAL_A) {
+    if (addLiquidityState === AddLiquidityState.POOL_NOT_EXIST) {
+      createPool();
+    } else if (addLiquidityState === AddLiquidityState.NEEDS_APPROVAL_A) {
       approveTokenA();
     } else if (addLiquidityState === AddLiquidityState.NEEDS_APPROVAL_B) {
       approveTokenB();
     } else if (addLiquidityState === AddLiquidityState.READY) {
       addLiquidity();
     }
-  }, [addLiquidityState, approveTokenA, approveTokenB, addLiquidity]);
+  }, [addLiquidityState, createPool, approveTokenA, approveTokenB, addLiquidity]);
 
   // ========== Computed Values ==========
 
   /**
-   * Liquidity preview (LP tokens, pool share, price ratios)
+   * Liquidity preview
    */
   const preview = useMemo((): LiquidityPreview | null => {
-    if (!formData.tokenA || !formData.tokenB || !reserves || !totalSupply)
+    if (!formData.tokenA || !formData.tokenB || !reserves || !totalSupply || !formData.selectedTokenA || !formData.selectedTokenB)
       return null;
 
     const [reserve0, reserve1] = reserves;
@@ -422,19 +474,19 @@ export const useAddLiquidity = () => {
     const priceToken0 = formatPriceRatio(
       reserve0,
       reserve1,
-      formData.pool!.token0.decimals,
-      formData.pool!.token1.decimals
+      formData.selectedTokenA.decimals,
+      formData.selectedTokenB.decimals
     );
     const priceToken1 = formatPriceRatio(
       reserve1,
       reserve0,
-      formData.pool!.token1.decimals,
-      formData.pool!.token0.decimals
+      formData.selectedTokenB.decimals,
+      formData.selectedTokenA.decimals
     );
 
     return {
       lpTokens,
-      lpTokensFormatted: formatUnits(lpTokens, 18), // LP tokens are always 18 decimals
+      lpTokensFormatted: formatUnits(lpTokens, 18),
       shareOfPool,
       priceToken0,
       priceToken1,
@@ -453,8 +505,12 @@ export const useAddLiquidity = () => {
    * Input validation
    */
   const validation = useMemo((): ValidationResult => {
-    if (!formData.pool) {
-      return { isValid: false, error: VALIDATION_MESSAGES.NO_POOL_SELECTED };
+    if (!formData.selectedTokenA || !formData.selectedTokenB) {
+      return { isValid: false, error: "Please select both tokens" };
+    }
+
+    if (!poolExists) {
+      return { isValid: true }; // Allow showing "Create Pool" button
     }
 
     if (!formData.tokenA || formData.tokenA.amount === 0n) {
@@ -476,45 +532,46 @@ export const useAddLiquidity = () => {
     }
 
     return { isValid: true };
-  }, [formData, balanceA, balanceB]);
+  }, [formData, poolExists, balanceA, balanceB]);
 
   // ========== Side Effects ==========
 
   /**
-   * Update token balances when they change
+   * Update pair address when factory returns result
    */
   useEffect(() => {
-    setFormData((prev) => {
-      if (!prev.pool || !prev.tokenA || !prev.tokenB) return prev;
-
-      return {
+    if (pairAddressFromFactory) {
+      setFormData((prev) => ({
         ...prev,
-        tokenA: {
-          ...prev.tokenA,
-          balance: balanceA || 0n,
-          balanceFormatted: formatUnits(
-            balanceA || 0n,
-            prev.pool.token0.decimals
-          ),
-        },
-        tokenB: {
-          ...prev.tokenB,
-          balance: balanceB || 0n,
-          balanceFormatted: formatUnits(
-            balanceB || 0n,
-            prev.pool.token1.decimals
-          ),
-        },
-      };
-    });
-  }, [balanceA, balanceB]);
+        pairAddress: pairAddressFromFactory,
+        pool: poolExists && formData.selectedTokenA && formData.selectedTokenB
+          ? {
+              address: pairAddressFromFactory,
+              token0: formData.selectedTokenA,
+              token1: formData.selectedTokenB,
+              type: PoolType.VOLATILE, // Default to volatile
+              reserve0: reserves ? reserves[0] : 0n,
+              reserve1: reserves ? reserves[1] : 0n,
+              totalSupply: totalSupply || 0n,
+              name: `${formData.selectedTokenA.symbol}/${formData.selectedTokenB.symbol}`,
+            }
+          : null,
+      }));
+
+      // Set state based on pool existence
+      if (!poolExists && formData.selectedTokenA && formData.selectedTokenB) {
+        setAddLiquidityState(AddLiquidityState.POOL_NOT_EXIST);
+      } else {
+        setAddLiquidityState(AddLiquidityState.IDLE);
+      }
+    }
+  }, [pairAddressFromFactory, poolExists, formData.selectedTokenA, formData.selectedTokenB, reserves, totalSupply]);
 
   /**
    * Update state based on approval status
    */
   useEffect(() => {
-    if (!formData.tokenA || !formData.tokenB || !validation.isValid) {
-      setAddLiquidityState(AddLiquidityState.IDLE);
+    if (!formData.tokenA || !formData.tokenB || !validation.isValid || !poolExists) {
       return;
     }
 
@@ -528,7 +585,7 @@ export const useAddLiquidity = () => {
     } else {
       setAddLiquidityState(AddLiquidityState.READY);
     }
-  }, [formData, allowanceA, allowanceB, validation.isValid]);
+  }, [formData, allowanceA, allowanceB, validation.isValid, poolExists]);
 
   /**
    * Handle transaction success
@@ -536,7 +593,6 @@ export const useAddLiquidity = () => {
   useEffect(() => {
     if (isTxSuccess) {
       setAddLiquidityState(AddLiquidityState.SUCCESS);
-      // Reset form after 3 seconds
       setTimeout(() => {
         setFormData((prev) => ({ ...prev, tokenA: null, tokenB: null }));
         setAddLiquidityState(AddLiquidityState.IDLE);
@@ -548,13 +604,15 @@ export const useAddLiquidity = () => {
     // Form data
     formData,
     // Actions
-    handlePoolSelect,
+    handleTokenASelect,
+    handleTokenBSelect,
     handleTokenAChange,
     handleSlippageChange,
     handleAction,
     // Computed
     preview,
     validation,
+    poolExists,
     // State
     addLiquidityState,
     errorMessage,

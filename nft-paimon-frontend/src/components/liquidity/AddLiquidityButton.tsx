@@ -23,11 +23,12 @@ interface AddLiquidityButtonProps {
  * OlympusDAO-inspired pill-shaped action button
  *
  * Features:
- * - State-based text display
+ * - State-based text display (including pool creation)
  * - Loading spinner during transactions
- * - Pulse animation during approval/adding
+ * - Pulse animation during pool creation/approval/adding
  * - Orange gradient background
  * - Hover lift effect
+ * - Handles complete flow: Create Pool → Approve Tokens → Add Liquidity
  */
 export const AddLiquidityButton: React.FC<AddLiquidityButtonProps> = ({
   state,
@@ -42,6 +43,10 @@ export const AddLiquidityButton: React.FC<AddLiquidityButtonProps> = ({
     switch (state) {
       case AddLiquidityState.IDLE:
         return 'Enter Amounts';
+      case AddLiquidityState.POOL_NOT_EXIST:
+        return 'Create Pool';
+      case AddLiquidityState.CREATING_POOL:
+        return 'Creating Pool...';
       case AddLiquidityState.NEEDS_APPROVAL_A:
         return 'Approve Token A';
       case AddLiquidityState.NEEDS_APPROVAL_B:
@@ -67,6 +72,7 @@ export const AddLiquidityButton: React.FC<AddLiquidityButtonProps> = ({
    * Whether the button is in a loading state
    */
   const isLoading =
+    state === AddLiquidityState.CREATING_POOL ||
     state === AddLiquidityState.APPROVING_A ||
     state === AddLiquidityState.APPROVING_B ||
     state === AddLiquidityState.ADDING;

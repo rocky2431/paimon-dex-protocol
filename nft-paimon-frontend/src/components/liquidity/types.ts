@@ -11,6 +11,10 @@
 export enum AddLiquidityState {
   /** Initial state - waiting for user input */
   IDLE = "IDLE",
+  /** Pool does not exist - needs creation */
+  POOL_NOT_EXIST = "POOL_NOT_EXIST",
+  /** Creating new pool */
+  CREATING_POOL = "CREATING_POOL",
   /** Token A needs approval */
   NEEDS_APPROVAL_A = "NEEDS_APPROVAL_A",
   /** Token B needs approval */
@@ -113,7 +117,13 @@ export interface TokenAmount {
  * Add liquidity form data
  */
 export interface AddLiquidityFormData {
-  /** Selected pool */
+  /** Selected token A (user chooses freely) */
+  selectedTokenA: Token | null;
+  /** Selected token B (user chooses freely) */
+  selectedTokenB: Token | null;
+  /** Detected/created pool address */
+  pairAddress: `0x${string}` | null;
+  /** Pool information (fetched after pair detection) */
   pool: LiquidityPool | null;
   /** Token A amount */
   tokenA: TokenAmount | null;
