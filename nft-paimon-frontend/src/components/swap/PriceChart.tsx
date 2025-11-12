@@ -169,12 +169,13 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
     console.log('[PriceChart] Price calculation:', {
       pair,
       token0Address,
-      token0Config: token0Config?.address,
-      token1Config: token1Config?.address,
+      token0Config: { address: token0Config?.address, symbol: token0Config?.symbol, decimals: token0Decimals },
+      token1Config: { address: token1Config?.address, symbol: token1Config?.symbol, decimals: token1Decimals },
       isToken0First,
       reserve0: reserve0Formatted,
       reserve1: reserve1Formatted,
       price,
+      priceType: typeof price,
     });
 
     return price;
@@ -262,6 +263,16 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
 
     setLoading(true);
 
+    // Validate currentPrice is a valid number
+    if (typeof currentPrice !== 'number' || isNaN(currentPrice) || !isFinite(currentPrice)) {
+      console.error('[PriceChart] Invalid currentPrice:', currentPrice);
+      seriesRef.current.setData([]);
+      setLoading(false);
+      return;
+    }
+
+    console.log('[PriceChart] Generating chart data with price:', currentPrice);
+
     // Generate simple price line based on timeframe
     const now = Math.floor(Date.now() / 1000);
     const dataPoints: LineData[] = [];
@@ -281,12 +292,14 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
       const time = now - (periods - i) * interval;
       // Add small random variation (±1%) to show price movement
       const variation = 1 + (Math.random() - 0.5) * 0.02;
+      const value = currentPrice * variation;
       dataPoints.push({
         time: time as any,
-        value: currentPrice * variation,
+        value: value,
       });
     }
 
+    console.log('[PriceChart] Sample data points:', dataPoints.slice(0, 3));
     seriesRef.current.setData(dataPoints);
     chartRef.current?.timeScale().fitContent();
     setLoading(false);
