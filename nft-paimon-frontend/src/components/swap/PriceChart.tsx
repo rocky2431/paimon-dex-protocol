@@ -259,10 +259,16 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
 
   // Update chart with current price
   useEffect(() => {
-    if (!seriesRef.current) return;
+    console.log('[PriceChart] useEffect triggered:', { pair, currentPrice, timeframe, hasSeriesRef: !!seriesRef.current });
+
+    if (!seriesRef.current) {
+      console.warn('[PriceChart] seriesRef.current is null, skipping update');
+      return;
+    }
 
     // Clear chart if no price data
     if (!currentPrice) {
+      console.log('[PriceChart] No price data, clearing chart');
       seriesRef.current.setData([]);
       setLoading(false);
       return;
@@ -310,14 +316,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
     seriesRef.current.setData(dataPoints);
     chartRef.current?.timeScale().fitContent();
     setLoading(false);
-  }, [currentPrice, timeframe]);
-
-  // Clear chart when pair changes
-  useEffect(() => {
-    if (seriesRef.current) {
-      seriesRef.current.setData([]);
-    }
-  }, [pair]);
+  }, [currentPrice, timeframe, pair]); // Add 'pair' dependency to ensure refresh on pair change
 
   const handleTimeframeChange = (_event: React.MouseEvent<HTMLElement>, newTimeframe: string | null) => {
     if (newTimeframe !== null) {
