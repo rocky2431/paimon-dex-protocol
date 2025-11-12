@@ -122,6 +122,15 @@ const getKnownPairs = (): TokenPairConfig[] => {
       decimalsB: tokenConfig.wbnb.decimals,
       type: PoolType.VOLATILE,
     },
+    {
+      tokenA: tokenConfig.hyd.address as `0x${string}`,
+      tokenB: tokenConfig.usdp.address as `0x${string}`,
+      symbolA: tokenConfig.hyd.symbol,
+      symbolB: tokenConfig.usdp.symbol,
+      decimalsA: tokenConfig.hyd.decimals,
+      decimalsB: tokenConfig.usdp.decimals,
+      type: PoolType.VOLATILE,
+    },
   ];
 };
 
