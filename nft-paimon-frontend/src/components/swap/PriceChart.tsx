@@ -87,6 +87,16 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
     return testnet.tokenConfig[tokenKey]?.decimals || 18;
   }, [token1Symbol]);
 
+  // Query token0 address to determine actual order
+  const { data: token0Address } = useReadContract({
+    address: pairAddress as `0x${string}`,
+    abi: PAIR_ABI,
+    functionName: 'token0',
+    query: {
+      enabled: !!pairAddress && pairAddress !== '0x0000000000000000000000000000000000000000',
+    },
+  });
+
   // Query reserves from pair contract
   const { data: reserves, refetch: refetchReserves } = useReadContract({
     address: pairAddress as `0x${string}`,
@@ -103,18 +113,50 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
 
   // Calculate current price from reserves
   const currentPrice = useMemo(() => {
-    if (!reserves) return null;
+    if (!reserves || !token0Address) return null;
 
     const [reserve0, reserve1] = reserves;
+
+    // Get token addresses from config
+    const token0ConfigAddr = Object.values(testnet.tokenConfig).find(
+      t => t.symbol === token0Symbol
+    )?.address.toLowerCase();
+    const token1ConfigAddr = Object.values(testnet.tokenConfig).find(
+      t => t.symbol === token1Symbol
+    )?.address.toLowerCase();
+
+    // Determine which reserve corresponds to which token
+    const isToken0First = token0Address.toLowerCase() === token0ConfigAddr;
 
     // Convert reserves to numbers with proper decimals
     const reserve0Formatted = Number(formatUnits(reserve0, token0Decimals));
     const reserve1Formatted = Number(formatUnits(reserve1, token1Decimals));
 
-    // Price = reserve1 / reserve0
-    if (reserve0Formatted === 0) return null;
-    return reserve1Formatted / reserve0Formatted;
-  }, [reserves, token0Decimals, token1Decimals]);
+    // Calculate price: how many token1 per 1 token0
+    let price: number;
+    if (isToken0First) {
+      // token0Symbol is actually token0 in pair
+      // Price = reserve1 / reserve0
+      price = reserve0Formatted === 0 ? 0 : reserve1Formatted / reserve0Formatted;
+    } else {
+      // token0Symbol is actually token1 in pair (reversed)
+      // Price = reserve0 / reserve1
+      price = reserve1Formatted === 0 ? 0 : reserve0Formatted / reserve1Formatted;
+    }
+
+    console.log('[PriceChart] Price calculation:', {
+      pair,
+      token0Address,
+      token0ConfigAddr,
+      token1ConfigAddr,
+      isToken0First,
+      reserve0: reserve0Formatted,
+      reserve1: reserve1Formatted,
+      price,
+    });
+
+    return price;
+  }, [reserves, token0Address, token0Symbol, token1Symbol, token0Decimals, token1Decimals, pair]);
 
   // Initialize chart
   useEffect(() => {
@@ -187,7 +229,14 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
 
   // Update chart with current price
   useEffect(() => {
-    if (!seriesRef.current || !currentPrice) return;
+    if (!seriesRef.current) return;
+
+    // Clear chart if no price data
+    if (!currentPrice) {
+      seriesRef.current.setData([]);
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
 
@@ -220,6 +269,13 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
     chartRef.current?.timeScale().fitContent();
     setLoading(false);
   }, [currentPrice, timeframe]);
+
+  // Clear chart when pair changes
+  useEffect(() => {
+    if (seriesRef.current) {
+      seriesRef.current.setData([]);
+    }
+  }, [pair]);
 
   const handleTimeframeChange = (_event: React.MouseEvent<HTMLElement>, newTimeframe: string | null) => {
     if (newTimeframe !== null) {
