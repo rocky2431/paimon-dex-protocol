@@ -39,6 +39,7 @@ export interface SwapCalculation {
   inputAmount: bigint;
   outputAmount: bigint;
   fee: bigint;
+  feeFormatted: string; // Formatted fee string with token symbol (e.g., "1.00 USDC")
   feePercentage: string;
   priceImpact: string;
   exchangeRate: string;

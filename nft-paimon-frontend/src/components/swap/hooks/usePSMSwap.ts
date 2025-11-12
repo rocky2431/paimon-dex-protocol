@@ -130,7 +130,7 @@ export const usePSMSwap = () => {
   });
 
   // Check allowance
-  const { data: allowance } = useReadContract({
+  const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address: TOKEN_CONFIG[formData.inputToken].address,
     abi: ERC20_ABI,
     functionName: 'allowance',
@@ -183,10 +183,14 @@ export const usePSMSwap = () => {
         Number(SWAP_CONFIG.BPS_DIVISOR)
       ).toFixed(4)} ${outputToken.symbol}`;
 
+      // Format fee with correct decimals and token symbol
+      const feeFormatted = `${formatUnits(feeBigInt, inputToken.decimals)} ${inputToken.symbol}`;
+
       return {
         inputAmount: inputAmountBigInt,
         outputAmount: outputAmountBigInt,
         fee: feeBigInt,
+        feeFormatted,
         feePercentage: SWAP_CONFIG.FEE_PERCENTAGE,
         priceImpact: '0.00', // PSM has no price impact (1:1 swap)
         exchangeRate,
@@ -287,12 +291,18 @@ export const usePSMSwap = () => {
     try {
       setSwapState(SwapState.APPROVING);
 
-      await writeContractAsync({
+      const hash = await writeContractAsync({
         address: TOKEN_CONFIG[formData.inputToken].address,
         abi: ERC20_ABI,
         functionName: 'approve',
         args: [CONTRACT_ADDRESSES.PSM, calculation.inputAmount],
       });
+
+      // Wait for transaction confirmation (2 seconds should be enough for BSC)
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Refetch allowance to update state
+      await refetchAllowance();
 
       setSwapState(SwapState.APPROVED);
     } catch (error) {
@@ -300,7 +310,7 @@ export const usePSMSwap = () => {
       setSwapState(SwapState.ERROR);
       setErrorMessage(MESSAGES.APPROVAL_ERROR);
     }
-  }, [address, calculation, formData.inputToken, writeContractAsync]);
+  }, [address, calculation, formData.inputToken, writeContractAsync, refetchAllowance]);
 
   // Execute swap
   const handleSwap = useCallback(async () => {

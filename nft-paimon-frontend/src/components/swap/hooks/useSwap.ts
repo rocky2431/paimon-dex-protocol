@@ -137,10 +137,14 @@ export const useSwap = () => {
         Number(SWAP_CONFIG.BPS_DIVISOR)
       ).toFixed(4)} ${outputToken.symbol}`;
 
+      // Format fee with correct decimals
+      const feeFormatted = `${formatUnits(feeBigInt, inputToken.decimals)} ${inputToken.symbol}`;
+
       return {
         inputAmount: inputAmountBigInt,
         outputAmount: outputAmountBigInt,
         fee: feeBigInt,
+        feeFormatted,
         feePercentage: SWAP_CONFIG.FEE_PERCENTAGE,
         priceImpact: '0.00', // PSM has no price impact
         exchangeRate,

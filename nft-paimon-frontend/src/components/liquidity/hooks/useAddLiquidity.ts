@@ -193,12 +193,14 @@ export const useAddLiquidity = () => {
         token: pool.token0,
         amount: 0n,
         amountFormatted: "",
+        balance: 0n,
         balanceFormatted: "0.00",
       },
       tokenB: {
         token: pool.token1,
         amount: 0n,
         amountFormatted: "",
+        balance: 0n,
         balanceFormatted: "0.00",
       },
     }));

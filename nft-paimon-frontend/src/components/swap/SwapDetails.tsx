@@ -56,8 +56,7 @@ export const SwapDetails: React.FC<SwapDetailsProps> = ({
           color="text.primary"
           sx={{ fontSize: '0.875rem' }}
         >
-          {/* Display fee in input token */}
-          {(Number(calculation.fee) / 1e6).toFixed(2)} USDC
+          {calculation.feeFormatted}
         </Typography>
       </Stack>
 
