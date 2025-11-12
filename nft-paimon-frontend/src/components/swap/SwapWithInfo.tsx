@@ -268,7 +268,7 @@ export const SwapWithInfo: React.FC = () => {
                       1 {formData.inputToken}
                     </Typography>
                     <Typography variant="body2" fontWeight={600} color="primary">
-                      ≈ {calculation ? (Number(calculation.outputAmount) / Number(calculation.inputAmount)).toFixed(4) : '0.00'} {formData.outputToken}
+                      ≈ {calculation?.exchangeRate || '0.00'} {formData.outputToken}
                     </Typography>
                   </Box>
 

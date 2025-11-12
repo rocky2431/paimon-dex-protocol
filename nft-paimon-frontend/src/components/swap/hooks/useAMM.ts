@@ -143,6 +143,11 @@ export const useAMM = () => {
     // Format fee with decimals
     const feeFormatted = `${(Number(ammHook.calculation.fee) / Math.pow(10, inputTokenConfig.decimals)).toFixed(6)} ${inputTokenConfig.symbol}`;
 
+    // Calculate exchange rate: outputAmount / inputAmount (both formatted)
+    const inputFormatted = Number(formatUnits(ammHook.calculation.amountIn, inputTokenConfig.decimals));
+    const outputFormatted = Number(formatUnits(ammHook.calculation.amountOut, outputTokenConfig.decimals));
+    const exchangeRate = inputFormatted > 0 ? (outputFormatted / inputFormatted).toFixed(6) : '0';
+
     return {
       inputAmount: ammHook.calculation.amountIn,
       outputAmount: ammHook.calculation.amountOut,
@@ -150,9 +155,9 @@ export const useAMM = () => {
       feeFormatted,
       feePercentage: ammHook.calculation.feePercentage.toString() + '%',
       priceImpact: ammHook.calculation.priceImpact.toString() + '%',
-      exchangeRate: '1', // Not directly available, approximate
+      exchangeRate, // Real exchange rate based on actual amounts
     };
-  }, [ammHook.calculation, inputTokenConfig]);
+  }, [ammHook.calculation, inputTokenConfig, outputTokenConfig]);
 
   // Adapt validation to match PSM interface
   const validation = useMemo(() => {
