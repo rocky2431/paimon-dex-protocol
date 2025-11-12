@@ -550,19 +550,40 @@ export const useAddLiquidity = () => {
    */
   useEffect(() => {
     if (pairAddressFromFactory) {
+      // Determine token0/token1 order (Uniswap V2 sorts by address)
+      let token0: Token | undefined;
+      let token1: Token | undefined;
+      let reserve0: bigint | undefined;
+      let reserve1: bigint | undefined;
+
+      if (formData.selectedTokenA && formData.selectedTokenB) {
+        const isToken0 = formData.selectedTokenA.address.toLowerCase() < formData.selectedTokenB.address.toLowerCase();
+        if (isToken0) {
+          token0 = formData.selectedTokenA;
+          token1 = formData.selectedTokenB;
+          reserve0 = reserves ? reserves[0] : 0n;
+          reserve1 = reserves ? reserves[1] : 0n;
+        } else {
+          token0 = formData.selectedTokenB;
+          token1 = formData.selectedTokenA;
+          reserve0 = reserves ? reserves[1] : 0n; // Swapped!
+          reserve1 = reserves ? reserves[0] : 0n; // Swapped!
+        }
+      }
+
       setFormData((prev) => ({
         ...prev,
         pairAddress: pairAddressFromFactory,
-        pool: poolExists && formData.selectedTokenA && formData.selectedTokenB
+        pool: poolExists && token0 && token1 && reserve0 !== undefined && reserve1 !== undefined
           ? {
               address: pairAddressFromFactory,
-              token0: formData.selectedTokenA,
-              token1: formData.selectedTokenB,
+              token0,
+              token1,
               type: PoolType.VOLATILE, // Default to volatile
-              reserve0: reserves ? reserves[0] : 0n,
-              reserve1: reserves ? reserves[1] : 0n,
+              reserve0,
+              reserve1,
               totalSupply: totalSupply || 0n,
-              name: `${formData.selectedTokenA.symbol}/${formData.selectedTokenB.symbol}`,
+              name: `${formData.selectedTokenA!.symbol}/${formData.selectedTokenB!.symbol}`,
             }
           : null,
       }));
