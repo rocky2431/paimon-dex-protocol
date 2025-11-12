@@ -271,12 +271,18 @@ export const useAddLiquidity = () => {
           cleanAmount === "" || cleanAmount === "0"
             ? 0n
             : parseUnits(cleanAmount, formData.selectedTokenA.decimals);
-        const [reserve0, reserve1] = reserves;
+
+        // Determine if selectedTokenA is token0 or token1 (Uniswap V2 sorts by address)
+        const isTokenAToken0 = formData.selectedTokenA.address.toLowerCase() < formData.selectedTokenB.address.toLowerCase();
+
+        // Map reserves correctly based on token order
+        const reserveA = isTokenAToken0 ? reserves[0] : reserves[1];
+        const reserveB = isTokenAToken0 ? reserves[1] : reserves[0];
 
         // Calculate token B amount based on pool ratio
         const amountB =
-          reserve0 > 0n
-            ? quoteTokenAmount(amountParsed, reserve0, reserve1)
+          reserveA > 0n
+            ? quoteTokenAmount(amountParsed, reserveA, reserveB)
             : 0n;
 
         setFormData((prev) => ({
@@ -466,7 +472,13 @@ export const useAddLiquidity = () => {
     if (!formData.tokenA || !formData.tokenB || !reserves || !totalSupply || !formData.selectedTokenA || !formData.selectedTokenB)
       return null;
 
-    const [reserve0, reserve1] = reserves;
+    // Determine if selectedTokenA is token0 or token1 (Uniswap V2 sorts by address)
+    const isTokenAToken0 = formData.selectedTokenA.address.toLowerCase() < formData.selectedTokenB.address.toLowerCase();
+
+    // Map reserves correctly based on token order
+    const reserveA = isTokenAToken0 ? reserves[0] : reserves[1];
+    const reserveB = isTokenAToken0 ? reserves[1] : reserves[0];
+
     const isFirstLP = totalSupply === 0n;
 
     const lpTokens = isFirstLP
@@ -474,21 +486,21 @@ export const useAddLiquidity = () => {
       : calculateSubsequentLiquidity(
           formData.tokenA.amount,
           formData.tokenB.amount,
-          reserve0,
-          reserve1,
+          reserveA,
+          reserveB,
           totalSupply
         );
 
     const shareOfPool = calculatePoolShare(lpTokens, totalSupply);
     const priceToken0 = formatPriceRatio(
-      reserve0,
-      reserve1,
+      reserveA,
+      reserveB,
       formData.selectedTokenA.decimals,
       formData.selectedTokenB.decimals
     );
     const priceToken1 = formatPriceRatio(
-      reserve1,
-      reserve0,
+      reserveB,
+      reserveA,
       formData.selectedTokenB.decimals,
       formData.selectedTokenA.decimals
     );
