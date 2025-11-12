@@ -1,0 +1,114 @@
+{
+  "newTasks": [
+    {
+      "id": "mock-1.1",
+      "title": "创建 useLPPools hook 查询真实池子数据",
+      "description": "创建新的 useLPPools hook，从链上读取 LP 池子的真实数据，替代 MOCK_POOLS。\n\n**文件**: src/hooks/useLPPools.ts\n\n**功能**:\n1. 从 `src/config/pools.ts` 加载池子配置（已有真实地址）\n2. 使用 wagmi `useReadContracts` 批量查询池子数据：\n   - `DEXPair.getReserves()` - 获取储备量（用于计算 TVL）\n   - `DEXPair.totalSupply()` - 获取 LP token 总供应量\n   - `Gauge.rewardRate()` - 获取奖励发放速率\n   - `GaugeController.gaugeWeights(gaugeAddress)` - 获取投票权重\n3. 计算派生数据：\n   - TVL（以 USD 计价）\n   - APR（基于奖励速率和 TVL）\n   - 用户持有的 LP 份额（如果钱包已连接）\n\n**返回数据结构**:\n```typescript\ninterface LPPool {\n  id: string;\n  name: string;\n  token0: Token;\n  token1: Token;\n  lpToken: `0x${string}`;\n  tvl: string; // USD\n  apr: number; // %\n  reserves: { token0: bigint; token1: bigint };\n  gaugeAddress?: `0x${string}`;\n  userBalance?: bigint;\n}\n```\n\n**验收标准**:\n- ✅ Hook 创建完成，类型定义清晰\n- ✅ 批量查询所有池子数据（性能优化）\n- ✅ 错误处理完善（网络错误、合约调用失败）\n- ✅ TVL 和 APR 计算准确\n- ✅ 支持钱包未连接状态（userBalance 可选）\n- ✅ 单元测试覆盖率 ≥80%",
+      "complexity": 7,
+      "priority": "P0",
+      "dependencies": [],
+      "estimated_days": 1,
+      "status": "pending",
+      "tags": ["liquidity", "hook", "blockchain-data"]
+    },
+    {
+      "id": "mock-1.2",
+      "title": "移除 liquidity/page.tsx 中的 MOCK_POOLS",
+      "description": "移除 `src/app/liquidity/page.tsx` 中的 MOCK_POOLS 常量，集成 useLPPools hook。\n\n**修改文件**: src/app/liquidity/page.tsx\n\n**修改内容**:\n1. 删除 MOCK_POOLS 定义（Line 57-95）\n2. 导入并使用 useLPPools hook：\n   ```typescript\n   import { useLPPools } from '@/hooks/useLPPools';\n   \n   const { data: pools, isLoading, error } = useLPPools();\n   ```\n3. 添加 Loading 状态处理：\n   ```typescript\n   if (isLoading) return <Skeleton variant=\"rectangular\" height={400} />;\n   if (error) return <Alert severity=\"error\">{error.message}</Alert>;\n   ```\n4. 更新池子列表渲染逻辑（Line 283）：\n   ```typescript\n   {pools?.map((pool) => (\n     <PoolCard key={pool.id} pool={pool} />\n   ))}\n   ```\n\n**验收标准**:\n- ✅ MOCK_POOLS 完全移除\n- ✅ 页面显示真实的链上数据\n- ✅ Loading 和 Error 状态正常显示\n- ✅ TVL 和 APR 数据准确\n- ✅ TypeScript 编译 0 错误\n- ✅ 手动测试：页面加载正常，数据显示正确",
+      "complexity": 4,
+      "priority": "P0",
+      "dependencies": ["mock-1.1"],
+      "estimated_days": 0.5,
+      "status": "pending",
+      "tags": ["liquidity", "cleanup"]
+    },
+    {
+      "id": "mock-1.3",
+      "title": "创建 useNitroPools hook 或隐藏未部署功能",
+      "description": "为 Nitro Pools 功能选择合适的处理方案：实现真实数据查询或临时隐藏。\n\n**方案评估**:\n\n**方案 A：实现真实查询** (如果 NitroPool 合约已部署)\n- 文件: src/hooks/useNitroPools.ts\n- 查询 `NitroPool.getActivePools()` 获取活跃池子列表\n- 批量查询各池子数据：\n  - `multiplier` - 奖励倍数\n  - `endTime` - 结束时间\n  - `rewardToken` - 奖励代币地址\n  - `totalStaked` - 总质押量\n\n**方案 B：临时隐藏** (如果 NitroPool 未部署)\n- 在 liquidity/page.tsx 中隐藏 Nitro 池子 Tab\n- 添加 Coming Soon 提示：\n   ```typescript\n   <DataNotice \n     message=\"Nitro Pools 功能将在 Phase 3.2 上线\"\n     severity=\"info\"\n   />\n   ```\n- 注释掉相关代码，添加 TODO 标记\n\n**决策标准**:\n- 检查 `deployments/testnet/addresses.json` 是否有 NitroPool 地址\n- 如果有真实地址 → 选择方案 A\n- 如果没有或为零地址 → 选择方案 B\n\n**验收标准**:\n- ✅ 方案选择有明确依据（合约部署状态）\n- ✅ 如果选方案 A：Hook 实现完整，测试通过\n- ✅ 如果选方案 B：UI 隐藏正确，提示清晰\n- ✅ TypeScript 编译 0 错误",
+      "complexity": 5,
+      "priority": "P0",
+      "dependencies": [],
+      "estimated_days": 0.75,
+      "status": "pending",
+      "tags": ["liquidity", "nitro", "hook"]
+    },
+    {
+      "id": "mock-1.4",
+      "title": "移除 liquidity/page.tsx 中的 MOCK_NITRO_POOLS",
+      "description": "根据 mock-1.3 的选择方案，移除 MOCK_NITRO_POOLS 并集成真实数据或隐藏功能。\n\n**修改文件**: src/app/liquidity/page.tsx\n\n**如果 mock-1.3 选择方案 A（实现查询）**:\n1. 删除 MOCK_NITRO_POOLS 定义（Line 97-125）\n2. 导入并使用 useNitroPools hook\n3. 更新 NitroPoolList 组件传参（Line 440）\n\n**如果 mock-1.3 选择方案 B（隐藏功能）**:\n1. 删除 MOCK_NITRO_POOLS 定义\n2. 隐藏或移除 \"Nitro Pools\" Tab\n3. 添加 Coming Soon 提示\n4. 注释相关代码，添加 TODO:\n   ```typescript\n   // TODO Phase 3.2+: Implement Nitro Pools\n   // Contract: NitroPool (pending deployment)\n   ```\n\n**验收标准**:\n- ✅ MOCK_NITRO_POOLS 完全移除\n- ✅ 根据方案 A：显示真实 Nitro 池子数据\n- ✅ 根据方案 B：功能正确隐藏，提示清晰\n- ✅ 无用户体验回归\n- ✅ TypeScript 编译 0 错误",
+      "complexity": 3,
+      "priority": "P0",
+      "dependencies": ["mock-1.3"],
+      "estimated_days": 0.375,
+      "status": "pending",
+      "tags": ["liquidity", "nitro", "cleanup"]
+    },
+    {
+      "id": "mock-1.5",
+      "title": "移除 LiquidationHistory 中的 MOCK_LIQUIDATIONS",
+      "description": "移除 `src/components/stability-pool/LiquidationHistory.tsx` 中的 MOCK_LIQUIDATIONS，采用短期临时方案。\n\n**修改文件**: src/components/stability-pool/LiquidationHistory.tsx\n\n**短期方案** (Phase 3.2 前):\n1. 删除 MOCK_LIQUIDATIONS 常量（Line 57-78）\n2. 替换为空数组：\n   ```typescript\n   const liquidations = useMemo(() => [] as Liquidation[], []);\n   ```\n3. 添加友好的空状态提示：\n   ```typescript\n   {liquidations.length === 0 && (\n     <Box textAlign=\"center\" py={8}>\n       <InfoIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />\n       <Typography variant=\"h6\" color=\"text.secondary\" gutterBottom>\n         暂无清算历史\n       </Typography>\n       <DataNotice \n         message=\"清算历史功能需要事件索引支持，将在 Phase 3.2 通过 The Graph Subgraph 实现。\"\n         severity=\"info\"\n       />\n     </Box>\n   )}\n   ```\n4. 添加 TODO 注释：\n   ```typescript\n   // TODO Phase 3.2+: Implement via The Graph Subgraph\n   // Index StabilityPool.Liquidated events:\n   //   - borrower, liquidator, debtOffset, collateralSent\n   // GraphQL query: liquidations(first: 10, orderBy: timestamp, orderDirection: desc)\n   ```\n\n**长期方案** (Phase 3.2+，仅文档):\n- 部署 The Graph Subgraph\n- 索引 `Liquidated` 事件\n- 创建 `useLiquidationHistory` hook 查询 GraphQL\n\n**验收标准**:\n- ✅ MOCK_LIQUIDATIONS 完全移除\n- ✅ 空状态 UI 友好且信息清晰\n- ✅ DataNotice 提示 Phase 3.2 计划\n- ✅ TODO 注释完整，包含技术方案\n- ✅ 不影响其他 Stability Pool 功能\n- ✅ TypeScript 编译 0 错误",
+      "complexity": 2,
+      "priority": "P0",
+      "dependencies": [],
+      "estimated_days": 0.25,
+      "status": "pending",
+      "tags": ["stability-pool", "cleanup"]
+    },
+    {
+      "id": "mock-1.6",
+      "title": "修复 bribes 和 rewards 常量中的占位地址",
+      "description": "将 bribes 和 rewards 模块中的占位地址替换为真实部署地址。\n\n**修改文件**:\n1. src/components/bribes/constants.ts\n2. src/components/rewards/constants.ts\n\n**修改内容**:\n\n**1. src/components/bribes/constants.ts** (Line 13):\n```typescript\n// ❌ 移除\nexport const BRIBE_MARKETPLACE_ADDRESS = \n  \"0x0000000000000000000000000000000000001000\" as `0x${string}`;\n\n// ✅ 替换为\nimport { TESTNET_ADDRESSES } from '@/config/generated/testnet';\nexport const BRIBE_MARKETPLACE_ADDRESS = \n  TESTNET_ADDRESSES.incentives.bribeMarketplace;\n```\n\n**2. src/components/rewards/constants.ts** (Line 9):\n```typescript\n// ❌ 移除\nexport const PAIMON_TOKEN_ADDRESS = \n  '0x0000000000000000000000000000000000000002' as `0x${string}`;\n\n// ✅ 替换为\nimport { TESTNET_ADDRESSES } from '@/config/generated/testnet';\nexport const PAIMON_TOKEN_ADDRESS = \n  TESTNET_ADDRESSES.core.paimon;\n```\n\n**验证**:\n- 检查 `deployments/testnet/addresses.json` 确认地址真实性\n- 确保地址非零且格式正确（0x + 40位十六进制）\n\n**验收标准**:\n- ✅ 所有占位地址替换为 TESTNET_ADDRESSES 导入\n- ✅ 运行 `npm run verify-addresses` 验证地址有效性\n- ✅ Bribes 和 Rewards 功能测试正常\n- ✅ TypeScript 编译 0 错误\n- ✅ 单元测试通过（如果存在）",
+      "complexity": 2,
+      "priority": "P0",
+      "dependencies": [],
+      "estimated_days": 0.25,
+      "status": "pending",
+      "tags": ["bribes", "rewards", "configuration"]
+    },
+    {
+      "id": "mock-2.1",
+      "title": "审查并文档化所有占位地址",
+      "description": "全面审查代码库中的 26 个占位地址，添加文档注释，区分合理使用和需要修复的情况。\n\n**扫描范围**:\n- src/components/treasury/constants.ts (3 个占位地址)\n- src/components/liquidity/constants.ts (6 个占位地址)\n- src/hooks/useConfigValidation.ts (1 个占位地址)\n- 其他 16 个零地址检查（合理用法）\n\n**审查分类**:\n\n**Category A: 合理的占位地址** (已标记 `isActive: false`):\n```typescript\n// src/components/treasury/constants.ts\n{\n  symbol: 'tUST',\n  address: '0x0000000000000000000000000000000000000001',\n  isActive: false, // ✅ 已标记为未部署\n  // TODO Phase 3.2+: Deploy tUST token and update address\n  // Contract: TokenizedUSTreasury (pending development)\n}\n```\n\n**Category B: 零地址检查** (正常逻辑):\n```typescript\n// src/hooks/useRWABalance.ts\nenabled: tokenAddress !== \"0x0000000000000000000000000000000000000000\"\n// ✅ 正常的零地址检查，无需修改\n```\n\n**Category C: 需要修复的占位地址**:\n- 已在 mock-1.6 中处理（bribes, rewards）\n\n**任务清单**:\n1. 遍历所有 26 个占位地址\n2. 为 Category A 添加详细 TODO 注释\n3. 为 Category B 添加注释说明用途\n4. 确认 Category C 在其他任务中已处理\n5. 更新 `.ultra/docs/hardcoded-data-scan-report.md`\n\n**生成文档**: .ultra/docs/placeholder-addresses-audit.md\n包含：\n- 完整的占位地址清单\n- 分类和状态\n- Phase 3.2+ 部署计划\n\n**验收标准**:\n- ✅ 所有 26 个占位地址已审查\n- ✅ Category A 有完整的 TODO 注释\n- ✅ Category B 有用途说明注释\n- ✅ 生成审计文档完整\n- ✅ 运行扫描脚本，MEDIUM 问题数量减少",
+      "complexity": 3,
+      "priority": "P1",
+      "dependencies": ["mock-1.6"],
+      "estimated_days": 0.375,
+      "status": "pending",
+      "tags": ["audit", "documentation"]
+    },
+    {
+      "id": "mock-2.2",
+      "title": "创建技术债务追踪文档",
+      "description": "整理并分类所有 78 个 TODO 标记，建立技术债务追踪系统。\n\n**生成文档**: .ultra/docs/technical-debt.md\n\n**文档结构**:\n\n```markdown\n# 技术债务追踪\n\n## 📊 总览\n- 总计：78 个 TODO\n- 高优先级（P0-P1）：43 个\n- 中优先级（P2）：25 个\n- 低优先级（P3）：10 个\n\n## 🔴 Phase 2 功能（15个）\n\n### Launchpad 模块\n| 文件 | 行号 | 描述 | 优先级 | 预计工作量 |\n|------|------|------|--------|------------|\n| ParticipateForm.tsx | 39 | 集成 wagmi hooks | P1 | 2 天 |\n| ...\n\n### Presale 模块\n| 文件 | 行号 | 描述 | 优先级 | 预计工作量 |\n| ...\n\n## 🟡 Phase 3.2+ 改进（25个）\n\n### 事件索引依赖\n| 模块 | TODO 数量 | 需求 | 技术方案 |\n|------|-----------|------|----------|\n| Portfolio | 8 | 历史数据查询 | The Graph Subgraph |\n| Analytics | 6 | 24h 交易量统计 | Event indexing |\n| Liquidation History | 4 | 清算记录 | Subgraph query |\n\n### 多抵押品支持\n| 模块 | TODO 数量 | 需求 | 依赖 |\n|------|-----------|------|------|\n| Vault | 5 | 多资产位置查询 | 合约升级 |\n| Portfolio | 3 | 多抵押品聚合 | 批量查询接口 |\n\n## 🟢 功能增强（38个）\n\n### 国际化支持（8个）\n- [ ] Borrow page\n- [ ] Stability Pool page\n- [ ] Vault page\n- ...\n\n### 性能优化（12个）\n- [ ] 批量领取奖励\n- [ ] 缓存策略优化\n- ...\n\n### 其他增强（18个）\n...\n```\n\n**追踪机制**:\n1. 每个 TODO 分配唯一 ID（TD-001 ~ TD-078）\n2. 设置优先级和预估工作量\n3. 定期评审（每月一次）\n4. 与 Roadmap 同步\n\n**验收标准**:\n- ✅ 所有 78 个 TODO 已分类\n- ✅ 每个 TODO 有优先级和工作量估算\n- ✅ 文档结构清晰，易于查阅\n- ✅ 建立定期评审机制（文档中说明）\n- ✅ 与 `.ultra/docs/roadmap.md` 关联（如果存在）",
+      "complexity": 4,
+      "priority": "P1",
+      "dependencies": [],
+      "estimated_days": 0.5,
+      "status": "pending",
+      "tags": ["documentation", "technical-debt"]
+    },
+    {
+      "id": "mock-3.1",
+      "title": "运行扫描脚本验证修复结果",
+      "description": "运行硬编码数据扫描脚本，验证所有 HIGH 和 MEDIUM 优先级问题已修复。\n\n**验证命令**: \n```bash\nnpx tsx scripts/check-hardcoded-data.ts\n```\n\n**预期结果**:\n- ✅ MOCK_DATA: 0 个（从 7 个减少到 0）\n- ✅ PLACEHOLDER_ADDRESS: ≤10 个（从 26 个减少，仅保留合理占位）\n- ✅ HARDCODED_NUMBER: 0 个（从 1 个减少到 0）\n- ✅ TODO: ~80 个（允许略有增减，应有完整文档）\n\n**如果扫描失败**:\n1. 查看失败报告，定位遗漏的 MOCK 数据\n2. 修复遗漏问题\n3. 重新运行扫描直到通过\n\n**生成报告**: .ultra/docs/hardcoded-data-final-report.md\n包含：\n- 修复前后对比\n- 剩余问题说明（如果有）\n- 技术债务追踪链接\n\n**验收标准**:\n- ✅ 扫描脚本执行成功（exit code 0）\n- ✅ HIGH 优先级问题清零\n- ✅ MEDIUM 优先级问题数量显著减少\n- ✅ 所有剩余占位地址有文档说明\n- ✅ 生成对比报告完整",
+      "complexity": 2,
+      "priority": "P0",
+      "dependencies": ["mock-1.2", "mock-1.4", "mock-1.5", "mock-1.6", "mock-2.1"],
+      "estimated_days": 0.25,
+      "status": "pending",
+      "tags": ["verification", "qa"]
+    },
+    {
+      "id": "mock-3.2",
+      "title": "最终验收测试与交付",
+      "description": "进行最终的端到端测试，确保所有修复不影响现有功能，生成交付报告。\n\n**测试清单**:\n\n**1. Liquidity 页面测试**:\n- [ ] 页面加载正常，无 JavaScript 错误\n- [ ] LP 池子列表显示真实数据\n- [ ] TVL 和 APR 数值合理（非零，非假数据）\n- [ ] 点击池子可查看详情\n- [ ] Nitro Pools 功能正常（或正确隐藏）\n- [ ] Loading 和 Error 状态显示正确\n\n**2. Stability Pool 页面测试**:\n- [ ] 清算历史显示空状态或真实数据\n- [ ] Phase 3.2 提示清晰（如果是空状态）\n- [ ] 存款/取款功能不受影响\n- [ ] 奖励领取功能正常\n\n**3. Governance 页面测试**:\n- [ ] Bribes 功能使用真实合约地址\n- [ ] Rewards 功能使用真实合约地址\n- [ ] 投票功能正常\n- [ ] 数据显示准确\n\n**4. 整体测试**:\n- [ ] TypeScript 编译 0 错误：`npm run type-check`\n- [ ] Build 成功：`npm run build`\n- [ ] 单元测试通过：`npm test`\n- [ ] 无 console 错误或警告（浏览器开发者工具）\n\n**性能测试**:\n- [ ] 首页加载时间 <3s\n- [ ] Liquidity 页面加载时间 <5s（批量查询池子数据）\n- [ ] 无明显卡顿\n\n**生成交付报告**: .ultra/docs/mock-cleanup-delivery-report.md\n包含：\n- 修复总结（7 个 MOCK 数据已移除）\n- 测试结果（所有检查项通过）\n- 技术债务说明（78 个 TODO 已分类追踪）\n- 下一步建议（Phase 3.2+ 计划）\n- 部署清单\n\n**验收标准**:\n- ✅ 所有测试检查项通过\n- ✅ TypeScript、Build、Test 全部成功\n- ✅ 无功能回归\n- ✅ 性能符合预期\n- ✅ 交付报告完整\n- ✅ 代码已提交到 Git\n- ✅ 准备好部署到 Vercel",
+      "complexity": 3,
+      "priority": "P0",
+      "dependencies": ["mock-3.1"],
+      "estimated_days": 0.5,
+      "status": "pending",
+      "tags": ["verification", "qa", "delivery"]
+    }
+  ]
+}
