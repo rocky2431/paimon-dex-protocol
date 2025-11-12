@@ -14,6 +14,7 @@ interface TokenInputProps {
   onTokenChange: (token: Token) => void;
   balance?: TokenBalance;
   readOnly?: boolean;
+  disableTokenSelect?: boolean; // Disable token selector independently
   excludeToken?: Token;
   allowedTokens?: Token[]; // Only show these tokens (for PSM mode)
   showMaxButton?: boolean;
@@ -40,6 +41,7 @@ export const TokenInput: React.FC<TokenInputProps> = ({
   onTokenChange,
   balance,
   readOnly = false,
+  disableTokenSelect = false,
   excludeToken,
   allowedTokens,
   showMaxButton = true,
@@ -133,7 +135,7 @@ export const TokenInput: React.FC<TokenInputProps> = ({
           <TokenSelector
             selectedToken={selectedToken}
             onTokenChange={onTokenChange}
-            disabled={readOnly}
+            disabled={disableTokenSelect}
             excludeToken={excludeToken}
             allowedTokens={allowedTokens}
             data-testid={testIdPrefix ? `${testIdPrefix}-token-selector` : undefined}

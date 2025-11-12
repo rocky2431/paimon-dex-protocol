@@ -129,9 +129,11 @@ export function useAMMSwap(
   });
 
   /**
-   * Calculate optimal route
-   * 1. Check direct pair: inputToken -> outputToken
-   * 2. If no direct pair, route through WBNB: inputToken -> WBNB -> outputToken
+   * Calculate optimal route with intelligent path finding
+   * 1. Try direct pair: inputToken -> outputToken
+   * 2. Try via USDP: inputToken -> USDP -> outputToken
+   * 3. Try via WBNB: inputToken -> WBNB -> outputToken
+   * 4. Return first valid route or null
    */
   const route = useMemo((): SwapRoute | null => {
     if (!inputToken || !outputToken) return null;
@@ -144,8 +146,30 @@ export function useAMMSwap(
       return [inputToken.address, outputToken.address];
     }
 
-    // Multi-hop through WBNB
-    return [inputToken.address, testnet.tokens.wbnb, outputToken.address];
+    // No direct pair - try multi-hop routes
+    // Priority: USDP > WBNB (USDP more likely to have pairs in our system)
+
+    const usdpAddress = testnet.tokens.usdp.toLowerCase();
+    const wbnbAddress = testnet.tokens.wbnb.toLowerCase();
+    const inputAddr = inputToken.address.toLowerCase();
+    const outputAddr = outputToken.address.toLowerCase();
+
+    // Don't route through a token if input/output is already that token
+    const canUseUsdp = inputAddr !== usdpAddress && outputAddr !== usdpAddress;
+    const canUseWbnb = inputAddr !== wbnbAddress && outputAddr !== wbnbAddress;
+
+    // Try USDP first (more pairs in our ecosystem)
+    if (canUseUsdp) {
+      return [inputToken.address, testnet.tokens.usdp, outputToken.address];
+    }
+
+    // Fallback to WBNB
+    if (canUseWbnb) {
+      return [inputToken.address, testnet.tokens.wbnb, outputToken.address];
+    }
+
+    // No valid route found
+    return null;
   }, [inputToken, outputToken, directPairAddress]);
 
   // ==================== Quote Calculation ====================
@@ -162,7 +186,7 @@ export function useAMMSwap(
     }
   }, [inputAmount, inputToken]);
 
-  const { data: amountsOut } = useReadContract({
+  const { data: amountsOut, error: amountsOutError, isLoading: amountsOutLoading } = useReadContract({
     address: testnet.dex.router,
     abi: DEX_ROUTER_ABI,
     functionName: 'getAmountsOut',
@@ -216,18 +240,19 @@ export function useAMMSwap(
 
   // ==================== Allowance Check ====================
 
-  const { data: allowance } = useReadContract({
+  const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address: inputToken.address,
     abi: ERC20_ABI,
     functionName: 'allowance',
     args: userAddress ? [userAddress, testnet.dex.router] : undefined,
     query: {
       enabled: !!userAddress && !!inputToken,
+      refetchInterval: 2000, // Auto-refetch every 2 seconds
     },
   });
 
   const needsApproval = useMemo(() => {
-    if (!calculation || !allowance) return false;
+    if (!calculation || allowance === undefined) return false;
     return allowance < calculation.amountIn;
   }, [calculation, allowance]);
 
@@ -240,6 +265,10 @@ export function useAMMSwap(
 
     if (!inputAmount || inputAmount === '0') {
       return { isValid: false, error: 'Enter an amount' };
+    }
+
+    if (!route) {
+      return { isValid: false, error: 'No liquidity route available for this pair' };
     }
 
     if (!calculation) {
@@ -258,7 +287,7 @@ export function useAMMSwap(
     }
 
     return { isValid: true };
-  }, [isConnected, inputAmount, calculation, inputBalance]);
+  }, [isConnected, inputAmount, route, calculation, inputBalance]);
 
   // ==================== Actions ====================
 
@@ -266,7 +295,7 @@ export function useAMMSwap(
    * Approve input token
    */
   const handleApprove = useCallback(async () => {
-    if (!userAddress || !calculation) {
+    if (!userAddress || !calculation || !publicClient) {
       throw new Error('Missing user address or calculation');
     }
 
@@ -274,27 +303,38 @@ export function useAMMSwap(
       setSwapState(SwapState.APPROVING);
       setError(null);
 
-      await writeContractAsync({
+      const hash = await writeContractAsync({
         address: inputToken.address,
         abi: ERC20_ABI,
         functionName: 'approve',
         args: [testnet.dex.router, calculation.amountIn],
       });
 
-      setSwapState(SwapState.APPROVED);
+      // Wait for transaction confirmation
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+
+      if (receipt.status === 'success') {
+        setSwapState(SwapState.APPROVED);
+        // Refetch allowance immediately after approval
+        await refetchAllowance();
+      } else {
+        setSwapState(SwapState.ERROR);
+        setError('Approval transaction reverted.');
+        throw new Error('Transaction reverted');
+      }
     } catch (err) {
       console.error('Approval error:', err);
       setSwapState(SwapState.ERROR);
       setError('Approval failed. Please try again.');
       throw err;
     }
-  }, [userAddress, calculation, inputToken, writeContractAsync]);
+  }, [userAddress, calculation, inputToken, writeContractAsync, publicClient, refetchAllowance]);
 
   /**
    * Execute swap
    */
   const handleSwap = useCallback(async () => {
-    if (!userAddress || !calculation || !validation.isValid) {
+    if (!userAddress || !calculation || !validation.isValid || !publicClient) {
       throw new Error('Invalid swap parameters');
     }
 
@@ -312,7 +352,7 @@ export function useAMMSwap(
       const deadline = BigInt(Math.floor(Date.now() / 1000) + deadlineMinutes * 60);
 
       // Execute swap with DEXRouter
-      await writeContractAsync({
+      const hash = await writeContractAsync({
         address: testnet.dex.router,
         abi: DEX_ROUTER_ABI,
         functionName: 'swapExactTokensForTokens',
@@ -325,13 +365,22 @@ export function useAMMSwap(
         ],
       });
 
-      setSwapState(SwapState.SUCCESS);
-      setInputAmount('');
+      // Wait for transaction confirmation
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-      // Reset state after 3 seconds
-      setTimeout(() => {
-        setSwapState(SwapState.IDLE);
-      }, 3000);
+      if (receipt.status === 'success') {
+        setSwapState(SwapState.SUCCESS);
+        setInputAmount('');
+
+        // Reset state after 3 seconds
+        setTimeout(() => {
+          setSwapState(SwapState.IDLE);
+        }, 3000);
+      } else {
+        setSwapState(SwapState.ERROR);
+        setError('Swap transaction reverted.');
+        throw new Error('Transaction reverted');
+      }
     } catch (err) {
       console.error('Swap error:', err);
       setSwapState(SwapState.ERROR);
@@ -346,6 +395,7 @@ export function useAMMSwap(
     handleApprove,
     deadlineMinutes,
     writeContractAsync,
+    publicClient,
   ]);
 
   /**

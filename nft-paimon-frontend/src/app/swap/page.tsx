@@ -2,30 +2,21 @@
 
 import { Container, Typography, Box } from '@mui/material';
 import { Navigation } from '@/components/layout/Navigation';
-import { SubNavigation, useTabState } from '@/components/layout/SubNavigation';
 import { SwapCard } from '@/components/swap/SwapCard';
-import { PSMSwapCard } from '@/components/swap/PSMSwapCard';
 
 /**
- * Swap Page (V3 - 扁平化架构)
+ * Swap Page (V3 - DEX Only)
  *
- * 功能: PSM + DEX 交易统一入口
+ * 功能: DEX AMM交易
  * 路由: /swap
- * Tabs: PSM (1:1稳定币兑换) | DEX (AMM交易)
+ * Note: PSM swap功能已移至 /usdp 页面的 PSM Tab
  *
  * 设计理念:
- * - 主入口: PSM（新用户友好，无滑点）
- * - 高级功能: DEX（任意代币交易）
- * - Tab切换: 保持在同一页面，减少跳转
+ * - 支持所有代币对交易（USDC/USDP/WBNB/HYD/etc.）
+ * - 通过AMM池子执行，显示多跳路由
+ * - USDC ↔ USDP 1:1交换请访问 /usdp → PSM Tab
  */
 export default function SwapPage() {
-  const [currentTab, setCurrentTab] = useTabState('psm');
-
-  const SWAP_TABS = [
-    { value: 'psm', label: 'PSM' },
-    { value: 'dex', label: 'DEX' },
-  ];
-
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
       {/* Top navigation bar */}
@@ -47,17 +38,34 @@ export default function SwapPage() {
         {/* Huge whitespace (OlympusDAO style) */}
         <Box sx={{ height: { xs: 40, sm: 60 } }} />
 
-        {/* Sub-navigation tabs (PSM | DEX) */}
-        <SubNavigation
-          tabs={SWAP_TABS}
-          currentTab={currentTab}
-          onChange={setCurrentTab}
-          variant="scrollable"
-        />
+        {/* Page title */}
+        <Box sx={{ mb: 4, textAlign: 'center' }}>
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 800,
+              color: '#ff6b00',
+              mb: 2,
+              fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
+            }}
+          >
+            DEX Swap
+          </Typography>
+          <Typography
+            variant="h6"
+            color="text.secondary"
+            sx={{
+              maxWidth: 700,
+              mx: 'auto',
+              fontSize: { xs: '1rem', sm: '1.125rem' },
+            }}
+          >
+            Trade any token pair via AMM pools
+          </Typography>
+        </Box>
 
-        {/* Tab content */}
-        {currentTab === 'psm' && <PSMSwapCard />}
-        {currentTab === 'dex' && <SwapCard />}
+        {/* Swap Card */}
+        <SwapCard />
 
         {/* Huge whitespace (OlympusDAO style) */}
         <Box sx={{ height: { xs: 40, sm: 60 } }} />
@@ -72,10 +80,7 @@ export default function SwapPage() {
             fontSize: '0.875rem',
           }}
         >
-          {currentTab === 'psm'
-            ? 'PSM (Peg Stability Module) • 1:1 Stablecoin Swap • 0.1% Fee'
-            : 've33 DEX • Automated Market Maker • BSC Network'
-          }
+          ve33 DEX • Automated Market Maker • BSC Network
         </Typography>
       </Container>
     </Box>

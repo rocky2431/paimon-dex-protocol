@@ -9,6 +9,8 @@ interface SwapButtonProps {
   onClick: () => void;
   disabled?: boolean;
   errorMessage?: string;
+  needsApproval?: boolean;
+  tokenSymbol?: string;
 }
 
 /**
@@ -20,14 +22,22 @@ interface SwapButtonProps {
  * - Hover: translateY(-2px) + text translateY(-4px)
  * - Pulse animation during loading
  * - State-based button text
+ * - Auto-displays "Approve" when needed
  */
 export const SwapButton: React.FC<SwapButtonProps> = ({
   state,
   onClick,
   disabled = false,
   errorMessage,
+  needsApproval = false,
+  tokenSymbol = '',
 }) => {
   const getButtonText = (): string => {
+    // Show "Approve" button when approval needed
+    if (needsApproval && (state === SwapState.IDLE || state === SwapState.INPUT)) {
+      return `Approve ${tokenSymbol}`;
+    }
+
     switch (state) {
       case SwapState.IDLE:
       case SwapState.INPUT:

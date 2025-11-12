@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { formatUnits } from 'viem';
 import { useAMMSwap, type TokenConfig, SwapState as AMMSwapState } from '@/hooks/useAMMSwap';
 import { SwapFormData, Token, TokenBalance, SwapState } from '../types';
 import { config } from '@/config';
@@ -37,11 +38,11 @@ function convertSwapState(ammState: AMMSwapState): SwapState {
  * - Adapts AMM-specific returns to match PSM interface
  */
 export const useAMM = () => {
-  // Form state (default: HYD → USDC)
+  // Form state (default: USDP → USDC - most common swap pair)
   const [formData, setFormData] = useState<SwapFormData>({
     inputAmount: '',
     outputAmount: '',
-    inputToken: Token.HYD,
+    inputToken: Token.USDP,
     outputToken: Token.USDC,
   });
 
@@ -114,12 +115,26 @@ export const useAMM = () => {
   // Sync output amount from calculation
   useMemo(() => {
     if (ammHook.calculation) {
-      const outputAmount = ammHook.calculation.amountOut.toString();
+      const outputAmount = formatUnits(
+        ammHook.calculation.amountOut,
+        outputTokenConfig.decimals
+      );
       setFormData((prev) => ({ ...prev, outputAmount }));
     } else {
       setFormData((prev) => ({ ...prev, outputAmount: '' }));
     }
-  }, [ammHook.calculation]);
+  }, [ammHook.calculation, outputTokenConfig.decimals]);
+
+  // Reset form on successful swap
+  useEffect(() => {
+    if (ammHook.swapState === AMMSwapState.SUCCESS) {
+      setFormData((prev) => ({
+        ...prev,
+        inputAmount: '',
+        outputAmount: '',
+      }));
+    }
+  }, [ammHook.swapState]);
 
   // Adapt calculation to match PSM interface
   const calculation = useMemo(() => {
@@ -159,5 +174,6 @@ export const useAMM = () => {
     handleMaxClick,
     handleSwap,
     route: ammHook.route, // AMM-specific: route array
+    needsApproval: ammHook.needsApproval, // AMM-specific: approval check
   };
 };

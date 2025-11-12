@@ -30,8 +30,7 @@ import BoltIcon from '@mui/icons-material/Bolt';
 import DiamondIcon from '@mui/icons-material/Diamond';
 
 // Swap Tab components
-import { SwapCard } from '@/components/swap/SwapCard';
-import { PSMSwapCard } from '@/components/swap/PSMSwapCard';
+import { SwapWithInfo } from '@/components/swap/SwapWithInfo';
 
 // Pools Tab components
 import { AddLiquidityCard } from '@/components/liquidity/AddLiquidityCard';
@@ -142,52 +141,8 @@ export default function LiquidityHub() {
           variant="scrollable"
         />
 
-        {/* Swap Tab */}
-        {currentTab === 'swap' && (
-          <>
-            <Box sx={{ mb: 4, textAlign: 'center' }}>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: '#ff6b00', mb: 1 }}>
-                Token Swap
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                Trade tokens instantly with low fees (0.25%)
-              </Typography>
-            </Box>
-
-            <Grid container spacing={3} justifyContent="center">
-              <Grid item xs={12} lg={5}>
-                <Card sx={{ backgroundColor: 'rgba(255, 107, 0, 0.03)', border: '1px solid rgba(255, 107, 0, 0.2)' }}>
-                  <CardContent>
-                    <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: '#ff9800' }}>
-                      PSM Swap
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      1:1 USDC ↔ USDP exchange (0.1% fee)
-                    </Typography>
-                    <PSMSwapCard />
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12} lg={5}>
-                <Card sx={{ backgroundColor: 'rgba(255, 152, 0, 0.03)', border: '1px solid rgba(255, 152, 0, 0.2)' }}>
-                  <CardContent>
-                    <Typography variant="h6" fontWeight={700} sx={{ mb: 2, color: '#ff6b00' }}>
-                      DEX Swap
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      Trade any token pair (0.25% fee)
-                    </Typography>
-                    <SwapCard />
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-
-            <Alert severity="info" icon={<InfoIcon />} sx={{ mt: 4 }}>
-              PSM is recommended for USDC↔USDP swaps (lower fees). Use DEX for all other pairs.
-            </Alert>
-          </>
-        )}
+        {/* Swap Tab - ThenaSwap Style with State Synchronization */}
+        {currentTab === 'swap' && <SwapWithInfo />}
 
         {/* Pools Tab */}
         {currentTab === 'pools' && (
@@ -223,7 +178,7 @@ export default function LiquidityHub() {
                 )}
 
                 {/* Pools Table */}
-                {!poolsLoading && !poolsError && pools && (
+                {!poolsLoading && !poolsError && pools && pools.length > 0 && (
                   <TableContainer sx={{ maxHeight: 440 }}>
                     <Table stickyHeader>
                       <TableHead>
@@ -280,6 +235,18 @@ export default function LiquidityHub() {
                       </TableBody>
                     </Table>
                   </TableContainer>
+                )}
+
+                {/* Empty State */}
+                {!poolsLoading && !poolsError && pools && pools.length === 0 && (
+                  <Box sx={{ py: 8, textAlign: 'center' }}>
+                    <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
+                      No Active Pools
+                    </Typography>
+                    <Typography variant="body2" color="text.disabled">
+                      Liquidity pools will appear here once liquidity is added
+                    </Typography>
+                  </Box>
                 )}
               </CardContent>
             </Card>

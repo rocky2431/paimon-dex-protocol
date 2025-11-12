@@ -165,6 +165,11 @@ export function useLPPools(): UseLPPoolsReturn {
       const reserve0 = reserves[0];
       const reserve1 = reserves[1];
 
+      // Skip pools with no liquidity (both reserves = 0)
+      if (reserve0 === 0n && reserve1 === 0n) {
+        continue;
+      }
+
       // Calculate TVL (simplified: assume 1:1 USD peg for stablecoins)
       // In production, would fetch real prices from oracle
       const tvlToken0 = Number(formatUnits(reserve0, pool.token0.decimals || 18));

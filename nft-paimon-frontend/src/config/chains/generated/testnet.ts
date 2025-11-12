@@ -55,7 +55,7 @@ export const TESTNET_ADDRESSES = {
   // ========================================
   dex: {
     factory: "0x1c1339F5A11f462A354D49ee03377D55B03E7f3D" as Address,
-    router: "0x066Db99AE64B1524834a1f97aa1613e2411E13AC" as Address,
+    router: "0x1e5a222d99a1804571522bac59Cde964bE59f21c" as Address, // Updated 2025-11-12: Added swap functions
     pairs: {
       usdpUsdc: "0x3B8D3c266B2BbE588188cA70525a2da456a848d2" as Address,
       paimonBnb: "0xc625Ab8646582100D48Ae4FC68c1E8B0976111fA" as Address,

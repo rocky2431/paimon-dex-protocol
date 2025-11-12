@@ -99,7 +99,7 @@ export const PSMSwapCard: React.FC = () => {
           />
         </Box>
 
-        {/* Input token (USDC or USDP) */}
+        {/* Input token (USDC or USDP only) */}
         <TokenInput
           label="From"
           amount={formData.inputAmount}
@@ -110,6 +110,7 @@ export const PSMSwapCard: React.FC = () => {
           }
           balance={inputBalance}
           excludeToken={formData.outputToken}
+          allowedTokens={[Token.USDC, Token.USDP]}
           showMaxButton={true}
           onMaxClick={handleMaxClick}
         />
@@ -117,7 +118,7 @@ export const PSMSwapCard: React.FC = () => {
         {/* Switch button */}
         <SwitchButton onClick={handleSwitchTokens} />
 
-        {/* Output token (USDP or USDC) */}
+        {/* Output token (USDP or USDC only) */}
         <TokenInput
           label="To"
           amount={formData.outputAmount}
@@ -129,6 +130,7 @@ export const PSMSwapCard: React.FC = () => {
           balance={outputBalance}
           readOnly={true}
           excludeToken={formData.inputToken}
+          allowedTokens={[Token.USDC, Token.USDP]}
           showMaxButton={false}
         />
 
