@@ -2,11 +2,13 @@
  * Rewards Dashboard Constants
  */
 
+import { TESTNET_ADDRESSES } from '@/config/chains/generated/testnet';
+
 /**
  * PAIMON token address
- * TODO: Update with actual deployed address
+ * Auto-synced from deployment (BSC Testnet)
  */
-export const PAIMON_TOKEN_ADDRESS = '0x0000000000000000000000000000000000000002' as `0x${string}`;
+export const PAIMON_TOKEN_ADDRESS = TESTNET_ADDRESSES.core.paimon;
 
 /**
  * Refresh interval for rewards data (10 seconds)
