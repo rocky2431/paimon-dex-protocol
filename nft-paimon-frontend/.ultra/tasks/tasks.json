@@ -9,10 +9,10 @@
   "stats": {
     "totalTasks": 46,
     "completed": 37,
-    "inProgress": 0,
-    "pending": 9,
+    "inProgress": 1,
+    "pending": 8,
     "progressPercentage": 80.43,
-    "lastUpdated": "2025-11-12T02:40:31.654Z"
+    "lastUpdated": "2025-11-12T02:46:45.485Z"
   },
   "tasks": [
     {
@@ -949,11 +949,12 @@
         "mock-1.1"
       ],
       "estimated_days": 0.5,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "liquidity",
         "cleanup"
-      ]
+      ],
+      "startedAt": "2025-11-12T02:46:45.485Z"
     },
     {
       "id": "mock-1.3",
