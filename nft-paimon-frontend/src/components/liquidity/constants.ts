@@ -26,9 +26,11 @@ export const LIQUIDITY_ADDRESSES = {
     "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73" as `0x${string}`,
 
   /** Custom Velodrome-style Router (if deployed) */
+  // TODO: Template placeholder - update with real address if custom DEX is deployed
   VELODROME_ROUTER:
     "0x0000000000000000000000000000000000000000" as `0x${string}`,
   /** Custom Velodrome-style Factory (if deployed) */
+  // TODO: Template placeholder - update with real address if custom DEX is deployed
   VELODROME_FACTORY:
     "0x0000000000000000000000000000000000000000" as `0x${string}`,
 } as const;
@@ -88,6 +90,7 @@ export const SUPPORTED_TOKENS: Record<string, Token> = {
  */
 export const LIQUIDITY_POOLS: LiquidityPool[] = [
   {
+    // TODO: Fallback address used when config.pools.hydUsdc is not deployed
     address: (config.pools.hydUsdc ||
       "0x0000000000000000000000000000000000000010") as `0x${string}`,
     token0: SUPPORTED_TOKENS.USDP,
@@ -101,6 +104,7 @@ export const LIQUIDITY_POOLS: LiquidityPool[] = [
     tvl: "$1,200,000",
   },
   {
+    // TODO: Fallback address used when config.pools.hydWbnb is not deployed
     address: (config.pools.hydWbnb ||
       "0x0000000000000000000000000000000000000011") as `0x${string}`,
     token0: SUPPORTED_TOKENS.USDP,
@@ -114,6 +118,7 @@ export const LIQUIDITY_POOLS: LiquidityPool[] = [
     tvl: "$850,000",
   },
   {
+    // TODO: Fallback address used when config.pools.usdcBusd is not deployed
     address: (config.pools.usdcBusd ||
       "0x0000000000000000000000000000000000000012") as `0x${string}`,
     token0: SUPPORTED_TOKENS.USDC,
@@ -127,6 +132,7 @@ export const LIQUIDITY_POOLS: LiquidityPool[] = [
     tvl: "$3,500,000",
   },
   {
+    // TODO: Fallback address used when config.pools.paimonWbnb is not deployed
     address: (config.pools.paimonWbnb ||
       "0x0000000000000000000000000000000000000013") as `0x${string}`,
     token0: SUPPORTED_TOKENS.PAIMON,
