@@ -66,11 +66,15 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
   // Parse pair (e.g., "USDP/USDC" -> ["USDP", "USDC"])
   const [token0Symbol, token1Symbol] = pair.split('/');
 
-  // Get pair address from config
+  // Get pair address from config (camelCase: usdpUsdc, hydUsdp, paimonWbnb)
   const pairAddress = useMemo(() => {
-    const pairKey = `${token0Symbol.toLowerCase()}${token1Symbol.toLowerCase()}` as keyof typeof testnet.pools;
+    const token0Lower = token0Symbol.toLowerCase();
+    const token1Camel = token1Symbol.charAt(0).toUpperCase() + token1Symbol.slice(1).toLowerCase();
+    const pairKey = `${token0Lower}${token1Camel}` as keyof typeof testnet.pools;
+
+    console.log('[PriceChart] Looking up pair:', { pair, pairKey, address: testnet.pools[pairKey] });
     return testnet.pools[pairKey] || null;
-  }, [token0Symbol, token1Symbol]);
+  }, [token0Symbol, token1Symbol, pair]);
 
   // Get token decimals
   const token0Decimals = useMemo(() => {
@@ -271,8 +275,21 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
           borderRadius: 2,
           border: '1px solid rgba(255, 107, 0, 0.2)',
           overflow: 'hidden',
+          minHeight: height,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
-      />
+      >
+        {/* Empty State */}
+        {!loading && !currentPrice && (
+          <Typography variant="body2" color="text.secondary">
+            {!pairAddress || pairAddress === '0x0000000000000000000000000000000000000000'
+              ? 'No liquidity pool found for this pair'
+              : 'Loading price data...'}
+          </Typography>
+        )}
+      </Box>
 
       {/* Loading Overlay */}
       {loading && (
