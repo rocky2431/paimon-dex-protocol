@@ -66,26 +66,56 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
   // Parse pair (e.g., "USDP/USDC" -> ["USDP", "USDC"])
   const [token0Symbol, token1Symbol] = pair.split('/');
 
-  // Get pair address from config (camelCase: usdpUsdc, hydUsdp, paimonWbnb)
-  const pairAddress = useMemo(() => {
-    const token0Lower = token0Symbol.toLowerCase();
-    const token1Camel = token1Symbol.charAt(0).toUpperCase() + token1Symbol.slice(1).toLowerCase();
-    const pairKey = `${token0Lower}${token1Camel}` as keyof typeof testnet.pools;
-
-    console.log('[PriceChart] Looking up pair:', { pair, pairKey, address: testnet.pools[pairKey] });
-    return testnet.pools[pairKey] || null;
-  }, [token0Symbol, token1Symbol, pair]);
-
-  // Get token decimals
-  const token0Decimals = useMemo(() => {
-    const tokenKey = token0Symbol.toLowerCase() as keyof typeof testnet.tokenConfig;
-    return testnet.tokenConfig[tokenKey]?.decimals || 18;
+  // Get token addresses from config
+  const token0Config = useMemo(() => {
+    return Object.values(testnet.tokenConfig).find(
+      t => t.symbol === token0Symbol
+    );
   }, [token0Symbol]);
 
-  const token1Decimals = useMemo(() => {
-    const tokenKey = token1Symbol.toLowerCase() as keyof typeof testnet.tokenConfig;
-    return testnet.tokenConfig[tokenKey]?.decimals || 18;
+  const token1Config = useMemo(() => {
+    return Object.values(testnet.tokenConfig).find(
+      t => t.symbol === token1Symbol
+    );
   }, [token1Symbol]);
+
+  // Query pair address directly from Factory (order-independent!)
+  const { data: pairAddress } = useReadContract({
+    address: testnet.dex.factory as `0x${string}`,
+    abi: [
+      {
+        inputs: [
+          { internalType: 'address', name: '', type: 'address' },
+          { internalType: 'address', name: '', type: 'address' },
+        ],
+        name: 'getPair',
+        outputs: [{ internalType: 'address', name: '', type: 'address' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+    ] as const,
+    functionName: 'getPair',
+    args: token0Config && token1Config
+      ? [token0Config.address as `0x${string}`, token1Config.address as `0x${string}`]
+      : undefined,
+    query: {
+      enabled: !!token0Config && !!token1Config,
+    },
+  });
+
+  // Log pair lookup
+  useMemo(() => {
+    console.log('[PriceChart] Pair lookup:', {
+      pair,
+      token0: token0Config?.symbol,
+      token1: token1Config?.symbol,
+      pairAddress,
+    });
+  }, [pair, token0Config, token1Config, pairAddress]);
+
+  // Get token decimals from config objects
+  const token0Decimals = token0Config?.decimals || 18;
+  const token1Decimals = token1Config?.decimals || 18;
 
   // Query token0 address to determine actual order
   const { data: token0Address } = useReadContract({
@@ -113,20 +143,12 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
 
   // Calculate current price from reserves
   const currentPrice = useMemo(() => {
-    if (!reserves || !token0Address) return null;
+    if (!reserves || !token0Address || !token0Config || !token1Config) return null;
 
     const [reserve0, reserve1] = reserves;
 
-    // Get token addresses from config
-    const token0ConfigAddr = Object.values(testnet.tokenConfig).find(
-      t => t.symbol === token0Symbol
-    )?.address.toLowerCase();
-    const token1ConfigAddr = Object.values(testnet.tokenConfig).find(
-      t => t.symbol === token1Symbol
-    )?.address.toLowerCase();
-
     // Determine which reserve corresponds to which token
-    const isToken0First = token0Address.toLowerCase() === token0ConfigAddr;
+    const isToken0First = token0Address.toLowerCase() === token0Config.address.toLowerCase();
 
     // Convert reserves to numbers with proper decimals
     const reserve0Formatted = Number(formatUnits(reserve0, token0Decimals));
@@ -147,8 +169,8 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
     console.log('[PriceChart] Price calculation:', {
       pair,
       token0Address,
-      token0ConfigAddr,
-      token1ConfigAddr,
+      token0Config: token0Config?.address,
+      token1Config: token1Config?.address,
       isToken0First,
       reserve0: reserve0Formatted,
       reserve1: reserve1Formatted,
@@ -156,7 +178,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
     });
 
     return price;
-  }, [reserves, token0Address, token0Symbol, token1Symbol, token0Decimals, token1Decimals, pair]);
+  }, [reserves, token0Address, token0Config, token1Config, token0Decimals, token1Decimals, pair]);
 
   // Initialize chart
   useEffect(() => {
