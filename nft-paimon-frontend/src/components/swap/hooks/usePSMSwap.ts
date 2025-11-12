@@ -333,14 +333,18 @@ export const usePSMSwap = () => {
       // USDP → USDC: call swapUSDPForUSDC(usdpAmount)
       const isUSDCtoUSDP = formData.inputToken === Token.USDC;
 
-      await writeContractAsync({
+      const hash = await writeContractAsync({
         address: CONTRACT_ADDRESSES.PSM,
         abi: PSM_ABI,
         functionName: isUSDCtoUSDP ? 'swapUSDCForUSDP' : 'swapUSDPForUSDC',
         args: [calculation.inputAmount],
       });
 
+      // Wait for transaction confirmation (BSC block time ~3s)
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
       setSwapState(SwapState.SUCCESS);
+      console.log('Swap successful! Transaction hash:', hash);
       setFormData({
         inputAmount: '',
         outputAmount: '',
