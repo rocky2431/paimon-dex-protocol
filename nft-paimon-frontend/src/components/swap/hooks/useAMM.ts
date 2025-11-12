@@ -38,12 +38,12 @@ function convertSwapState(ammState: AMMSwapState): SwapState {
  * - Adapts AMM-specific returns to match PSM interface
  */
 export const useAMM = () => {
-  // Form state (default: USDP → USDC - most common swap pair)
+  // Form state (default: USDC → USDP - users typically hold USDC and want to swap to USDP)
   const [formData, setFormData] = useState<SwapFormData>({
     inputAmount: '',
     outputAmount: '',
-    inputToken: Token.USDP,
-    outputToken: Token.USDC,
+    inputToken: Token.USDC,
+    outputToken: Token.USDP,
   });
 
   // Convert Token enum to TokenConfig for useAMMSwap

@@ -60,7 +60,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
   const chartRef = useRef<any>(null);
   const seriesRef = useRef<any>(null);
 
-  const [timeframe, setTimeframe] = useState<string>('1D');
+  const [timeframe, setTimeframe] = useState<string>('1H');
   const [loading, setLoading] = useState(false);
 
   // Parse pair (e.g., "USDP/USDC" -> ["USDP", "USDC"])
