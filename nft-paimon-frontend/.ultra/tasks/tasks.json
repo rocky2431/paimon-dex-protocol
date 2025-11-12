@@ -9,10 +9,10 @@
   "stats": {
     "totalTasks": 46,
     "completed": 38,
-    "inProgress": 0,
-    "pending": 8,
+    "inProgress": 1,
+    "pending": 7,
     "progressPercentage": 82.61,
-    "lastUpdated": "2025-11-12T03:15:00Z"
+    "lastUpdated": "2025-11-12T03:20:00Z"
   },
   "tasks": [
     {
@@ -975,12 +975,13 @@
       "priority": "P0",
       "dependencies": [],
       "estimated_days": 0.75,
-      "status": "pending",
+      "status": "in_progress",
       "tags": [
         "liquidity",
         "nitro",
         "hook"
-      ]
+      ],
+      "startedAt": "2025-11-12T03:20:00Z"
     },
     {
       "id": "mock-1.4",
