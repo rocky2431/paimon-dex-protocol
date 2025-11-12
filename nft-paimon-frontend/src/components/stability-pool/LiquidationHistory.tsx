@@ -28,7 +28,9 @@ import {
   History as HistoryIcon,
   TrendingDown as TrendingDownIcon,
   TrendingUp as TrendingUpIcon,
+  Info as InfoIcon,
 } from '@mui/icons-material';
+import { DataNotice } from '@/components/common/DataNotice';
 
 interface LiquidationHistoryProps {
   locale?: 'en' | 'zh';
@@ -53,32 +55,24 @@ const translations = {
   },
 };
 
-// Mock liquidation history - in production, this would come from subgraph/API
-const MOCK_LIQUIDATIONS = [
-  {
-    timestamp: Date.now() - 86400000, // 1 day ago
-    debtOffset: 50000,
-    collateralGained: { symbol: 'USDC', amount: 5500 },
-    shareChange: -2.5,
-  },
-  {
-    timestamp: Date.now() - 172800000, // 2 days ago
-    debtOffset: 120000,
-    collateralGained: { symbol: 'RWA-1', amount: 13200 },
-    shareChange: -5.8,
-  },
-  {
-    timestamp: Date.now() - 259200000, // 3 days ago
-    debtOffset: 75000,
-    collateralGained: { symbol: 'USDC', amount: 8250 },
-    shareChange: -3.2,
-  },
-];
+// TODO Phase 3.2+: Implement via The Graph Subgraph
+// Index StabilityPool.Liquidated events:
+//   - borrower, liquidator, debtOffset, collateralSent, timestamp
+// GraphQL query: liquidations(first: 10, orderBy: timestamp, orderDirection: desc)
+// Create useLiquidationHistory hook to query subgraph
+// Long-term solution: Real-time event indexing with historical data
+interface Liquidation {
+  timestamp: number;
+  debtOffset: number;
+  collateralGained: { symbol: string; amount: number };
+  shareChange: number;
+}
 
 export function LiquidationHistory({ locale = 'en' }: LiquidationHistoryProps) {
   const t = translations[locale];
 
-  const liquidations = useMemo(() => MOCK_LIQUIDATIONS, []);
+  // Empty array - liquidation history requires The Graph Subgraph (Phase 3.2+)
+  const liquidations = useMemo(() => [] as Liquidation[], []);
 
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US', {
@@ -107,9 +101,20 @@ export function LiquidationHistory({ locale = 'en' }: LiquidationHistoryProps) {
 
         {/* Table */}
         {liquidations.length === 0 ? (
-          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
-            {t.noHistory}
-          </Typography>
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <InfoIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              {t.noHistory}
+            </Typography>
+            <DataNotice
+              message={
+                locale === 'zh'
+                  ? '清算历史功能需要事件索引支持，将在 Phase 3.2 通过 The Graph Subgraph 实现。'
+                  : 'Liquidation history requires event indexing and will be implemented via The Graph Subgraph in Phase 3.2.'
+              }
+              severity="info"
+            />
+          </Box>
         ) : (
           <TableContainer sx={{ maxHeight: 440 }}>
             <Table size="small" stickyHeader>
