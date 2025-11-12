@@ -20,6 +20,7 @@ import { Navigation } from '@/components/layout/Navigation';
 import { SubNavigation, useTabState } from '@/components/layout/SubNavigation';
 import { useAccount } from 'wagmi';
 import { useLPPools } from '@/hooks/useLPPools';
+import { useNitroPools } from '@/hooks/useNitroPools';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import AddIcon from '@mui/icons-material/Add';
@@ -57,33 +58,8 @@ export default function LiquidityHub() {
   // Real pool data from useLPPools hook
   const { pools, isLoading: poolsLoading, error: poolsError } = useLPPools();
 
-  // Mock Nitro Pools data (符合 NitroPool 接口)
-  const MOCK_NITRO_POOLS = [
-    {
-      id: 1n,
-      name: 'USDP/USDC Nitro',
-      lpToken: '0x0000000000000000000000000000000000000001' as `0x${string}`,
-      lockDuration: 604800n, // 7 days in seconds
-      apr: 45,
-      active: true,
-    },
-    {
-      id: 2n,
-      name: 'USDC/ETH Nitro',
-      lpToken: '0x0000000000000000000000000000000000000002' as `0x${string}`,
-      lockDuration: 1209600n, // 14 days in seconds
-      apr: 38,
-      active: true,
-    },
-    {
-      id: 3n,
-      name: 'PAIMON/USDP Nitro',
-      lpToken: '0x0000000000000000000000000000000000000003' as `0x${string}`,
-      lockDuration: 259200n, // 3 days in seconds
-      apr: 64,
-      active: true,
-    },
-  ];
+  // Real Nitro pool data from useNitroPools hook
+  const { pools: nitroPools, isLoading: nitroLoading, error: nitroError } = useNitroPools();
 
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
@@ -410,11 +386,28 @@ export default function LiquidityHub() {
                 </Typography>
               </Box>
 
-              <NitroPoolList pools={MOCK_NITRO_POOLS} locale="en" showFilter={false} />
-
-              <Alert severity="warning" icon={<BoltIcon />} sx={{ mt: 3 }}>
-                Nitro pools provide temporary boosted rewards. Duration and multiplier vary by pool.
-              </Alert>
+              {nitroLoading ? (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Skeleton variant="rounded" height={120} />
+                  <Skeleton variant="rounded" height={120} />
+                  <Skeleton variant="rounded" height={120} />
+                </Box>
+              ) : nitroError ? (
+                <Alert severity="error">
+                  Failed to load Nitro pools: {nitroError.message}
+                </Alert>
+              ) : nitroPools && nitroPools.length > 0 ? (
+                <>
+                  <NitroPoolList pools={nitroPools} locale="en" showFilter={false} />
+                  <Alert severity="warning" icon={<BoltIcon />} sx={{ mt: 3 }}>
+                    Nitro pools provide temporary boosted rewards. Duration and multiplier vary by pool.
+                  </Alert>
+                </>
+              ) : (
+                <Alert severity="info">
+                  No active Nitro pools available at the moment.
+                </Alert>
+              )}
             </Box>
 
             {/* Boost Staking Section */}
