@@ -1,6 +1,7 @@
 'use client';
 
 import { Box, Typography, Stack, LinearProgress } from '@mui/material';
+import { formatUnits } from 'viem';
 import { LiquidityPreview as LiquidityPreviewType } from './types';
 import { LIQUIDITY_DESIGN_TOKENS, ANIMATION_CONFIG } from './constants';
 
@@ -14,6 +15,10 @@ interface LiquidityPreviewProps {
   token0Symbol: string;
   /** Token1 symbol */
   token1Symbol: string;
+  /** Token0 decimals */
+  token0Decimals: number;
+  /** Token1 decimals */
+  token1Decimals: number;
 }
 
 /**
@@ -32,6 +37,8 @@ export const LiquidityPreview: React.FC<LiquidityPreviewProps> = ({
   preview,
   token0Symbol,
   token1Symbol,
+  token0Decimals,
+  token1Decimals,
 }) => {
   if (!preview) return null;
 
@@ -176,8 +183,8 @@ export const LiquidityPreview: React.FC<LiquidityPreviewProps> = ({
           textAlign: 'center',
         }}
       >
-        Output is estimated. You will receive at least {preview.amountAMin.toString()} {token0Symbol} and{' '}
-        {preview.amountBMin.toString()} {token1Symbol} or the transaction will revert.
+        Output is estimated. You will receive at least {formatUnits(preview.amountAMin, token0Decimals)} {token0Symbol} and{' '}
+        {formatUnits(preview.amountBMin, token1Decimals)} {token1Symbol} or the transaction will revert.
       </Typography>
     </Box>
   );

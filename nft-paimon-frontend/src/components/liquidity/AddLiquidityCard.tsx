@@ -190,6 +190,8 @@ export const AddLiquidityCard: React.FC = () => {
               preview={preview}
               token0Symbol={formData.pool.token0.symbol}
               token1Symbol={formData.pool.token1.symbol}
+              token0Decimals={formData.pool.token0.decimals}
+              token1Decimals={formData.pool.token1.decimals}
             />
           </Box>
         )}
