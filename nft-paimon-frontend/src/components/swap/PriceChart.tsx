@@ -113,10 +113,6 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
     });
   }, [pair, token0Config, token1Config, pairAddress]);
 
-  // Get token decimals from config objects
-  const token0Decimals = token0Config?.decimals || 18;
-  const token1Decimals = token1Config?.decimals || 18;
-
   // Query token0 address to determine actual order
   const { data: token0Address } = useReadContract({
     address: pairAddress as `0x${string}`,
@@ -147,12 +143,17 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
 
     const [reserve0, reserve1] = reserves;
 
-    // Determine which reserve corresponds to which token
+    // Determine which token is actually token0 in the pair contract
+    // (Pair contracts sort by address, not by user input order)
     const isToken0First = token0Address.toLowerCase() === token0Config.address.toLowerCase();
 
-    // Convert reserves to numbers with proper decimals
-    const reserve0Formatted = Number(formatUnits(reserve0, token0Decimals));
-    const reserve1Formatted = Number(formatUnits(reserve1, token1Decimals));
+    // Map to actual token configs based on on-chain order
+    const actualToken0Config = isToken0First ? token0Config : token1Config;
+    const actualToken1Config = isToken0First ? token1Config : token0Config;
+
+    // Convert reserves using CORRECT decimals from actual tokens
+    const reserve0Formatted = Number(formatUnits(reserve0, actualToken0Config.decimals));
+    const reserve1Formatted = Number(formatUnits(reserve1, actualToken1Config.decimals));
 
     // Calculate price: how many token1 per 1 token0
     let price: number;
@@ -169,8 +170,14 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
     console.log('[PriceChart] Price calculation:', {
       pair,
       token0Address,
-      token0Config: { address: token0Config?.address, symbol: token0Config?.symbol, decimals: token0Decimals },
-      token1Config: { address: token1Config?.address, symbol: token1Config?.symbol, decimals: token1Decimals },
+      userInputOrder: {
+        token0Config: { address: token0Config?.address, symbol: token0Config?.symbol, decimals: token0Config?.decimals },
+        token1Config: { address: token1Config?.address, symbol: token1Config?.symbol, decimals: token1Config?.decimals },
+      },
+      actualOrder: {
+        token0: { symbol: actualToken0Config?.symbol, decimals: actualToken0Config?.decimals },
+        token1: { symbol: actualToken1Config?.symbol, decimals: actualToken1Config?.decimals },
+      },
       isToken0First,
       reserve0: reserve0Formatted,
       reserve1: reserve1Formatted,
@@ -179,7 +186,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({ pair, height = 280 }) =>
     });
 
     return price;
-  }, [reserves, token0Address, token0Config, token1Config, token0Decimals, token1Decimals, pair]);
+  }, [reserves, token0Address, token0Config, token1Config, pair]);
 
   // Initialize chart
   useEffect(() => {
