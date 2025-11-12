@@ -13,10 +13,7 @@ import {
   AddLiquidityFormData,
   LiquidityPreview,
   ValidationResult,
-  Token,
-  TokenAmount,
   LiquidityPool,
-  AddLiquidityParams,
 } from "../types";
 import {
   calculateAmountMin,
@@ -29,6 +26,7 @@ import {
   DEFAULT_SLIPPAGE_BPS,
   DEFAULT_DEADLINE_MINUTES,
   VALIDATION_MESSAGES,
+  getGaugeAddress,
 } from "../constants";
 import { config } from "@/config";
 
@@ -54,17 +52,6 @@ const ROUTER_ABI = [
       { name: "liquidity", type: "uint256" },
     ],
     stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      { name: "amountA", type: "uint256" },
-      { name: "reserveA", type: "uint256" },
-      { name: "reserveB", type: "uint256" },
-    ],
-    name: "quote",
-    outputs: [{ name: "amountB", type: "uint256" }],
-    stateMutability: "pure",
     type: "function",
   },
 ] as const;
@@ -94,30 +81,65 @@ const PAIR_ABI = [
 ] as const;
 
 /**
- * useAddLiquidity Hook
- * Manages the complete add liquidity flow with wagmi integration
+ * Gauge contract ABI (minimal) - Velodrome/Solidly style
+ */
+const GAUGE_ABI = [
+  {
+    inputs: [
+      { name: "amount", type: "uint256" },
+      { name: "recipient", type: "address" },
+    ],
+    name: "deposit",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [{ name: "amount", type: "uint256" }],
+    name: "deposit",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+] as const;
+
+/**
+ * Extended form data with auto-stake option
+ */
+interface AddLiquidityWithGaugeFormData extends AddLiquidityFormData {
+  autoStakeToGauge: boolean;
+}
+
+/**
+ * useAddLiquidityWithGauge Hook
+ * Enhanced version with automatic Gauge staking
  *
  * Features:
- * - Token balance fetching
- * - Allowance checking
- * - Token approval
- * - Pool reserve fetching
- * - Liquidity calculation
- * - Add liquidity transaction
- * - State machine management
+ * - All features from useAddLiquidity
+ * - Auto-stake to Gauge option (default: true)
+ * - Automatic LP token approval for Gauge
+ * - Gauge deposit transaction
+ *
+ * Flow:
+ * 1. User adds liquidity (gets LP tokens)
+ * 2. If autoStakeToGauge is true:
+ *    a. Approve LP tokens for Gauge
+ *    b. Deposit LP tokens to Gauge
+ * 3. Success: User earns both trading fees + PAIMON rewards
  */
-export const useAddLiquidity = () => {
+export const useAddLiquidityWithGauge = () => {
   const { address } = useAccount();
   const routerAddress = config.dex.router as `0x${string}` | undefined;
   const { writeContractAsync } = useWriteContract();
 
   // ========== State ==========
-  const [formData, setFormData] = useState<AddLiquidityFormData>({
+  const [formData, setFormData] = useState<AddLiquidityWithGaugeFormData>({
     pool: null,
     tokenA: null,
     tokenB: null,
     slippageBps: DEFAULT_SLIPPAGE_BPS,
     deadlineMinutes: DEFAULT_DEADLINE_MINUTES,
+    autoStakeToGauge: true, // Default to true for first-time liquidity provision
   });
 
   const [addLiquidityState, setAddLiquidityState] = useState<AddLiquidityState>(
@@ -125,6 +147,8 @@ export const useAddLiquidity = () => {
   );
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>(undefined);
+  const [lpTokensReceived, setLpTokensReceived] = useState<bigint>(0n);
+  const [gaugeAddress, setGaugeAddress] = useState<`0x${string}` | null>(null);
 
   // ========== Token Balance Queries ==========
   const { data: balanceA } = useReadContract({
@@ -137,6 +161,15 @@ export const useAddLiquidity = () => {
 
   const { data: balanceB } = useReadContract({
     address: formData.pool?.token1.address,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: { enabled: !!address && !!formData.pool },
+  });
+
+  // ========== LP Token Balance Query (for Gauge approval) ==========
+  const { data: lpTokenBalance } = useReadContract({
+    address: formData.pool?.address,
     abi: erc20Abi,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
@@ -160,12 +193,21 @@ export const useAddLiquidity = () => {
     query: { enabled: !!address && !!formData.pool && !!routerAddress },
   });
 
+  // ========== LP Token Allowance for Gauge ==========
+  const { data: lpTokenAllowanceForGauge } = useReadContract({
+    address: formData.pool?.address,
+    abi: erc20Abi,
+    functionName: "allowance",
+    args: address && gaugeAddress ? [address, gaugeAddress] : undefined,
+    query: { enabled: !!address && !!formData.pool && !!gaugeAddress },
+  });
+
   // ========== Pool Reserve Queries ==========
   const { data: reserves } = useReadContract({
     address: formData.pool?.address,
     abi: PAIR_ABI,
     functionName: "getReserves",
-    query: { enabled: !!formData.pool, refetchInterval: 10000 }, // Refresh every 10s
+    query: { enabled: !!formData.pool, refetchInterval: 10000 },
   });
 
   const { data: totalSupply } = useReadContract({
@@ -189,20 +231,14 @@ export const useAddLiquidity = () => {
     setFormData((prev) => ({
       ...prev,
       pool,
-      tokenA: {
-        token: pool.token0,
-        amount: 0n,
-        amountFormatted: "",
-        balanceFormatted: "0.00",
-      },
-      tokenB: {
-        token: pool.token1,
-        amount: 0n,
-        amountFormatted: "",
-        balanceFormatted: "0.00",
-      },
+      tokenA: null,
+      tokenB: null,
     }));
     setAddLiquidityState(AddLiquidityState.IDLE);
+
+    // Get gauge address for selected pool
+    const gauge = getGaugeAddress(pool.name);
+    setGaugeAddress(gauge);
   }, []);
 
   /**
@@ -219,7 +255,6 @@ export const useAddLiquidity = () => {
             : parseUnits(amount, formData.pool.token0.decimals);
         const [reserve0, reserve1] = reserves;
 
-        // Calculate token B amount based on pool ratio
         const amountB =
           reserve0 > 0n
             ? quoteTokenAmount(amountParsed, reserve0, reserve1)
@@ -266,6 +301,13 @@ export const useAddLiquidity = () => {
   }, []);
 
   /**
+   * Handle auto-stake toggle
+   */
+  const handleAutoStakeToggle = useCallback((enabled: boolean) => {
+    setFormData((prev) => ({ ...prev, autoStakeToGauge: enabled }));
+  }, []);
+
+  /**
    * Approve Token A
    */
   const approveTokenA = useCallback(async () => {
@@ -279,7 +321,7 @@ export const useAddLiquidity = () => {
         functionName: "approve",
         args: [routerAddress, formData.tokenA.amount],
       });
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for confirmation
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     } catch (error: any) {
       setAddLiquidityState(AddLiquidityState.ERROR);
       setErrorMessage(error.message || "Approval failed");
@@ -300,7 +342,7 @@ export const useAddLiquidity = () => {
         functionName: "approve",
         args: [routerAddress, formData.tokenB.amount],
       });
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait for confirmation
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     } catch (error: any) {
       setAddLiquidityState(AddLiquidityState.ERROR);
       setErrorMessage(error.message || "Approval failed");
@@ -316,46 +358,21 @@ export const useAddLiquidity = () => {
       !formData.tokenA ||
       !formData.tokenB ||
       !address ||
-      !routerAddress ||
-      !reserves
+      !routerAddress
     )
       return;
 
     try {
       setAddLiquidityState(AddLiquidityState.ADDING);
 
-      // Check if tokenA matches pool.token0 (token order matching)
-      const isTokenAFirst =
-        formData.tokenA.token.address.toLowerCase() ===
-        formData.pool.token0.address.toLowerCase();
-
-      // Match token addresses and amounts to pool order
-      const routerTokenA = isTokenAFirst
-        ? formData.pool.token0.address
-        : formData.pool.token1.address;
-      const routerTokenB = isTokenAFirst
-        ? formData.pool.token1.address
-        : formData.pool.token0.address;
-      const routerAmountA = isTokenAFirst
-        ? formData.tokenA.amount
-        : formData.tokenB.amount;
-      const routerAmountB = isTokenAFirst
-        ? formData.tokenB.amount
-        : formData.tokenA.amount;
-
-      // Check if this is a new pool (no liquidity yet)
-      const [reserve0, reserve1] = reserves;
-      const isNewPool = reserve0 === 0n && reserve1 === 0n;
-
-      // For new pools, set amountMin to 0 to avoid ratio issues
-      // For existing pools, apply slippage protection
-      const amountAMin = isNewPool
-        ? 0n
-        : calculateAmountMin(routerAmountA, formData.slippageBps);
-      const amountBMin = isNewPool
-        ? 0n
-        : calculateAmountMin(routerAmountB, formData.slippageBps);
-
+      const amountAMin = calculateAmountMin(
+        formData.tokenA.amount,
+        formData.slippageBps
+      );
+      const amountBMin = calculateAmountMin(
+        formData.tokenB.amount,
+        formData.slippageBps
+      );
       const deadline = calculateDeadline(formData.deadlineMinutes);
 
       const hash = await writeContractAsync({
@@ -363,10 +380,10 @@ export const useAddLiquidity = () => {
         abi: ROUTER_ABI,
         functionName: "addLiquidity",
         args: [
-          routerTokenA,
-          routerTokenB,
-          routerAmountA,
-          routerAmountB,
+          formData.pool.token0.address,
+          formData.pool.token1.address,
+          formData.tokenA.amount,
+          formData.tokenB.amount,
           amountAMin,
           amountBMin,
           address,
@@ -379,10 +396,52 @@ export const useAddLiquidity = () => {
       setAddLiquidityState(AddLiquidityState.ERROR);
       setErrorMessage(error.message || "Transaction failed");
     }
-  }, [formData, address, routerAddress, reserves, writeContractAsync]);
+  }, [formData, address, routerAddress, writeContractAsync]);
 
   /**
-   * Main action handler (routes to appropriate function based on state)
+   * Approve LP tokens for Gauge
+   */
+  const approveLPForGauge = useCallback(async () => {
+    if (!formData.pool || !address || !gaugeAddress || !lpTokenBalance) return;
+
+    try {
+      setAddLiquidityState(AddLiquidityState.APPROVING_A); // Reuse state
+      const hash = await writeContractAsync({
+        address: formData.pool.address,
+        abi: erc20Abi,
+        functionName: "approve",
+        args: [gaugeAddress, lpTokenBalance], // Approve all LP tokens
+      });
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    } catch (error: any) {
+      setAddLiquidityState(AddLiquidityState.ERROR);
+      setErrorMessage(error.message || "LP token approval failed");
+    }
+  }, [formData.pool, address, gaugeAddress, lpTokenBalance, writeContractAsync]);
+
+  /**
+   * Deposit LP tokens to Gauge
+   */
+  const depositToGauge = useCallback(async () => {
+    if (!formData.pool || !address || !gaugeAddress || !lpTokenBalance) return;
+
+    try {
+      setAddLiquidityState(AddLiquidityState.ADDING); // Reuse state
+      const hash = await writeContractAsync({
+        address: gaugeAddress,
+        abi: GAUGE_ABI,
+        functionName: "deposit",
+        args: [lpTokenBalance], // Deposit all LP tokens
+      });
+      setTxHash(hash);
+    } catch (error: any) {
+      setAddLiquidityState(AddLiquidityState.ERROR);
+      setErrorMessage(error.message || "Gauge deposit failed");
+    }
+  }, [formData.pool, address, gaugeAddress, lpTokenBalance, writeContractAsync]);
+
+  /**
+   * Main action handler
    */
   const handleAction = useCallback(() => {
     if (addLiquidityState === AddLiquidityState.NEEDS_APPROVAL_A) {
@@ -397,7 +456,7 @@ export const useAddLiquidity = () => {
   // ========== Computed Values ==========
 
   /**
-   * Liquidity preview (LP tokens, pool share, price ratios)
+   * Liquidity preview
    */
   const preview = useMemo((): LiquidityPreview | null => {
     if (!formData.tokenA || !formData.tokenB || !reserves || !totalSupply)
@@ -432,7 +491,7 @@ export const useAddLiquidity = () => {
 
     return {
       lpTokens,
-      lpTokensFormatted: formatUnits(lpTokens, 18), // LP tokens are always 18 decimals
+      lpTokensFormatted: formatUnits(lpTokens, 18),
       shareOfPool,
       priceToken0,
       priceToken1,
@@ -476,36 +535,14 @@ export const useAddLiquidity = () => {
     return { isValid: true };
   }, [formData, balanceA, balanceB]);
 
-  // ========== Side Effects ==========
-
   /**
-   * Update token balances when they change
+   * Check if Gauge is deployed
    */
-  useEffect(() => {
-    setFormData((prev) => {
-      if (!prev.pool || !prev.tokenA || !prev.tokenB) return prev;
+  const isGaugeDeployed = useMemo(() => {
+    return gaugeAddress && gaugeAddress !== "0x0000000000000000000000000000000000000000";
+  }, [gaugeAddress]);
 
-      return {
-        ...prev,
-        tokenA: {
-          ...prev.tokenA,
-          balance: balanceA || 0n,
-          balanceFormatted: formatUnits(
-            balanceA || 0n,
-            prev.pool.token0.decimals
-          ),
-        },
-        tokenB: {
-          ...prev.tokenB,
-          balance: balanceB || 0n,
-          balanceFormatted: formatUnits(
-            balanceB || 0n,
-            prev.pool.token1.decimals
-          ),
-        },
-      };
-    });
-  }, [balanceA, balanceB]);
+  // ========== Side Effects ==========
 
   /**
    * Update state based on approval status
@@ -529,18 +566,42 @@ export const useAddLiquidity = () => {
   }, [formData, allowanceA, allowanceB, validation.isValid]);
 
   /**
-   * Handle transaction success
+   * Handle add liquidity transaction success
+   * If auto-stake is enabled and Gauge is deployed, proceed to stake
    */
   useEffect(() => {
-    if (isTxSuccess) {
-      setAddLiquidityState(AddLiquidityState.SUCCESS);
-      // Reset form after 3 seconds
-      setTimeout(() => {
-        setFormData((prev) => ({ ...prev, tokenA: null, tokenB: null }));
-        setAddLiquidityState(AddLiquidityState.IDLE);
-      }, 3000);
+    if (isTxSuccess && txHash) {
+      // Check if this was the addLiquidity tx or gauge deposit tx
+      if (formData.autoStakeToGauge && isGaugeDeployed && lpTokenBalance && lpTokenBalance > 0n) {
+        // Check if LP tokens need approval for Gauge
+        const needsGaugeApproval = (lpTokenAllowanceForGauge || 0n) < lpTokenBalance;
+
+        if (needsGaugeApproval) {
+          // Approve LP tokens for Gauge
+          approveLPForGauge();
+        } else {
+          // Deposit to Gauge
+          depositToGauge();
+        }
+      } else {
+        // No auto-stake, show success
+        setAddLiquidityState(AddLiquidityState.SUCCESS);
+        setTimeout(() => {
+          setFormData((prev) => ({ ...prev, tokenA: null, tokenB: null }));
+          setAddLiquidityState(AddLiquidityState.IDLE);
+        }, 3000);
+      }
     }
-  }, [isTxSuccess]);
+  }, [
+    isTxSuccess,
+    txHash,
+    formData.autoStakeToGauge,
+    isGaugeDeployed,
+    lpTokenBalance,
+    lpTokenAllowanceForGauge,
+    approveLPForGauge,
+    depositToGauge,
+  ]);
 
   return {
     // Form data
@@ -549,10 +610,13 @@ export const useAddLiquidity = () => {
     handlePoolSelect,
     handleTokenAChange,
     handleSlippageChange,
+    handleAutoStakeToggle,
     handleAction,
     // Computed
     preview,
     validation,
+    isGaugeDeployed,
+    gaugeAddress,
     // State
     addLiquidityState,
     errorMessage,
