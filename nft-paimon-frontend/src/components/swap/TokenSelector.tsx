@@ -18,6 +18,7 @@ interface TokenSelectorProps {
   onTokenChange: (token: Token) => void;
   disabled?: boolean;
   excludeToken?: Token; // Hide this token from dropdown
+  allowedTokens?: Token[]; // Only show these tokens (for PSM mode: USDC, USDP)
   'data-testid'?: string; // For E2E testing
 }
 
@@ -36,6 +37,7 @@ export const TokenSelector: React.FC<TokenSelectorProps> = ({
   onTokenChange,
   disabled = false,
   excludeToken,
+  allowedTokens,
   'data-testid': testId,
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -56,10 +58,17 @@ export const TokenSelector: React.FC<TokenSelectorProps> = ({
     handleClose();
   };
 
-  // Get available tokens (exclude selected in opposite field)
-  const availableTokens = Object.values(TOKEN_CONFIG).filter(
-    (token) => !excludeToken || token.symbol !== excludeToken
-  );
+  // Get available tokens
+  // 1. If allowedTokens is set, only show those tokens (PSM mode: USDC, USDP)
+  // 2. Otherwise exclude the token from opposite field
+  const availableTokens = Object.values(TOKEN_CONFIG).filter((token) => {
+    // If allowedTokens is set, only show allowed tokens
+    if (allowedTokens && allowedTokens.length > 0) {
+      return allowedTokens.includes(token.symbol as Token);
+    }
+    // Otherwise exclude the opposite token
+    return !excludeToken || token.symbol !== excludeToken;
+  });
 
   return (
     <>

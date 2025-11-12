@@ -164,6 +164,7 @@ export const SwapCard: React.FC = () => {
           }
           balance={inputBalance}
           excludeToken={formData.outputToken}
+          allowedTokens={isPSMMode ? [Token.USDC, Token.USDP] : undefined}
           showMaxButton={true}
           onMaxClick={handleMaxClick}
           data-testid-prefix="from"
@@ -184,6 +185,7 @@ export const SwapCard: React.FC = () => {
           balance={outputBalance}
           readOnly={true}
           excludeToken={formData.inputToken}
+          allowedTokens={isPSMMode ? [Token.USDC, Token.USDP] : undefined}
           showMaxButton={false}
           data-testid-prefix="to"
         />

@@ -15,6 +15,7 @@ interface TokenInputProps {
   balance?: TokenBalance;
   readOnly?: boolean;
   excludeToken?: Token;
+  allowedTokens?: Token[]; // Only show these tokens (for PSM mode)
   showMaxButton?: boolean;
   onMaxClick?: () => void;
   'data-testid-prefix'?: string; // E.g., "from" or "to" for generating test IDs
@@ -40,6 +41,7 @@ export const TokenInput: React.FC<TokenInputProps> = ({
   balance,
   readOnly = false,
   excludeToken,
+  allowedTokens,
   showMaxButton = true,
   onMaxClick,
   'data-testid-prefix': testIdPrefix,
@@ -133,6 +135,7 @@ export const TokenInput: React.FC<TokenInputProps> = ({
             onTokenChange={onTokenChange}
             disabled={readOnly}
             excludeToken={excludeToken}
+            allowedTokens={allowedTokens}
             data-testid={testIdPrefix ? `${testIdPrefix}-token-selector` : undefined}
           />
         </Box>
