@@ -28,6 +28,13 @@ export const NITROPOOL_ABI = [
   },
   {
     type: "function",
+    name: "poolCount",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "PLATFORM_FEE",
     inputs: [],
     outputs: [{ name: "", type: "uint256" }],
