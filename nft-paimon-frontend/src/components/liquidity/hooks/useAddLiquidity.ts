@@ -182,7 +182,7 @@ export const useAddLiquidity = () => {
   });
 
   // ========== Allowance Queries ==========
-  const { data: allowanceA } = useReadContract({
+  const { data: allowanceA, refetch: refetchAllowanceA } = useReadContract({
     address: formData.selectedTokenA?.address,
     abi: erc20Abi,
     functionName: "allowance",
@@ -190,7 +190,7 @@ export const useAddLiquidity = () => {
     query: { enabled: !!address && !!formData.selectedTokenA && !!routerAddress },
   });
 
-  const { data: allowanceB } = useReadContract({
+  const { data: allowanceB, refetch: refetchAllowanceB } = useReadContract({
     address: formData.selectedTokenB?.address,
     abi: erc20Abi,
     functionName: "allowance",
@@ -631,16 +631,32 @@ export const useAddLiquidity = () => {
 
   /**
    * Handle transaction success
+   * Distinguishes between approval and addLiquidity transactions
    */
   useEffect(() => {
-    if (isTxSuccess) {
-      setAddLiquidityState(AddLiquidityState.SUCCESS);
-      setTimeout(() => {
-        setFormData((prev) => ({ ...prev, tokenA: null, tokenB: null }));
-        setAddLiquidityState(AddLiquidityState.IDLE);
-      }, 3000);
+    if (isTxSuccess && txHash) {
+      // Check if this was an approval transaction
+      if (addLiquidityState === AddLiquidityState.APPROVING_A) {
+        // Refetch allowance A and reset txHash
+        refetchAllowanceA();
+        setTxHash(undefined);
+        // State will auto-update via the allowance monitoring useEffect
+      } else if (addLiquidityState === AddLiquidityState.APPROVING_B) {
+        // Refetch allowance B and reset txHash
+        refetchAllowanceB();
+        setTxHash(undefined);
+        // State will auto-update via the allowance monitoring useEffect
+      } else if (addLiquidityState === AddLiquidityState.ADDING) {
+        // This was the final addLiquidity transaction
+        setAddLiquidityState(AddLiquidityState.SUCCESS);
+        setTimeout(() => {
+          setFormData((prev) => ({ ...prev, tokenA: null, tokenB: null }));
+          setAddLiquidityState(AddLiquidityState.IDLE);
+          setTxHash(undefined);
+        }, 3000);
+      }
     }
-  }, [isTxSuccess]);
+  }, [isTxSuccess, txHash, addLiquidityState, refetchAllowanceA, refetchAllowanceB]);
 
   return {
     // Form data
