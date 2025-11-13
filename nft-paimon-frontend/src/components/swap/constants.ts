@@ -67,39 +67,54 @@ export const SWAP_CONFIG = {
 
 // Token configuration
 /**
- * Token configuration from centralized config
- * Token配置从中央配置获取
+ * Token Configuration
+ * 代币配置 - 从全局配置动态生成
+ *
+ * BEFORE (hardcoded): Manually maintained token list with enum values
+ * AFTER (dynamic): Automatically generated from config.tokenConfig, filters out:
+ *   1. Zero-address tokens (e.g., WBNB not deployed on testnet)
+ *   2. Non-swappable tokens (e.g., esPAIMON - non-transferable vesting token)
+ *   3. Unwanted tokens (e.g., BUSD, USDT - not primary trading pairs)
+ *
+ * Swappable tokens: USDC, USDP, PAIMON, HYD
  */
-export const TOKEN_CONFIG: Record<Token, TokenInfo> = {
-  [Token.USDC]: {
-    symbol: Token.USDC,
-    name: config.tokenConfig.usdc.name,
-    decimals: config.tokenConfig.usdc.decimals,
-    address: config.tokenConfig.usdc.address as `0x${string}`,
-    icon: config.tokenConfig.usdc.icon,
-  },
-  [Token.USDP]: {
-    symbol: Token.USDP,
-    name: config.tokenConfig.usdp.name,
-    decimals: config.tokenConfig.usdp.decimals,
-    address: config.tokenConfig.usdp.address as `0x${string}`,
-    icon: config.tokenConfig.usdp.icon,
-  },
-  [Token.HYD]: {
-    symbol: Token.HYD,
-    name: config.tokenConfig.hyd.name,
-    decimals: config.tokenConfig.hyd.decimals,
-    address: config.tokenConfig.hyd.address as `0x${string}`,
-    icon: config.tokenConfig.hyd.icon,
-  },
-  [Token.WBNB]: {
-    symbol: Token.WBNB,
-    name: config.tokenConfig.wbnb.name,
-    decimals: config.tokenConfig.wbnb.decimals,
-    address: config.tokenConfig.wbnb.address as `0x${string}`,
-    icon: config.tokenConfig.wbnb.icon,
-  },
-};
+export const TOKEN_CONFIG: Record<string, TokenInfo> = Object.entries(
+  config.tokenConfig
+).reduce((acc, [key, tokenInfo]) => {
+  const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+
+  // Filter out tokens with zero address (e.g., WBNB on testnet - not deployed yet)
+  if (tokenInfo.address === ZERO_ADDRESS) {
+    console.warn(`[TOKEN_CONFIG] Skipping ${key.toUpperCase()} (zero address)`);
+    return acc;
+  }
+
+  // Filter out non-swappable tokens
+  const NON_SWAPPABLE_TOKENS = ['espaimon']; // esPAIMON is non-transferable (soulbound)
+  if (NON_SWAPPABLE_TOKENS.includes(key.toLowerCase())) {
+    console.warn(`[TOKEN_CONFIG] Skipping ${key.toUpperCase()} (non-swappable token)`);
+    return acc;
+  }
+
+  // Filter out unwanted tokens (not primary trading pairs)
+  const UNWANTED_TOKENS = ['busd', 'usdt']; // BUSD/USDT - use USDC instead
+  if (UNWANTED_TOKENS.includes(key.toLowerCase())) {
+    console.warn(`[TOKEN_CONFIG] Skipping ${key.toUpperCase()} (unwanted token)`);
+    return acc;
+  }
+
+  // Include token with lowercase symbol (matching config.tokenConfig keys)
+  const symbol = key as Token;
+  acc[symbol] = {
+    symbol,
+    name: tokenInfo.name,
+    decimals: tokenInfo.decimals,
+    address: tokenInfo.address as `0x${string}`,
+    icon: tokenInfo.icon,
+  };
+
+  return acc;
+}, {} as Record<string, TokenInfo>);
 
 // Contract addresses
 /**

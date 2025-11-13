@@ -110,8 +110,8 @@ export const usePSMSwap = () => {
   const [formData, setFormData] = useState<SwapFormData>({
     inputAmount: '',
     outputAmount: '',
-    inputToken: Token.USDC,
-    outputToken: Token.USDP,
+    inputToken: "usdc" as Token,
+    outputToken: "usdp" as Token,
   });
 
   // Swap state
@@ -154,7 +154,7 @@ export const usePSMSwap = () => {
 
       // PSM 1:1 swap with 0.1% fee, considering decimals difference
       // USDC (6 decimals) ↔ USDP (18 decimals) requires SCALE = 10^12
-      const isUSDCtoUSDP = formData.inputToken === Token.USDC;
+      const isUSDCtoUSDP = formData.inputToken === "usdc";
 
       let outputAmountBigInt: bigint;
       let feeBigInt: bigint;
@@ -240,7 +240,7 @@ export const usePSMSwap = () => {
         const inputAmountBigInt = parseUnits(amount, inputToken.decimals);
 
         // Calculate output considering SCALE factor
-        const isUSDCtoUSDP = prev.inputToken === Token.USDC;
+        const isUSDCtoUSDP = prev.inputToken === "usdc";
         let outputAmountBigInt: bigint;
 
         if (isUSDCtoUSDP) {
@@ -331,7 +331,7 @@ export const usePSMSwap = () => {
       // Execute swap based on direction
       // USDC → USDP: call swapUSDCForUSDP(usdcAmount)
       // USDP → USDC: call swapUSDPForUSDC(usdpAmount)
-      const isUSDCtoUSDP = formData.inputToken === Token.USDC;
+      const isUSDCtoUSDP = formData.inputToken === "usdc";
 
       const hash = await writeContractAsync({
         address: CONTRACT_ADDRESSES.PSM,

@@ -42,14 +42,14 @@ export const useAMM = () => {
   const [formData, setFormData] = useState<SwapFormData>({
     inputAmount: '',
     outputAmount: '',
-    inputToken: Token.USDC,
-    outputToken: Token.USDP,
+    inputToken: "usdc" as Token,
+    outputToken: "usdp" as Token,
   });
 
-  // Convert Token enum to TokenConfig for useAMMSwap
+  // Convert Token type to TokenConfig for useAMMSwap
   const inputTokenConfig: TokenConfig = useMemo(() => {
     const tokenInfo = Object.values(config.tokenConfig).find(
-      (t) => t.symbol === formData.inputToken
+      (t) => t.symbol.toLowerCase() === formData.inputToken
     );
     if (!tokenInfo) throw new Error(`Token not found: ${formData.inputToken}`);
 
@@ -62,7 +62,7 @@ export const useAMM = () => {
 
   const outputTokenConfig: TokenConfig = useMemo(() => {
     const tokenInfo = Object.values(config.tokenConfig).find(
-      (t) => t.symbol === formData.outputToken
+      (t) => t.symbol.toLowerCase() === formData.outputToken
     );
     if (!tokenInfo) throw new Error(`Token not found: ${formData.outputToken}`);
 

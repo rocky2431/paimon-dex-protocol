@@ -110,7 +110,7 @@ export const PSMSwapCard: React.FC = () => {
           }
           balance={inputBalance}
           excludeToken={formData.outputToken}
-          allowedTokens={[Token.USDC, Token.USDP]}
+          allowedTokens={["usdc" as Token, "usdp" as Token]}
           showMaxButton={true}
           onMaxClick={handleMaxClick}
         />
@@ -130,7 +130,7 @@ export const PSMSwapCard: React.FC = () => {
           balance={outputBalance}
           readOnly={true}
           excludeToken={formData.inputToken}
-          allowedTokens={[Token.USDC, Token.USDP]}
+          allowedTokens={["usdc" as Token, "usdp" as Token]}
           showMaxButton={false}
         />
 

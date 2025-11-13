@@ -64,8 +64,8 @@ export const useSwap = () => {
   const [formData, setFormData] = useState<SwapFormData>({
     inputAmount: '',
     outputAmount: '',
-    inputToken: Token.USDC,
-    outputToken: Token.USDP,
+    inputToken: "usdc" as Token,
+    outputToken: "usdp" as Token,
   });
 
   // Swap state
@@ -108,7 +108,7 @@ export const useSwap = () => {
 
       // PSM 1:1 swap with 0.1% fee, considering decimals difference
       // USDC (6 decimals) ↔ USDP (18 decimals) requires SCALE = 10^12
-      const isUSDCtoUSDP = formData.inputToken === Token.USDC;
+      const isUSDCtoUSDP = formData.inputToken === "usdc";
 
       let outputAmountBigInt: bigint;
       let feeBigInt: bigint;
@@ -192,7 +192,7 @@ export const useSwap = () => {
         const inputAmountBigInt = parseUnits(amount, inputToken.decimals);
 
         // Apply SCALE for USDC↔USDP conversion
-        const isUSDCtoUSDP = prev.inputToken === Token.USDC;
+        const isUSDCtoUSDP = prev.inputToken === "usdc";
         const outputAmountBigInt = isUSDCtoUSDP
           ? (inputAmountBigInt * SWAP_CONFIG.SCALE * (SWAP_CONFIG.BPS_DIVISOR - SWAP_CONFIG.FEE_BPS)) / SWAP_CONFIG.BPS_DIVISOR
           : (inputAmountBigInt * (SWAP_CONFIG.BPS_DIVISOR - SWAP_CONFIG.FEE_BPS)) / (SWAP_CONFIG.BPS_DIVISOR * SWAP_CONFIG.SCALE);

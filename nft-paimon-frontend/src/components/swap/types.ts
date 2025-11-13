@@ -3,6 +3,8 @@
  * OlympusDAO-inspired design system
  */
 
+import { config } from '@/config';
+
 export enum SwapState {
   IDLE = 'idle',
   INPUT = 'input',
@@ -13,12 +15,14 @@ export enum SwapState {
   ERROR = 'error',
 }
 
-export enum Token {
-  USDC = 'USDC',
-  USDP = 'USDP',
-  HYD = 'HYD',
-  WBNB = 'WBNB',
-}
+/**
+ * Token type - dynamically derived from config
+ * 从配置动态推导的Token类型
+ *
+ * BEFORE (hardcoded): enum Token { USDC = 'USDC', USDP = 'USDP', HYD = 'HYD', WBNB = 'WBNB' }
+ * AFTER (dynamic): Type derived from config.tokenConfig keys (lowercase: usdc, usdp, hyd, etc.)
+ */
+export type Token = keyof typeof config.tokenConfig;
 
 export interface TokenInfo {
   symbol: Token;
