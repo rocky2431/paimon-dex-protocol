@@ -130,7 +130,14 @@ export const useStaking = () => {
       .replace(/\s+/g, "") as keyof typeof config.gauges;
 
     const address = config.gauges[gaugeKey] as string | undefined;
-    return address ? (address as `0x${string}`) : null;
+
+    // Return null if address is undefined or zero address (not deployed)
+    const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+    if (!address || address === ZERO_ADDRESS) {
+      return null;
+    }
+
+    return address as `0x${string}`;
   }
 
   // ==================== Queries ====================
@@ -247,6 +254,13 @@ export const useStaking = () => {
       return;
     }
 
+    // Check if gauge exists (not zero address)
+    if (!gaugeAddress || gaugeAddress === "0x0000000000000000000000000000000000000000") {
+      setStakingState(StakingState.ERROR);
+      setErrorMessage(`Liquidity Mining not available for ${formData.pool.name} pool (Phase 2 feature)`);
+      return;
+    }
+
     // For staking: check if approval is needed
     if (formData.action === "stake") {
       const allowance = allowanceData || 0n;
@@ -265,6 +279,7 @@ export const useStaking = () => {
     formData.amount,
     formData.action,
     allowanceData,
+    gaugeAddress,
   ]);
 
   // Transaction status handling
