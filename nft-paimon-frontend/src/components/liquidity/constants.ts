@@ -46,9 +46,8 @@ export const LIQUIDITY_ADDRESSES = {
  *   1. Zero-address tokens (e.g., WBNB not deployed on testnet)
  *   2. Non-transferable tokens (e.g., esPAIMON - soulbound vesting token)
  *   3. Unwanted tokens (e.g., BUSD, USDT - not primary trading pairs)
- *   4. RWA collateral tokens (e.g., HYD - not for general DEX liquidity)
  *
- * Suitable liquidity tokens: USDC, USDP, PAIMON
+ * Suitable liquidity tokens: USDC, USDP, PAIMON, HYD
  */
 const generateSupportedTokens = (): Record<string, Token> => {
   const { tokenConfig } = config;
@@ -73,13 +72,6 @@ const generateSupportedTokens = (): Record<string, Token> => {
     const UNWANTED_TOKENS = ['busd', 'usdt']; // BUSD/USDT - use USDC instead
     if (UNWANTED_TOKENS.includes(key.toLowerCase())) {
       console.warn(`[LIQUIDITY_TOKENS] Skipping ${key.toUpperCase()} (unwanted token)`);
-      continue;
-    }
-
-    // Layer 4: Filter out RWA collateral tokens (not for general DEX liquidity)
-    const RWA_COLLATERAL_TOKENS = ['hyd']; // HYD is RWA collateral, not for public liquidity
-    if (RWA_COLLATERAL_TOKENS.includes(key.toLowerCase())) {
-      console.warn(`[LIQUIDITY_TOKENS] Skipping ${key.toUpperCase()} (RWA collateral)`);
       continue;
     }
 
