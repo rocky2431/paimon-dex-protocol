@@ -39,28 +39,51 @@ export const LIQUIDITY_ADDRESSES = {
 
 /**
  * Supported tokens for liquidity provision
- * Dynamically generated from centralized config
+ * Dynamically generated from centralized config with three-layer filtering
  *
- * Only includes tokens suitable for DEX liquidity:
- * - USDP (stablecoin)
- * - USDC (external stablecoin)
- * - WBNB (native wrapped token)
- * - PAIMON (governance token)
+ * BEFORE (hardcoded): Manually maintained list ['usdp', 'usdc', 'wbnb', 'paimon']
+ * AFTER (dynamic): Automatically filtered from config.tokenConfig, excludes:
+ *   1. Zero-address tokens (e.g., WBNB not deployed on testnet)
+ *   2. Non-transferable tokens (e.g., esPAIMON - soulbound vesting token)
+ *   3. Unwanted tokens (e.g., BUSD, USDT - not primary trading pairs)
+ *   4. RWA collateral tokens (e.g., HYD - not for general DEX liquidity)
  *
- * Excludes:
- * - HYD (RWA collateral, not for DEX)
- * - esPAIMON (vesting token, non-transferable)
- * - BUSD (deprecated by Binance)
+ * Suitable liquidity tokens: USDC, USDP, PAIMON
  */
 const generateSupportedTokens = (): Record<string, Token> => {
   const { tokenConfig } = config;
   const tokens: Record<string, Token> = {};
+  const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-  // Only include liquid tokens suitable for DEX
-  const liquidTokenKeys: Array<keyof typeof tokenConfig> = ['usdp', 'usdc', 'wbnb', 'paimon'];
+  for (const [key, tokenData] of Object.entries(tokenConfig)) {
+    // Layer 1: Filter out tokens with zero address (e.g., WBNB on testnet - not deployed yet)
+    if (tokenData.address === ZERO_ADDRESS) {
+      console.warn(`[LIQUIDITY_TOKENS] Skipping ${key.toUpperCase()} (zero address)`);
+      continue;
+    }
 
-  for (const key of liquidTokenKeys) {
-    const tokenData = tokenConfig[key];
+    // Layer 2: Filter out non-transferable tokens
+    const NON_TRANSFERABLE_TOKENS = ['espaimon']; // esPAIMON is soulbound
+    if (NON_TRANSFERABLE_TOKENS.includes(key.toLowerCase())) {
+      console.warn(`[LIQUIDITY_TOKENS] Skipping ${key.toUpperCase()} (non-transferable)`);
+      continue;
+    }
+
+    // Layer 3: Filter out unwanted tokens (not primary trading pairs)
+    const UNWANTED_TOKENS = ['busd', 'usdt']; // BUSD/USDT - use USDC instead
+    if (UNWANTED_TOKENS.includes(key.toLowerCase())) {
+      console.warn(`[LIQUIDITY_TOKENS] Skipping ${key.toUpperCase()} (unwanted token)`);
+      continue;
+    }
+
+    // Layer 4: Filter out RWA collateral tokens (not for general DEX liquidity)
+    const RWA_COLLATERAL_TOKENS = ['hyd']; // HYD is RWA collateral, not for public liquidity
+    if (RWA_COLLATERAL_TOKENS.includes(key.toLowerCase())) {
+      console.warn(`[LIQUIDITY_TOKENS] Skipping ${key.toUpperCase()} (RWA collateral)`);
+      continue;
+    }
+
+    // Include token with uppercase symbol key (matching existing convention)
     tokens[tokenData.symbol.toUpperCase()] = {
       address: tokenData.address as `0x${string}`,
       symbol: tokenData.symbol,
