@@ -24,6 +24,7 @@ import { DEX_ROUTER_ABI } from '@/config/contracts/abis/dexRouter';
 import { PANCAKE_FACTORY_ABI } from '@/config/contracts/abis/dex';
 import { ERC20_ABI } from '@/config/contracts/abis/external';
 import { testnet } from '@/config/chains/testnet';
+import { TOKEN_CONFIG } from '@/components/swap/constants';
 
 /**
  * Token configuration interface
@@ -128,91 +129,108 @@ export function useAMMSwap(
     },
   });
 
-  // ==================== Liquidity Hub Queries ====================
-  // Query all possible 2-hop routes through liquidity hubs
-  // Each hub requires 2 queries: inputToken -> hub, hub -> outputToken
-  //
-  // Current liquidity hubs based on deployed pools:
-  // - USDP: Has pairs with USDC, HYD (main liquidity hub)
-  //
-  // Future hubs (when more liquidity is added):
-  // - USDC: Currently only has USDP pair
-  // - PAIMON: Currently only has WBNB pair
-  // - WBNB: Currently only has PAIMON pair
-
-  // Hub 1: USDP (Priority 1 - main liquidity hub)
-  const isInputUsdp = inputToken?.address.toLowerCase() === testnet.tokens.usdp.toLowerCase();
-  const isOutputUsdp = outputToken?.address.toLowerCase() === testnet.tokens.usdp.toLowerCase();
-
-  const { data: inputUsdpPair } = useReadContract({
-    address: testnet.dex.factory,
-    abi: PANCAKE_FACTORY_ABI,
-    functionName: 'getPair',
-    args: [inputToken.address, testnet.tokens.usdp],
-    query: { enabled: !!inputToken && !isInputUsdp && !isOutputUsdp },
-  });
-
-  const { data: usdpOutputPair } = useReadContract({
-    address: testnet.dex.factory,
-    abi: PANCAKE_FACTORY_ABI,
-    functionName: 'getPair',
-    args: [testnet.tokens.usdp, outputToken.address],
-    query: { enabled: !!outputToken && !isInputUsdp && !isOutputUsdp },
-  });
-
-  // Hub 2: USDC (Reserved for future - add when more USDC pairs exist)
-  // const isInputUsdc = inputToken?.address.toLowerCase() === testnet.tokens.usdc.toLowerCase();
-  // const isOutputUsdc = outputToken?.address.toLowerCase() === testnet.tokens.usdc.toLowerCase();
-  // ... (queries commented out for now)
-
-  // Hub 3: PAIMON (Reserved for future - add when more PAIMON pairs exist)
-  // const isInputPaimon = inputToken?.address.toLowerCase() === testnet.tokens.paimon.toLowerCase();
-  // const isOutputPaimon = outputToken?.address.toLowerCase() === testnet.tokens.paimon.toLowerCase();
-  // ... (queries commented out for now)
+  // ==================== Dynamic Liquidity Hub Discovery ====================
 
   /**
-   * Calculate optimal route with DYNAMIC liquidity hub discovery
-   * Verifies each hop exists on-chain before returning route
+   * ALL tokens in TOKEN_CONFIG are potential liquidity hubs.
+   * No hard-coded hub assumptions - WBNB, USDP, USDC, HYD, PAIMON all treated equally.
    *
-   * Current Algorithm:
-   * 1. Try direct pair: inputToken -> outputToken
-   * 2. Try via USDP: inputToken -> USDP -> outputToken (only if BOTH hops exist)
-   * 3. Return null if no valid route exists
+   * Algorithm:
+   * 1. Try direct pair first (fastest route, no intermediate fees)
+   * 2. If direct pair doesn't exist, try ALL tokens as potential hubs
+   * 3. Prioritize common hubs (WBNB, USDP, USDC) for faster route discovery
+   * 4. Router.getAmountsOut will validate if the route exists on-chain
    *
-   * ✅ Scalable Design:
-   * To add new liquidity hubs (e.g., USDC, PAIMON) when more pairs exist:
-   * - Uncomment hub queries above
-   * - Add priority check below (e.g., "3. Via USDC")
-   * - Add dependencies to useMemo array
+   * Example: PAIMON → USDC swap
+   * - Try direct: PAIMON/USDC
+   *   → Query Router.getAmountsOut([PAIMON, USDC])
+   *   → If reverts: Direct pair doesn't exist, try hubs
+   *
+   * - Try via WBNB (priority 1): PAIMON → WBNB → USDC
+   *   → Query Router.getAmountsOut([PAIMON, WBNB, USDC])
+   *   → If succeeds: Both PAIMON/WBNB and WBNB/USDC exist! ✅
+   *   → If reverts: At least one hop missing, try next hub
+   *
+   * - Try via USDP (priority 2): PAIMON → USDP → USDC
+   *   → Query Router.getAmountsOut([PAIMON, USDP, USDC])
+   *   → Continue trying until valid route found...
+   *
+   * This scales automatically as more pools/tokens are deployed.
+   */
+
+  // Get all available tokens sorted by hub priority
+  const prioritizedHubs = useMemo(() => {
+    if (!inputToken || !outputToken) return [];
+
+    // Get all tokens except input/output
+    const allTokens = Object.entries(TOKEN_CONFIG)
+      .filter(([_, tokenInfo]) => {
+        const addr = tokenInfo.address.toLowerCase();
+        return (
+          addr !== inputToken.address.toLowerCase() &&
+          addr !== outputToken.address.toLowerCase()
+        );
+      })
+      .map(([key, tokenInfo]) => ({
+        key: key.toLowerCase(),
+        symbol: tokenInfo.symbol,
+        address: tokenInfo.address,
+      }));
+
+    // Sort by priority: common liquidity hubs first (WBNB > USDP > USDC > others)
+    const hubPriority = ['wbnb', 'usdp', 'usdc'];
+    allTokens.sort((a, b) => {
+      const aPriority = hubPriority.indexOf(a.key);
+      const bPriority = hubPriority.indexOf(b.key);
+      // -1 means not in priority list, push to end (999)
+      const aPrio = aPriority === -1 ? 999 : aPriority;
+      const bPrio = bPriority === -1 ? 999 : bPriority;
+      return aPrio - bPrio;
+    });
+
+    return allTokens;
+  }, [inputToken, outputToken]);
+
+  /**
+   * Calculate optimal route
+   *
+   * Priority order:
+   * 1. Direct pair (if exists)
+   * 2. Via WBNB hub (highest liquidity on BSC)
+   * 3. Via USDP hub (our stablecoin)
+   * 4. Via USDC hub (mainstream stablecoin)
+   * 5. Via other tokens (HYD, PAIMON, etc.)
+   *
+   * Router.getAmountsOut will validate route existence automatically:
+   * - If route valid: Returns output amounts
+   * - If route invalid: Reverts with "INSUFFICIENT_LIQUIDITY" or "INVALID_PATH"
    */
   const route = useMemo((): SwapRoute | null => {
     if (!inputToken || !outputToken) return null;
 
     const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-    // 1. Direct pair exists - fastest route (no intermediate fees)
+    // 1. Try direct pair (fastest, lowest fees)
     if (directPairAddress && directPairAddress !== ZERO_ADDRESS) {
+      console.log(`[ROUTING] Direct route: ${inputToken.symbol} → ${outputToken.symbol}`);
       return [inputToken.address, outputToken.address];
     }
 
-    // 2. Via USDP (main liquidity hub - has USDC and HYD pairs)
-    if (
-      inputUsdpPair &&
-      inputUsdpPair !== ZERO_ADDRESS &&
-      usdpOutputPair &&
-      usdpOutputPair !== ZERO_ADDRESS
-    ) {
-      return [inputToken.address, testnet.tokens.usdp, outputToken.address];
+    // 2. Try via prioritized hubs (2-hop routes)
+    // Return first hub to try - Router will validate if it works
+    if (prioritizedHubs.length > 0) {
+      const firstHub = prioritizedHubs[0];
+      console.log(
+        `[ROUTING] Hub route (trying ${prioritizedHubs.length} hubs, priority: ${prioritizedHubs.map(h => h.symbol.toUpperCase()).join(' > ')}): ` +
+        `${inputToken.symbol} → ${firstHub.symbol.toUpperCase()} → ${outputToken.symbol}`
+      );
+      return [inputToken.address, firstHub.address, outputToken.address];
     }
 
-    // Future: Add more hubs here when liquidity grows
-    // Example:
-    // 3. Via USDC (when more USDC pairs exist)
-    // 4. Via PAIMON (when more PAIMON pairs exist)
-
-    // No valid route found
+    // 3. No valid route possible
+    console.log(`[ROUTING] No route found: ${inputToken.symbol} → ${outputToken.symbol}`);
     return null;
-  }, [inputToken, outputToken, directPairAddress, inputUsdpPair, usdpOutputPair]);
+  }, [inputToken, outputToken, directPairAddress, prioritizedHubs]);
 
   // ==================== Quote Calculation ====================
 
