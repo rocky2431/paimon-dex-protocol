@@ -4,7 +4,7 @@
  * Generated from: paimon-rwa-contracts/deployments/testnet/addresses.json
  * Network: BSC Testnet (Chain ID: 97)
  * Deployed by: 0x90465a524Fd4c54470f77a11DeDF7503c951E62F
- * Deployment time: 2025-11-06T18:02:44.000Z
+ * Deployment time: 2025-11-13T05:42:22.000Z
  *
  * To regenerate this file, run:
  *   npm run sync-addresses
@@ -20,46 +20,46 @@ export const TESTNET_ADDRESSES = {
   // Core Contracts (核心合约)
   // ========================================
   core: {
-    usdp: "0x69cA4879c52A0935561F9D8165e4CB3b91f951a6" as Address,
-    paimon: "0x4FfBD9CC8e5E26Ec1559D754cC71a061D1820fDF" as Address,
-    esPaimon: "0xA848c9F841bB2deDC160DCb5108F2aac610CA02a" as Address,
-    hyd: "0xbBeAE7204fab9ae9F9eF67866C0eB6274db0549c" as Address,
-    psm: "0x46eB7627024cEd13826359a5c0aEc57c7255b330" as Address,
-    votingEscrow: "0x8CC8a97Cf7a05d5308b49CFdF24De5Fa66F696B7" as Address,
-    votingEscrowPaimon: "0xdEe148Cd27a9923DE1986399a6629aB375F244e1" as Address,
-    usdpVault: "0xF98B41CD89e5434Cae982d4b7EB326D2C1222867" as Address,
-    stabilityPool: "0x4f40786fB0722A10822E3929d331c07042B68838" as Address,
+    usdp: "0x6F7021C9B4DCD61b26d1aF5ACd1394A79eb49051" as Address,
+    paimon: "0x9c85485176fcD2db01eD0af66ed63680Eb9e5CB2" as Address,
+    esPaimon: "0x16f3a36Adae84c9c980D6C96510F37A5861DF2C6" as Address,
+    hyd: "0x3803E40C522E23163078c6fB2980288974645d85" as Address,
+    psm: "0xC04288c5f143541d38D5E7EAd152dB69b386a384" as Address,
+    votingEscrow: "0x1A54aA3302a1F2F5BF852517A92587E9c43B15e8" as Address,
+    votingEscrowPaimon: "0x9f70D468BBdC4e4b0789732DDBCa7eF01E671cC4" as Address,
+    usdpVault: "0x94E9F52F90609a6941ACc20996CCF9F738Eb22A1" as Address,
+    stabilityPool: "0x594D48f69B14D3f22fa18682F48Bd6fBcB829dA0" as Address,
   },
 
   // ========================================
   // Governance Contracts (治理合约)
   // ========================================
   governance: {
-    gaugeController: "0x4fDF9e1640722455cdA32dC2cceD85AeA8a3dB1A" as Address,
-    rewardDistributor: "0x94c9E4eb5F82D381e889178d322b7b36601AD11a" as Address,
-    bribeMarketplace: "0x748800E079eC6605D23d9803A6248613e80253B1" as Address,
-    emissionManager: "0x13536aDe0a7b8Ec6B07FcFc29a6915881c50EA38" as Address,
-    emissionRouter: "0x0B6638cb031b880238DC5793aD1B3CFCE10DA852" as Address,
+    gaugeController: "0x229d5744Edc1684C30A8A393e3d66428bd904b26" as Address,
+    rewardDistributor: "0xc1867Dea89CaBcCdf207f348C420850dA4DeFF38" as Address,
+    bribeMarketplace: "0x0B6454BF8C2a1111F1ba888AE29000c5FC52d7dF" as Address,
+    emissionManager: "0x8bF29ACdeFFBCc3965Aaa225C4CB3EA479e7615a" as Address,
+    emissionRouter: "0x122e31af6BefAEC17EC5eE2402e31364aCAbE60b" as Address,
   },
 
   // ========================================
   // Incentive Contracts (激励合约)
   // ========================================
   incentives: {
-    boostStaking: "0x0998dA12E9A61a7957e37feE9bBdAe7DDA6Ef314" as Address,
-    nitroPool: "0x89f108938951CF996cD3c26556dAF525aD4d9957" as Address,
+    boostStaking: "0xd7b1C5F77F2a2BEB06E3f145eF5cce53E566D2FF" as Address,
+    nitroPool: "0x52712Ef3aa240Bdd46180f3522c1bf7573C1abbA" as Address,
   },
 
   // ========================================
   // DEX Contracts (去中心化交易所)
   // ========================================
   dex: {
-    factory: "0x1c1339F5A11f462A354D49ee03377D55B03E7f3D" as Address,
-    router: "0x1e5a222d99a1804571522bac59Cde964bE59f21c" as Address, // Updated 2025-11-12: Added swap functions
+    factory: "0xc32F700393F6d9d39b4f3b30ceF02e7A0795DB5A" as Address,
+    router: "0x77a9B25d69746d9b51455c2EE71dbcc934365dDB" as Address,
     pairs: {
-      usdpUsdc: "0x3B8D3c266B2BbE588188cA70525a2da456a848d2" as Address,
-      paimonBnb: "0xc625Ab8646582100D48Ae4FC68c1E8B0976111fA" as Address,
-      hydUsdp: "0x2361484f586eEf76dCbaE9e4dD37C2b3d10d9110" as Address,
+      usdpUsdc: "undefined" as Address,
+      paimonBnb: "undefined" as Address,
+      hydUsdp: "undefined" as Address,
     },
   },
 
@@ -67,31 +67,31 @@ export const TESTNET_ADDRESSES = {
   // Treasury Contracts (国库合约)
   // ========================================
   treasury: {
-    treasury: "0x8CA5Cd0293b9d3C8BC796083E806bc5bC381772A" as Address,
-    savingRate: "0xB89188bD9b635EC9Dd73f73C9E3bE17dB83D01B2" as Address,
-    priceOracle: "0x5Ae36173EA62B33590857eD2E77580A9680d4d33" as Address,
-    rwaPriceOracle: "0xa6dD28dfCa8448965BE9D97BBBAaf82c45CE25C7" as Address,
+    treasury: "0x0BdBeC0efe5f3Db5b771AB095aF1A7051B304E05" as Address,
+    savingRate: "0x3977DB6503795E3c1812765f6910D96848b1e025" as Address,
+    priceOracle: "0x53E69De7747a373071867eD1f0E0fFd4fC3C7357" as Address,
+    rwaPriceOracle: "0xbEf3913a7FA99985c1C7FfAb9B948C5f93eC2A8b" as Address,
   },
 
   // ========================================
   // Launchpad Contracts (启动平台)
   // ========================================
   launchpad: {
-    projectRegistry: "0x764a546351cc7C74f68D10b15C18b8d4D7bBB08A" as Address,
-    issuanceController: "0xd7b22158801C22fFc0Ff81a1C5B000f29779530E" as Address,
+    projectRegistry: "0x03799e8F66027cE3A96e03bA3a39A641D72961dC" as Address,
+    issuanceController: "0xA417eA34907F30DaC280E736b07B867ADB187E0e" as Address,
   },
 
   // ========================================
   // Mock Contracts (测试网模拟合约)
   // ========================================
   mocks: {
-    usdc: "0xA1112f596A73111E102b4a9c39064b2b2383EC38" as Address,
-    wbnb: "0xe3402BAd7951c00e2B077A745C9e8B14122f05ED" as Address,
-    usdcPriceFeed: "0xD36eff69950c1eE2713BB1d204f875434Da28aB7" as Address,
-    bnbPriceFeed: "0x6D0a11083DCe3Fe5a2498b4B37f8edb30b29645B" as Address,
-    hydPriceFeed: "0x536608101E17e4C2c7b0d5eCc4e5659a75fE1489" as Address,
-    pyth: "0x4B4a7949694c9bcb7B4731dA60C511DD73f7FBB8" as Address,
-    vrfCoordinator: "0xeAcAa0e6c5965f680fc6470745dE63E53A5D249c" as Address,
+    usdc: "0x2Dbcd194F22858Ae139Ba026830cBCc5C730FdF4" as Address,
+    wbnb: "undefined" as Address,
+    usdcPriceFeed: "0xC3071490d44f6122e892b37996308f073D75C4B7" as Address,
+    bnbPriceFeed: "undefined" as Address,
+    hydPriceFeed: "0x45E3E8bB1169283Ae9d5B7B65aE5D72227Ea83BF" as Address,
+    pyth: "0x04c8ca319FBd3378E56bDe0EbDbDb7200f462084" as Address,
+    vrfCoordinator: "0x2aAb24fC469334EE2e81F4A647c876EF921C1A2c" as Address,
   },
 } as const;
 
@@ -102,6 +102,6 @@ export const TESTNET_DEPLOYMENT_METADATA = {
   network: "BSC Testnet",
   chainId: 97,
   deployer: "0x90465a524Fd4c54470f77a11DeDF7503c951E62F" as Address,
-  timestamp: 1762452164,
-  deployedAt: new Date(1762452164 * 1000).toISOString(),
+  timestamp: 1763012542,
+  deployedAt: new Date(1763012542 * 1000).toISOString(),
 } as const;
