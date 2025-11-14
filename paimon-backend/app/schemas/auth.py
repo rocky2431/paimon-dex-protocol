@@ -6,6 +6,8 @@ Schemas:
 - TokenData: Internal token payload data model
 - NonceResponse: Response for nonce generation endpoint
 - LoginRequest: Request model for wallet signature login
+- SocialLoginRequest: Request model for social login (Email/Google/X)
+- SocialLoginResponse: Response model for social login with user info
 """
 
 from typing import Any
@@ -114,3 +116,76 @@ class LoginRequest(BaseModel):
         min_length=130,  # 65 bytes = 130 hex chars (or 132 with 0x)
     )
     nonce: str = Field(..., description="Nonce that was included in the signed message")
+
+
+class SocialLoginRequest(BaseModel):
+    """
+    Request model for social login via Reown OAuth.
+
+    Supports Email, Google, and X (Twitter) login.
+
+    Example:
+        >>> request = SocialLoginRequest(
+        ...     provider="google",
+        ...     token="ya29.a0AfH6SMB...",
+        ...     address="0x1234567890abcdef..." # Optional
+        ... )
+    """
+
+    provider: str = Field(
+        ...,
+        description="OAuth provider (email, google, x)",
+        pattern=r"^(email|google|x)$",
+    )
+    token: str = Field(
+        ...,
+        description="OAuth access token from Reown AppKit",
+        min_length=10,
+    )
+    address: str | None = Field(
+        None,
+        description="Optional wallet address to link (42 chars with 0x prefix)",
+        min_length=42,
+        max_length=42,
+        pattern=r"^0x[a-fA-F0-9]{40}$",
+    )
+
+
+class SocialLoginResponse(BaseModel):
+    """
+    Response model for social login.
+
+    Includes JWT tokens and user information.
+
+    Example:
+        >>> response = SocialLoginResponse(
+        ...     access_token="eyJ0eXAiOiJKV1QiLCJhbGc...",
+        ...     refresh_token="eyJ0eXAiOiJKV1QiLCJhbGc...",
+        ...     token_type="bearer",
+        ...     user=UserInfo(...)
+        ... )
+    """
+
+    access_token: str = Field(..., description="JWT access token (15 minutes)")
+    refresh_token: str = Field(..., description="JWT refresh token (7 days)")
+    token_type: str = Field(default="bearer", description="Token type")
+    user: dict[str, Any] = Field(..., description="User information")
+
+
+class UserInfo(BaseModel):
+    """
+    User information model for social login response.
+
+    Example:
+        >>> user = UserInfo(
+        ...     id=1,
+        ...     address="0x1234...",
+        ...     email="user@example.com",
+        ...     social_provider="google"
+        ... )
+    """
+
+    id: int = Field(..., description="User ID")
+    address: str | None = Field(None, description="Linked wallet address")
+    email: str | None = Field(None, description="User email")
+    social_provider: str | None = Field(None, description="OAuth provider")
