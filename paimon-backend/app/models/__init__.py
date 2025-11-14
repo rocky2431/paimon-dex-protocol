@@ -1,1 +1,19 @@
 """SQLAlchemy ORM models."""
+
+from app.models.base import Base
+from app.models.kyc import KYC, KYCStatus, KYCTier
+from app.models.referral import Referral
+from app.models.task import TaskProgress, TaskStatus, TaskType
+from app.models.user import User
+
+__all__ = [
+    "Base",
+    "User",
+    "KYC",
+    "KYCTier",
+    "KYCStatus",
+    "TaskProgress",
+    "TaskType",
+    "TaskStatus",
+    "Referral",
+]
