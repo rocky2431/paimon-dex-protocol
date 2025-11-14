@@ -1,9 +1,11 @@
 """
-Authentication schemas for JWT tokens.
+Authentication schemas for JWT tokens and wallet login.
 
 Schemas:
 - TokenResponse: Response model for token generation endpoints
 - TokenData: Internal token payload data model
+- NonceResponse: Response for nonce generation endpoint
+- LoginRequest: Request model for wallet signature login
 """
 
 from typing import Any
@@ -64,3 +66,51 @@ class TokenData(BaseModel):
             if key not in data and not key.startswith("_"):
                 data[key] = value
         return data
+
+
+class NonceResponse(BaseModel):
+    """
+    Response model for nonce generation endpoint.
+
+    Example:
+        >>> response = NonceResponse(
+        ...     nonce="a1b2c3d4e5f6789...",
+        ...     address="0x1234...",
+        ...     expires_in=300
+        ... )
+    """
+
+    nonce: str = Field(..., description="Generated nonce for signing")
+    address: str = Field(..., description="Wallet address")
+    expires_in: int = Field(
+        default=300, description="Nonce expiration time in seconds (5 minutes)"
+    )
+
+
+class LoginRequest(BaseModel):
+    """
+    Request model for wallet signature login.
+
+    Example:
+        >>> request = LoginRequest(
+        ...     address="0x1234567890abcdef...",
+        ...     message="Sign this message to login to Paimon DEX",
+        ...     signature="0xabcdef123456...",
+        ...     nonce="a1b2c3d4e5f6..."
+        ... )
+    """
+
+    address: str = Field(
+        ...,
+        description="Ethereum wallet address",
+        min_length=42,
+        max_length=42,
+        pattern=r"^0x[a-fA-F0-9]{40}$",
+    )
+    message: str = Field(..., description="Message that was signed")
+    signature: str = Field(
+        ...,
+        description="Hex-encoded signature (with or without 0x prefix)",
+        min_length=130,  # 65 bytes = 130 hex chars (or 132 with 0x)
+    )
+    nonce: str = Field(..., description="Nonce that was included in the signed message")

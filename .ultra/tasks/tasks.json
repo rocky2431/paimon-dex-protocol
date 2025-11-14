@@ -18,12 +18,12 @@
   "stats": {
     "totalTasks": 67,
     "completed": 8,
-    "inProgress": 0,
-    "pending": 59,
+    "inProgress": 1,
+    "pending": 58,
     "paused": 0,
     "progressPercentage": 11.94,
     "estimatedTotalDays": 123,
-    "lastModified": "2025-11-15T07:17:00Z"
+    "lastModified": "2025-11-15T07:20:00Z"
   },
   "phases": [
     {
@@ -370,7 +370,8 @@
         8
       ],
       "estimatedDays": 2,
-      "status": "pending",
+      "status": "in_progress",
+      "startedAt": "2025-11-15T07:20:00Z",
       "tags": [
         "backend",
         "auth",
