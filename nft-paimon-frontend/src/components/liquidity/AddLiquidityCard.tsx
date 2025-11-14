@@ -98,11 +98,13 @@ export const AddLiquidityCard: React.FC = () => {
     handleTokenASelect,
     handleTokenBSelect,
     handleTokenAChange,
+    handleTokenBChange,
     handleSlippageChange,
     handleAction,
     preview,
     validation,
     poolExists,
+    pairAddressExists,
     addLiquidityState,
     errorMessage,
   } = useAddLiquidity();
@@ -166,18 +168,21 @@ export const AddLiquidityCard: React.FC = () => {
             onTokenASelect={handleTokenASelect}
             onTokenBSelect={handleTokenBSelect}
             poolExists={poolExists || false}
+            pairAddressExists={pairAddressExists || false}
             pool={formData.pool}
             disabled={false}
           />
         </Box>
 
-        {/* Token input pair - only show if pool exists */}
-        {poolExists && formData.pool && (
+        {/* Token input pair - show when both tokens selected */}
+        {formData.selectedTokenA && formData.selectedTokenB && (
           <Box sx={{ mb: 3 }}>
             <TokenInputPair
               tokenA={formData.tokenA}
               tokenB={formData.tokenB}
               onTokenAChange={handleTokenAChange}
+              onTokenBChange={handleTokenBChange}
+              tokenBEditable={true}
               disabled={false}
             />
           </Box>

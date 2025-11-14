@@ -122,12 +122,7 @@
       "dependencies": [],
       "estimatedDays": 0.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "setup",
-        "fastapi",
-        "python"
-      ]
+      "tags": ["backend", "setup", "fastapi", "python"]
     },
     {
       "id": 2,
@@ -143,18 +138,10 @@
       ],
       "complexity": 3,
       "priority": "P0",
-      "dependencies": [
-        1
-      ],
+      "dependencies": [1],
       "estimatedDays": 1,
       "status": "pending",
-      "tags": [
-        "backend",
-        "database",
-        "sqlalchemy",
-        "postgresql",
-        "alembic"
-      ]
+      "tags": ["backend", "database", "sqlalchemy", "postgresql", "alembic"]
     },
     {
       "id": 3,
@@ -170,18 +157,10 @@
       ],
       "complexity": 2,
       "priority": "P0",
-      "dependencies": [
-        1
-      ],
+      "dependencies": [1],
       "estimatedDays": 0.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "cache",
-        "redis",
-        "upstash",
-        "python"
-      ]
+      "tags": ["backend", "cache", "redis", "upstash", "python"]
     },
     {
       "id": 4,
@@ -197,17 +176,10 @@
       ],
       "complexity": 4,
       "priority": "P0",
-      "dependencies": [
-        2
-      ],
+      "dependencies": [2],
       "estimatedDays": 1.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "database",
-        "schema",
-        "migration"
-      ]
+      "tags": ["backend", "database", "schema", "migration"]
     },
     {
       "id": 5,
@@ -223,18 +195,10 @@
       ],
       "complexity": 3,
       "priority": "P0",
-      "dependencies": [
-        1
-      ],
+      "dependencies": [1],
       "estimatedDays": 1,
       "status": "pending",
-      "tags": [
-        "backend",
-        "infrastructure",
-        "logger",
-        "config",
-        "python"
-      ]
+      "tags": ["backend", "infrastructure", "logger", "config", "python"]
     },
     {
       "id": 6,
@@ -251,17 +215,10 @@
       ],
       "complexity": 2,
       "priority": "P0",
-      "dependencies": [
-        5
-      ],
+      "dependencies": [5],
       "estimatedDays": 0.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "documentation",
-        "openapi",
-        "fastapi"
-      ]
+      "tags": ["backend", "documentation", "openapi", "fastapi"]
     },
     {
       "id": 7,
@@ -278,20 +235,10 @@
       ],
       "complexity": 3,
       "priority": "P0",
-      "dependencies": [
-        4,
-        5,
-        6
-      ],
+      "dependencies": [4, 5, 6],
       "estimatedDays": 1,
       "status": "pending",
-      "tags": [
-        "backend",
-        "deployment",
-        "railway",
-        "docker",
-        "python"
-      ]
+      "tags": ["backend", "deployment", "railway", "docker", "python"]
     },
     {
       "id": 8,
@@ -307,18 +254,10 @@
       ],
       "complexity": 4,
       "priority": "P0",
-      "dependencies": [
-        5
-      ],
+      "dependencies": [5],
       "estimatedDays": 1.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "auth",
-        "jwt",
-        "security",
-        "python"
-      ]
+      "tags": ["backend", "auth", "jwt", "security", "python"]
     },
     {
       "id": 9,
@@ -334,19 +273,10 @@
       ],
       "complexity": 5,
       "priority": "P0",
-      "dependencies": [
-        8
-      ],
+      "dependencies": [8],
       "estimatedDays": 2,
       "status": "pending",
-      "tags": [
-        "backend",
-        "auth",
-        "wallet",
-        "signature",
-        "web3",
-        "python"
-      ]
+      "tags": ["backend", "auth", "wallet", "signature", "web3", "python"]
     },
     {
       "id": 10,
@@ -363,18 +293,10 @@
       ],
       "complexity": 6,
       "priority": "P0",
-      "dependencies": [
-        8
-      ],
+      "dependencies": [8],
       "estimatedDays": 2.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "auth",
-        "oauth",
-        "social",
-        "python"
-      ]
+      "tags": ["backend", "auth", "oauth", "social", "python"]
     },
     {
       "id": 11,
@@ -390,17 +312,10 @@
       ],
       "complexity": 3,
       "priority": "P0",
-      "dependencies": [
-        8
-      ],
+      "dependencies": [8],
       "estimatedDays": 1,
       "status": "pending",
-      "tags": [
-        "backend",
-        "api",
-        "user",
-        "crud"
-      ]
+      "tags": ["backend", "api", "user", "crud"]
     },
     {
       "id": 12,
@@ -418,12 +333,7 @@
       "dependencies": [],
       "estimatedDays": 0.5,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "wallet",
-        "migration",
-        "cleanup"
-      ]
+      "tags": ["frontend", "wallet", "migration", "cleanup"]
     },
     {
       "id": 13,
@@ -439,17 +349,10 @@
       ],
       "complexity": 4,
       "priority": "P0",
-      "dependencies": [
-        12
-      ],
+      "dependencies": [12],
       "estimatedDays": 1.5,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "wallet",
-        "reown",
-        "appkit"
-      ]
+      "tags": ["frontend", "wallet", "reown", "appkit"]
     },
     {
       "id": 14,
@@ -464,17 +367,10 @@
       ],
       "complexity": 2,
       "priority": "P0",
-      "dependencies": [
-        13
-      ],
+      "dependencies": [13],
       "estimatedDays": 0.5,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "wallet",
-        "binance",
-        "ui"
-      ]
+      "tags": ["frontend", "wallet", "binance", "ui"]
     },
     {
       "id": 15,
@@ -491,18 +387,10 @@
       ],
       "complexity": 5,
       "priority": "P0",
-      "dependencies": [
-        13,
-        10
-      ],
+      "dependencies": [13, 10],
       "estimatedDays": 2,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "auth",
-        "social",
-        "ui"
-      ]
+      "tags": ["frontend", "auth", "social", "ui"]
     },
     {
       "id": 16,
@@ -518,17 +406,10 @@
       ],
       "complexity": 3,
       "priority": "P0",
-      "dependencies": [
-        15
-      ],
+      "dependencies": [15],
       "estimatedDays": 1,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "testing",
-        "wallet",
-        "qa"
-      ]
+      "tags": ["frontend", "testing", "wallet", "qa"]
     },
     {
       "id": 17,
@@ -544,17 +425,10 @@
       ],
       "complexity": 4,
       "priority": "P0",
-      "dependencies": [
-        15
-      ],
+      "dependencies": [15],
       "estimatedDays": 1.5,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "kyc",
-        "blockpass",
-        "integration"
-      ]
+      "tags": ["frontend", "kyc", "blockpass", "integration"]
     },
     {
       "id": 18,
@@ -570,17 +444,10 @@
       ],
       "complexity": 5,
       "priority": "P0",
-      "dependencies": [
-        11
-      ],
+      "dependencies": [11],
       "estimatedDays": 2,
       "status": "pending",
-      "tags": [
-        "backend",
-        "kyc",
-        "webhook",
-        "blockpass"
-      ]
+      "tags": ["backend", "kyc", "webhook", "blockpass"]
     },
     {
       "id": 19,
@@ -596,17 +463,10 @@
       ],
       "complexity": 3,
       "priority": "P0",
-      "dependencies": [
-        18
-      ],
+      "dependencies": [18],
       "estimatedDays": 1,
       "status": "pending",
-      "tags": [
-        "backend",
-        "kyc",
-        "api",
-        "query"
-      ]
+      "tags": ["backend", "kyc", "api", "query"]
     },
     {
       "id": 20,
@@ -622,17 +482,10 @@
       ],
       "complexity": 4,
       "priority": "P0",
-      "dependencies": [
-        19
-      ],
+      "dependencies": [19],
       "estimatedDays": 1.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "kyc",
-        "tier",
-        "authorization"
-      ]
+      "tags": ["backend", "kyc", "tier", "authorization"]
     },
     {
       "id": 21,
@@ -648,18 +501,10 @@
       ],
       "complexity": 3,
       "priority": "P0",
-      "dependencies": [
-        17,
-        19
-      ],
+      "dependencies": [17, 19],
       "estimatedDays": 1,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "kyc",
-        "ui",
-        "user-center"
-      ]
+      "tags": ["frontend", "kyc", "ui", "user-center"]
     },
     {
       "id": 22,
@@ -675,17 +520,10 @@
       ],
       "complexity": 4,
       "priority": "P0",
-      "dependencies": [
-        4
-      ],
+      "dependencies": [4],
       "estimatedDays": 1.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "task",
-        "design",
-        "schema"
-      ]
+      "tags": ["backend", "task", "design", "schema"]
     },
     {
       "id": 23,
@@ -702,18 +540,10 @@
       ],
       "complexity": 4,
       "priority": "P0",
-      "dependencies": [
-        22
-      ],
+      "dependencies": [22],
       "estimatedDays": 3,
       "status": "pending",
-      "tags": [
-        "backend",
-        "taskon",
-        "integration",
-        "api",
-        "python"
-      ]
+      "tags": ["backend", "taskon", "integration", "api", "python"]
     },
     {
       "id": 24,
@@ -730,19 +560,10 @@
       ],
       "complexity": 3,
       "priority": "P0",
-      "dependencies": [
-        18,
-        23
-      ],
+      "dependencies": [18, 23],
       "estimatedDays": 1.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "kyc",
-        "taskon",
-        "permission",
-        "sync"
-      ]
+      "tags": ["backend", "kyc", "taskon", "permission", "sync"]
     },
     {
       "id": 25,
@@ -759,21 +580,10 @@
       ],
       "complexity": 6,
       "priority": "P0",
-      "dependencies": [
-        22,
-        23
-      ],
+      "dependencies": [22, 23],
       "estimatedDays": 5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "task",
-        "verification",
-        "rwa",
-        "web3",
-        "python",
-        "redis"
-      ]
+      "tags": ["backend", "task", "verification", "rwa", "web3", "python", "redis"]
     },
     {
       "id": 26,
@@ -790,79 +600,51 @@
       ],
       "complexity": 4,
       "priority": "P0",
-      "dependencies": [
-        23,
-        24
-      ],
+      "dependencies": [23, 25],
       "estimatedDays": 2,
       "status": "pending",
-      "tags": [
-        "backend",
-        "task",
-        "api",
-        "progress",
-        "taskon",
-        "redis"
-      ]
+      "tags": ["backend", "task", "api", "progress", "taskon", "redis"]
     },
     {
-      "id": 27,
+      "id": 28,
       "phase": "phase-1",
       "stage": "Stage 1.5: 任务中心 MVP",
       "title": "实现任务奖励发放",
-      "description": "创建 POST /api/tasks/:taskId/claim 端点。验证任务完成状态（TaskOn + 自建 RWA）。使用 web3.py 调用合约发放 esPAIMON 奖励。防止重复领取（PostgreSQL 记录）。",
+      "description": "创建 POST /api/tasks/:taskId/claim 端点。验证任务完成状态（Galxe + 自建）。使用 web3.py 调用合约发放 esPAIMON 奖励。防止重复领取。",
       "acceptanceCriteria": [
         "奖励发放成功（web3.py 发送交易）",
-        "防止重复领取（数据库幂等性）",
-        "交易哈希记录到 PostgreSQL",
-        "错误处理完善（余额不足、网络错误、gas 估算）",
-        "支持奖励队列（异步处理）"
+        "防止重复领取",
+        "交易哈希记录",
+        "错误处理完善（余额不足、网络错误、gas 估算）"
       ],
       "complexity": 6,
       "priority": "P0",
-      "dependencies": [
-        25
-      ],
+      "dependencies": [27],
       "estimatedDays": 2.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "task",
-        "reward",
-        "claim",
-        "web3",
-        "python"
-      ]
+      "tags": ["backend", "task", "reward", "claim", "web3", "python"]
     },
     {
-      "id": 28,
+      "id": 29,
       "phase": "phase-1",
       "stage": "Stage 1.5: 任务中心 MVP",
       "title": "创建任务中心 UI",
-      "description": "创建任务中心页面（用户中心 Tab 5）。显示 TaskOn + 自建 RWA 任务列表、进度、奖励。实现任务筛选（全部/已完成/未完成）和分类（社交/链上/RWA）。",
+      "description": "创建任务中心页面（用户中心 Tab 5）。显示 Galxe + 自建任务列表、进度、奖励。实现任务筛选（全部/已完成/未完成）。",
       "acceptanceCriteria": [
-        "任务列表渲染正确（TaskOn + 自建 RWA）",
-        "进度条显示准确（百分比 + 完成数/总数）",
-        "领取按钮正常工作（调用 Task 27 API）",
-        "筛选和分类功能正常"
+        "任务列表渲染正确（Galxe + 自建）",
+        "进度条显示准确",
+        "领取按钮正常工作",
+        "筛选功能正常"
       ],
       "complexity": 4,
       "priority": "P0",
-      "dependencies": [
-        26
-      ],
+      "dependencies": [27],
       "estimatedDays": 1.5,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "task",
-        "ui",
-        "user-center",
-        "taskon"
-      ]
+      "tags": ["frontend", "task", "ui", "user-center", "galxe"]
     },
     {
-      "id": 28,
+      "id": 30,
       "phase": "phase-1",
       "stage": "Stage 1.6: 用户中心重构",
       "title": "创建用户中心路由和布局",
@@ -875,20 +657,13 @@
       ],
       "complexity": 3,
       "priority": "P0",
-      "dependencies": [
-        16
-      ],
+      "dependencies": [16],
       "estimatedDays": 1,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "user-center",
-        "routing",
-        "layout"
-      ]
+      "tags": ["frontend", "user-center", "routing", "layout"]
     },
     {
-      "id": 29,
+      "id": 31,
       "phase": "phase-1",
       "stage": "Stage 1.6: 用户中心重构",
       "title": "迁移 Portfolio Hub 到用户中心 Tab 1-3",
@@ -901,20 +676,13 @@
       ],
       "complexity": 4,
       "priority": "P0",
-      "dependencies": [
-        29
-      ],
+      "dependencies": [30],
       "estimatedDays": 1.5,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "user-center",
-        "migration",
-        "portfolio"
-      ]
+      "tags": ["frontend", "user-center", "migration", "portfolio"]
     },
     {
-      "id": 30,
+      "id": 32,
       "phase": "phase-1",
       "stage": "Stage 1.6: 用户中心重构",
       "title": "添加 KYC Tab（Tab 4）",
@@ -927,49 +695,32 @@
       ],
       "complexity": 2,
       "priority": "P0",
-      "dependencies": [
-        29,
-        21
-      ],
+      "dependencies": [30, 21],
       "estimatedDays": 0.5,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "user-center",
-        "kyc",
-        "integration"
-      ]
+      "tags": ["frontend", "user-center", "kyc", "integration"]
     },
     {
-      "id": 31,
+      "id": 33,
       "phase": "phase-1",
       "stage": "Stage 1.6: 用户中心重构",
       "title": "添加任务中心 Tab（Tab 5）",
-      "description": "集成 Task 28 的任务中心 UI。显示 TaskOn + 自建 RWA 任务列表、进度、奖励、筛选、分类。",
+      "description": "集成 Task 29 的任务中心 UI。显示 Galxe + 自建任务列表、进度、奖励、筛选。",
       "acceptanceCriteria": [
         "任务中心 Tab 显示正确",
-        "任务数据加载正常（TaskOn + 自建 RWA）",
+        "任务数据加载正常（Galxe + 自建）",
         "领取功能正常",
-        "筛选和分类功能正常"
+        "筛选功能正常"
       ],
       "complexity": 2,
       "priority": "P0",
-      "dependencies": [
-        29,
-        28
-      ],
+      "dependencies": [30, 29],
       "estimatedDays": 0.5,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "user-center",
-        "task",
-        "integration",
-        "taskon"
-      ]
+      "tags": ["frontend", "user-center", "task", "integration", "galxe"]
     },
     {
-      "id": 32,
+      "id": 34,
       "phase": "phase-1",
       "stage": "Stage 1.6: 用户中心重构",
       "title": "重构导航栏钱包按钮",
@@ -983,20 +734,13 @@
       ],
       "complexity": 3,
       "priority": "P0",
-      "dependencies": [
-        29
-      ],
+      "dependencies": [30],
       "estimatedDays": 1,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "navigation",
-        "wallet",
-        "dropdown"
-      ]
+      "tags": ["frontend", "navigation", "wallet", "dropdown"]
     },
     {
-      "id": 33,
+      "id": 35,
       "phase": "phase-1",
       "stage": "Stage 1.7: 推荐系统",
       "title": "实现推荐码生成逻辑",
@@ -1009,20 +753,13 @@
       ],
       "complexity": 3,
       "priority": "P0",
-      "dependencies": [
-        11
-      ],
+      "dependencies": [11],
       "estimatedDays": 1,
       "status": "pending",
-      "tags": [
-        "backend",
-        "referral",
-        "code",
-        "generation"
-      ]
+      "tags": ["backend", "referral", "code", "generation"]
     },
     {
-      "id": 34,
+      "id": 36,
       "phase": "phase-1",
       "stage": "Stage 1.7: 推荐系统",
       "title": "实现推荐关系记录",
@@ -1035,20 +772,13 @@
       ],
       "complexity": 4,
       "priority": "P0",
-      "dependencies": [
-        34
-      ],
+      "dependencies": [35],
       "estimatedDays": 1.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "referral",
-        "relationship",
-        "validation"
-      ]
+      "tags": ["backend", "referral", "relationship", "validation"]
     },
     {
-      "id": 35,
+      "id": 37,
       "phase": "phase-1",
       "stage": "Stage 1.7: 推荐系统",
       "title": "实现推荐统计 API",
@@ -1061,20 +791,13 @@
       ],
       "complexity": 3,
       "priority": "P0",
-      "dependencies": [
-        35
-      ],
+      "dependencies": [36],
       "estimatedDays": 1,
       "status": "pending",
-      "tags": [
-        "backend",
-        "referral",
-        "stats",
-        "api"
-      ]
+      "tags": ["backend", "referral", "stats", "api"]
     },
     {
-      "id": 36,
+      "id": 38,
       "phase": "phase-1",
       "stage": "Stage 1.7: 推荐系统",
       "title": "创建推荐中心 UI（用户中心 Tab 6）",
@@ -1088,21 +811,13 @@
       ],
       "complexity": 3,
       "priority": "P0",
-      "dependencies": [
-        36,
-        29
-      ],
+      "dependencies": [37, 30],
       "estimatedDays": 1,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "referral",
-        "ui",
-        "user-center"
-      ]
+      "tags": ["frontend", "referral", "ui", "user-center"]
     },
     {
-      "id": 37,
+      "id": 39,
       "phase": "phase-2",
       "stage": "Stage 2.1: 链上数据索引器",
       "title": "设计索引器架构",
@@ -1115,20 +830,13 @@
       ],
       "complexity": 5,
       "priority": "P1",
-      "dependencies": [
-        7
-      ],
+      "dependencies": [7],
       "estimatedDays": 2,
       "status": "pending",
-      "tags": [
-        "backend",
-        "indexer",
-        "architecture",
-        "design"
-      ]
+      "tags": ["backend", "indexer", "architecture", "design"]
     },
     {
-      "id": 38,
+      "id": 40,
       "phase": "phase-2",
       "stage": "Stage 2.1: 链上数据索引器",
       "title": "实现 LP 仓位索引",
@@ -1142,22 +850,13 @@
       ],
       "complexity": 6,
       "priority": "P1",
-      "dependencies": [
-        38
-      ],
+      "dependencies": [39],
       "estimatedDays": 2.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "indexer",
-        "lp",
-        "events",
-        "web3",
-        "python"
-      ]
+      "tags": ["backend", "indexer", "lp", "events", "web3", "python"]
     },
     {
-      "id": 39,
+      "id": 41,
       "phase": "phase-2",
       "stage": "Stage 2.1: 链上数据索引器",
       "title": "实现 Vault 仓位索引",
@@ -1171,22 +870,13 @@
       ],
       "complexity": 7,
       "priority": "P1",
-      "dependencies": [
-        38
-      ],
+      "dependencies": [39],
       "estimatedDays": 3,
       "status": "pending",
-      "tags": [
-        "backend",
-        "indexer",
-        "vault",
-        "events",
-        "web3",
-        "python"
-      ]
+      "tags": ["backend", "indexer", "vault", "events", "web3", "python"]
     },
     {
-      "id": 40,
+      "id": 42,
       "phase": "phase-2",
       "stage": "Stage 2.1: 链上数据索引器",
       "title": "实现 veNFT 仓位索引",
@@ -1200,22 +890,13 @@
       ],
       "complexity": 6,
       "priority": "P1",
-      "dependencies": [
-        38
-      ],
+      "dependencies": [39],
       "estimatedDays": 2.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "indexer",
-        "venft",
-        "events",
-        "web3",
-        "python"
-      ]
+      "tags": ["backend", "indexer", "venft", "events", "web3", "python"]
     },
     {
-      "id": 41,
+      "id": 43,
       "phase": "phase-2",
       "stage": "Stage 2.1: 链上数据索引器",
       "title": "实现定时扫描机制",
@@ -1229,24 +910,13 @@
       ],
       "complexity": 5,
       "priority": "P1",
-      "dependencies": [
-        39,
-        40,
-        41
-      ],
+      "dependencies": [40, 41, 42],
       "estimatedDays": 2,
       "status": "pending",
-      "tags": [
-        "backend",
-        "indexer",
-        "cron",
-        "resilience",
-        "apscheduler",
-        "python"
-      ]
+      "tags": ["backend", "indexer", "cron", "resilience", "apscheduler", "python"]
     },
     {
-      "id": 42,
+      "id": 44,
       "phase": "phase-2",
       "stage": "Stage 2.1: 链上数据索引器",
       "title": "创建加速版 Portfolio API",
@@ -1259,20 +929,13 @@
       ],
       "complexity": 4,
       "priority": "P1",
-      "dependencies": [
-        42
-      ],
+      "dependencies": [43],
       "estimatedDays": 1.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "api",
-        "portfolio",
-        "performance"
-      ]
+      "tags": ["backend", "api", "portfolio", "performance"]
     },
     {
-      "id": 43,
+      "id": 45,
       "phase": "phase-2",
       "stage": "Stage 2.2: 历史数据存储",
       "title": "创建时序数据表（TimescaleDB）",
@@ -1285,20 +948,13 @@
       ],
       "complexity": 5,
       "priority": "P1",
-      "dependencies": [
-        7
-      ],
+      "dependencies": [7],
       "estimatedDays": 2,
       "status": "pending",
-      "tags": [
-        "backend",
-        "database",
-        "timescale",
-        "timeseries"
-      ]
+      "tags": ["backend", "database", "timescale", "timeseries"]
     },
     {
-      "id": 44,
+      "id": 46,
       "phase": "phase-2",
       "stage": "Stage 2.2: 历史数据存储",
       "title": "实现历史 APR 记录",
@@ -1311,22 +967,13 @@
       ],
       "complexity": 4,
       "priority": "P1",
-      "dependencies": [
-        44
-      ],
+      "dependencies": [45],
       "estimatedDays": 1.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "cron",
-        "apr",
-        "history",
-        "apscheduler",
-        "python"
-      ]
+      "tags": ["backend", "cron", "apr", "history", "apscheduler", "python"]
     },
     {
-      "id": 45,
+      "id": 47,
       "phase": "phase-2",
       "stage": "Stage 2.2: 历史数据存储",
       "title": "实现历史收益记录",
@@ -1339,22 +986,13 @@
       ],
       "complexity": 5,
       "priority": "P1",
-      "dependencies": [
-        44
-      ],
+      "dependencies": [45],
       "estimatedDays": 2,
       "status": "pending",
-      "tags": [
-        "backend",
-        "cron",
-        "rewards",
-        "history",
-        "apscheduler",
-        "python"
-      ]
+      "tags": ["backend", "cron", "rewards", "history", "apscheduler", "python"]
     },
     {
-      "id": 46,
+      "id": 48,
       "phase": "phase-2",
       "stage": "Stage 2.2: 历史数据存储",
       "title": "创建历史数据查询 API",
@@ -1367,21 +1005,13 @@
       ],
       "complexity": 4,
       "priority": "P1",
-      "dependencies": [
-        45,
-        46
-      ],
+      "dependencies": [46, 47],
       "estimatedDays": 1.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "api",
-        "history",
-        "query"
-      ]
+      "tags": ["backend", "api", "history", "query"]
     },
     {
-      "id": 47,
+      "id": 49,
       "phase": "phase-2",
       "stage": "Stage 2.2: 历史数据存储",
       "title": "前端集成历史数据图表",
@@ -1394,21 +1024,13 @@
       ],
       "complexity": 3,
       "priority": "P1",
-      "dependencies": [
-        47,
-        30
-      ],
+      "dependencies": [48, 31],
       "estimatedDays": 1,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "charts",
-        "history",
-        "ui"
-      ]
+      "tags": ["frontend", "charts", "history", "ui"]
     },
     {
-      "id": 48,
+      "id": 50,
       "phase": "phase-2",
       "stage": "Stage 2.3: 实时通知",
       "title": "集成 Socket.IO（后端）",
@@ -1422,21 +1044,13 @@
       ],
       "complexity": 5,
       "priority": "P1",
-      "dependencies": [
-        7
-      ],
+      "dependencies": [7],
       "estimatedDays": 2,
       "status": "pending",
-      "tags": [
-        "backend",
-        "websocket",
-        "socketio",
-        "realtime",
-        "python"
-      ]
+      "tags": ["backend", "websocket", "socketio", "realtime", "python"]
     },
     {
-      "id": 49,
+      "id": 51,
       "phase": "phase-2",
       "stage": "Stage 2.3: 实时通知",
       "title": "实现任务完成通知",
@@ -1449,21 +1063,13 @@
       ],
       "complexity": 3,
       "priority": "P1",
-      "dependencies": [
-        49,
-        27
-      ],
+      "dependencies": [50, 28],
       "estimatedDays": 1,
       "status": "pending",
-      "tags": [
-        "backend",
-        "notification",
-        "task",
-        "realtime"
-      ]
+      "tags": ["backend", "notification", "task", "realtime"]
     },
     {
-      "id": 50,
+      "id": 52,
       "phase": "phase-2",
       "stage": "Stage 2.3: 实时通知",
       "title": "实现清算预警通知",
@@ -1476,21 +1082,13 @@
       ],
       "complexity": 5,
       "priority": "P1",
-      "dependencies": [
-        49,
-        40
-      ],
+      "dependencies": [50, 41],
       "estimatedDays": 2,
       "status": "pending",
-      "tags": [
-        "backend",
-        "notification",
-        "risk",
-        "liquidation"
-      ]
+      "tags": ["backend", "notification", "risk", "liquidation"]
     },
     {
-      "id": 51,
+      "id": 53,
       "phase": "phase-2",
       "stage": "Stage 2.3: 实时通知",
       "title": "前端集成 Socket.IO 客户端",
@@ -1504,21 +1102,13 @@
       ],
       "complexity": 4,
       "priority": "P1",
-      "dependencies": [
-        50,
-        51
-      ],
+      "dependencies": [51, 52],
       "estimatedDays": 1.5,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "websocket",
-        "notification",
-        "ui"
-      ]
+      "tags": ["frontend", "websocket", "notification", "ui"]
     },
     {
-      "id": 52,
+      "id": 54,
       "phase": "phase-2",
       "stage": "Stage 2.4: 优化与测试",
       "title": "数据库索引优化",
@@ -1531,20 +1121,13 @@
       ],
       "complexity": 4,
       "priority": "P1",
-      "dependencies": [
-        43
-      ],
+      "dependencies": [44],
       "estimatedDays": 1.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "database",
-        "optimization",
-        "performance"
-      ]
+      "tags": ["backend", "database", "optimization", "performance"]
     },
     {
-      "id": 53,
+      "id": 55,
       "phase": "phase-2",
       "stage": "Stage 2.4: 优化与测试",
       "title": "Redis 缓存策略优化",
@@ -1557,20 +1140,13 @@
       ],
       "complexity": 5,
       "priority": "P1",
-      "dependencies": [
-        43
-      ],
+      "dependencies": [44],
       "estimatedDays": 2,
       "status": "pending",
-      "tags": [
-        "backend",
-        "cache",
-        "redis",
-        "optimization"
-      ]
+      "tags": ["backend", "cache", "redis", "optimization"]
     },
     {
-      "id": 54,
+      "id": 56,
       "phase": "phase-2",
       "stage": "Stage 2.4: 优化与测试",
       "title": "性能压力测试",
@@ -1583,21 +1159,13 @@
       ],
       "complexity": 5,
       "priority": "P1",
-      "dependencies": [
-        53,
-        54
-      ],
+      "dependencies": [54, 55],
       "estimatedDays": 2,
       "status": "pending",
-      "tags": [
-        "testing",
-        "performance",
-        "load",
-        "stress"
-      ]
+      "tags": ["testing", "performance", "load", "stress"]
     },
     {
-      "id": 55,
+      "id": 57,
       "phase": "phase-2",
       "stage": "Stage 2.4: 优化与测试",
       "title": "端到端测试（E2E）",
@@ -1610,21 +1178,13 @@
       ],
       "complexity": 6,
       "priority": "P1",
-      "dependencies": [
-        37,
-        52
-      ],
+      "dependencies": [38, 53],
       "estimatedDays": 2.5,
       "status": "pending",
-      "tags": [
-        "testing",
-        "e2e",
-        "playwright",
-        "quality"
-      ]
+      "tags": ["testing", "e2e", "playwright", "quality"]
     },
     {
-      "id": 56,
+      "id": 58,
       "phase": "phase-3",
       "stage": "Stage 3.1: 用户积分系统",
       "title": "设计积分系统规则",
@@ -1637,20 +1197,13 @@
       ],
       "complexity": 4,
       "priority": "P2",
-      "dependencies": [
-        27
-      ],
+      "dependencies": [28],
       "estimatedDays": 1.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "points",
-        "design",
-        "gamification"
-      ]
+      "tags": ["backend", "points", "design", "gamification"]
     },
     {
-      "id": 57,
+      "id": 59,
       "phase": "phase-3",
       "stage": "Stage 3.1: 用户积分系统",
       "title": "实现积分获取逻辑",
@@ -1663,20 +1216,13 @@
       ],
       "complexity": 5,
       "priority": "P2",
-      "dependencies": [
-        57
-      ],
+      "dependencies": [58],
       "estimatedDays": 2,
       "status": "pending",
-      "tags": [
-        "backend",
-        "points",
-        "logic",
-        "calculation"
-      ]
+      "tags": ["backend", "points", "logic", "calculation"]
     },
     {
-      "id": 58,
+      "id": 60,
       "phase": "phase-3",
       "stage": "Stage 3.1: 用户积分系统",
       "title": "实现积分排行榜",
@@ -1689,20 +1235,13 @@
       ],
       "complexity": 4,
       "priority": "P2",
-      "dependencies": [
-        58
-      ],
+      "dependencies": [59],
       "estimatedDays": 1.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "points",
-        "leaderboard",
-        "ranking"
-      ]
+      "tags": ["backend", "points", "leaderboard", "ranking"]
     },
     {
-      "id": 59,
+      "id": 61,
       "phase": "phase-3",
       "stage": "Stage 3.1: 用户积分系统",
       "title": "实现积分兑换功能",
@@ -1715,20 +1254,13 @@
       ],
       "complexity": 5,
       "priority": "P2",
-      "dependencies": [
-        58
-      ],
+      "dependencies": [59],
       "estimatedDays": 2,
       "status": "pending",
-      "tags": [
-        "backend",
-        "points",
-        "redeem",
-        "rewards"
-      ]
+      "tags": ["backend", "points", "redeem", "rewards"]
     },
     {
-      "id": 60,
+      "id": 62,
       "phase": "phase-3",
       "stage": "Stage 3.2: 数据分析",
       "title": "实现用户画像分析",
@@ -1741,20 +1273,13 @@
       ],
       "complexity": 6,
       "priority": "P2",
-      "dependencies": [
-        43
-      ],
+      "dependencies": [44],
       "estimatedDays": 2.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "analytics",
-        "user-profile",
-        "ml"
-      ]
+      "tags": ["backend", "analytics", "user-profile", "ml"]
     },
     {
-      "id": 61,
+      "id": 63,
       "phase": "phase-3",
       "stage": "Stage 3.2: 数据分析",
       "title": "创建管理员数据分析看板",
@@ -1767,20 +1292,13 @@
       ],
       "complexity": 5,
       "priority": "P2",
-      "dependencies": [
-        61
-      ],
+      "dependencies": [62],
       "estimatedDays": 2,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "admin",
-        "analytics",
-        "dashboard"
-      ]
+      "tags": ["frontend", "admin", "analytics", "dashboard"]
     },
     {
-      "id": 62,
+      "id": 64,
       "phase": "phase-3",
       "stage": "Stage 3.3: 智能推荐",
       "title": "实现交易对推荐算法",
@@ -1793,20 +1311,13 @@
       ],
       "complexity": 7,
       "priority": "P2",
-      "dependencies": [
-        61
-      ],
+      "dependencies": [62],
       "estimatedDays": 3,
       "status": "pending",
-      "tags": [
-        "backend",
-        "recommendation",
-        "algorithm",
-        "ml"
-      ]
+      "tags": ["backend", "recommendation", "algorithm", "ml"]
     },
     {
-      "id": 63,
+      "id": 65,
       "phase": "phase-3",
       "stage": "Stage 3.3: 智能推荐",
       "title": "实现策略推荐",
@@ -1819,20 +1330,13 @@
       ],
       "complexity": 6,
       "priority": "P2",
-      "dependencies": [
-        61
-      ],
+      "dependencies": [62],
       "estimatedDays": 2.5,
       "status": "pending",
-      "tags": [
-        "backend",
-        "recommendation",
-        "strategy",
-        "finance"
-      ]
+      "tags": ["backend", "recommendation", "strategy", "finance"]
     },
     {
-      "id": 64,
+      "id": 66,
       "phase": "phase-3",
       "stage": "Stage 3.3: 智能推荐",
       "title": "前端集成推荐功能",
@@ -1845,22 +1349,13 @@
       ],
       "complexity": 3,
       "priority": "P2",
-      "dependencies": [
-        63,
-        64,
-        30
-      ],
+      "dependencies": [64, 65, 31],
       "estimatedDays": 1,
       "status": "pending",
-      "tags": [
-        "frontend",
-        "recommendation",
-        "ui",
-        "user-center"
-      ]
+      "tags": ["frontend", "recommendation", "ui", "user-center"]
     },
     {
-      "id": 65,
+      "id": 67,
       "phase": "phase-3",
       "stage": "Stage 3.4: 高级功能",
       "title": "多链支持规划",
@@ -1873,20 +1368,13 @@
       ],
       "complexity": 6,
       "priority": "P2",
-      "dependencies": [
-        43
-      ],
+      "dependencies": [44],
       "estimatedDays": 2.5,
       "status": "pending",
-      "tags": [
-        "architecture",
-        "multichain",
-        "planning",
-        "research"
-      ]
+      "tags": ["architecture", "multichain", "planning", "research"]
     },
     {
-      "id": 66,
+      "id": 68,
       "phase": "phase-3",
       "stage": "Stage 3.4: 高级功能",
       "title": "完善 API 文档",
@@ -1899,25 +1387,17 @@
       ],
       "complexity": 3,
       "priority": "P2",
-      "dependencies": [
-        65
-      ],
+      "dependencies": [66],
       "estimatedDays": 1,
       "status": "pending",
-      "tags": [
-        "documentation",
-        "api",
-        "fastapi",
-        "openapi",
-        "postman"
-      ]
+      "tags": ["documentation", "api", "fastapi", "openapi", "postman"]
     },
     {
-      "id": 67,
+      "id": 69,
       "phase": "phase-3",
       "stage": "Stage 3.4: 高级功能",
       "title": "创建用户指南文档",
-      "description": "编写用户使用指南（钱包连接、KYC 认证、TaskOn 任务系统、积分兑换）。添加 FAQ。",
+      "description": "编写用户使用指南（钱包连接、KYC 认证、Galxe 任务、积分兑换）。添加 FAQ。",
       "acceptanceCriteria": [
         "用户指南完整",
         "截图清晰",
@@ -1926,18 +1406,10 @@
       ],
       "complexity": 4,
       "priority": "P2",
-      "dependencies": [
-        65
-      ],
+      "dependencies": [66],
       "estimatedDays": 1.5,
       "status": "pending",
-      "tags": [
-        "documentation",
-        "user-guide",
-        "faq",
-        "tutorial",
-        "taskon"
-      ]
+      "tags": ["documentation", "user-guide", "faq", "tutorial", "galxe"]
     }
   ]
 }

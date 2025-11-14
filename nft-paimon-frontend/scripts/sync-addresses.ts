@@ -24,27 +24,25 @@ const __dirname = path.dirname(__filename);
 
 // 路径配置
 const CONTRACTS_REPO_PATH = path.resolve(__dirname, '../../paimon-rwa-contracts');
-const SOURCE_FILE = path.join(CONTRACTS_REPO_PATH, 'deployments/testnet/addresses.json');
+const SOURCE_FILE = path.join(CONTRACTS_REPO_PATH, 'deployments/testnet-nopools/addresses.json');
 const OUTPUT_DIR = path.resolve(__dirname, '../src/config/chains/generated');
 const OUTPUT_FILE = path.join(OUTPUT_DIR, 'testnet.ts');
 
 /**
- * 部署地址文件结构
+ * 部署地址文件结构 (testnet-nopools format)
  */
 interface DeploymentAddresses {
   network: string;
   chainId: number;
   deployer: string;
   timestamp: number;
-  contracts: {
-    core: Record<string, string>;
-    governance: Record<string, string>;
-    incentives: Record<string, string>;
-    dex: Record<string, string>;
-    treasury: Record<string, string>;
-    launchpad: Record<string, string>;
-    mocks: Record<string, string>;
-  };
+  core: Record<string, string>;
+  governance: Record<string, string>;
+  incentives: Record<string, string>;
+  dex: Record<string, string>;
+  treasury: Record<string, string>;
+  launchpad: Record<string, string>;
+  mocks: Record<string, string>;
 }
 
 /**
@@ -67,13 +65,12 @@ export function validateAddresses(addresses: DeploymentAddresses): ValidationRes
   let totalContracts = 0;
   let validContracts = 0;
 
-  // Validate contracts object exists
-  if (!addresses.contracts || typeof addresses.contracts !== 'object') {
-    throw new Error('Invalid deployment data: contracts object is missing or malformed');
-  }
+  // Check all contract categories (flattened structure)
+  const categories = ['core', 'governance', 'incentives', 'dex', 'treasury', 'launchpad', 'mocks'];
 
-  // Check all contract categories
-  for (const [category, contracts] of Object.entries(addresses.contracts)) {
+  for (const category of categories) {
+    const contracts = addresses[category as keyof Omit<DeploymentAddresses, 'network' | 'chainId' | 'deployer' | 'timestamp'>];
+
     if (!contracts || typeof contracts !== 'object') {
       continue; // Skip invalid categories
     }
@@ -111,15 +108,25 @@ function readDeploymentAddresses(): DeploymentAddresses {
 }
 
 /**
+ * Helper function to get address or zero address if undefined
+ */
+function getAddressOrZero(obj: any, key: string): string {
+  const zeroAddress = '0x0000000000000000000000000000000000000000';
+  return obj && obj[key] ? obj[key] : zeroAddress;
+}
+
+/**
  * 生成 TypeScript 配置文件内容
  */
 function generateTypeScriptConfig(addresses: DeploymentAddresses): string {
   const timestamp = new Date(addresses.timestamp * 1000).toISOString();
+  const dex = addresses.dex as any; // Cast to any for flexible access
+  const mocks = addresses.mocks as any;
 
   return `/**
  * 🤖 AUTO-GENERATED FILE - DO NOT EDIT MANUALLY
  *
- * Generated from: paimon-rwa-contracts/deployments/testnet/addresses.json
+ * Generated from: paimon-rwa-contracts/deployments/testnet-nopools/addresses.json
  * Network: ${addresses.network} (Chain ID: ${addresses.chainId})
  * Deployed by: ${addresses.deployer}
  * Deployment time: ${timestamp}
@@ -138,46 +145,46 @@ export const TESTNET_ADDRESSES = {
   // Core Contracts (核心合约)
   // ========================================
   core: {
-    usdp: "${addresses.contracts.core.USDP}" as Address,
-    paimon: "${addresses.contracts.core.PAIMON}" as Address,
-    esPaimon: "${addresses.contracts.core.esPAIMON}" as Address,
-    hyd: "${addresses.contracts.core.HYD}" as Address,
-    psm: "${addresses.contracts.core.PSM}" as Address,
-    votingEscrow: "${addresses.contracts.core.VotingEscrow}" as Address,
-    votingEscrowPaimon: "${addresses.contracts.core.VotingEscrowPaimon}" as Address,
-    usdpVault: "${addresses.contracts.core.USDPVault}" as Address,
-    stabilityPool: "${addresses.contracts.core.StabilityPool}" as Address,
+    usdp: "${getAddressOrZero(addresses.core, 'usdp')}" as Address,
+    paimon: "${getAddressOrZero(addresses.core, 'paimon')}" as Address,
+    esPaimon: "${getAddressOrZero(addresses.core, 'esPaimon')}" as Address,
+    hyd: "${getAddressOrZero(addresses.core, 'hyd')}" as Address,
+    psm: "${getAddressOrZero(addresses.core, 'psm')}" as Address,
+    votingEscrow: "${getAddressOrZero(addresses.core, 'votingEscrow')}" as Address,
+    votingEscrowPaimon: "${getAddressOrZero(addresses.core, 'votingEscrowPaimon')}" as Address,
+    usdpVault: "${getAddressOrZero(addresses.core, 'usdpVault')}" as Address,
+    stabilityPool: "${getAddressOrZero(addresses.core, 'stabilityPool')}" as Address,
   },
 
   // ========================================
   // Governance Contracts (治理合约)
   // ========================================
   governance: {
-    gaugeController: "${addresses.contracts.governance.GaugeController}" as Address,
-    rewardDistributor: "${addresses.contracts.governance.RewardDistributor}" as Address,
-    bribeMarketplace: "${addresses.contracts.governance.BribeMarketplace}" as Address,
-    emissionManager: "${addresses.contracts.governance.EmissionManager}" as Address,
-    emissionRouter: "${addresses.contracts.governance.EmissionRouter}" as Address,
+    gaugeController: "${getAddressOrZero(addresses.governance, 'gaugeController')}" as Address,
+    rewardDistributor: "${getAddressOrZero(addresses.governance, 'rewardDistributor')}" as Address,
+    bribeMarketplace: "${getAddressOrZero(addresses.governance, 'bribeMarketplace')}" as Address,
+    emissionManager: "${getAddressOrZero(addresses.governance, 'emissionManager')}" as Address,
+    emissionRouter: "${getAddressOrZero(addresses.governance, 'emissionRouter')}" as Address,
   },
 
   // ========================================
   // Incentive Contracts (激励合约)
   // ========================================
   incentives: {
-    boostStaking: "${addresses.contracts.incentives.BoostStaking}" as Address,
-    nitroPool: "${addresses.contracts.incentives.NitroPool}" as Address,
+    boostStaking: "${getAddressOrZero(addresses.incentives, 'boostStaking')}" as Address,
+    nitroPool: "${getAddressOrZero(addresses.incentives, 'nitroPool')}" as Address,
   },
 
   // ========================================
   // DEX Contracts (去中心化交易所)
   // ========================================
   dex: {
-    factory: "${addresses.contracts.dex.DEXFactory}" as Address,
-    router: "${addresses.contracts.dex.DEXRouter}" as Address,
+    factory: "${getAddressOrZero(dex, 'factory')}" as Address,
+    router: "${getAddressOrZero(dex, 'router')}" as Address,
     pairs: {
-      usdpUsdc: "${addresses.contracts.dex.USDP_USDC_Pair}" as Address,
-      paimonBnb: "${addresses.contracts.dex.PAIMON_BNB_Pair}" as Address,
-      hydUsdp: "${addresses.contracts.dex.HYD_USDP_Pair}" as Address,
+      usdpUsdc: "${getAddressOrZero(dex.pairs, 'usdpUsdc')}" as Address,
+      paimonBnb: "${getAddressOrZero(dex.pairs, 'paimonBnb')}" as Address,
+      hydUsdp: "${getAddressOrZero(dex.pairs, 'hydUsdp')}" as Address,
     },
   },
 
@@ -185,31 +192,31 @@ export const TESTNET_ADDRESSES = {
   // Treasury Contracts (国库合约)
   // ========================================
   treasury: {
-    treasury: "${addresses.contracts.treasury.Treasury}" as Address,
-    savingRate: "${addresses.contracts.treasury.SavingRate}" as Address,
-    priceOracle: "${addresses.contracts.treasury.PriceOracle}" as Address,
-    rwaPriceOracle: "${addresses.contracts.treasury.RWAPriceOracle}" as Address,
+    treasury: "${getAddressOrZero(addresses.treasury, 'treasury')}" as Address,
+    savingRate: "${getAddressOrZero(addresses.treasury, 'savingRate')}" as Address,
+    priceOracle: "${getAddressOrZero(addresses.treasury, 'priceOracle')}" as Address,
+    rwaPriceOracle: "${getAddressOrZero(addresses.treasury, 'rwaPriceOracle')}" as Address,
   },
 
   // ========================================
   // Launchpad Contracts (启动平台)
   // ========================================
   launchpad: {
-    projectRegistry: "${addresses.contracts.launchpad.ProjectRegistry}" as Address,
-    issuanceController: "${addresses.contracts.launchpad.IssuanceController}" as Address,
+    projectRegistry: "${getAddressOrZero(addresses.launchpad, 'projectRegistry')}" as Address,
+    issuanceController: "${getAddressOrZero(addresses.launchpad, 'issuanceController')}" as Address,
   },
 
   // ========================================
   // Mock Contracts (测试网模拟合约)
   // ========================================
   mocks: {
-    usdc: "${addresses.contracts.mocks.USDC}" as Address,
-    wbnb: "${addresses.contracts.mocks.WBNB}" as Address,
-    usdcPriceFeed: "${addresses.contracts.mocks.USDCPriceFeed}" as Address,
-    bnbPriceFeed: "${addresses.contracts.mocks.BNBPriceFeed}" as Address,
-    hydPriceFeed: "${addresses.contracts.mocks.HYDPriceFeed}" as Address,
-    pyth: "${addresses.contracts.mocks.Pyth}" as Address,
-    vrfCoordinator: "${addresses.contracts.mocks.VRFCoordinator}" as Address,
+    usdc: "${getAddressOrZero(mocks, 'usdc')}" as Address,
+    wbnb: "${getAddressOrZero(mocks, 'wbnb')}" as Address,
+    usdcPriceFeed: "${getAddressOrZero(mocks, 'usdcPriceFeed')}" as Address,
+    bnbPriceFeed: "${getAddressOrZero(mocks, 'bnbPriceFeed')}" as Address,
+    hydPriceFeed: "${getAddressOrZero(mocks, 'hydPriceFeed')}" as Address,
+    pyth: "${getAddressOrZero(mocks, 'pyth')}" as Address,
+    vrfCoordinator: "${getAddressOrZero(mocks, 'vrfCoordinator')}" as Address,
   },
 } as const;
 
@@ -252,7 +259,9 @@ function main(): void {
   try {
     // 1. 读取部署地址
     const addresses = readDeploymentAddresses();
-    console.log(`✅ Loaded ${Object.keys(addresses.contracts).length} contract categories\n`);
+    const categories = ['core', 'governance', 'incentives', 'dex', 'treasury', 'launchpad', 'mocks'];
+    const categoryCount = categories.filter(cat => addresses[cat as keyof typeof addresses]).length;
+    console.log(`✅ Loaded ${categoryCount} contract categories\n`);
 
     // 2. 验证地址（零地址检测）
     console.log('🔍 Validating contract addresses...');
@@ -277,13 +286,13 @@ function main(): void {
     // 5. 成功消息
     console.log('\n🎉 Address sync completed successfully!');
     console.log(`\n📊 Summary:`);
-    console.log(`  - Core contracts: ${Object.keys(addresses.contracts.core).length}`);
-    console.log(`  - Governance contracts: ${Object.keys(addresses.contracts.governance).length}`);
-    console.log(`  - Incentive contracts: ${Object.keys(addresses.contracts.incentives).length}`);
-    console.log(`  - DEX contracts: ${Object.keys(addresses.contracts.dex).length}`);
-    console.log(`  - Treasury contracts: ${Object.keys(addresses.contracts.treasury).length}`);
-    console.log(`  - Launchpad contracts: ${Object.keys(addresses.contracts.launchpad).length}`);
-    console.log(`  - Mock contracts: ${Object.keys(addresses.contracts.mocks).length}`);
+    console.log(`  - Core contracts: ${Object.keys(addresses.core).length}`);
+    console.log(`  - Governance contracts: ${Object.keys(addresses.governance).length}`);
+    console.log(`  - Incentive contracts: ${Object.keys(addresses.incentives).length}`);
+    console.log(`  - DEX contracts: ${Object.keys(addresses.dex).length}`);
+    console.log(`  - Treasury contracts: ${Object.keys(addresses.treasury).length}`);
+    console.log(`  - Launchpad contracts: ${Object.keys(addresses.launchpad).length}`);
+    console.log(`  - Mock contracts: ${Object.keys(addresses.mocks).length}`);
     console.log(`\n📈 Validation:`);
     console.log(`  - Total contracts: ${validation.totalContracts}`);
     console.log(`  - Valid addresses: ${validation.validContracts}`);

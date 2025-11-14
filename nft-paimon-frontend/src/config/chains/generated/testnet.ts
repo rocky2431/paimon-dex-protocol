@@ -1,7 +1,7 @@
 /**
  * 🤖 AUTO-GENERATED FILE - DO NOT EDIT MANUALLY
  *
- * Generated from: paimon-rwa-contracts/deployments/testnet/addresses.json
+ * Generated from: paimon-rwa-contracts/deployments/testnet-nopools/addresses.json
  * Network: BSC Testnet (Chain ID: 97)
  * Deployed by: 0x90465a524Fd4c54470f77a11DeDF7503c951E62F
  * Deployment time: 2025-11-13T05:42:22.000Z
@@ -57,9 +57,9 @@ export const TESTNET_ADDRESSES = {
     factory: "0xc32F700393F6d9d39b4f3b30ceF02e7A0795DB5A" as Address,
     router: "0x77a9B25d69746d9b51455c2EE71dbcc934365dDB" as Address,
     pairs: {
-      usdpUsdc: "undefined" as Address,
-      paimonBnb: "undefined" as Address,
-      hydUsdp: "undefined" as Address,
+      usdpUsdc: "0x0000000000000000000000000000000000000000" as Address,
+      paimonBnb: "0x0000000000000000000000000000000000000000" as Address,
+      hydUsdp: "0x0000000000000000000000000000000000000000" as Address,
     },
   },
 
@@ -86,9 +86,9 @@ export const TESTNET_ADDRESSES = {
   // ========================================
   mocks: {
     usdc: "0x2Dbcd194F22858Ae139Ba026830cBCc5C730FdF4" as Address,
-    wbnb: "undefined" as Address,
+    wbnb: "0x0000000000000000000000000000000000000000" as Address,
     usdcPriceFeed: "0xC3071490d44f6122e892b37996308f073D75C4B7" as Address,
-    bnbPriceFeed: "undefined" as Address,
+    bnbPriceFeed: "0x0000000000000000000000000000000000000000" as Address,
     hydPriceFeed: "0x45E3E8bB1169283Ae9d5B7B65aE5D72227Ea83BF" as Address,
     pyth: "0x04c8ca319FBd3378E56bDe0EbDbDb7200f462084" as Address,
     vrfCoordinator: "0x2aAb24fC469334EE2e81F4A647c876EF921C1A2c" as Address,

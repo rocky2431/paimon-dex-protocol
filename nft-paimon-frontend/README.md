@@ -118,6 +118,29 @@ npm run build
 npm start
 ```
 
+## BSC Testnet Contract Addresses
+
+Current deployment (testnet-nopools):
+
+### Core Contracts
+- **USDP**: `0x6F7021C9B4DCD61b26d1aF5ACd1394A79eb49051`
+- **PAIMON**: `0x9c85485176fcD2db01eD0af66ed63680Eb9e5CB2`
+- **PSM**: `0xC04288c5f143541d38D5E7EAd152dB69b386a384`
+- **DEX Factory**: `0xc32F700393F6d9d39b4f3b30ceF02e7A0795DB5A`
+- **DEX Router**: `0x77a9B25d69746d9b51455c2EE71dbcc934365dDB`
+
+### Governance
+- **VotingEscrowPaimon**: `0x9f70D468BBdC4e4b0789732DDBCa7eF01E671cC4`
+- **GaugeController**: `0x229d5744Edc1684C30A8A393e3d66428bd904b26`
+
+### Testing Tokens
+- **Mock USDC**: `0x2Dbcd194F22858Ae139Ba026830cBCc5C730FdF4`
+- **HYD** (Test RWA): `0x3803E40C522E23163078c6fB2980288974645d85`
+
+📄 **Full address list**: See `deployments/testnet-nopools/addresses.json` in paimon-rwa-contracts
+
+🔗 **BscScan**: https://testnet.bscscan.com/
+
 ## Next Steps
 
 1. [ ] Implement PSM swap UI

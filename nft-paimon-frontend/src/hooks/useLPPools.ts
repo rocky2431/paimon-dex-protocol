@@ -347,11 +347,6 @@ export function useLPPools(): UseLPPoolsReturn {
       const reserve1 = reserves[1];
       const totalSupply = totalSupplyResult.result as bigint;
 
-      // Skip pools with no liquidity (both reserves = 0)
-      if (reserve0 === 0n && reserve1 === 0n) {
-        return;
-      }
-
       // Look up token metadata from config
       const token0 = getTokenMetadata(token0Address);
       const token1 = getTokenMetadata(token1Address);
@@ -361,6 +356,12 @@ export function useLPPools(): UseLPPoolsReturn {
       const tvlToken0 = Number(formatUnits(reserve0, token0.decimals || 18));
       const tvlToken1 = Number(formatUnits(reserve1, token1.decimals || 18));
       const tvlUSD = tvlToken0 + tvlToken1; // Simplified calculation
+
+      // Skip pools with negligible liquidity (TVL < $10)
+      // This filters out both empty pools and dust/residual liquidity
+      if (tvlUSD < 10) {
+        return;
+      }
       const tvlFormatted = tvlUSD.toLocaleString('en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,

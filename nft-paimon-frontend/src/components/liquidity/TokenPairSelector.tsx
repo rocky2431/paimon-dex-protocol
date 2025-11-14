@@ -17,8 +17,10 @@ interface TokenPairSelectorProps {
   onTokenASelect: (token: Token) => void;
   /** Callback when token B is selected */
   onTokenBSelect: (token: Token) => void;
-  /** Whether the pool exists for this token pair */
+  /** Whether the pool exists (has reserves > 0) for this token pair */
   poolExists: boolean;
+  /** Whether the pair address exists (even if reserves = 0) */
+  pairAddressExists: boolean;
   /** Pool information (if exists) */
   pool: LiquidityPool | null;
   /** Whether the component is disabled */
@@ -42,6 +44,7 @@ export const TokenPairSelector: React.FC<TokenPairSelectorProps> = ({
   onTokenASelect,
   onTokenBSelect,
   poolExists,
+  pairAddressExists,
   pool,
   disabled = false,
 }) => {
@@ -163,8 +166,8 @@ export const TokenPairSelector: React.FC<TokenPairSelectorProps> = ({
             </Box>
           )}
 
-          {/* Pool Doesn't Exist - Show Warning */}
-          {!poolExists && (
+          {/* Pool Doesn't Exist - Show Warning (only when pair address truly doesn't exist) */}
+          {!pairAddressExists && (
             <Alert
               severity="warning"
               sx={{

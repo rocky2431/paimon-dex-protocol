@@ -160,8 +160,8 @@ export const useAddLiquidity = () => {
     },
   });
 
-  // Check if pool exists (address !== 0x0000...0000)
-  const poolExists =
+  // Check if pair address exists (step 1)
+  const pairAddressExists =
     pairAddressFromFactory && pairAddressFromFactory !== ("0x0000000000000000000000000000000000000000" as `0x${string}`);
 
   // ========== Token Balance Queries ==========
@@ -198,20 +198,24 @@ export const useAddLiquidity = () => {
     query: { enabled: !!address && !!formData.selectedTokenB && !!routerAddress },
   });
 
-  // ========== Pool Reserve Queries (only if pool exists) ==========
+  // ========== Pool Reserve Queries (only if pair address exists) ==========
   const { data: reserves } = useReadContract({
     address: pairAddressFromFactory,
     abi: PAIR_ABI,
     functionName: "getReserves",
-    query: { enabled: !!poolExists, refetchInterval: 10000 },
+    query: { enabled: !!pairAddressExists, refetchInterval: 10000 },
   });
 
   const { data: totalSupply } = useReadContract({
     address: pairAddressFromFactory,
     abi: PAIR_ABI,
     functionName: "totalSupply",
-    query: { enabled: !!poolExists, refetchInterval: 10000 },
+    query: { enabled: !!pairAddressExists, refetchInterval: 10000 },
   });
+
+  // Check if pool exists (step 2): address exists AND has liquidity
+  // A pool with zero reserves should be treated as "new pool" (allows free input)
+  const poolExists = pairAddressExists && reserves && (reserves[0] > 0n || reserves[1] > 0n);
 
   // ========== Transaction Receipt ==========
   const { isSuccess: isTxSuccess } = useWaitForTransactionReceipt({
@@ -251,11 +255,25 @@ export const useAddLiquidity = () => {
   }, []);
 
   /**
+   * Helper: Clean formatted amount - remove leading zeros but keep decimal values
+   */
+  const cleanFormattedAmount = (formatted: string): string => {
+    if (!formatted || formatted === '0' || formatted === '0.0') return formatted;
+
+    // Parse to number and back to string to remove leading zeros
+    const num = parseFloat(formatted);
+    if (isNaN(num)) return formatted;
+
+    // Format back to string, preserving decimals
+    return num.toString();
+  };
+
+  /**
    * Handle token A amount change
    */
   const handleTokenAChange = useCallback(
     (amount: string) => {
-      if (!formData.selectedTokenA || !formData.selectedTokenB || !poolExists || !reserves) return;
+      if (!formData.selectedTokenA || !formData.selectedTokenB) return;
 
       try {
         // Clean input: remove trailing dot and leading zeros
@@ -272,6 +290,39 @@ export const useAddLiquidity = () => {
             ? 0n
             : parseUnits(cleanAmount, formData.selectedTokenA.decimals);
 
+        // For new pools (reserves = 0), allow free input - don't force ratio
+        if (!poolExists || !reserves || reserves[0] === 0n || reserves[1] === 0n) {
+          // Clean Token A formatted amount to remove leading zeros
+          const tokenAFormatted = cleanFormattedAmount(cleanAmount);
+
+          setFormData((prev) => ({
+            ...prev,
+            tokenA: {
+              token: prev.selectedTokenA!,
+              amount: amountParsed,
+              amountFormatted: tokenAFormatted,  // Use cleaned format
+              balance: balanceA || 0n,
+              balanceFormatted: formatUnits(
+                balanceA || 0n,
+                prev.selectedTokenA!.decimals
+              ),
+            },
+            // For new pools, initialize Token B with 0 (user will input freely)
+            tokenB: {
+              token: prev.selectedTokenB!,
+              amount: 0n,
+              amountFormatted: "",
+              balance: balanceB || 0n,
+              balanceFormatted: formatUnits(
+                balanceB || 0n,
+                prev.selectedTokenB!.decimals
+              ),
+            },
+          }));
+          return;
+        }
+
+        // For existing pools (reserves > 0), enforce ratio
         // Determine if selectedTokenA is token0 or token1 (Uniswap V2 sorts by address)
         const isTokenAToken0 = formData.selectedTokenA.address.toLowerCase() < formData.selectedTokenB.address.toLowerCase();
 
@@ -280,10 +331,12 @@ export const useAddLiquidity = () => {
         const reserveB = isTokenAToken0 ? reserves[1] : reserves[0];
 
         // Calculate token B amount based on pool ratio
-        const amountB =
-          reserveA > 0n
-            ? quoteTokenAmount(amountParsed, reserveA, reserveB)
-            : 0n;
+        const amountB = quoteTokenAmount(amountParsed, reserveA, reserveB);
+
+        // Clean Token B formatted amount to remove leading zeros
+        const tokenBFormatted = cleanFormattedAmount(
+          formatUnits(amountB, formData.selectedTokenB!.decimals)
+        );
 
         setFormData((prev) => ({
           ...prev,
@@ -300,10 +353,7 @@ export const useAddLiquidity = () => {
           tokenB: {
             token: formData.selectedTokenB!,
             amount: amountB,
-            amountFormatted: formatUnits(
-              amountB,
-              formData.selectedTokenB!.decimals
-            ),
+            amountFormatted: tokenBFormatted,  // Use cleaned format
             balance: balanceB || 0n,
             balanceFormatted: formatUnits(
               balanceB || 0n,
@@ -316,6 +366,52 @@ export const useAddLiquidity = () => {
       }
     },
     [formData.selectedTokenA, formData.selectedTokenB, poolExists, reserves, balanceA, balanceB]
+  );
+
+  /**
+   * Handle token B amount change (for new pools)
+   */
+  const handleTokenBChange = useCallback(
+    (amount: string) => {
+      if (!formData.selectedTokenA || !formData.selectedTokenB) return;
+
+      try {
+        // Clean input: remove trailing dot and leading zeros
+        let cleanAmount = amount.trim();
+        if (cleanAmount.endsWith('.')) {
+          cleanAmount = cleanAmount.slice(0, -1);
+        }
+        if (cleanAmount === '' || cleanAmount === '.') {
+          cleanAmount = '0';
+        }
+
+        const amountParsed =
+          cleanAmount === "" || cleanAmount === "0"
+            ? 0n
+            : parseUnits(cleanAmount, formData.selectedTokenB.decimals);
+
+        // Clean the formatted amount to remove leading zeros
+        const formattedAmount = cleanFormattedAmount(cleanAmount);
+
+        // Update Token B amount (Token A remains unchanged)
+        setFormData((prev) => ({
+          ...prev,
+          tokenB: {
+            token: prev.selectedTokenB!,
+            amount: amountParsed,
+            amountFormatted: formattedAmount,  // Use cleaned format
+            balance: balanceB || 0n,
+            balanceFormatted: formatUnits(
+              balanceB || 0n,
+              prev.selectedTokenB!.decimals
+            ),
+          },
+        }));
+      } catch (error) {
+        console.error("Invalid amount input:", error);
+      }
+    },
+    [formData.selectedTokenA, formData.selectedTokenB, balanceB]
   );
 
   /**
@@ -367,12 +463,20 @@ export const useAddLiquidity = () => {
         functionName: "approve",
         args: [routerAddress, formData.tokenA.amount],
       });
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Wait for transaction confirmation
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // Refetch allowances to update state
+      await refetchAllowanceA();
+
+      // Reset state to IDLE
+      setAddLiquidityState(AddLiquidityState.IDLE);
     } catch (error: any) {
       setAddLiquidityState(AddLiquidityState.ERROR);
       setErrorMessage(error.message || "Approval failed");
     }
-  }, [formData.tokenA, address, routerAddress, writeContractAsync]);
+  }, [formData.tokenA, address, routerAddress, writeContractAsync, refetchAllowanceA]);
 
   /**
    * Approve Token B
@@ -388,12 +492,20 @@ export const useAddLiquidity = () => {
         functionName: "approve",
         args: [routerAddress, formData.tokenB.amount],
       });
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Wait for transaction confirmation
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      // Refetch allowances to update state
+      await refetchAllowanceB();
+
+      // Reset state to IDLE
+      setAddLiquidityState(AddLiquidityState.IDLE);
     } catch (error: any) {
       setAddLiquidityState(AddLiquidityState.ERROR);
       setErrorMessage(error.message || "Approval failed");
     }
-  }, [formData.tokenB, address, routerAddress, writeContractAsync]);
+  }, [formData.tokenB, address, routerAddress, writeContractAsync, refetchAllowanceB]);
 
   /**
    * Add liquidity
@@ -442,6 +554,19 @@ export const useAddLiquidity = () => {
       });
 
       setTxHash(hash);
+
+      // Wait for transaction confirmation
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+
+      // Reset state to IDLE (data will refetch automatically via refetchInterval)
+      setAddLiquidityState(AddLiquidityState.IDLE);
+
+      // Reset form amounts
+      setFormData((prev) => ({
+        ...prev,
+        tokenA: null,
+        tokenB: null,
+      }));
     } catch (error: any) {
       setAddLiquidityState(AddLiquidityState.ERROR);
       setErrorMessage(error.message || "Transaction failed");
@@ -530,10 +655,12 @@ export const useAddLiquidity = () => {
       return { isValid: false, error: "Please select both tokens" };
     }
 
-    if (!poolExists) {
+    // For pools that truly don't exist (no pair address), allow "Create Pool" button
+    if (!pairAddressExists) {
       return { isValid: true }; // Allow showing "Create Pool" button
     }
 
+    // For pools that exist (with or without reserves), validate amounts
     if (!formData.tokenA || formData.tokenA.amount === 0n) {
       return { isValid: false, error: VALIDATION_MESSAGES.AMOUNT_ZERO };
     }
@@ -545,6 +672,20 @@ export const useAddLiquidity = () => {
       };
     }
 
+    // For new pools (reserves = 0), also validate Token B amount
+    if (!poolExists && formData.tokenB) {
+      if (formData.tokenB.amount === 0n) {
+        return { isValid: false, error: "Please enter amount for both tokens" };
+      }
+      if (formData.tokenB.amount > (balanceB || 0n)) {
+        return {
+          isValid: false,
+          error: VALIDATION_MESSAGES.INSUFFICIENT_BALANCE_B,
+        };
+      }
+    }
+
+    // For existing pools, tokenB is auto-calculated and validated here
     if (formData.tokenB && formData.tokenB.amount > (balanceB || 0n)) {
       return {
         isValid: false,
@@ -553,7 +694,7 @@ export const useAddLiquidity = () => {
     }
 
     return { isValid: true };
-  }, [formData, poolExists, balanceA, balanceB]);
+  }, [formData, poolExists, pairAddressExists, balanceA, balanceB]);
 
   // ========== Side Effects ==========
 
@@ -601,7 +742,9 @@ export const useAddLiquidity = () => {
       }));
 
       // Set state based on pool existence
-      if (!poolExists && formData.selectedTokenA && formData.selectedTokenB) {
+      // Only show "Create Pool" if pair address doesn't exist at all
+      // If pair exists but has no reserves, show normal form (IDLE state)
+      if (!pairAddressExists && formData.selectedTokenA && formData.selectedTokenB) {
         setAddLiquidityState(AddLiquidityState.POOL_NOT_EXIST);
       } else {
         setAddLiquidityState(AddLiquidityState.IDLE);
@@ -613,7 +756,8 @@ export const useAddLiquidity = () => {
    * Update state based on approval status
    */
   useEffect(() => {
-    if (!formData.tokenA || !formData.tokenB || !validation.isValid || !poolExists) {
+    // Skip if validation failed or no pair address exists
+    if (!formData.tokenA || !formData.tokenB || !validation.isValid || !pairAddressExists) {
       return;
     }
 
@@ -627,7 +771,7 @@ export const useAddLiquidity = () => {
     } else {
       setAddLiquidityState(AddLiquidityState.READY);
     }
-  }, [formData, allowanceA, allowanceB, validation.isValid, poolExists]);
+  }, [formData, allowanceA, allowanceB, validation.isValid, pairAddressExists]);
 
   /**
    * Handle transaction success
@@ -665,12 +809,14 @@ export const useAddLiquidity = () => {
     handleTokenASelect,
     handleTokenBSelect,
     handleTokenAChange,
+    handleTokenBChange,
     handleSlippageChange,
     handleAction,
     // Computed
     preview,
     validation,
     poolExists,
+    pairAddressExists,  // Export for UI warnings
     // State
     addLiquidityState,
     errorMessage,

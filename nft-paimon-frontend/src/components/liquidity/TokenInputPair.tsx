@@ -14,6 +14,10 @@ interface TokenInputPairProps {
   tokenB: TokenAmount | null;
   /** Callback when token A amount changes */
   onTokenAChange: (amount: string) => void;
+  /** Callback when token B amount changes (optional, for new pools) */
+  onTokenBChange?: (amount: string) => void;
+  /** Whether Token B should be editable (true for new pools, false for existing) */
+  tokenBEditable?: boolean;
   /** Whether the component is disabled */
   disabled?: boolean;
 }
@@ -33,11 +37,19 @@ export const TokenInputPair: React.FC<TokenInputPairProps> = ({
   tokenA,
   tokenB,
   onTokenAChange,
+  onTokenBChange,
+  tokenBEditable = false,
   disabled = false,
 }) => {
   const handleMaxA = () => {
     if (tokenA?.balanceFormatted) {
       onTokenAChange(tokenA.balanceFormatted);
+    }
+  };
+
+  const handleMaxB = () => {
+    if (tokenB?.balanceFormatted && onTokenBChange) {
+      onTokenBChange(tokenB.balanceFormatted);
     }
   };
 
@@ -149,7 +161,7 @@ export const TokenInputPair: React.FC<TokenInputPairProps> = ({
         </Box>
       </Box>
 
-      {/* Token B Input (Read-only, auto-calculated) */}
+      {/* Token B Input (Editable for new pools, read-only for existing pools) */}
       <Box
         sx={{
           borderRadius: LIQUIDITY_DESIGN_TOKENS.RADIUS_LARGE,
@@ -159,6 +171,14 @@ export const TokenInputPair: React.FC<TokenInputPairProps> = ({
           border: '2px solid',
           borderColor: 'rgba(255, 152, 0, 0.1)',
           opacity: disabled ? 0.6 : 1,
+          transition: `all ${ANIMATION_CONFIG.DURATION_NORMAL} ${ANIMATION_CONFIG.EASE_OUT_EXPO}`,
+
+          '&:hover': tokenBEditable
+            ? {
+                borderColor: 'rgba(255, 152, 0, 0.3)',
+                boxShadow: LIQUIDITY_DESIGN_TOKENS.SHADOW_CARD_HOVER,
+              }
+            : {},
         }}
       >
         {/* Header: Token name + Balance */}
@@ -171,18 +191,70 @@ export const TokenInputPair: React.FC<TokenInputPairProps> = ({
           </Typography>
         </Stack>
 
-        {/* Read-only input field */}
-        <Typography
-          variant="h4"
-          fontWeight={700}
-          color={tokenB?.amountFormatted ? 'text.primary' : 'text.disabled'}
-          sx={{
-            fontSize: '2rem',
-            opacity: tokenB?.amountFormatted ? 1 : 0.5,
-          }}
-        >
-          {tokenB?.amountFormatted || '0.00'}
-        </Typography>
+        {tokenBEditable ? (
+          /* Editable input field for new pools */
+          <Stack direction="row" spacing={1} alignItems="center">
+            <TextField
+              fullWidth
+              variant="standard"
+              placeholder="0.00"
+              value={tokenB?.amountFormatted || ''}
+              onChange={(e) => onTokenBChange && onTokenBChange(e.target.value)}
+              disabled={disabled}
+              InputProps={{
+                disableUnderline: true,
+                sx: {
+                  fontSize: '2rem',
+                  fontWeight: 700,
+                  color: 'text.primary',
+                },
+              }}
+              sx={{
+                '& input::placeholder': {
+                  color: 'text.disabled',
+                  opacity: 0.5,
+                },
+              }}
+            />
+
+            {/* MAX button */}
+            <Button
+              size="small"
+              onClick={handleMaxB}
+              disabled={disabled}
+              sx={{
+                minWidth: 'auto',
+                px: 2,
+                py: 0.5,
+                borderRadius: LIQUIDITY_DESIGN_TOKENS.RADIUS_PILL,
+                backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                color: 'primary.main',
+                fontWeight: 700,
+                fontSize: '0.75rem',
+                transition: `all ${ANIMATION_CONFIG.DURATION_NORMAL}`,
+
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 152, 0, 0.2)',
+                },
+              }}
+            >
+              MAX
+            </Button>
+          </Stack>
+        ) : (
+          /* Read-only display for existing pools */
+          <Typography
+            variant="h4"
+            fontWeight={700}
+            color={tokenB?.amountFormatted ? 'text.primary' : 'text.disabled'}
+            sx={{
+              fontSize: '2rem',
+              opacity: tokenB?.amountFormatted ? 1 : 0.5,
+            }}
+          >
+            {tokenB?.amountFormatted || '0.00'}
+          </Typography>
+        )}
       </Box>
     </Box>
   );
