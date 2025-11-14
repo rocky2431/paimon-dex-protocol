@@ -3,7 +3,7 @@
   "metadata": {
     "projectName": "Paimon DEX - 全栈架构升级",
     "created": "2025-11-14T10:00:00Z",
-    "lastModified": "2025-11-15T04:30:00Z",
+    "lastModified": "2025-11-15T07:17:00Z",
     "description": "钱包迁移（Reown AppKit + 社交登录）+ 用户中心升级（KYC + TaskOn 任务系统）+ 后端架构建设（Python FastAPI + PostgreSQL + Redis）",
     "totalDuration": "24 周（6 个月）",
     "phases": 3,
@@ -17,13 +17,13 @@
   },
   "stats": {
     "totalTasks": 67,
-    "completed": 7,
+    "completed": 8,
     "inProgress": 0,
-    "pending": 60,
+    "pending": 59,
     "paused": 0,
-    "progressPercentage": 10.45,
+    "progressPercentage": 11.94,
     "estimatedTotalDays": 123,
-    "lastModified": "2025-11-15T05:30:00Z"
+    "lastModified": "2025-11-15T07:17:00Z"
   },
   "phases": [
     {
@@ -340,7 +340,10 @@
         5
       ],
       "estimatedDays": 1.5,
-      "status": "pending",
+      "status": "completed",
+      "startedAt": "2025-11-15T06:30:00Z",
+      "completedAt": "2025-11-15T07:17:00Z",
+      "implementationNotes": "✅ 完整实现 JWT 认证系统（TDD 方法）：\n- app/core/security.py: JWT 生成/验证/刷新工具（4 个函数）\n- app/api/dependencies.py: FastAPI 依赖注入（get_current_user + get_current_user_optional）\n- app/schemas/auth.py: Pydantic 模型（TokenResponse + TokenData）\n- 32 个测试全部通过（19 JWT 工具测试 + 13 依赖注入测试）\n- 测试覆盖：功能/边界/异常/性能/安全/兼容性（6 维度）\n- Pydantic v2 ConfigDict 适配",
       "tags": [
         "backend",
         "auth",
