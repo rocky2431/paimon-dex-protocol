@@ -292,6 +292,15 @@ export function VaultDepositModal({
       // Execute approval first
       try {
         await approval.handleApprove();
+
+        // ✅ Fix: Auto-execute deposit after successful approval
+        // Wait for allowance to be updated (refetch delay on BSC testnet ~2-3s)
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        // Execute deposit if approval succeeded (no error)
+        if (!approval.error) {
+          await handleConfirm();
+        }
       } catch (err) {
         // Error handled by approval hook, just prevent propagation
         console.error('Approval error:', err);

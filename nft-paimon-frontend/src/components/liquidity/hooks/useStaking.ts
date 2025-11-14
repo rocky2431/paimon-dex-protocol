@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import {
   useAccount,
   useReadContract,
@@ -114,6 +114,9 @@ export const useStaking = () => {
     StakingState.IDLE
   );
   const [errorMessage, setErrorMessage] = useState<string>("");
+
+  // Track previous state to detect approval completion
+  const prevStateRef = useRef<StakingState>(StakingState.IDLE);
 
   // Get gauge address
   const gaugeAddress = formData.pool
@@ -286,10 +289,13 @@ export const useStaking = () => {
   useEffect(() => {
     if (isWriting) {
       if (stakingState === StakingState.NEEDS_APPROVAL) {
+        prevStateRef.current = StakingState.APPROVING;
         setStakingState(StakingState.APPROVING);
       } else if (formData.action === "stake") {
+        prevStateRef.current = StakingState.STAKING;
         setStakingState(StakingState.STAKING);
       } else {
+        prevStateRef.current = StakingState.UNSTAKING;
         setStakingState(StakingState.UNSTAKING);
       }
     }
@@ -306,11 +312,24 @@ export const useStaking = () => {
       refetchEarnedRewards();
       refetchAllowance();
 
-      // Reset form after success
-      setTimeout(() => {
-        setFormData((prev) => ({ ...prev, amount: 0n }));
-        setStakingState(StakingState.IDLE);
-      }, 2000);
+      // ✅ Fix: Auto-execute stake after successful approval
+      if (prevStateRef.current === StakingState.APPROVING) {
+        // Wait for allowance to be updated (refetch delay on BSC testnet ~2-3s)
+        setTimeout(async () => {
+          await new Promise(resolve => setTimeout(resolve, 3000));
+
+          // Auto-execute stake if action is "stake"
+          if (formData.action === "stake") {
+            handleStake();
+          }
+        }, 500);
+      } else {
+        // For stake/unstake, reset form after success
+        setTimeout(() => {
+          setFormData((prev) => ({ ...prev, amount: 0n }));
+          setStakingState(StakingState.IDLE);
+        }, 2000);
+      }
     }
   }, [isWriting, isConfirming, isConfirmed, stakingState, formData.action]);
 
