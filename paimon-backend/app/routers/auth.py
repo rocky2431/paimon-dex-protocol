@@ -1,18 +1,28 @@
 """
-Authentication routes for wallet signature login.
+Authentication routes for wallet signature login and social OAuth.
 
 Endpoints:
 - GET /api/auth/nonce: Generate nonce for signing
 - POST /api/auth/login: Wallet signature login
+- POST /api/auth/social: Social OAuth login (Email/Google/X)
 """
 
-from fastapi import APIRouter, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.database import get_db
 from app.core.nonce import DEFAULT_NONCE_TTL, consume_nonce, generate_nonce, validate_nonce
 from app.core.security import create_access_token, create_refresh_token
+from app.core.social_oauth import get_or_create_user, link_wallet_address, verify_oauth_token
 from app.core.wallet import verify_signature
-from app.schemas.auth import LoginRequest, NonceResponse, TokenResponse
+from app.schemas.auth import (
+    LoginRequest,
+    NonceResponse,
+    SocialLoginRequest,
+    SocialLoginResponse,
+    TokenResponse,
+)
 
 # Constants
 ETHEREUM_ADDRESS_LENGTH = 42
@@ -128,4 +138,88 @@ async def login(request: LoginRequest, response: Response) -> TokenResponse:
 
     return TokenResponse(
         access_token=access_token, refresh_token=refresh_token, token_type="bearer"
+    )
+
+
+@router.post("/social", response_model=SocialLoginResponse, status_code=status.HTTP_200_OK)
+async def social_login(
+    request: SocialLoginRequest, response: Response, db: AsyncSession = Depends(get_db)
+) -> SocialLoginResponse:
+    """
+    Authenticate user with social OAuth (Email/Google/X).
+
+    Flow:
+    1. Verify OAuth token with provider API
+    2. Get or create user from OAuth data
+    3. Link wallet address if provided
+    4. Generate JWT tokens
+    5. Set httpOnly cookie with refresh token
+
+    Args:
+        request: Social login request with provider, token, and optional address.
+        response: FastAPI Response object for setting cookies.
+        db: Database session.
+
+    Returns:
+        SocialLoginResponse: Access token, refresh token, and user info.
+
+    Raises:
+        HTTPException: 401 if token invalid, 400 if provider unsupported.
+
+    Example:
+        POST /api/auth/social
+        Body: {
+            "provider": "google",
+            "token": "ya29.a0AfH6SMB...",
+            "address": "0x1234..." (optional)
+        }
+    """
+    # Step 1: Verify OAuth token with provider
+    oauth_data = await verify_oauth_token(request.token, request.provider)
+
+    if oauth_data is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Invalid {request.provider} OAuth token",
+        )
+
+    # Step 2: Get or create user from OAuth data
+    user = await get_or_create_user(oauth_data, request.provider, db)
+
+    # Step 3: Link wallet address if provided
+    if request.address and user.address != request.address.lower():
+        user = await link_wallet_address(user, request.address, db)
+
+    # Step 4: Generate JWT tokens
+    # Use wallet address as subject if available, otherwise use user ID
+    token_subject = user.address if user.address else f"user_{user.id}"
+    token_data = {"sub": token_subject, "user_id": user.id}
+
+    access_token = create_access_token(token_data)
+    refresh_token = create_refresh_token(token_data)
+
+    # Step 5: Set httpOnly cookie with refresh token
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=REFRESH_TOKEN_COOKIE_MAX_AGE,
+    )
+
+    # Build user info response
+    user_info = {
+        "id": user.id,
+        "address": user.address,
+        "email": user.email,
+        "social_provider": user.social_provider,
+        "referral_code": user.referral_code,
+    }
+
+    return SocialLoginResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",
+        user=user_info,
     )
