@@ -18,10 +18,10 @@
   "stats": {
     "totalTasks": 67,
     "completed": 0,
-    "inProgress": 0,
-    "pending": 67,
+    "inProgress": 1,
+    "pending": 66,
     "paused": 0,
-    "progressPercentage": 0,
+    "progressPercentage": 1.49,
     "estimatedTotalDays": 123
   },
   "phases": [
@@ -121,7 +121,8 @@
       "priority": "P0",
       "dependencies": [],
       "estimatedDays": 0.5,
-      "status": "pending",
+      "status": "in_progress",
+      "startedAt": "2025-11-14T20:30:00Z",
       "tags": [
         "backend",
         "setup",
