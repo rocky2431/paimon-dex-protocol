@@ -2,6 +2,7 @@
 
 from app.models.base import Base
 from app.models.kyc import KYC, KYCStatus, KYCTier
+from app.models.portfolio_cache import DataType, PortfolioCache
 from app.models.referral import Referral
 from app.models.task import TaskProgress, TaskStatus, TaskType
 from app.models.user import User
@@ -16,4 +17,6 @@ __all__ = [
     "TaskType",
     "TaskStatus",
     "Referral",
+    "PortfolioCache",
+    "DataType",
 ]
