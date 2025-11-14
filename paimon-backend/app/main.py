@@ -5,12 +5,16 @@ Initializes FastAPI app with middleware, routers, and configuration.
 """
 
 from contextlib import asynccontextmanager
+from datetime import datetime, UTC
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
 
 from app.core.config import settings
+from app.core.database import engine
+from app.core.cache import redis_client
 
 
 @asynccontextmanager
@@ -81,15 +85,45 @@ async def root():
 @app.get("/health", tags=["Health"])
 async def health_check():
     """
-    Health check endpoint.
+    Enhanced health check endpoint for deployment verification.
+
+    Checks:
+    - Database connection status
+    - Redis connection status
+    - Overall service health
 
     Returns:
-        dict: Service health status.
+        dict: Comprehensive service health status with DB and Redis connectivity.
     """
-    return {
+    health_status = {
         "status": "healthy",
         "service": "paimon-backend",
+        "timestamp": datetime.now(UTC).isoformat(),
+        "database": {"connected": False},
+        "redis": {"connected": False},
     }
+
+    # Check database connection
+    try:
+        async with engine.connect() as conn:
+            # Simple ping to verify connection
+            await conn.execute(text("SELECT 1"))
+            health_status["database"]["connected"] = True
+    except Exception as e:
+        health_status["database"]["connected"] = False
+        health_status["database"]["error"] = str(e)
+        health_status["status"] = "degraded"
+
+    # Check Redis connection
+    try:
+        await redis_client.ping()
+        health_status["redis"]["connected"] = True
+    except Exception as e:
+        health_status["redis"]["connected"] = False
+        health_status["redis"]["error"] = str(e)
+        health_status["status"] = "degraded"
+
+    return health_status
 
 
 # Exception handler for generic errors
