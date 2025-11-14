@@ -1,5 +1,5 @@
 """Pydantic schemas for request/response validation."""
 
-from app.schemas import example
+from app.schemas import auth, example
 
-__all__ = ["example"]
+__all__ = ["auth", "example"]
