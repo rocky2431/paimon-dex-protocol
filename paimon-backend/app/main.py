@@ -40,6 +40,13 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
+    contact={
+        "name": "Paimon DEX Team",
+        "email": "support@paimon.dex",
+    },
+    license_info={
+        "name": "MIT License",
+    },
     lifespan=lifespan,
 )
 
