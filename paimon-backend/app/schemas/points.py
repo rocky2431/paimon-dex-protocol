@@ -85,6 +85,7 @@ class DeductPointsRequest(BaseModel):
 class RedeemPointsRequest(BaseModel):
     """Request schema for redeeming points."""
 
+    user_id: int = Field(gt=0, description="User ID")
     amount: int = Field(gt=0, description="Points to redeem (must be positive)")
     redemption_type: str = Field(
         default="espaimon", description="Redemption type (default: espaimon)"
@@ -117,3 +118,41 @@ class PointsHistoryResponse(BaseModel):
     total_count: int
     page: int
     page_size: int
+
+
+class RedeemPointsResponse(BaseModel):
+    """Response schema for points redemption."""
+
+    redemption_id: int = Field(alias="redemptionId", description="Redemption request ID")
+    points_amount: int = Field(alias="pointsAmount", description="Points redeemed")
+    espaimon_amount: str = Field(alias="espaimonAmount", description="esPAIMON amount (in Wei, 18 decimals)")
+    status: str = Field(description="Redemption status (pending/processing/completed/failed)")
+    created_at: datetime = Field(alias="createdAt", description="Request creation time")
+
+    model_config = {"from_attributes": True, "populate_by_name": True}
+
+
+class RedemptionHistoryItem(BaseModel):
+    """Individual redemption history item."""
+
+    redemption_id: int = Field(alias="redemptionId")
+    points_amount: int = Field(alias="pointsAmount")
+    espaimon_amount: str = Field(alias="espaimonAmount")
+    status: str = Field(description="Redemption status")
+    transaction_hash: Optional[str] = Field(None, alias="transactionHash")
+    error_message: Optional[str] = Field(None, alias="errorMessage")
+    created_at: datetime = Field(alias="createdAt")
+    completed_at: Optional[datetime] = Field(None, alias="completedAt")
+
+    model_config = {"from_attributes": True, "populate_by_name": True}
+
+
+class RedemptionHistoryResponse(BaseModel):
+    """Response schema for redemption history."""
+
+    redemptions: list[RedemptionHistoryItem]
+    total_count: int = Field(alias="totalCount")
+    page: int
+    page_size: int = Field(alias="pageSize")
+
+    model_config = {"populate_by_name": True}

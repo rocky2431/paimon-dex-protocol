@@ -52,6 +52,38 @@ class Settings(BaseSettings):
     )
     CHAIN_ID: int = 97  # BSC Testnet
 
+    # Redemption Configuration
+    ESPAIMON_CONTRACT_ADDRESS: str = Field(
+        default="0x0000000000000000000000000000000000000000",
+        description="esPAIMON contract address",
+    )
+    ESPAIMON_ABI: list = Field(
+        default=[
+            {
+                "inputs": [
+                    {"internalType": "address", "name": "user", "type": "address"},
+                    {"internalType": "uint256", "name": "amount", "type": "uint256"}
+                ],
+                "name": "vestFor",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
+                "name": "balanceOf",
+                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ],
+        description="esPAIMON contract ABI (minimal)",
+    )
+    REDEMPTION_PRIVATE_KEY: str = Field(
+        default="0x0000000000000000000000000000000000000000000000000000000000000000",
+        description="Private key for redemption transactions",
+    )
+
     # Third-party Services
     BLOCKPASS_CLIENT_ID: str | None = None
     BLOCKPASS_SECRET: str | None = None
