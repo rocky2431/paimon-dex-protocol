@@ -17,13 +17,13 @@
   },
   "stats": {
     "totalTasks": 67,
-    "completed": 18,
-    "inProgress": 1,
-    "pending": 48,
+    "completed": 20,
+    "inProgress": 0,
+    "pending": 47,
     "paused": 0,
-    "progressPercentage": 26.87,
+    "progressPercentage": 29.85,
     "estimatedTotalDays": 123,
-    "lastModified": "2025-11-15T23:45:00Z"
+    "lastModified": "2025-11-16T01:30:00Z"
   },
   "phases": [
     {
@@ -691,7 +691,11 @@
         19
       ],
       "estimatedDays": 1.5,
-      "status": "pending",
+      "status": "completed",
+      "startedAt": "2025-11-15T23:45:00Z",
+      "completedAt": "2025-11-16T01:30:00Z",
+      "actualDays": 1.75,
+      "implementationNotes": "完整 TDD 实现（RED-GREEN-REFACTOR）KYC tier-based authorization system. 创建 app/api/tier_auth.py (tier validation logic, RequireTier dependency class), app/routers/features.py (tier-restricted demo endpoints), 12 comprehensive test cases (TestTierValidation, TestTierPermissions, TestTierErrorMessages, TestTierBoundaries). 修复测试隔离问题 (unique address per test in conftest.py). 所有 30 测试通过 (100%). 代码质量: SOLID principles, functions <50 lines, complete docstrings with usage examples. Localized error messages in Chinese.",
       "tags": [
         "backend",
         "kyc",
