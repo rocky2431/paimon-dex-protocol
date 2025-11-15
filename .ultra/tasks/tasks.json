@@ -18,12 +18,12 @@
   "stats": {
     "totalTasks": 67,
     "completed": 15,
-    "inProgress": 0,
-    "pending": 52,
+    "inProgress": 1,
+    "pending": 51,
     "paused": 0,
     "progressPercentage": 22.39,
     "estimatedTotalDays": 123,
-    "lastModified": "2025-11-15T17:30:00Z"
+    "lastModified": "2025-11-15T17:45:00Z"
   },
   "phases": [
     {
@@ -575,7 +575,8 @@
         15
       ],
       "estimatedDays": 1,
-      "status": "pending",
+      "status": "in_progress",
+      "startedAt": "2025-11-15T17:45:00Z",
       "tags": [
         "frontend",
         "testing",
