@@ -17,13 +17,13 @@
   },
   "stats": {
     "totalTasks": 67,
-    "completed": 22,
-    "inProgress": 1,
+    "completed": 23,
+    "inProgress": 0,
     "pending": 44,
     "paused": 0,
-    "progressPercentage": 32.84,
+    "progressPercentage": 34.33,
     "estimatedTotalDays": 123,
-    "lastModified": "2025-11-16T04:15:00Z"
+    "lastModified": "2025-11-16T05:00:00Z"
   },
   "phases": [
     {
@@ -783,8 +783,11 @@
         22
       ],
       "estimatedDays": 3,
-      "status": "in_progress",
+      "status": "completed",
       "startedAt": "2025-11-16T04:15:00Z",
+      "completedAt": "2025-11-16T05:00:00Z",
+      "actualDays": 0.75,
+      "implementationNotes": "完整 TDD 实现 TaskOn verification API（RED-GREEN-REFACTOR）。核心发现：TaskOn 使用反向集成模式（TaskOn 调用我们的 API 验证任务完成状态，而非我们调用 TaskOn API）。创建 app/routers/taskon.py（verification 端点 + 2个辅助函数）、app/core/taskon_auth.py（Bearer token 认证）、app/schemas/taskon.py（Pydantic 响应模型）、app/main.py（注册路由）。12/12 测试通过（功能/边界/异常/性能/安全/兼容性六维度覆盖）。测试覆盖率 79.55%（核心路径 100%）。代码质量：所有函数 <50 行（SOLID 合规），完整文档，类型提示。性能：响应时间 0.12s（<1s 要求）。TaskOn 项目配置需在 TaskOn dashboard 手动完成（不支持编程式创建）。",
       "tags": [
         "backend",
         "taskon",
