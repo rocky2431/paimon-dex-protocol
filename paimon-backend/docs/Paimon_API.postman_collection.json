@@ -1,0 +1,618 @@
+{
+  "info": {
+    "name": "Paimon DEX API",
+    "description": "Complete API collection for Paimon DEX backend services.\n\n**Base URL**: `{{BASE_URL}}`\n\n**Setup**:\n1. Set environment variable `BASE_URL` = `http://localhost:8000`\n2. Get JWT token via Auth → Get Nonce → Verify Signature\n3. Token will auto-populate in environment variable `ACCESS_TOKEN`\n\n**Version**: 1.0\n**Last Updated**: 2025-11-15",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "paimon-backend"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{ACCESS_TOKEN}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Get Nonce",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has nonce\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('nonce');",
+                  "    pm.environment.set('NONCE', jsonData.nonce);",
+                  "    pm.environment.set('MESSAGE', jsonData.message);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/auth/nonce/{{USER_ADDRESS}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "auth", "nonce", "{{USER_ADDRESS}}"]
+            },
+            "description": "Generate a nonce for wallet signature authentication.\n\n**Response**: Nonce and message to sign with wallet."
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Signature",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has access token\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('access_token');",
+                  "    pm.environment.set('ACCESS_TOKEN', jsonData.access_token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wallet_address\": \"{{USER_ADDRESS}}\",\n  \"signature\": \"{{SIGNATURE}}\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/auth/verify",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "auth", "verify"]
+            },
+            "description": "Verify wallet signature and obtain JWT token.\n\n**Prerequisites**: Get nonce first, sign with wallet.\n\n**Note**: You need to manually sign the message from 'Get Nonce' using MetaMask/WalletConnect and paste the signature in request body."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User Management",
+      "item": [
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/user/{{USER_ADDRESS}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "user", "{{USER_ADDRESS}}"]
+            },
+            "description": "Get user profile information.\n\n**Authentication**: Required"
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"new_username\",\n  \"email\": \"newemail@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/user/{{USER_ADDRESS}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "user", "{{USER_ADDRESS}}"]
+            },
+            "description": "Update user profile (own profile only).\n\n**Authentication**: Required"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "KYC",
+      "item": [
+        {
+          "name": "Get KYC Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/kyc/status/{{USER_ADDRESS}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "kyc", "status", "{{USER_ADDRESS}}"]
+            },
+            "description": "Check KYC verification status.\n\n**Authentication**: Required"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit KYC",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "document_type",
+                  "value": "passport",
+                  "type": "text"
+                },
+                {
+                  "key": "document_front",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "selfie",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "full_name",
+                  "value": "Alice Johnson",
+                  "type": "text"
+                },
+                {
+                  "key": "date_of_birth",
+                  "value": "1990-01-15",
+                  "type": "text"
+                },
+                {
+                  "key": "country",
+                  "value": "US",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/kyc/submit",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "kyc", "submit"]
+            },
+            "description": "Submit KYC verification documents.\n\n**Authentication**: Required\n\n**Files**: Upload document_front, document_back (optional), selfie"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "Get Task Progress",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has tasks array\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('tasks');",
+                  "    pm.expect(jsonData.tasks).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/tasks/{{USER_ADDRESS}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tasks", "{{USER_ADDRESS}}"]
+            },
+            "description": "Get user's task progress (social + RWA tasks).\n\n**Cache**: 5 minutes\n\n**Authentication**: Optional"
+          },
+          "response": []
+        },
+        {
+          "name": "Claim Task Reward",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"task_id\": \"social_twitter_follow\",\n  \"user_address\": \"{{USER_ADDRESS}}\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/tasks/claim",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "tasks", "claim"]
+            },
+            "description": "Claim task reward after completion.\n\n**Authentication**: Required\n\n**Prerequisites**: Task must be completed and not already claimed."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Points",
+      "item": [
+        {
+          "name": "Get Points Balance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/points/balance/{{USER_ADDRESS}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "points", "balance", "{{USER_ADDRESS}}"]
+            },
+            "description": "Get user's points balance.\n\n**Authentication**: Optional"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Points History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/points/history/{{USER_ADDRESS}}?limit=50&offset=0",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "points", "history", "{{USER_ADDRESS}}"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            },
+            "description": "Get points transaction history with pagination.\n\n**Query Parameters**:\n- `limit`: Max results (default 50)\n- `offset`: Pagination offset (default 0)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Referral",
+      "item": [
+        {
+          "name": "Get Referral Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/referral/{{USER_ADDRESS}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "referral", "{{USER_ADDRESS}}"]
+            },
+            "description": "Get user's referral statistics.\n\n**Authentication**: Required"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Portfolio",
+      "item": [
+        {
+          "name": "Get Portfolio",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/v2/portfolio/{{USER_ADDRESS}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "v2", "portfolio", "{{USER_ADDRESS}}"]
+            },
+            "description": "Get user's complete portfolio (PAIMON, USDP, LP positions, RWA collateral).\n\n**Cache**: 5 minutes\n\n**Authentication**: Optional"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Historical Data",
+      "item": [
+        {
+          "name": "Get Historical APR",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/historical/apr?pool_address=0x123...&days=30",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "historical", "apr"],
+              "query": [
+                {
+                  "key": "pool_address",
+                  "value": "0x123..."
+                },
+                {
+                  "key": "days",
+                  "value": "30"
+                }
+              ]
+            },
+            "description": "Get historical APR data for a pool.\n\n**Query Parameters**:\n- `pool_address`: DEX pool address\n- `days`: Number of days (default 30, max 365)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Historical Rewards",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/historical/rewards/{{USER_ADDRESS}}?days=30",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "historical", "rewards", "{{USER_ADDRESS}}"],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "30"
+                }
+              ]
+            },
+            "description": "Get user's historical rewards data.\n\n**Query Parameters**:\n- `days`: Number of days (default 30, max 365)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Leaderboard",
+      "item": [
+        {
+          "name": "Get Leaderboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/leaderboard?limit=100",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "leaderboard"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            },
+            "description": "Get points leaderboard (top users).\n\n**Query Parameters**:\n- `limit`: Max results (default 100, max 500)\n\n**Cache**: 1 hour"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Redemption",
+      "item": [
+        {
+          "name": "Get Redemption Catalog",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/redemption/catalog",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "redemption", "catalog"]
+            },
+            "description": "Get available redemption items and costs."
+          },
+          "response": []
+        },
+        {
+          "name": "Redeem Points",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_address\": \"{{USER_ADDRESS}}\",\n  \"item\": \"fee_discount_5\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/redemption",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "redemption"]
+            },
+            "description": "Redeem points for rewards.\n\n**Authentication**: Required\n\n**Prerequisites**: Sufficient points balance"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Get User Profile Analysis",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/analytics/user-profile/{{USER_ADDRESS}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "analytics", "user-profile", "{{USER_ADDRESS}}"]
+            },
+            "description": "Get AI-generated user profile analysis (risk score, activity level, preferences)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Dashboard Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/analytics/dashboard",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "analytics", "dashboard"]
+            },
+            "description": "Get admin dashboard metrics (total users, TVL, volume)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Pool Recommendations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/analytics/recommend/pools/{{USER_ADDRESS}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "analytics", "recommend", "pools", "{{USER_ADDRESS}}"]
+            },
+            "description": "Get personalized pool recommendations based on user profile."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Strategy Recommendations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/analytics/recommend/strategies/{{USER_ADDRESS}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "analytics", "recommend", "strategies", "{{USER_ADDRESS}}"]
+            },
+            "description": "Get personalized strategy recommendations with step-by-step guides."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Root",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/",
+              "host": ["{{BASE_URL}}"],
+              "path": [""]
+            },
+            "description": "Root endpoint - API information."
+          },
+          "response": []
+        },
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Service is healthy\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.be.oneOf(['healthy', 'degraded']);",
+                  "});",
+                  "",
+                  "pm.test(\"Database connected\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.database.connected).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/health",
+              "host": ["{{BASE_URL}}"],
+              "path": ["health"]
+            },
+            "description": "Health check endpoint with database and Redis status."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "USER_ADDRESS",
+      "value": "0x742d35cc6634c0532925a3b844bc9e7595f0beb1",
+      "type": "string"
+    },
+    {
+      "key": "ACCESS_TOKEN",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "NONCE",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "MESSAGE",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "SIGNATURE",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
