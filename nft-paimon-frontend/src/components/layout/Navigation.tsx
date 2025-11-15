@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 
 import { getNavigationColumns, getActiveColumn, type NavColumn } from '@/config/navigation';
 import { MobileNavigation } from './MobileNavigation';
+import { UserMenu } from './UserMenu';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 // TypeScript declaration for Reown AppKit web component
@@ -147,10 +148,8 @@ export function Navigation() {
             {/* Spacer - pushes wallet button to far right */}
             <Box sx={{ flexGrow: 1 }} />
 
-            {/* Connect Wallet Button - Reown AppKit */}
-            <Box sx={{ flexShrink: 0 }}>
-              <w3m-button />
-            </Box>
+            {/* User Menu - Task 33 */}
+            <UserMenu />
           </Stack>
         </Container>
       </Box>
@@ -198,10 +197,8 @@ export function Navigation() {
             {/* Spacer - pushes wallet button to far right */}
             <Box sx={{ flexGrow: 1 }} />
 
-            {/* Connect Wallet Button - Reown AppKit */}
-            <Box sx={{ flexShrink: 0 }}>
-              <w3m-button />
-            </Box>
+            {/* User Menu - Task 33 */}
+            <UserMenu />
           </Stack>
         </Container>
       </Box>
