@@ -1537,13 +1537,16 @@
         46
       ],
       "estimatedDays": 1.5,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "backend",
         "api",
         "history",
         "query"
-      ]
+      ],
+      "startedAt": "2025-11-15T18:50:00Z",
+      "completedAt": "2025-11-15T10:44:06Z",
+      "implementationNotes": "Implemented 3 RESTful API endpoints for historical data queries: APR trends (7d/30d/90d with avg/max/min stats), reward history (filterable by pool/type), and latest APR for all pools. Response models with Pydantic validation. Performance: <100ms for 30-day queries (TimescaleDB optimized). Registered in main.py with OpenAPI docs."
     },
     {
       "id": 47,
