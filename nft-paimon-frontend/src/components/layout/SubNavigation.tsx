@@ -68,10 +68,16 @@ export function SubNavigation({
     (_event: React.SyntheticEvent, newValue: string) => {
       onChange(newValue);
 
-      // Update URL with tab parameter
-      const params = new URLSearchParams(searchParams.toString());
-      params.set('tab', newValue);
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+      // Update URL with tab parameter (with error handling)
+      try {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('tab', newValue);
+        router.push(`${pathname}?${params.toString()}`, { scroll: false });
+      } catch (error) {
+        // Router navigation failed, but onChange was already called
+        // Log error for debugging but don't crash
+        console.error('Failed to update URL:', error);
+      }
     },
     [onChange, pathname, router, searchParams]
   );
