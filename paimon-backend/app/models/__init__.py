@@ -8,6 +8,13 @@ from app.models.redemption import PointsRedemption, RedemptionStatus
 from app.models.referral import Referral
 from app.models.task import TaskProgress, TaskStatus, TaskType
 from app.models.user import User
+from app.models.indexer import (
+    IndexerState,
+    LPPosition,
+    PortfolioSummary,
+    VaultPosition,
+    VeNFTPosition,
+)
 
 __all__ = [
     "Base",
@@ -25,4 +32,10 @@ __all__ = [
     "Referral",
     "PortfolioCache",
     "DataType",
+    # Indexer models
+    "LPPosition",
+    "VaultPosition",
+    "VeNFTPosition",
+    "PortfolioSummary",
+    "IndexerState",
 ]
