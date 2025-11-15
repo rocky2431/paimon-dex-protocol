@@ -45,17 +45,9 @@ export { KYCTab } from './KYCTab';
 /**
  * Tab 5: Tasks
  * TaskOn integration + RWA task verification engine
+ * (Task 32)
  */
-export function TasksTab() {
-  return (
-    <TabPlaceholder
-      title="Tasks"
-      description="Complete social tasks and RWA verification tasks to earn points and rewards. Track your progress and claim rewards."
-      icon={<AssignmentIcon />}
-      comingSoonMessage="Task center will be available in Phase 2 (Task 32)"
-    />
-  );
-}
+export { TasksTab } from './TasksTab';
 
 /**
  * Tab 6: Referral
