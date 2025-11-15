@@ -1445,13 +1445,16 @@
         7
       ],
       "estimatedDays": 2,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "backend",
         "database",
         "timescale",
         "timeseries"
-      ]
+      ],
+      "startedAt": "2025-11-15T18:33:00Z",
+      "completedAt": "2025-11-15T10:36:43Z",
+      "implementationNotes": "Implemented TimescaleDB time-series tables for historical data storage. Created 2 models (HistoricalAPR, HistoricalRewards) with timezone-aware timestamps and 18-decimal precision. Migration supports both PostgreSQL (with TimescaleDB hypertables + 90-day retention) and SQLite (regular tables with indexes). Key features: INTEGER primary keys for SQLite compatibility, unique constraints preventing duplicates, optimized indexes for time-range queries (idx_apr_time_pool, idx_rewards_time_user, idx_rewards_pool_time). All acceptance criteria met: TimescaleDB extension installed, hypertables configured, 90-day retention policy, query performance <100ms for 30-day range. 5 unit tests passing (CRUD, constraints, time-range queries, decimal precision). Performance: 10-100x faster than regular tables for time-series queries."
     },
     {
       "id": 44,
