@@ -17,13 +17,13 @@
   },
   "stats": {
     "totalTasks": 67,
-    "completed": 10,
+    "completed": 11,
     "inProgress": 1,
-    "pending": 56,
+    "pending": 55,
     "paused": 0,
-    "progressPercentage": 14.93,
+    "progressPercentage": 16.42,
     "estimatedTotalDays": 123,
-    "lastModified": "2025-11-15T12:20:00Z"
+    "lastModified": "2025-11-15T14:00:00Z"
   },
   "phases": [
     {
@@ -458,7 +458,8 @@
       "priority": "P0",
       "dependencies": [],
       "estimatedDays": 0.5,
-      "status": "pending",
+      "status": "in_progress",
+      "startedAt": "2025-11-15T14:00:00Z",
       "tags": [
         "frontend",
         "wallet",
