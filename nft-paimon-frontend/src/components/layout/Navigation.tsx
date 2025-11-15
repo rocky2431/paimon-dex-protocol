@@ -1,7 +1,7 @@
 'use client';
 
-import { Container, Typography, Box, Stack } from '@mui/material';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { Container, Typography, Box, Stack, Button } from '@mui/material';
+// import { ConnectButton } from '@rainbow-me/rainbowkit'; // REMOVED: Will be replaced with Reown AppKit (Task 13)
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -139,9 +139,11 @@ export function Navigation() {
             {/* Spacer - pushes wallet button to far right */}
             <Box sx={{ flexGrow: 1 }} />
 
-            {/* Connect Wallet Button */}
+            {/* Connect Wallet Button - Temporarily disabled, will be replaced with Reown AppKit (Task 13) */}
             <Box sx={{ flexShrink: 0 }}>
-              <ConnectButton />
+              <Button variant="contained" color="primary" disabled sx={{ fontSize: '0.875rem' }}>
+                Connect Wallet
+              </Button>
             </Box>
           </Stack>
         </Container>
@@ -190,9 +192,11 @@ export function Navigation() {
             {/* Spacer - pushes wallet button to far right */}
             <Box sx={{ flexGrow: 1 }} />
 
-            {/* Connect Wallet Button */}
+            {/* Connect Wallet Button - Temporarily disabled, will be replaced with Reown AppKit (Task 13) */}
             <Box sx={{ flexShrink: 0 }}>
-              <ConnectButton />
+              <Button variant="contained" color="primary" disabled sx={{ fontSize: '0.875rem' }}>
+                Connect Wallet
+              </Button>
             </Box>
           </Stack>
         </Container>

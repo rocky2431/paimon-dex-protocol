@@ -9,10 +9,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { Navigation } from '@/components/layout/Navigation'
 
-// Mock RainbowKit's ConnectButton
-jest.mock('@rainbow-me/rainbowkit', () => ({
-  ConnectButton: () => <button>Connect Wallet</button>,
-}))
+// Note: RainbowKit removed (Task 12), ConnectButton replaced with MUI Button placeholder
 
 // Mock Next.js Link
 jest.mock('next/link', () => {
