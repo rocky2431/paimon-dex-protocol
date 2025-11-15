@@ -16,6 +16,7 @@ from app.config.contracts import (
     DEX_FACTORY_ABI,
     DEX_PAIR_ABI,
     GAUGE_CONTROLLER_ABI,
+    TREASURY_ABI,
     VAULT_ABI,
     VENFT_ABI,
     get_contract_address,
@@ -25,6 +26,7 @@ from app.indexer.handlers.dex_handler import DEXEventHandler
 from app.indexer.handlers.vault_handler import VaultEventHandler
 from app.indexer.handlers.venft_handler import VeNFTEventHandler
 from app.indexer.services.apr_recorder import APRRecorder
+from app.indexer.services.health_monitor import HealthFactorMonitor
 from app.core.database import get_db_session
 
 logging.basicConfig(
@@ -67,8 +69,9 @@ class IndexerScheduler:
         self.vault_listener: EventListener = None
         self.venft_listener: EventListener = None
 
-        # APR recorder
+        # Services
         self.apr_recorder: APRRecorder = None
+        self.health_monitor: HealthFactorMonitor = None
 
     async def initialize(self) -> None:
         """Initialize Web3 and create event listeners."""
@@ -207,6 +210,16 @@ class IndexerScheduler:
         )
         logger.info("Initialized APR recorder")
 
+        # Create Health Factor Monitor
+        treasury_address = get_contract_address("treasury", "Treasury")
+        treasury = self.w3.eth.contract(address=treasury_address, abi=TREASURY_ABI)
+
+        self.health_monitor = HealthFactorMonitor(
+            w3=self.w3,
+            treasury_contract=treasury,
+        )
+        logger.info("Initialized Health Factor Monitor")
+
     async def _get_all_pairs(
         self,
         factory,
@@ -254,6 +267,21 @@ class IndexerScheduler:
 
         except Exception as e:
             logger.error(f"Error during APR recording: {e}", exc_info=True)
+
+    async def check_health_factors(self) -> None:
+        """Check health factors and send liquidation warnings (scheduled job)."""
+        logger.info("Starting health factor checks...")
+
+        try:
+            stats = await self.health_monitor.check_all_positions()
+            logger.info(
+                f"Health check completed: {stats['checked']} positions checked, "
+                f"{stats['warnings_sent']} warnings sent, "
+                f"{stats['critical_positions']} critical positions"
+            )
+
+        except Exception as e:
+            logger.error(f"Error during health check: {e}", exc_info=True)
 
     async def aggregate_portfolios(self) -> None:
         """Aggregate portfolio summaries (scheduled job)."""
@@ -306,12 +334,22 @@ class IndexerScheduler:
             name="Record APR snapshots",
         )
 
+        # Add health factor monitoring job (every 5 minutes)
+        self.scheduler.add_job(
+            self.check_health_factors,
+            "interval",
+            minutes=5,  # Every 5 minutes
+            id="check_health",
+            name="Check health factors",
+        )
+
         # Start scheduler
         self.scheduler.start()
 
         logger.info(
             f"Scheduler started: event scan every {self.event_scan_interval}s, "
-            f"aggregation every {self.aggregation_interval}s, APR recording every 1h"
+            f"aggregation every {self.aggregation_interval}s, APR recording every 1h, "
+            f"health check every 5min"
         )
 
     def stop(self) -> None:
