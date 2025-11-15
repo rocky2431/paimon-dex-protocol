@@ -73,18 +73,24 @@ async def async_client(test_db):
 
 
 @pytest_asyncio.fixture
-async def test_user(test_db):
-    """Create a test user and ensure it's committed."""
+async def test_user(test_db, request):
+    """Create a test user with unique address for test isolation."""
+    # Generate unique address using test name to ensure isolation
+    test_name_hash = str(hash(request.node.nodeid))[-8:]
+    unique_address = f"0x{test_name_hash}{'0' * 32}"[:42]
+
     user = User(
-        address="0x1234567890abcdef1234567890abcdef12345678",
-        referral_code="TEST1234",
+        address=unique_address,
+        referral_code=f"TEST{test_name_hash[:4]}",
     )
     test_db.add(user)
     await test_db.flush()  # Flush to get ID without committing
     await test_db.commit()  # Commit the transaction
     await test_db.refresh(user)  # Refresh to ensure object is up-to-date
 
-    # Ensure the session is in a clean state for subsequent operations
-    await test_db.expire_all()
+    # Ensure attributes are loaded (prevent lazy loading issues)
+    _ = user.address  # Access attribute to ensure it's loaded
+    _ = user.id
+    _ = user.referral_code
 
     return user
