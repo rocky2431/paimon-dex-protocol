@@ -38,7 +38,7 @@ export const wagmiAdapter = new WagmiAdapter({
   projectId,
 });
 
-// Create modal with social login support
+// Create modal with social login support and Binance Wallet prioritization
 export const modal = createAppKit({
   adapters: [wagmiAdapter],
   networks: networksList,
@@ -49,6 +49,12 @@ export const modal = createAppKit({
     socials: ['google', 'x'], // Enable Google and X (Twitter) social login
     emailShowWallets: true, // Show wallet options even when using email
   },
+  // Highlight Binance Wallet and BSC ecosystem wallets at the top
+  // Note: Binance Wallet browser extension is auto-detected as injected wallet
+  featuredWalletIds: [
+    '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // Trust Wallet (Binance ecosystem)
+    'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
+  ],
   themeMode: 'light',
   themeVariables: {
     '--w3m-accent': '#FF6F00', // Orange accent color
