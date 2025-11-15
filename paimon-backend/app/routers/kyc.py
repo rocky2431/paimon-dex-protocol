@@ -25,6 +25,7 @@ from app.schemas.kyc import (
     KYCStatusResponse,
     KYCWebhookResponse,
 )
+from app.services.kyc_permission import invalidate_kyc_cache
 
 logger = logging.getLogger(__name__)
 
@@ -208,6 +209,16 @@ async def blockpass_webhook(
         logger.info(f"Cache invalidated for {payload.refId} after KYC status update")
     else:
         logger.debug(f"No cache to invalidate for {payload.refId}")
+
+    # Invalidate KYC tier cache (for task permission checking)
+    tier_cache_deleted = await invalidate_kyc_cache(user.address)
+    if tier_cache_deleted:
+        logger.info(
+            f"KYC tier cache invalidated for {user.address} "
+            f"(tier={new_tier.value})"
+        )
+    else:
+        logger.debug(f"No KYC tier cache to invalidate for {user.address}")
 
     return KYCWebhookResponse(
         success=True,
