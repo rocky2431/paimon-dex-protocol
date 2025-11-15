@@ -1656,13 +1656,15 @@
         40
       ],
       "estimatedDays": 2,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "backend",
         "notification",
         "risk",
         "liquidation"
-      ]
+      ],
+      "completedAt": "2025-11-15T11:02:32Z",
+      "implementationNotes": "Implemented comprehensive health factor monitoring and liquidation warning system. Created HealthFactorMonitor service with Treasury contract integration. Scheduled job checks all positions every 5 minutes. Two-tier warning system: warning (<1.3) and critical (<1.15). Real-time Socket.IO notifications with current health factor and contextual suggested actions. One-time notification per user until health recovery."
     },
     {
       "id": 51,
