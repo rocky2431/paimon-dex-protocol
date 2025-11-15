@@ -1567,13 +1567,16 @@
         30
       ],
       "estimatedDays": 1,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "frontend",
         "charts",
         "history",
         "ui"
-      ]
+      ],
+      "startedAt": "2025-11-15T18:55:00Z",
+      "completedAt": "2025-11-15T10:44:59Z",
+      "implementationNotes": "Implemented React hooks (useAPRHistory, useRewardsHistory, useLatestAPRAllPools) and APRChart component with Chart.js integration. Features: period filtering (7d/30d/90d), loading/error states, statistics display (avg/max/min APR), TypeScript type safety. Components ready for integration in portfolio/pool pages."
     },
     {
       "id": 48,
