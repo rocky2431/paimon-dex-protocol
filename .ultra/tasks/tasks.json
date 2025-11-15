@@ -17,13 +17,13 @@
   },
   "stats": {
     "totalTasks": 67,
-    "completed": 17,
+    "completed": 18,
     "inProgress": 0,
-    "pending": 50,
+    "pending": 49,
     "paused": 0,
-    "progressPercentage": 25.37,
+    "progressPercentage": 26.87,
     "estimatedTotalDays": 123,
-    "lastModified": "2025-11-15T20:30:00Z"
+    "lastModified": "2025-11-15T23:30:00Z"
   },
   "phases": [
     {
@@ -633,7 +633,10 @@
         11
       ],
       "estimatedDays": 2,
-      "status": "pending",
+      "status": "completed",
+      "startedAt": "2025-11-15T21:00:00Z",
+      "completedAt": "2025-11-15T23:30:00Z",
+      "implementationNotes": "完整 TDD 实现 Blockpass KYC webhook 接收和处理。创建了 webhook_security.py（HMAC-SHA256 签名验证）、kyc.py router（3 个端点：webhook、callback、status 查询）、kyc.py schema（Payload/Response 模型）。实现了 7 种事件类型映射、数据库自动更新（创建/更新 KYC 记录）、安全验证（时序安全比较）。编写了 15 个单元测试覆盖所有场景（签名验证 5 个、webhook 处理 7 个、状态查询 3 个），测试覆盖 6 个维度（功能、边界、异常、性能、安全、兼容性）。",
       "tags": [
         "backend",
         "kyc",
