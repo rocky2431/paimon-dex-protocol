@@ -1245,12 +1245,27 @@
         7
       ],
       "estimatedDays": 2,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "backend",
         "indexer",
         "architecture",
         "design"
+      ],
+      "implementationNotes": [
+        "✅ 创建完整架构设计文档 (.ultra/docs/indexer-architecture.md)",
+        "✅ 设计三层架构: Frontend → Backend API → Indexer Worker → Blockchain",
+        "✅ 定义核心组件: Event Listener, Event Handler, Data Aggregator",
+        "✅ 明确 10+ 合约事件监听列表 (DEXPair, Vault, VePaimon, SavingRate等)",
+        "✅ 设计 6 个数据表: lp_positions, vault_positions, venft_positions, portfolio_cache, portfolio_history, apr_history",
+        "✅ 设计 TimescaleDB 时序数据存储方案",
+        "✅ 设计定时任务调度策略 (30s扫描事件, 1min更新APR, 5min聚合portfolio, 1hr记录历史)",
+        "✅ 设计 Portfolio API 端点: GET /api/portfolio/:address (<500ms响应)",
+        "✅ 创建架构图文档 (.ultra/docs/indexer-architecture-diagram.md)",
+        "✅ 包含 5 个 Mermaid 图表: 系统架构图, 数据流时序图, 历史数据流程图, 类关系图, ER图",
+        "✅ 设计扩展性方案: 水平扩展, 容错设计, 批量查询优化",
+        "✅ 预期性能提升: 响应时间 5-10s → <500ms (10-20x 提升)",
+        "📋 架构评审完成后即可开始 Task 38 (实现 LP 仓位索引)"
       ]
     },
     {
