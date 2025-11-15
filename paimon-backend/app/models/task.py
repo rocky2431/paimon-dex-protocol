@@ -7,14 +7,16 @@ Stores user task progress and completion status.
 import enum
 from datetime import datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import (
     DateTime,
     ForeignKey,
     Integer,
+    JSON,
     Numeric,
     String,
+    UniqueConstraint,
 )
 from sqlalchemy import (
     Enum as SQLEnum,
@@ -45,9 +47,13 @@ class TaskStatus(enum.Enum):
 
 
 class TaskProgress(Base, TimestampMixin):
-    """User task progress tracking."""
+    """User task progress tracking with enhanced configuration and verification support."""
 
     __tablename__ = "task_progress"
+    __table_args__ = (
+        # Ensure user cannot have duplicate task progress records
+        UniqueConstraint("user_id", "task_id", name="uq_user_task"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
@@ -59,13 +65,26 @@ class TaskProgress(Base, TimestampMixin):
     # Task identification
     task_id: Mapped[str] = mapped_column(
         String(255), nullable=False, index=True
-    )  # TaskOn task ID or custom task ID
+    )  # Internal task ID
+    external_task_id: Mapped[str | None] = mapped_column(
+        String(255), index=True
+    )  # External task ID (e.g., TaskOn task ID)
     task_type: Mapped[TaskType] = mapped_column(SQLEnum(TaskType), nullable=False)
 
     # Progress status
     status: Mapped[TaskStatus] = mapped_column(
-        SQLEnum(TaskStatus), default=TaskStatus.PENDING, nullable=False
+        SQLEnum(TaskStatus), default=TaskStatus.PENDING, nullable=False, index=True
     )
+
+    # Task configuration (TaskOn API config, RWA verification rules, referral targets)
+    config: Mapped[dict[str, Any] | None] = mapped_column(
+        JSON
+    )  # Flexible JSON storage for task-specific configuration
+
+    # Verification data (snapshots of verification results for complex tasks)
+    verification_data: Mapped[dict[str, Any] | None] = mapped_column(
+        JSON
+    )  # Store validation results, timestamps, asset values, etc.
 
     # Completion timestamps
     completed_at: Mapped[datetime | None] = mapped_column(DateTime)
