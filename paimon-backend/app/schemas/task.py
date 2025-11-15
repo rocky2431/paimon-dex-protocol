@@ -46,3 +46,29 @@ class TaskProgressResponse(BaseModel):
     address: str = Field(..., description="User wallet address")
     tasks: list[TaskItem] = Field(default_factory=list, description="List of tasks")
     statistics: TaskStatistics = Field(..., description="Task statistics")
+
+
+class ClaimRewardRequest(BaseModel):
+    """Request schema for claiming task rewards."""
+
+    user_address: str = Field(
+        ...,
+        alias="userAddress",
+        description="User wallet address (Ethereum format)",
+        min_length=42,
+        max_length=42,
+    )
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class ClaimRewardResponse(BaseModel):
+    """Response schema for task reward claim."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    task_id: str = Field(..., alias="taskId", description="Task identifier")
+    status: str = Field(..., description="Updated task status (should be 'claimed')")
+    points_awarded: int = Field(..., alias="pointsAwarded", description="Points awarded for this task")
+    transaction_id: str = Field(..., alias="transactionId", description="Points transaction ID")
+    claimed_at: datetime = Field(..., alias="claimedAt", description="Claim timestamp")
