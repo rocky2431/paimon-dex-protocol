@@ -531,3 +531,348 @@ class TestSecurity:
 
         assert verified is False
         assert "error" in data or "invalid" in str(data).lower()
+
+
+class TestMaintainHealthFactorVerifier:
+    """Test MAINTAIN_HEALTH_FACTOR task verifier."""
+
+    @pytest.mark.asyncio
+    async def test_verify_health_factor_success(
+        self,
+        mock_web3_provider,
+        mock_contract_manager,
+        cache_manager
+    ):
+        """FUNCTIONAL: User maintaining health factor above threshold should pass."""
+        from app.services.rwa_task.verifiers.maintain_health_factor import MaintainHealthFactorVerifier
+
+        verifier = MaintainHealthFactorVerifier(
+            mock_web3_provider,
+            mock_contract_manager,
+            cache_manager
+        )
+
+        config = {
+            "type": "MAINTAIN_HEALTH_FACTOR",
+            "minimumHealthFactor": "1.5",
+            "durationDays": 7,
+            "snapshotIntervalHours": 24
+        }
+
+        verified, verification_data = await verifier.verify(
+            address="0x1234567890123456789012345678901234567890",
+            config=config
+        )
+
+        # Should pass since mock returns 1.8 health factor
+        assert verified is True
+        assert verification_data["currentHealthFactor"] == "1.8"
+        assert verification_data["allAboveThreshold"] is True
+
+    @pytest.mark.asyncio
+    async def test_verify_insufficient_health_factor(
+        self,
+        mock_web3_provider,
+        mock_contract_manager,
+        cache_manager
+    ):
+        """BOUNDARY: Health factor below threshold should fail."""
+        from app.services.rwa_task.verifiers.maintain_health_factor import MaintainHealthFactorVerifier
+
+        # Mock returns 1.8, but we require 2.0
+        verifier = MaintainHealthFactorVerifier(
+            mock_web3_provider,
+            mock_contract_manager,
+            cache_manager
+        )
+
+        config = {
+            "type": "MAINTAIN_HEALTH_FACTOR",
+            "minimumHealthFactor": "2.0",  # Higher than mock's 1.8
+            "durationDays": 7,
+            "snapshotIntervalHours": 24
+        }
+
+        verified, verification_data = await verifier.verify(
+            address="0x1234567890123456789012345678901234567890",
+            config=config
+        )
+
+        assert verified is False
+        assert verification_data["allAboveThreshold"] is False
+
+
+class TestMintUSDPAmountVerifier:
+    """Test MINT_USDP_AMOUNT task verifier."""
+
+    @pytest.mark.asyncio
+    async def test_verify_mint_amount_success(
+        self,
+        mock_web3_provider,
+        mock_contract_manager,
+        cache_manager
+    ):
+        """FUNCTIONAL: User minting USDP above target should pass."""
+        from app.services.rwa_task.verifiers.mint_usdp import MintUSDPAmountVerifier
+
+        verifier = MintUSDPAmountVerifier(
+            mock_web3_provider,
+            mock_contract_manager,
+            cache_manager
+        )
+
+        # Mock USDPVault contract
+        vault_contract = Mock()
+        vault_contract.functions = Mock()
+        vault_contract.functions.getUserDebt = Mock(return_value=Mock(
+            call=AsyncMock(return_value=2000 * 10**18)  # 2000 USDP debt
+        ))
+        mock_contract_manager.get_contract = Mock(return_value=vault_contract)
+
+        config = {
+            "type": "MINT_USDP_AMOUNT",
+            "targetAmount": str(1000 * 10**18),  # Target 1000 USDP
+        }
+
+        verified, verification_data = await verifier.verify(
+            address="0x1234567890123456789012345678901234567890",
+            config=config
+        )
+
+        assert verified is True
+        assert int(verification_data["totalMinted"]) >= int(config["targetAmount"])
+
+    @pytest.mark.asyncio
+    async def test_verify_insufficient_mint_amount(
+        self,
+        mock_web3_provider,
+        mock_contract_manager,
+        cache_manager
+    ):
+        """BOUNDARY: User minting below target should fail."""
+        from app.services.rwa_task.verifiers.mint_usdp import MintUSDPAmountVerifier
+
+        verifier = MintUSDPAmountVerifier(
+            mock_web3_provider,
+            mock_contract_manager,
+            cache_manager
+        )
+
+        # Mock USDPVault contract with low debt
+        vault_contract = Mock()
+        vault_contract.functions = Mock()
+        vault_contract.functions.getUserDebt = Mock(return_value=Mock(
+            call=AsyncMock(return_value=500 * 10**18)  # Only 500 USDP debt
+        ))
+        mock_contract_manager.get_contract = Mock(return_value=vault_contract)
+
+        config = {
+            "type": "MINT_USDP_AMOUNT",
+            "targetAmount": str(1000 * 10**18),  # Target 1000 USDP
+        }
+
+        verified, verification_data = await verifier.verify(
+            address="0x1234567890123456789012345678901234567890",
+            config=config
+        )
+
+        assert verified is False
+        assert int(verification_data["totalMinted"]) < int(config["targetAmount"])
+
+
+class TestProvideLiquidityVerifier:
+    """Test PROVIDE_LIQUIDITY task verifier."""
+
+    @pytest.mark.asyncio
+    async def test_verify_liquidity_provision_success(
+        self,
+        mock_web3_provider,
+        mock_contract_manager,
+        cache_manager
+    ):
+        """FUNCTIONAL: User providing sufficient liquidity for required duration should pass."""
+        from app.services.rwa_task.verifiers.provide_liquidity import ProvideLiquidityVerifier
+
+        verifier = ProvideLiquidityVerifier(
+            mock_web3_provider,
+            mock_contract_manager,
+            cache_manager
+        )
+
+        # Mock DEXPair contract
+        pair_abi = []  # Simplified
+        mock_contract_manager.load_abi = Mock(return_value=pair_abi)
+
+        pair_contract = Mock()
+        pair_contract.functions = Mock()
+        pair_contract.functions.balanceOf = Mock(return_value=Mock(
+            call=AsyncMock(return_value=2000 * 10**18)  # 2000 LP tokens
+        ))
+        mock_web3_provider.eth = Mock()
+        mock_web3_provider.eth.contract = Mock(return_value=pair_contract)
+
+        # Mock provision time from 20 days ago
+        first_provision_time = datetime.now(UTC) - timedelta(days=20)
+        mock_web3_provider.get_logs = AsyncMock(return_value=[
+            {
+                "blockNumber": 900000,
+                "transactionHash": "0xabc...",
+                "args": {
+                    "timestamp": int(first_provision_time.timestamp())
+                }
+            }
+        ])
+
+        config = {
+            "type": "PROVIDE_LIQUIDITY",
+            "poolAddress": "0x1234567890123456789012345678901234567890",
+            "minimumLiquidity": str(1000 * 10**18),
+            "minimumDays": 14
+        }
+
+        verified, verification_data = await verifier.verify(
+            address="0x9876543210987654321098765432109876543210",
+            config=config
+        )
+
+        assert verified is True
+        assert verification_data["provisionDuration"] >= 14
+
+    @pytest.mark.asyncio
+    async def test_verify_insufficient_liquidity_duration(
+        self,
+        mock_web3_provider,
+        mock_contract_manager,
+        cache_manager
+    ):
+        """BOUNDARY: Insufficient provision duration should fail."""
+        from app.services.rwa_task.verifiers.provide_liquidity import ProvideLiquidityVerifier
+
+        verifier = ProvideLiquidityVerifier(
+            mock_web3_provider,
+            mock_contract_manager,
+            cache_manager
+        )
+
+        # Mock DEXPair contract
+        pair_abi = []
+        mock_contract_manager.load_abi = Mock(return_value=pair_abi)
+
+        pair_contract = Mock()
+        pair_contract.functions = Mock()
+        pair_contract.functions.balanceOf = Mock(return_value=Mock(
+            call=AsyncMock(return_value=2000 * 10**18)
+        ))
+        mock_web3_provider.eth = Mock()
+        mock_web3_provider.eth.contract = Mock(return_value=pair_contract)
+
+        # Mock provision time from only 5 days ago
+        first_provision_time = datetime.now(UTC) - timedelta(days=5)
+        mock_web3_provider.get_logs = AsyncMock(return_value=[
+            {
+                "blockNumber": 900000,
+                "args": {
+                    "timestamp": int(first_provision_time.timestamp())
+                }
+            }
+        ])
+
+        config = {
+            "type": "PROVIDE_LIQUIDITY",
+            "poolAddress": "0x1234567890123456789012345678901234567890",
+            "minimumLiquidity": str(1000 * 10**18),
+            "minimumDays": 14
+        }
+
+        verified, verification_data = await verifier.verify(
+            address="0x9876543210987654321098765432109876543210",
+            config=config
+        )
+
+        assert verified is False
+        assert verification_data["provisionDuration"] < 14
+
+
+class TestEarnStabilityPoolVerifier:
+    """Test EARN_STABILITY_POOL task verifier."""
+
+    @pytest.mark.asyncio
+    async def test_verify_stability_pool_earnings_success(
+        self,
+        mock_web3_provider,
+        mock_contract_manager,
+        cache_manager
+    ):
+        """FUNCTIONAL: User earning sufficient rewards should pass."""
+        from app.services.rwa_task.verifiers.earn_stability_pool import EarnStabilityPoolVerifier
+
+        verifier = EarnStabilityPoolVerifier(
+            mock_web3_provider,
+            mock_contract_manager,
+            cache_manager
+        )
+
+        # Mock USDPStabilityPool contract
+        pool_contract = Mock()
+        pool_contract.functions = Mock()
+        pool_contract.functions.getClaimableReward = Mock(return_value=Mock(
+            call=AsyncMock(return_value=600 * 10**18)  # 600 PAIMON claimable
+        ))
+        mock_contract_manager.get_contract = Mock(return_value=pool_contract)
+        mock_contract_manager._get_address = Mock(return_value="0x...")
+
+        # Mock empty claim history
+        mock_web3_provider.get_logs = AsyncMock(return_value=[])
+
+        config = {
+            "type": "EARN_STABILITY_POOL",
+            "targetEarnings": str(500 * 10**18),  # Target 500 PAIMON
+        }
+
+        verified, verification_data = await verifier.verify(
+            address="0x1234567890123456789012345678901234567890",
+            config=config
+        )
+
+        assert verified is True
+        assert int(verification_data["totalEarned"]) >= int(config["targetEarnings"])
+
+    @pytest.mark.asyncio
+    async def test_verify_insufficient_earnings(
+        self,
+        mock_web3_provider,
+        mock_contract_manager,
+        cache_manager
+    ):
+        """BOUNDARY: Insufficient earnings should fail."""
+        from app.services.rwa_task.verifiers.earn_stability_pool import EarnStabilityPoolVerifier
+
+        verifier = EarnStabilityPoolVerifier(
+            mock_web3_provider,
+            mock_contract_manager,
+            cache_manager
+        )
+
+        # Mock USDPStabilityPool contract with low rewards
+        pool_contract = Mock()
+        pool_contract.functions = Mock()
+        pool_contract.functions.getClaimableReward = Mock(return_value=Mock(
+            call=AsyncMock(return_value=300 * 10**18)  # Only 300 PAIMON
+        ))
+        mock_contract_manager.get_contract = Mock(return_value=pool_contract)
+        mock_contract_manager._get_address = Mock(return_value="0x...")
+
+        mock_web3_provider.get_logs = AsyncMock(return_value=[])
+
+        config = {
+            "type": "EARN_STABILITY_POOL",
+            "targetEarnings": str(500 * 10**18),  # Target 500 PAIMON
+        }
+
+        verified, verification_data = await verifier.verify(
+            address="0x1234567890123456789012345678901234567890",
+            config=config
+        )
+
+        assert verified is False
+        assert int(verification_data["totalEarned"]) < int(config["targetEarnings"])

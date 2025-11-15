@@ -13,7 +13,13 @@ from app.models.task import TaskProgress, TaskStatus
 from app.services.rwa_task.web3_provider import Web3Provider
 from app.services.rwa_task.contract_manager import ContractManager
 from app.services.rwa_task.cache_manager import CacheManager
-from app.services.rwa_task.verifiers.hold_rwa_asset import HoldRWAAssetVerifier
+from app.services.rwa_task.verifiers import (
+    HoldRWAAssetVerifier,
+    MaintainHealthFactorVerifier,
+    MintUSDPAmountVerifier,
+    ProvideLiquidityVerifier,
+    EarnStabilityPoolVerifier,
+)
 
 
 class VerificationService:
@@ -43,11 +49,10 @@ class VerificationService:
         # Register task verifiers
         self.verifiers = {
             "HOLD_RWA_ASSET": HoldRWAAssetVerifier(w3_provider, contract_mgr, cache_mgr),
-            # Other verifiers will be added in next iteration
-            # "MAINTAIN_HEALTH_FACTOR": MaintainHealthFactorVerifier(...),
-            # "MINT_USDP_AMOUNT": MintUSDPAmountVerifier(...),
-            # "PROVIDE_LIQUIDITY": ProvideLiquidityVerifier(...),
-            # "EARN_STABILITY_POOL": EarnStabilityPoolVerifier(...)
+            "MAINTAIN_HEALTH_FACTOR": MaintainHealthFactorVerifier(w3_provider, contract_mgr, cache_mgr),
+            "MINT_USDP_AMOUNT": MintUSDPAmountVerifier(w3_provider, contract_mgr, cache_mgr),
+            "PROVIDE_LIQUIDITY": ProvideLiquidityVerifier(w3_provider, contract_mgr, cache_mgr),
+            "EARN_STABILITY_POOL": EarnStabilityPoolVerifier(w3_provider, contract_mgr, cache_mgr),
         }
 
     async def verify_task(
