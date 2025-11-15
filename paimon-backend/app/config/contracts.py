@@ -267,6 +267,72 @@ VAULT_ABI = [
     },
 ]
 
+# VotingEscrowPaimon (veNFT) ABI
+VENFT_ABI = [
+    # Lock data
+    {
+        "type": "function",
+        "name": "locked",
+        "inputs": [{"name": "tokenId", "type": "uint256"}],
+        "outputs": [
+            {"name": "amount", "type": "int128"},
+            {"name": "end", "type": "uint256"},
+        ],
+        "stateMutability": "view",
+    },
+    {
+        "type": "function",
+        "name": "balanceOfNFT",
+        "inputs": [{"name": "tokenId", "type": "uint256"}],
+        "outputs": [{"name": "", "type": "uint256"}],
+        "stateMutability": "view",
+    },
+    {
+        "type": "function",
+        "name": "ownerOf",
+        "inputs": [{"name": "tokenId", "type": "uint256"}],
+        "outputs": [{"name": "", "type": "address"}],
+        "stateMutability": "view",
+    },
+    # Events
+    {
+        "type": "event",
+        "name": "Deposit",
+        "inputs": [
+            {"name": "provider", "type": "address", "indexed": True},
+            {"name": "tokenId", "type": "uint256", "indexed": True},
+            {"name": "value", "type": "uint256", "indexed": False},
+            {"name": "locktime", "type": "uint256", "indexed": True},
+            {"name": "deposit_type", "type": "uint8", "indexed": False},
+            {"name": "ts", "type": "uint256", "indexed": False},
+        ],
+    },
+    {
+        "type": "event",
+        "name": "Withdraw",
+        "inputs": [
+            {"name": "provider", "type": "address", "indexed": True},
+            {"name": "tokenId", "type": "uint256", "indexed": True},
+            {"name": "value", "type": "uint256", "indexed": False},
+            {"name": "ts", "type": "uint256", "indexed": False},
+        ],
+    },
+    {
+        "type": "event",
+        "name": "Merge",
+        "inputs": [
+            {"name": "provider", "type": "address", "indexed": True},
+            {"name": "from", "type": "uint256", "indexed": True},
+            {"name": "to", "type": "uint256", "indexed": True},
+            {"name": "amountFrom", "type": "uint256", "indexed": False},
+            {"name": "amountTo", "type": "uint256", "indexed": False},
+            {"name": "amountFinal", "type": "uint256", "indexed": False},
+            {"name": "locktime", "type": "uint256", "indexed": False},
+            {"name": "ts", "type": "uint256", "indexed": False},
+        ],
+    },
+]
+
 
 def get_contract_address(category: str, name: str) -> str:
     """
