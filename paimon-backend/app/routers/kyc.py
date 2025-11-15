@@ -7,12 +7,14 @@ Endpoints:
 """
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.dependencies import get_current_user
+from app.core.cache import cache
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.webhook_security import verify_blockpass_signature
@@ -199,6 +201,14 @@ async def blockpass_webhook(
             detail="Failed to update KYC status",
         )
 
+    # Invalidate cache after successful KYC status update
+    cache_key = f"kyc:status:{payload.refId.lower()}"
+    deleted = await cache.delete(cache_key)
+    if deleted:
+        logger.info(f"Cache invalidated for {payload.refId} after KYC status update")
+    else:
+        logger.debug(f"No cache to invalidate for {payload.refId}")
+
     return KYCWebhookResponse(
         success=True,
         message=f"KYC status updated to {new_status.value}",
@@ -248,20 +258,51 @@ async def kyc_callback(
 async def get_kyc_status(
     address: str,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> KYCStatusResponse:
     """
     Get KYC status for a wallet address.
 
+    Permission: Users can only query their own KYC status.
+    Caching: Results cached for 5 minutes to reduce database load.
+
     Args:
         address: Wallet address (0x...)
         db: Database session
+        current_user: Authenticated user from JWT token
 
     Returns:
         KYCStatusResponse with tier, status, and approval timestamp
 
     Raises:
-        HTTPException: 404 if user or KYC record not found
+        HTTPException: 403 if user tries to query another user's KYC
+        HTTPException: 404 if user not found
+
+    Security:
+        - JWT authentication required
+        - Permission validation (only own address)
+        - Redis caching (5 min TTL)
     """
+    # Permission validation: users can only query their own KYC status
+    if current_user.address.lower() != address.lower():
+        logger.warning(
+            f"Permission denied: {current_user.address} tried to query {address}"
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permission denied: You can only query your own KYC status",
+        )
+
+    # Try to get from cache first (5 min TTL)
+    cache_key = f"kyc:status:{address.lower()}"
+    cached_data = await cache.get_json(cache_key)
+
+    if cached_data is not None:
+        logger.debug(f"Cache hit for KYC status: {address}")
+        return KYCStatusResponse(**cached_data)
+
+    logger.debug(f"Cache miss for KYC status: {address}, querying database")
+
     # Find user
     user_query = select(User).where(User.address == address)
     user_result = await db.execute(user_query)
@@ -278,20 +319,27 @@ async def get_kyc_status(
     kyc_result = await db.execute(kyc_query)
     kyc_record = kyc_result.scalar_one_or_none()
 
+    # Prepare response
     if not kyc_record:
         # Return default values for users without KYC
-        return KYCStatusResponse(
-            tier=0,
-            status="pending",
-            approved_at=None,
-            blockpass_id=None,
-        )
+        response_data = {
+            "tier": 0,
+            "status": "pending",
+            "approved_at": None,
+            "blockpass_id": None,
+        }
+    else:
+        response_data = {
+            "tier": kyc_record.tier.value,
+            "status": kyc_record.status.value,
+            "approved_at": (
+                kyc_record.approved_at.isoformat() if kyc_record.approved_at else None
+            ),
+            "blockpass_id": kyc_record.blockpass_id,
+        }
 
-    return KYCStatusResponse(
-        tier=kyc_record.tier.value,
-        status=kyc_record.status.value,
-        approved_at=(
-            kyc_record.approved_at.isoformat() if kyc_record.approved_at else None
-        ),
-        blockpass_id=kyc_record.blockpass_id,
-    )
+    # Cache the result for 5 minutes
+    await cache.set_json(cache_key, response_data, ttl=timedelta(minutes=5))
+    logger.debug(f"Cached KYC status for {address}")
+
+    return KYCStatusResponse(**response_data)

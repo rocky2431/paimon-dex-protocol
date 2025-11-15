@@ -10,16 +10,21 @@ from typing import Any
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.database import get_db
 from app.core.security import decode_token
+from app.models.user import User
 
 # HTTP Bearer security scheme for JWT tokens
 http_bearer = HTTPBearer()
 
 
-def get_current_user(
+async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(http_bearer),
-) -> dict[str, Any]:
+    db: AsyncSession = Depends(get_db),
+) -> User:
     """
     FastAPI dependency to extract and validate current user from JWT token.
 
@@ -28,17 +33,19 @@ def get_current_user(
 
     Args:
         credentials: HTTP Authorization credentials with Bearer token.
+        db: Database session.
 
     Returns:
-        dict: Decoded token payload containing user data.
+        User: User model instance from database.
 
     Raises:
         HTTPException: 401 Unauthorized if token is invalid or expired.
+        HTTPException: 404 Not Found if user not found in database.
 
     Example:
         >>> @app.get("/protected")
-        >>> async def protected_route(user: dict = Depends(get_current_user)):
-        ...     return {"user_address": user["sub"]}
+        >>> async def protected_route(current_user: User = Depends(get_current_user)):
+        ...     return {"user_address": current_user.address}
     """
     # Extract token from credentials
     token = credentials.credentials
@@ -54,14 +61,26 @@ def get_current_user(
         )
 
     # Verify required claim 'sub' (subject/wallet address)
-    if payload.get("sub") is None:
+    wallet_address = payload.get("sub")
+    if wallet_address is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    return payload
+    # Fetch user from database
+    user_query = select(User).where(User.address == wallet_address)
+    result = await db.execute(user_query)
+    user = result.scalar_one_or_none()
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User not found: {wallet_address}",
+        )
+
+    return user
 
 
 def get_current_user_optional(

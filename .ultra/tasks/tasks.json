@@ -18,12 +18,12 @@
   "stats": {
     "totalTasks": 67,
     "completed": 18,
-    "inProgress": 0,
-    "pending": 49,
+    "inProgress": 1,
+    "pending": 48,
     "paused": 0,
     "progressPercentage": 26.87,
     "estimatedTotalDays": 123,
-    "lastModified": "2025-11-15T23:30:00Z"
+    "lastModified": "2025-11-15T23:45:00Z"
   },
   "phases": [
     {
@@ -662,7 +662,8 @@
         18
       ],
       "estimatedDays": 1,
-      "status": "pending",
+      "status": "in_progress",
+      "startedAt": "2025-11-15T23:45:00Z",
       "tags": [
         "backend",
         "kyc",
