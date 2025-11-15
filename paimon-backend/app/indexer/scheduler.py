@@ -24,6 +24,8 @@ from app.indexer.event_listener import EventListener
 from app.indexer.handlers.dex_handler import DEXEventHandler
 from app.indexer.handlers.vault_handler import VaultEventHandler
 from app.indexer.handlers.venft_handler import VeNFTEventHandler
+from app.indexer.services.apr_recorder import APRRecorder
+from app.core.database import get_db_session
 
 logging.basicConfig(
     level=logging.INFO,
@@ -64,6 +66,9 @@ class IndexerScheduler:
         self.dex_listeners: List[EventListener] = []
         self.vault_listener: EventListener = None
         self.venft_listener: EventListener = None
+
+        # APR recorder
+        self.apr_recorder: APRRecorder = None
 
     async def initialize(self) -> None:
         """Initialize Web3 and create event listeners."""
@@ -194,6 +199,14 @@ class IndexerScheduler:
 
         logger.info("Initialized veNFT listener")
 
+        # Create APR recorder
+        self.apr_recorder = APRRecorder(
+            w3=self.w3,
+            pair_contracts=pair_contracts,
+            gauge_controller=gauge_controller,
+        )
+        logger.info("Initialized APR recorder")
+
     async def _get_all_pairs(
         self,
         factory,
@@ -229,6 +242,18 @@ class IndexerScheduler:
 
         except Exception as e:
             logger.error(f"Error during event scan: {e}", exc_info=True)
+
+    async def record_apr_snapshots(self) -> None:
+        """Record APR snapshots for all pools (scheduled job)."""
+        logger.info("Starting APR snapshot recording...")
+
+        try:
+            async with get_db_session() as session:
+                count = await self.apr_recorder.record_all_pools(session)
+                logger.info(f"APR recording completed: {count} snapshots")
+
+        except Exception as e:
+            logger.error(f"Error during APR recording: {e}", exc_info=True)
 
     async def aggregate_portfolios(self) -> None:
         """Aggregate portfolio summaries (scheduled job)."""
@@ -272,12 +297,21 @@ class IndexerScheduler:
             name="Aggregate portfolio summaries",
         )
 
+        # Add hourly APR recording job
+        self.scheduler.add_job(
+            self.record_apr_snapshots,
+            "interval",
+            hours=1,  # Every hour
+            id="record_apr",
+            name="Record APR snapshots",
+        )
+
         # Start scheduler
         self.scheduler.start()
 
         logger.info(
             f"Scheduler started: event scan every {self.event_scan_interval}s, "
-            f"aggregation every {self.aggregation_interval}s"
+            f"aggregation every {self.aggregation_interval}s, APR recording every 1h"
         )
 
     def stop(self) -> None:
