@@ -53,13 +53,4 @@ export { TasksTab } from './TasksTab';
  * Tab 6: Referral
  * Referral code generation, invited users, rewards
  */
-export function ReferralTab() {
-  return (
-    <TabPlaceholder
-      title="Referral Program"
-      description="Share your referral code, invite friends, and earn rewards for every successful referral. Track your referral statistics."
-      icon={<PeopleIcon />}
-      comingSoonMessage="Referral system will be available in Phase 2 (Task 33)"
-    />
-  );
-}
+export { ReferralTab } from './ReferralTab';
