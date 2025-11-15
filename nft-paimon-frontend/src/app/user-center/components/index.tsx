@@ -3,14 +3,13 @@
  *
  * Phase 1 (Task 29): Placeholder components
  * Phase 2 (Task 30-35): Replace with actual implementations
+ *
+ * Task 30: Migrated Overview, Positions, Rewards from /portfolio
  */
 
 'use client';
 
 import { TabPlaceholder } from './TabPlaceholder';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import PeopleIcon from '@mui/icons-material/People';
@@ -18,47 +17,23 @@ import PeopleIcon from '@mui/icons-material/People';
 /**
  * Tab 1: Overview
  * Total assets, risk warnings, quick actions
+ * (Migrated from /portfolio - Task 30)
  */
-export function OverviewTab() {
-  return (
-    <TabPlaceholder
-      title="Overview"
-      description="View your total assets, risk warnings, and quick actions across all Paimon DEX products."
-      icon={<DashboardIcon />}
-      comingSoonMessage="Overview dashboard will be available in Phase 2 (Task 30)"
-    />
-  );
-}
+export { OverviewTab } from './OverviewTab';
 
 /**
  * Tab 2: Positions
  * All position details (LP, USDP Vault, veNFT, Launchpad, Savings)
+ * (Migrated from /portfolio - Task 30)
  */
-export function PositionsTab() {
-  return (
-    <TabPlaceholder
-      title="Positions"
-      description="Manage all your positions including Liquidity Pools, USDP Vault, veNFT locks, Launchpad investments, and Savings deposits."
-      icon={<AccountBalanceWalletIcon />}
-      comingSoonMessage="Positions management will be available in Phase 2 (Task 30)"
-    />
-  );
-}
+export { PositionsTab } from './PositionsTab';
 
 /**
  * Tab 3: Rewards
  * One-click claim, esPAIMON vesting, Boost staking
+ * (Migrated from /portfolio - Task 30)
  */
-export function RewardsTab() {
-  return (
-    <TabPlaceholder
-      title="Rewards"
-      description="Claim all your rewards in one click, manage esPAIMON vesting, and stake PAIMON for boost multipliers."
-      icon={<CardGiftcardIcon />}
-      comingSoonMessage="Rewards dashboard will be available in Phase 2 (Task 30)"
-    />
-  );
-}
+export { RewardsTab } from './RewardsTab';
 
 /**
  * Tab 4: KYC
