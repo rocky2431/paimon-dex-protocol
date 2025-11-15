@@ -15,7 +15,7 @@ from sqlalchemy import text
 from app.core.config import settings
 from app.core.database import engine
 from app.core.cache import redis_client
-from app.routers import auth, user, kyc
+from app.routers import auth, user, kyc, features
 
 
 @asynccontextmanager
@@ -68,6 +68,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(user.router)
 app.include_router(kyc.router)
+app.include_router(features.router)
 
 
 # Root endpoint
