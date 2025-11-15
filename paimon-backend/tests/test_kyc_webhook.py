@@ -12,6 +12,7 @@ Tests comprehensive coverage:
 
 import hashlib
 import hmac
+import json
 import pytest
 from datetime import datetime, timezone
 from fastapi import status
@@ -38,6 +39,26 @@ def compute_signature(payload: bytes, secret: str) -> str:
         digestmod=hashlib.sha256,
     )
     return f"sha256={hmac_obj.hexdigest()}"
+
+
+def prepare_webhook_request(payload_data: dict) -> tuple[bytes, str]:
+    """
+    Prepare webhook request payload and signature for testing.
+
+    Creates JSON bytes exactly as httpx will send them, then computes
+    the correct HMAC-SHA256 signature.
+
+    Args:
+        payload_data: Webhook payload dict
+
+    Returns:
+        Tuple of (payload_bytes, signature_header)
+    """
+    # Create JSON bytes exactly as httpx sends (default format with spaces)
+    # httpx uses json.dumps() with default separators: (', ', ': ')
+    payload_bytes = json.dumps(payload_data).encode('utf-8')
+    signature = compute_signature(payload_bytes, TEST_WEBHOOK_SECRET)
+    return payload_bytes, signature
 
 
 @pytest.fixture
@@ -140,8 +161,7 @@ class TestWebhookEndpoint:
         }
 
         # Compute signature
-        payload_bytes = str(payload_data).replace("'", '"').encode("utf-8")
-        signature = compute_signature(payload_bytes, TEST_WEBHOOK_SECRET)
+        payload_bytes, signature = prepare_webhook_request(payload_data)
 
         # Mock settings
         settings.BLOCKPASS_SECRET = TEST_WEBHOOK_SECRET
@@ -186,8 +206,7 @@ class TestWebhookEndpoint:
             "env": "prod",
         }
 
-        payload_bytes = str(payload_data).replace("'", '"').encode("utf-8")
-        signature = compute_signature(payload_bytes, TEST_WEBHOOK_SECRET)
+        payload_bytes, signature = prepare_webhook_request(payload_data)
         settings.BLOCKPASS_SECRET = TEST_WEBHOOK_SECRET
 
         response = await async_client.post(
@@ -222,8 +241,7 @@ class TestWebhookEndpoint:
             "env": "prod",
         }
 
-        payload_bytes = str(payload_data).replace("'", '"').encode("utf-8")
-        signature = compute_signature(payload_bytes, TEST_WEBHOOK_SECRET)
+        payload_bytes, signature = prepare_webhook_request(payload_data)
         settings.BLOCKPASS_SECRET = TEST_WEBHOOK_SECRET
 
         response = await async_client.post(
@@ -306,8 +324,7 @@ class TestWebhookEndpoint:
             "env": "prod",
         }
 
-        payload_bytes = str(payload_data).replace("'", '"').encode("utf-8")
-        signature = compute_signature(payload_bytes, TEST_WEBHOOK_SECRET)
+        payload_bytes, signature = prepare_webhook_request(payload_data)
         settings.BLOCKPASS_SECRET = TEST_WEBHOOK_SECRET
 
         response = await async_client.post(
@@ -325,6 +342,8 @@ class TestKYCStatusEndpoint:
 
     async def test_get_kyc_status_approved(self, async_client, test_db, test_user):
         """Should return KYC status for approved user."""
+        from app.core.security import create_access_token
+
         # Create KYC record
         kyc_record = KYC(
             user_id=test_user.id,
@@ -336,8 +355,12 @@ class TestKYCStatusEndpoint:
         test_db.add(kyc_record)
         await test_db.commit()
 
-        # Query status
-        response = await async_client.get(f"/api/kyc/status/{TEST_WALLET_ADDRESS}")
+        # Query status with JWT authentication
+        token = create_access_token({"sub": TEST_WALLET_ADDRESS})
+        response = await async_client.get(
+            f"/api/kyc/status/{TEST_WALLET_ADDRESS}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -348,9 +371,16 @@ class TestKYCStatusEndpoint:
 
     async def test_get_kyc_status_pending(self, async_client, test_db, test_user):
         """Should return default status for user without KYC."""
+        from app.core.security import create_access_token
+
         # No KYC record created
 
-        response = await async_client.get(f"/api/kyc/status/{TEST_WALLET_ADDRESS}")
+        # Query status with JWT authentication
+        token = create_access_token({"sub": TEST_WALLET_ADDRESS})
+        response = await async_client.get(
+            f"/api/kyc/status/{TEST_WALLET_ADDRESS}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -359,9 +389,20 @@ class TestKYCStatusEndpoint:
         assert data["blockpass_id"] is None
 
     async def test_get_kyc_status_user_not_found(self, async_client, test_db):
-        """Should return 404 for non-existent user."""
-        response = await async_client.get("/api/kyc/status/0xnonexistent")
+        """Should return 404 when authenticated user doesn't exist in database."""
+        from app.core.security import create_access_token
 
+        # Create JWT token for a user that doesn't exist in database
+        nonexistent_address = "0xnonexistent1234567890abcdef1234567890abcd"
+        token = create_access_token({"sub": nonexistent_address})
+
+        # Try to query with non-existent authenticated user
+        response = await async_client.get(
+            f"/api/kyc/status/{nonexistent_address}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+
+        # Should return 404 because authenticated user not found in database
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     async def test_get_kyc_status_permission_denied(self, async_client, test_db, test_user):
@@ -507,8 +548,7 @@ class TestKYCStatusEndpoint:
             "env": "prod",
         }
 
-        payload_bytes = str(payload_data).replace("'", '"').encode("utf-8")
-        signature = compute_signature(payload_bytes, TEST_WEBHOOK_SECRET)
+        payload_bytes, signature = prepare_webhook_request(payload_data)
         settings.BLOCKPASS_SECRET = TEST_WEBHOOK_SECRET
 
         webhook_response = await async_client.post(

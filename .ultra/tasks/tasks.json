@@ -662,14 +662,16 @@
         18
       ],
       "estimatedDays": 1,
-      "status": "in_progress",
+      "status": "completed",
       "startedAt": "2025-11-15T23:45:00Z",
       "tags": [
         "backend",
         "kyc",
         "api",
         "query"
-      ]
+      ],
+      "completedAt": "2025-11-16T00:30:00Z",
+      "implementationNotes": "Enhanced KYC status query API with: 1) JWT authentication (get_current_user dependency), 2) Permission validation (users can only query their own address), 3) Redis caching with 5-minute TTL, 4) Cache invalidation in webhook handler, 5) Fixed router prefix from /kyc to /api/kyc, 6) Fixed all webhook signature tests with prepare_webhook_request helper, 7) All 18 tests passing"
     },
     {
       "id": 20,

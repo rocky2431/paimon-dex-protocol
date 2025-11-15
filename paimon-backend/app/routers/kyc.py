@@ -28,7 +28,7 @@ from app.schemas.kyc import (
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/kyc", tags=["kyc"])
+router = APIRouter(prefix="/api/kyc", tags=["kyc"])
 
 
 # Event to KYC status mapping

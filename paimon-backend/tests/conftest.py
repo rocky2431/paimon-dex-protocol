@@ -42,7 +42,7 @@ async def test_engine():
 
 @pytest_asyncio.fixture
 async def test_db(test_engine):
-    """Create test database session."""
+    """Create test database session factory."""
     async_session_factory = async_sessionmaker(
         test_engine,
         class_=AsyncSession,
@@ -51,18 +51,16 @@ async def test_db(test_engine):
 
     async with async_session_factory() as session:
         yield session
+        # Rollback any uncommitted changes
+        await session.rollback()
 
 
 @pytest_asyncio.fixture
 async def async_client(test_db):
-    """Create async test client."""
-    # Override get_db dependency to use the same test_db session
+    """Create async test client with shared database session."""
+    # Override get_db dependency to return a generator that yields the test_db
     async def override_get_db():
-        try:
-            yield test_db
-        except Exception:
-            await test_db.rollback()
-            raise
+        yield test_db
 
     app.dependency_overrides[get_db] = override_get_db
 
@@ -76,12 +74,17 @@ async def async_client(test_db):
 
 @pytest_asyncio.fixture
 async def test_user(test_db):
-    """Create a test user."""
+    """Create a test user and ensure it's committed."""
     user = User(
         address="0x1234567890abcdef1234567890abcdef12345678",
         referral_code="TEST1234",
     )
     test_db.add(user)
-    await test_db.commit()
-    await test_db.refresh(user)
+    await test_db.flush()  # Flush to get ID without committing
+    await test_db.commit()  # Commit the transaction
+    await test_db.refresh(user)  # Refresh to ensure object is up-to-date
+
+    # Ensure the session is in a clean state for subsequent operations
+    await test_db.expire_all()
+
     return user
