@@ -15,7 +15,7 @@ from sqlalchemy import text
 from app.core.config import settings
 from app.core.database import engine
 from app.core.cache import redis_client
-from app.routers import auth, user, kyc, features, taskon, tasks, points, referral
+from app.routers import auth, user, kyc, features, taskon, tasks, points, referral, portfolio
 
 
 @asynccontextmanager
@@ -73,6 +73,7 @@ app.include_router(taskon.router)
 app.include_router(tasks.router)
 app.include_router(points.router)
 app.include_router(referral.router)
+app.include_router(portfolio.router)
 
 
 # Root endpoint
