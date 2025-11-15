@@ -18,12 +18,12 @@
   "stats": {
     "totalTasks": 67,
     "completed": 22,
-    "inProgress": 0,
-    "pending": 45,
+    "inProgress": 1,
+    "pending": 44,
     "paused": 0,
     "progressPercentage": 32.84,
     "estimatedTotalDays": 123,
-    "lastModified": "2025-11-16T04:00:00Z"
+    "lastModified": "2025-11-16T04:15:00Z"
   },
   "phases": [
     {
@@ -783,7 +783,8 @@
         22
       ],
       "estimatedDays": 3,
-      "status": "pending",
+      "status": "in_progress",
+      "startedAt": "2025-11-16T04:15:00Z",
       "tags": [
         "backend",
         "taskon",
