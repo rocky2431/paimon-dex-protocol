@@ -5,7 +5,7 @@ import { WagmiProvider } from 'wagmi';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Box, CircularProgress } from '@mui/material';
-import { config } from '@/config/wagmi';
+import { config } from '@/config/appkit'; // Changed from wagmi.ts to appkit.ts
 import { theme } from '@/config/theme';
 import { useConfigValidation } from '@/hooks/useConfigValidation';
 import { ConfigErrorPage } from '@/components/common';

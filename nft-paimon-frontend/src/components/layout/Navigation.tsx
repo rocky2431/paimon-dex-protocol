@@ -1,13 +1,21 @@
 'use client';
 
-import { Container, Typography, Box, Stack, Button } from '@mui/material';
-// import { ConnectButton } from '@rainbow-me/rainbowkit'; // REMOVED: Will be replaced with Reown AppKit (Task 13)
+import { Container, Typography, Box, Stack } from '@mui/material';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { getNavigationColumns, getActiveColumn, type NavColumn } from '@/config/navigation';
 import { MobileNavigation } from './MobileNavigation';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
+
+// TypeScript declaration for Reown AppKit web component
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'w3m-button': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+    }
+  }
+}
 
 // Fitts' Law compliance: Minimum touch target size (gap-4.1.1)
 const MIN_HOT_ZONE_SIZE = 44;
@@ -139,11 +147,9 @@ export function Navigation() {
             {/* Spacer - pushes wallet button to far right */}
             <Box sx={{ flexGrow: 1 }} />
 
-            {/* Connect Wallet Button - Temporarily disabled, will be replaced with Reown AppKit (Task 13) */}
+            {/* Connect Wallet Button - Reown AppKit */}
             <Box sx={{ flexShrink: 0 }}>
-              <Button variant="contained" color="primary" disabled sx={{ fontSize: '0.875rem' }}>
-                Connect Wallet
-              </Button>
+              <w3m-button />
             </Box>
           </Stack>
         </Container>
@@ -192,11 +198,9 @@ export function Navigation() {
             {/* Spacer - pushes wallet button to far right */}
             <Box sx={{ flexGrow: 1 }} />
 
-            {/* Connect Wallet Button - Temporarily disabled, will be replaced with Reown AppKit (Task 13) */}
+            {/* Connect Wallet Button - Reown AppKit */}
             <Box sx={{ flexShrink: 0 }}>
-              <Button variant="contained" color="primary" disabled sx={{ fontSize: '0.875rem' }}>
-                Connect Wallet
-              </Button>
+              <w3m-button />
             </Box>
           </Stack>
         </Container>
