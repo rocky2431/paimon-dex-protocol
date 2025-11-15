@@ -7,6 +7,7 @@ Initializes FastAPI app with middleware, routers, and configuration.
 from contextlib import asynccontextmanager
 from datetime import datetime, UTC
 
+import socketio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -16,6 +17,7 @@ from app.core.config import settings
 from app.core.database import engine
 from app.core.cache import redis_client
 from app.routers import auth, user, kyc, features, taskon, tasks, points, referral, portfolio, historical
+from app.websocket.events import sio
 
 
 @asynccontextmanager
@@ -173,11 +175,16 @@ async def generic_exception_handler(request, exc):
         )
 
 
+# Wrap FastAPI app with Socket.IO
+# This creates a single ASGI app that handles both HTTP (FastAPI) and WebSocket (Socket.IO)
+socket_app = socketio.ASGIApp(sio, app)
+
+
 if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(
-        "app.main:app",
+        "app.main:socket_app",
         host="0.0.0.0",
         port=8000,
         reload=settings.DEBUG,
