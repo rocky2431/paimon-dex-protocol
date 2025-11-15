@@ -17,13 +17,13 @@
   },
   "stats": {
     "totalTasks": 67,
-    "completed": 16,
+    "completed": 17,
     "inProgress": 0,
-    "pending": 51,
+    "pending": 50,
     "paused": 0,
-    "progressPercentage": 23.88,
+    "progressPercentage": 25.37,
     "estimatedTotalDays": 123,
-    "lastModified": "2025-11-15T18:30:00Z"
+    "lastModified": "2025-11-15T20:30:00Z"
   },
   "phases": [
     {
@@ -604,7 +604,10 @@
         15
       ],
       "estimatedDays": 1.5,
-      "status": "pending",
+      "status": "completed",
+      "startedAt": "2025-11-15T19:00:00Z",
+      "completedAt": "2025-11-15T20:30:00Z",
+      "implementationNotes": "成功集成 Blockpass KYC SDK 到前端。创建了 BlockpassWidget 组件（303 行）和完整的 TypeScript 类型定义（197 行）。实现了 CDN 脚本加载、钱包地址作为 refId、完整事件处理（Success/Close/Cancel/Load）、后端 API 集成（/api/kyc/callback）、以及全面的错误处理。编写了 24 个单元测试覆盖所有场景（功能、边界、异常、事件、安全、UI 状态），所有测试通过，TypeScript 编译无错误。",
       "tags": [
         "frontend",
         "kyc",
