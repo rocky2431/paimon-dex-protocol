@@ -38,17 +38,9 @@ export { RewardsTab } from './RewardsTab';
 /**
  * Tab 4: KYC
  * Blockpass integration, verification status
+ * (Migrated from /kyc - Task 31)
  */
-export function KYCTab() {
-  return (
-    <TabPlaceholder
-      title="KYC Verification"
-      description="Complete your identity verification through Blockpass to access advanced features and higher transaction limits."
-      icon={<VerifiedUserIcon />}
-      comingSoonMessage="KYC module will be available in Phase 2 (Task 31)"
-    />
-  );
-}
+export { KYCTab } from './KYCTab';
 
 /**
  * Tab 5: Tasks
