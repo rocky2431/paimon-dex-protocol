@@ -9,6 +9,8 @@ import { config } from '@/config/appkit'; // Changed from wagmi.ts to appkit.ts
 import { theme } from '@/config/theme';
 import { useConfigValidation } from '@/hooks/useConfigValidation';
 import { ConfigErrorPage } from '@/components/common';
+import { SocketProvider } from '@/contexts/SocketContext';
+import { NotificationToast } from '@/components/NotificationToast';
 
 const queryClient = new QueryClient();
 
@@ -60,7 +62,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <ConfigValidator>{children}</ConfigValidator>
+          <SocketProvider>
+            <ConfigValidator>
+              {children}
+              <NotificationToast />
+            </ConfigValidator>
+          </SocketProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </WagmiProvider>
