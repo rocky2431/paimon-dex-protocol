@@ -16,7 +16,7 @@ from sqlalchemy import text
 from app.core.config import settings
 from app.core.database import engine
 from app.core.cache import redis_client
-from app.routers import auth, user, kyc, features, taskon, tasks, points, referral, portfolio, historical, leaderboard, redemption
+from app.routers import auth, user, kyc, features, taskon, tasks, points, referral, portfolio, historical, leaderboard, redemption, analytics
 from app.websocket.events import sio
 
 
@@ -79,6 +79,7 @@ app.include_router(portfolio.router)
 app.include_router(historical.router)
 app.include_router(leaderboard.router)
 app.include_router(redemption.router)
+app.include_router(analytics.router)
 
 
 # Root endpoint
