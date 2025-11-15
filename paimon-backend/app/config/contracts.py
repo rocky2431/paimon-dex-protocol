@@ -196,6 +196,77 @@ DEX_FACTORY_ABI = [
     },
 ]
 
+# USDPVault ABI
+VAULT_ABI = [
+    # Collateral management
+    {
+        "type": "function",
+        "name": "getCollateralBalance",
+        "inputs": [
+            {"name": "user", "type": "address"},
+            {"name": "collateral", "type": "address"},
+        ],
+        "outputs": [{"name": "", "type": "uint256"}],
+        "stateMutability": "view",
+    },
+    {
+        "type": "function",
+        "name": "getDebt",
+        "inputs": [{"name": "user", "type": "address"}],
+        "outputs": [{"name": "", "type": "uint256"}],
+        "stateMutability": "view",
+    },
+    {
+        "type": "function",
+        "name": "collateralLTVRatio",
+        "inputs": [{"name": "collateral", "type": "address"}],
+        "outputs": [{"name": "", "type": "uint256"}],
+        "stateMutability": "view",
+    },
+    {
+        "type": "function",
+        "name": "liquidationThreshold",
+        "inputs": [{"name": "collateral", "type": "address"}],
+        "outputs": [{"name": "", "type": "uint256"}],
+        "stateMutability": "view",
+    },
+    # Events
+    {
+        "type": "event",
+        "name": "Deposit",
+        "inputs": [
+            {"name": "user", "type": "address", "indexed": True},
+            {"name": "collateral", "type": "address", "indexed": True},
+            {"name": "amount", "type": "uint256", "indexed": False},
+        ],
+    },
+    {
+        "type": "event",
+        "name": "Withdraw",
+        "inputs": [
+            {"name": "user", "type": "address", "indexed": True},
+            {"name": "collateral", "type": "address", "indexed": True},
+            {"name": "amount", "type": "uint256", "indexed": False},
+        ],
+    },
+    {
+        "type": "event",
+        "name": "Borrow",
+        "inputs": [
+            {"name": "user", "type": "address", "indexed": True},
+            {"name": "amount", "type": "uint256", "indexed": False},
+        ],
+    },
+    {
+        "type": "event",
+        "name": "Repay",
+        "inputs": [
+            {"name": "user", "type": "address", "indexed": True},
+            {"name": "amount", "type": "uint256", "indexed": False},
+        ],
+    },
+]
+
 
 def get_contract_address(category: str, name: str) -> str:
     """
