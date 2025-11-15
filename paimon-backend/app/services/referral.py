@@ -131,3 +131,71 @@ class ReferralService:
             "total_referrals": int(total_count),
             "total_rewards_earned": str(total_rewards),
         }
+
+    async def create_referral_relationship(
+        self, referee_id: int, referral_code: str
+    ) -> Referral:
+        """
+        Create a referral relationship between referee and referrer.
+
+        Args:
+            referee_id: ID of the user being referred
+            referral_code: Referral code of the referrer
+
+        Returns:
+            Created Referral object
+
+        Raises:
+            ValueError: If validation fails (self-referral, circular, invalid code, already referred)
+        """
+        # Get referee
+        referee_result = await self.db.execute(
+            select(User).where(User.id == referee_id)
+        )
+        referee = referee_result.scalar_one_or_none()
+        if not referee:
+            raise ValueError(f"Referee user {referee_id} not found")
+
+        # Check if user already has a referrer
+        if referee.referred_by is not None:
+            raise ValueError(
+                f"User {referee_id} has already been referred by user {referee.referred_by}"
+            )
+
+        # Get referrer by code
+        referrer_result = await self.db.execute(
+            select(User).where(User.referral_code == referral_code)
+        )
+        referrer = referrer_result.scalar_one_or_none()
+        if not referrer:
+            raise ValueError(f"Invalid referral code: {referral_code}")
+
+        # Prevent self-referral
+        if referee.id == referrer.id:
+            raise ValueError("Cannot refer yourself")
+
+        # Prevent circular referrals (check if referrer was referred by referee)
+        if referrer.referred_by == referee.id:
+            raise ValueError(
+                f"Circular referral detected: User {referrer.id} was referred by user {referee.id}"
+            )
+
+        # Create referral record
+        referral = Referral(
+            referrer_id=referrer.id,
+            referee_id=referee.id,
+            reward_earned=0,  # Initial reward is 0
+        )
+
+        # Update referee's referred_by field
+        referee.referred_by = referrer.id
+
+        # Save to database
+        self.db.add(referral)
+        await self.db.commit()
+        await self.db.refresh(referral)
+
+        logger.info(
+            f"Created referral relationship: user {referee.id} referred by user {referrer.id}"
+        )
+        return referral

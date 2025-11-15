@@ -15,6 +15,8 @@ from app.schemas.referral import (
     GenerateCodeRequest,
     GenerateCodeResponse,
     ReferralStatsResponse,
+    CreateReferralRequest,
+    CreateReferralResponse,
 )
 from app.services.referral import ReferralService
 
@@ -100,4 +102,55 @@ async def get_referral_stats(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve referral statistics",
+        )
+
+
+@router.post("/create", response_model=CreateReferralResponse, status_code=status.HTTP_201_CREATED)
+async def create_referral_relationship(
+    request: CreateReferralRequest,
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """
+    Create a referral relationship.
+
+    Binds a referee to a referrer using the referral code.
+    This is typically called during user registration.
+
+    Args:
+        request: CreateReferralRequest with referee_id and referral_code
+        db: Database session
+
+    Returns:
+        CreateReferralResponse: Created referral relationship details
+
+    Raises:
+        HTTPException: If validation fails (400) or users not found (404)
+    """
+    try:
+        service = ReferralService(db)
+        referral = await service.create_referral_relationship(
+            referee_id=request.referee_id,
+            referral_code=request.referral_code,
+        )
+
+        return CreateReferralResponse(
+            referral_id=referral.id,
+            referrer_id=referral.referrer_id,
+            referee_id=referral.referee_id,
+            message=f"Successfully created referral relationship: user {referral.referee_id} referred by user {referral.referrer_id}",
+        )
+    except ValueError as e:
+        error_msg = str(e)
+        # Determine appropriate status code based on error message
+        if "not found" in error_msg:
+            status_code = status.HTTP_404_NOT_FOUND
+        else:
+            status_code = status.HTTP_400_BAD_REQUEST
+
+        raise HTTPException(status_code=status_code, detail=error_msg)
+    except Exception as e:
+        logger.error(f"Failed to create referral relationship: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create referral relationship",
         )
