@@ -15,6 +15,7 @@ from app.models.indexer import (
     VaultPosition,
     VeNFTPosition,
 )
+from app.models.historical import HistoricalAPR, HistoricalRewards
 
 __all__ = [
     "Base",
@@ -38,4 +39,7 @@ __all__ = [
     "VeNFTPosition",
     "PortfolioSummary",
     "IndexerState",
+    # Historical models
+    "HistoricalAPR",
+    "HistoricalRewards",
 ]
