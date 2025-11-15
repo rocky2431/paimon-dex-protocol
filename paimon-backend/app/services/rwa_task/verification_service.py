@@ -20,6 +20,7 @@ from app.services.rwa_task.verifiers import (
     ProvideLiquidityVerifier,
     EarnStabilityPoolVerifier,
 )
+from app.websocket.events import send_notification
 
 
 class VerificationService:
@@ -158,6 +159,27 @@ class VerificationService:
                 task_progress.completed_at = datetime.now(UTC)
 
                 await self.db.commit()
+
+                # Send task completion notification (non-blocking)
+                try:
+                    reward_amount = int(task_progress.reward_amount) if task_progress.reward_amount else 100
+                    notification = {
+                        "type": "task_completed",
+                        "title": "Task Completed",
+                        "message": f"Congratulations! You completed task: {task_id}",
+                        "data": {
+                            "task_id": task_id,
+                            "task_name": task_id,  # Use task_id as name (can be enhanced with task metadata)
+                            "reward_amount": reward_amount,
+                            "completed_at": task_progress.completed_at.isoformat(),
+                            "verification_data": verification_data,
+                        },
+                        "timestamp": datetime.now(UTC).isoformat(),
+                    }
+                    await send_notification(address, notification)
+                except Exception:
+                    # Silently fail - don't block verification on notification errors
+                    pass
 
         except Exception:
             # Silently fail - don't block verification on DB errors
