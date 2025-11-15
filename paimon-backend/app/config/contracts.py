@@ -333,6 +333,26 @@ VENFT_ABI = [
     },
 ]
 
+# Treasury ABI
+TREASURY_ABI = [
+    # Health factor
+    {
+        "type": "function",
+        "name": "getHealthFactor",
+        "inputs": [{"name": "user", "type": "address"}],
+        "outputs": [{"name": "", "type": "uint256"}],
+        "stateMutability": "view",
+    },
+    # Position management
+    {
+        "type": "function",
+        "name": "getUserDebt",
+        "inputs": [{"name": "user", "type": "address"}],
+        "outputs": [{"name": "", "type": "uint256"}],
+        "stateMutability": "view",
+    },
+]
+
 
 def get_contract_address(category: str, name: str) -> str:
     """
