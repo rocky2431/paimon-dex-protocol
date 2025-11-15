@@ -915,7 +915,10 @@
         68
       ],
       "estimatedDays": 1.5,
-      "status": "pending",
+      "status": "completed",
+      "startedAt": "2025-11-15T17:40:00Z",
+      "completedAt": "2025-11-15T18:10:00Z",
+      "implementationNotes": "Implemented task reward claiming API:\n\nEndpoint: POST /api/tasks/{task_id}/claim\n\nRequest Schema:\n- ClaimRewardRequest with user_address (Ethereum format, 42 chars)\n\nResponse Schema:\n- ClaimRewardResponse: task_id, status, points_awarded, transaction_id, claimed_at\n\nValidation:\n- User exists and owns the task\n- Task is in COMPLETED status\n- Task not already CLAIMED\n\nProcess:\n1. Validate user address format\n2. Get user by wallet address\n3. Get task progress record\n4. Check task status (must be COMPLETED)\n5. Award points using PointsService.award_points()\n   - source: 'task_completion'\n   - reference_id: task_id (for idempotency)\n   - metadata: task_type, completed_at\n6. Update task status to CLAIMED with claimed_at timestamp\n7. Invalidate task progress cache\n\nError Handling:\n- 404: User or task not found\n- 400: Task not completed or already claimed\n- 500: Points service failure\n\nIdempotency:\n- PointsService handles duplicate transactions\n- Transaction ID: 'task_completion:{task_id}'\n\nCommit: e397b47",
       "tags": [
         "backend",
         "task",
