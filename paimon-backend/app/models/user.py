@@ -13,6 +13,7 @@ from app.models.base import Base, TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.kyc import KYC
+    from app.models.points import PointsBalance
     from app.models.portfolio_cache import PortfolioCache
     from app.models.referral import Referral
     from app.models.task import TaskProgress
@@ -57,6 +58,9 @@ class User(Base, TimestampMixin):
     )
     portfolio_caches: Mapped[list["PortfolioCache"]] = relationship(
         "PortfolioCache", back_populates="user"
+    )
+    points_balance: Mapped["PointsBalance"] = relationship(
+        "PointsBalance", back_populates="user", uselist=False
     )
 
     def __repr__(self) -> str:
