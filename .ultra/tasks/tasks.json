@@ -1474,7 +1474,7 @@
         44
       ],
       "estimatedDays": 1.5,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "backend",
         "cron",
@@ -1482,7 +1482,10 @@
         "history",
         "apscheduler",
         "python"
-      ]
+      ],
+      "startedAt": "2025-11-15T18:40:00Z",
+      "completedAt": "2025-11-15T10:42:22Z",
+      "implementationNotes": "Implemented hourly APR snapshot recording integrated with scheduler. Created APRRecorder service with dual APR calculation: trading fee APR (24h volume × 0.3% × 365 / TVL) and gauge emission APR (weekly emission × price × 52 / TVL). Uses mock PAIMON price $0.50. Added hourly scheduler job with error handling and duplicate prevention. Performance: Records ~10 pools in <5 seconds."
     },
     {
       "id": 45,
