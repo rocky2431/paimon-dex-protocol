@@ -12,19 +12,17 @@ Tests comprehensive coverage:
 
 import hashlib
 import hmac
+import json
 import pytest
 from datetime import datetime, timezone
 from fastapi import status
-from http
-
-client import AsyncClient
+from httpx import AsyncClient
 from sqlalchemy import select
 
 from app.core.config import settings
 from app.core.webhook_security import verify_blockpass_signature, generate_webhook_secret
 from app.models.kyc import KYC, KYCStatus, KYCTier
 from app.models.user import User
-from tests.conftest import async_client, test_db
 
 
 # Test constants
@@ -41,6 +39,26 @@ def compute_signature(payload: bytes, secret: str) -> str:
         digestmod=hashlib.sha256,
     )
     return f"sha256={hmac_obj.hexdigest()}"
+
+
+def prepare_webhook_request(payload_data: dict) -> tuple[bytes, str]:
+    """
+    Prepare webhook request payload and signature for testing.
+
+    Creates JSON bytes exactly as httpx will send them, then computes
+    the correct HMAC-SHA256 signature.
+
+    Args:
+        payload_data: Webhook payload dict
+
+    Returns:
+        Tuple of (payload_bytes, signature_header)
+    """
+    # Create JSON bytes exactly as httpx sends (default format with spaces)
+    # httpx uses json.dumps() with default separators: (', ', ': ')
+    payload_bytes = json.dumps(payload_data).encode('utf-8')
+    signature = compute_signature(payload_bytes, TEST_WEBHOOK_SECRET)
+    return payload_bytes, signature
 
 
 @pytest.fixture
@@ -143,8 +161,7 @@ class TestWebhookEndpoint:
         }
 
         # Compute signature
-        payload_bytes = str(payload_data).replace("'", '"').encode("utf-8")
-        signature = compute_signature(payload_bytes, TEST_WEBHOOK_SECRET)
+        payload_bytes, signature = prepare_webhook_request(payload_data)
 
         # Mock settings
         settings.BLOCKPASS_SECRET = TEST_WEBHOOK_SECRET
@@ -189,8 +206,7 @@ class TestWebhookEndpoint:
             "env": "prod",
         }
 
-        payload_bytes = str(payload_data).replace("'", '"').encode("utf-8")
-        signature = compute_signature(payload_bytes, TEST_WEBHOOK_SECRET)
+        payload_bytes, signature = prepare_webhook_request(payload_data)
         settings.BLOCKPASS_SECRET = TEST_WEBHOOK_SECRET
 
         response = await async_client.post(
@@ -225,8 +241,7 @@ class TestWebhookEndpoint:
             "env": "prod",
         }
 
-        payload_bytes = str(payload_data).replace("'", '"').encode("utf-8")
-        signature = compute_signature(payload_bytes, TEST_WEBHOOK_SECRET)
+        payload_bytes, signature = prepare_webhook_request(payload_data)
         settings.BLOCKPASS_SECRET = TEST_WEBHOOK_SECRET
 
         response = await async_client.post(
@@ -309,8 +324,7 @@ class TestWebhookEndpoint:
             "env": "prod",
         }
 
-        payload_bytes = str(payload_data).replace("'", '"').encode("utf-8")
-        signature = compute_signature(payload_bytes, TEST_WEBHOOK_SECRET)
+        payload_bytes, signature = prepare_webhook_request(payload_data)
         settings.BLOCKPASS_SECRET = TEST_WEBHOOK_SECRET
 
         response = await async_client.post(
@@ -328,6 +342,8 @@ class TestKYCStatusEndpoint:
 
     async def test_get_kyc_status_approved(self, async_client, test_db, test_user):
         """Should return KYC status for approved user."""
+        from app.core.security import create_access_token
+
         # Create KYC record
         kyc_record = KYC(
             user_id=test_user.id,
@@ -339,8 +355,12 @@ class TestKYCStatusEndpoint:
         test_db.add(kyc_record)
         await test_db.commit()
 
-        # Query status
-        response = await async_client.get(f"/api/kyc/status/{TEST_WALLET_ADDRESS}")
+        # Query status with JWT authentication
+        token = create_access_token({"sub": TEST_WALLET_ADDRESS})
+        response = await async_client.get(
+            f"/api/kyc/status/{TEST_WALLET_ADDRESS}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -351,9 +371,16 @@ class TestKYCStatusEndpoint:
 
     async def test_get_kyc_status_pending(self, async_client, test_db, test_user):
         """Should return default status for user without KYC."""
+        from app.core.security import create_access_token
+
         # No KYC record created
 
-        response = await async_client.get(f"/api/kyc/status/{TEST_WALLET_ADDRESS}")
+        # Query status with JWT authentication
+        token = create_access_token({"sub": TEST_WALLET_ADDRESS})
+        response = await async_client.get(
+            f"/api/kyc/status/{TEST_WALLET_ADDRESS}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -362,7 +389,184 @@ class TestKYCStatusEndpoint:
         assert data["blockpass_id"] is None
 
     async def test_get_kyc_status_user_not_found(self, async_client, test_db):
-        """Should return 404 for non-existent user."""
-        response = await async_client.get("/api/kyc/status/0xnonexistent")
+        """Should return 404 when authenticated user doesn't exist in database."""
+        from app.core.security import create_access_token
 
+        # Create JWT token for a user that doesn't exist in database
+        nonexistent_address = "0xnonexistent1234567890abcdef1234567890abcd"
+        token = create_access_token({"sub": nonexistent_address})
+
+        # Try to query with non-existent authenticated user
+        response = await async_client.get(
+            f"/api/kyc/status/{nonexistent_address}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+
+        # Should return 404 because authenticated user not found in database
         assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    async def test_get_kyc_status_permission_denied(self, async_client, test_db, test_user):
+        """Should deny access when querying other user's KYC status."""
+        from app.core.security import create_access_token
+
+        # Create another user
+        another_user = User(
+            address="0xanotheruser1234567890abcdef1234567890abcd",
+            referral_code="ANOTHER1",
+        )
+        test_db.add(another_user)
+        await test_db.commit()
+        await test_db.refresh(another_user)
+
+        # Create KYC record for another user
+        kyc_record = KYC(
+            user_id=another_user.id,
+            status=KYCStatus.APPROVED,
+            tier=KYCTier.TIER_1,
+            blockpass_id="bp_another",
+            approved_at=datetime.now(timezone.utc),
+        )
+        test_db.add(kyc_record)
+        await test_db.commit()
+
+        # test_user tries to query another_user's KYC status
+        token = create_access_token({"sub": test_user.address})
+        response = await async_client.get(
+            f"/api/kyc/status/{another_user.address}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+
+        # Should return 403 Forbidden
+        print(f"Response status: {response.status_code}")
+        print(f"Response body: {response.json()}")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert "permission" in response.json()["detail"].lower()
+
+    async def test_get_kyc_status_own_success(self, async_client, test_db, test_user):
+        """Should allow user to query their own KYC status."""
+        from app.core.security import create_access_token
+
+        # Create KYC record for test_user
+        kyc_record = KYC(
+            user_id=test_user.id,
+            status=KYCStatus.APPROVED,
+            tier=KYCTier.TIER_1,
+            blockpass_id=TEST_BLOCKPASS_ID,
+            approved_at=datetime.now(timezone.utc),
+        )
+        test_db.add(kyc_record)
+        await test_db.commit()
+
+        # test_user queries their own KYC status
+        token = create_access_token({"sub": test_user.address})
+        response = await async_client.get(
+            f"/api/kyc/status/{test_user.address}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+
+        # Should return 200 OK
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["tier"] == 1
+        assert data["status"] == "approved"
+
+    async def test_get_kyc_status_cache_hit(self, async_client, test_db, test_user):
+        """Should return cached result on second request."""
+        from app.core.security import create_access_token
+        from app.core.cache import cache
+
+        # Create KYC record
+        kyc_record = KYC(
+            user_id=test_user.id,
+            status=KYCStatus.APPROVED,
+            tier=KYCTier.TIER_1,
+            blockpass_id=TEST_BLOCKPASS_ID,
+            approved_at=datetime.now(timezone.utc),
+        )
+        test_db.add(kyc_record)
+        await test_db.commit()
+
+        token = create_access_token({"sub": test_user.address})
+
+        # First request - cache miss, should query DB
+        response1 = await async_client.get(
+            f"/api/kyc/status/{test_user.address}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        assert response1.status_code == status.HTTP_200_OK
+
+        # Verify cache was set
+        cache_key = f"kyc:status:{test_user.address}"
+        cached = await cache.get_json(cache_key)
+        assert cached is not None
+        assert cached["tier"] == 1
+
+        # Second request - cache hit, should not query DB
+        response2 = await async_client.get(
+            f"/api/kyc/status/{test_user.address}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        assert response2.status_code == status.HTTP_200_OK
+        assert response2.json() == response1.json()
+
+    async def test_get_kyc_status_cache_invalidation(self, async_client, test_db, test_user):
+        """Should invalidate cache when KYC status updates via webhook."""
+        from app.core.security import create_access_token
+        from app.core.cache import cache
+
+        # Create initial KYC record
+        kyc_record = KYC(
+            user_id=test_user.id,
+            status=KYCStatus.PENDING,
+            tier=KYCTier.TIER_0,
+            blockpass_id=TEST_BLOCKPASS_ID,
+        )
+        test_db.add(kyc_record)
+        await test_db.commit()
+
+        token = create_access_token({"sub": test_user.address})
+
+        # First query - cache KYC status
+        response1 = await async_client.get(
+            f"/api/kyc/status/{test_user.address}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        assert response1.json()["status"] == "pending"
+
+        # Webhook updates KYC status to approved
+        payload_data = {
+            "guid": "cache-invalidation-test",
+            "status": "approved",
+            "event": "review.approved",
+            "refId": TEST_WALLET_ADDRESS,
+            "blockPassID": TEST_BLOCKPASS_ID,
+            "clientId": "test-client",
+            "recordId": "rec_cache",
+            "submitCount": 1,
+            "isArchived": False,
+            "isPing": False,
+            "env": "prod",
+        }
+
+        payload_bytes, signature = prepare_webhook_request(payload_data)
+        settings.BLOCKPASS_SECRET = TEST_WEBHOOK_SECRET
+
+        webhook_response = await async_client.post(
+            "/api/kyc/webhook",
+            json=payload_data,
+            headers={"X-Hub-Signature": signature},
+        )
+        assert webhook_response.status_code == status.HTTP_200_OK
+
+        # Cache should be cleared
+        cache_key = f"kyc:status:{test_user.address}"
+        cached = await cache.get_json(cache_key)
+        assert cached is None
+
+        # Next query should return updated status from DB
+        response2 = await async_client.get(
+            f"/api/kyc/status/{test_user.address}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        assert response2.json()["status"] == "approved"
+        assert response2.json()["tier"] == 1
