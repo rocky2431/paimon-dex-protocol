@@ -1940,13 +1940,15 @@
         43
       ],
       "estimatedDays": 2.5,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "backend",
         "analytics",
         "user-profile",
         "ml"
-      ]
+      ],
+      "completedAt": "2025-11-15T11:16:49Z",
+      "implementationNotes": "User profile analysis API with risk score, activity level, preferred pools."
     },
     {
       "id": 61,
@@ -1966,13 +1968,15 @@
         61
       ],
       "estimatedDays": 2,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "frontend",
         "admin",
         "analytics",
         "dashboard"
-      ]
+      ],
+      "completedAt": "2025-11-15T11:16:49Z",
+      "implementationNotes": "Admin dashboard API with key metrics (users, TVL, volume, APR)."
     },
     {
       "id": 62,
@@ -1992,13 +1996,15 @@
         61
       ],
       "estimatedDays": 3,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "backend",
         "recommendation",
         "algorithm",
         "ml"
-      ]
+      ],
+      "completedAt": "2025-11-15T11:16:49Z",
+      "implementationNotes": "Pool recommendation API with personalized match scores."
     },
     {
       "id": 63,
@@ -2018,13 +2024,15 @@
         61
       ],
       "estimatedDays": 2.5,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "backend",
         "recommendation",
         "strategy",
         "finance"
-      ]
+      ],
+      "completedAt": "2025-11-15T11:16:49Z",
+      "implementationNotes": "Strategy recommendation API with step-by-step guides."
     },
     {
       "id": 64,
@@ -2046,13 +2054,15 @@
         30
       ],
       "estimatedDays": 1,
-      "status": "pending",
+      "status": "completed",
       "tags": [
         "frontend",
         "recommendation",
         "ui",
         "user-center"
-      ]
+      ],
+      "completedAt": "2025-11-15T11:16:49Z",
+      "implementationNotes": "Frontend React hooks for pool and strategy recommendations."
     },
     {
       "id": 65,
