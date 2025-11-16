@@ -1156,6 +1156,166 @@
       "completedAt": "2025-11-12T11:00:00.000Z",
       "actualDays": 0.5,
       "implementation_notes": "✅ Executed comprehensive acceptance testing\n✅ Quality Validation:\n  - TypeScript type-check: 0 errors ✅\n  - Production build: Success ✅\n  - Unit tests: 1228/1300 passed (94.46%) ✅\n  - No functional regression from mock cleanup\n✅ Functional Validation:\n  - Liquidity page: LP pools + Nitro pools using real blockchain data\n  - Stability Pool: Correct empty state handling\n  - Governance: Bribes + Rewards using real addresses\n  - Portfolio: Position aggregation working correctly\n✅ Scan Verification:\n  - MOCK Data: 0 actual (5 false positives are comments)\n  - Placeholder Addresses: 21 (90.5% acceptable per audit)\n  - Hardcoded Numbers: 0 ✅\n  - TODO Markers: 86 (tracked in technical-debt.md)\n✅ Created comprehensive delivery report: .ultra/docs/mock-cleanup-delivery-report.md\n✅ Delivery Report Contents:\n  - Before/After comparison\n  - All 10 tasks completion summary\n  - Test results and validation\n  - Technical debt roadmap (Phase 2/3.1/3.2/3.3)\n  - Deployment checklist\n  - Risk assessment: 🟢 LOW\n✅ Final Assessment:\n  - All HIGH priority issues resolved\n  - MEDIUM priority issues significantly reduced (26→21, -19%)\n  - Project health excellent (100% tasks completed)\n  - Production ready ✅\n✅ Next Steps: Deploy to Vercel, start Phase 2 development (Launchpad + Presale)"
+    },
+    {
+      "id": "perf-1.1",
+      "title": "Webpack 外部化 React Native 依赖",
+      "description": "修复 @metamask/sdk 重复尝试加载 @react-native-async-storage/async-storage 导致的 3-5 秒编译延迟。\n\n实施步骤：\n1. 修改 next.config.mjs 的 webpack 配置\n2. 添加 '@react-native-async-storage/async-storage' 到 config.externals\n3. 添加 'react-native' 到 config.externals\n4. 配置 resolve.alias 将这些模块指向 false\n5. 测试启动时间\n\n验收标准：\n- 启动日志中不再出现 'Module not found: @react-native-async-storage'\n- 首次编译时间减少 3-5 秒\n- WalletConnect 功能正常",
+      "complexity": 2,
+      "priority": "P0",
+      "dependencies": [],
+      "estimated_days": 0.1,
+      "status": "completed",
+      "type": "performance",
+      "trace_to": "ultra-think analysis dimension 1.1",
+      "started_at": "2025-11-16T18:14:16",
+      "completed_at": "2025-11-16T18:16:21",
+      "implementation_notes": "✅ 配置修改完成\n- 添加 React Native 依赖到 webpack externals\n- 配置 resolve.alias 防止模块解析\n- 预期效果: 首次编译时间减少 3-5 秒\n- 提交: 9660993\n- 分支已合并并删除"
+    },
+    {
+      "id": "perf-1.2",
+      "title": "禁用 Reown AppKit 远程配置和分析",
+      "description": "禁用 Reown AppKit 的远程配置和分析功能，消除因 403 错误导致的 1-2 秒初始化延迟。\n\n实施步骤：\n1. 修改 src/config/appkit.ts\n2. 添加 enableAnalytics: false 配置\n3. 添加 enableRemoteConfig: false 配置（如果支持）\n4. 测试 WalletConnect 连接功能\n5. 验证日志中不再出现 403 错误\n\n验收标准：\n- 启动日志中不再出现 '[Reown Config] Failed to fetch'\n- 启动日志中不再出现 'Failed to fetch usage'\n- AppKit 初始化时间减少 1-2 秒\n- 钱包连接功能完全正常",
+      "complexity": 2,
+      "priority": "P0",
+      "dependencies": [],
+      "estimated_days": 0.1,
+      "status": "pending",
+      "type": "performance",
+      "trace_to": "ultra-think analysis dimension 8.1"
+    },
+    {
+      "id": "perf-1.3",
+      "title": "懒加载 Reown AppKit（Web3Provider）",
+      "description": "将 231MB 的 WalletConnect 依赖从同步加载改为懒加载，减少 10-15 秒首次编译时间。\n\n实施步骤：\n1. 创建 src/components/providers/Web3Provider.tsx\n2. 将 WagmiProvider 和 QueryClientProvider 迁移到新组件\n3. 修改 src/app/providers.tsx 使用 React.lazy() 加载\n4. 添加 Suspense 和 loading fallback\n5. 测试钱包连接流程\n6. 测试所有页面是否正常加载\n\n验收标准：\n- 首次编译时间减少 10-15 秒\n- 不需要钱包的页面（如 /coming-soon）加载更快\n- 钱包连接功能完全正常\n- 所有使用钱包的页面（如 /swap, /liquidity）正常工作",
+      "complexity": 5,
+      "priority": "P0",
+      "dependencies": [
+        "perf-1.1",
+        "perf-1.2"
+      ],
+      "estimated_days": 0.25,
+      "status": "pending",
+      "type": "performance",
+      "trace_to": "ultra-think analysis dimension 3.1"
+    },
+    {
+      "id": "perf-1.4",
+      "title": "（可选）启用 Turbopack 实验性构建",
+      "description": "尝试启用 Next.js 14 的 Turbopack 构建工具，预期减少 50-70% 编译时间。\n\n实施步骤：\n1. 修改 package.json 的 dev 脚本\n2. 添加 --turbo 参数\n3. 测试所有功能是否正常\n4. 如果出现兼容性问题，立即回滚\n\n验收标准：\n- 首次编译时间减少 50-70%（23秒 → 7-10秒）\n- 所有页面正常加载\n- WalletConnect 功能正常\n- Material-UI 组件正常渲染\n- 如果有任何功能异常，回滚此更改\n\n⚠️ 风险：高（实验性功能，可能有兼容性问题）\n⚠️ 建议：先完成 perf-1.1, 1.2, 1.3 后再尝试此优化",
+      "complexity": 1,
+      "priority": "P1",
+      "dependencies": [
+        "perf-1.3"
+      ],
+      "estimated_days": 0.05,
+      "status": "pending",
+      "type": "performance",
+      "trace_to": "ultra-think analysis dimension 2.1"
+    },
+    {
+      "id": "perf-2.1",
+      "title": "启用 Webpack 文件系统持久化缓存",
+      "description": "配置 Webpack 使用文件系统缓存，使第二次启动减少 70-80% 编译时间。\n\n实施步骤：\n1. 修改 next.config.mjs 的 webpack 配置\n2. 添加 config.cache 配置（type: 'filesystem'）\n3. 设置 cacheDirectory 为 .next/cache/webpack\n4. 添加 buildDependencies 配置\n5. 测试第二次启动速度\n\n验收标准：\n- .next/cache/webpack 目录被创建\n- 第二次启动时间从 23秒 减少到 5-7秒\n- 修改代码后热更新仍然正常",
+      "complexity": 2,
+      "priority": "P1",
+      "dependencies": [
+        "perf-1.3"
+      ],
+      "estimated_days": 0.1,
+      "status": "pending",
+      "type": "performance",
+      "trace_to": "ultra-think analysis dimension 2.3"
+    },
+    {
+      "id": "perf-2.2",
+      "title": "启用 Next.js 实验性优化选项",
+      "description": "启用 optimizePackageImports, webpackBuildWorker, swcMinify 等实验性优化。\n\n实施步骤：\n1. 修改 next.config.mjs\n2. 添加 experimental.optimizePackageImports 配置\n   - 包括 @mui/material, @mui/icons-material, recharts, lightweight-charts\n3. 启用 experimental.webpackBuildWorker (并行构建)\n4. 启用 experimental.swcMinify\n5. 测试编译速度和功能\n\n验收标准：\n- 编译时间减少 15-25%\n- 所有依赖包正常加载\n- Material-UI 组件渲染正常\n- Charts 组件工作正常",
+      "complexity": 3,
+      "priority": "P1",
+      "dependencies": [
+        "perf-2.1"
+      ],
+      "estimated_days": 0.1,
+      "status": "pending",
+      "type": "performance",
+      "trace_to": "ultra-think analysis dimension 4.1"
+    },
+    {
+      "id": "perf-2.3",
+      "title": "配置文件系统监听忽略规则",
+      "description": "配置 Webpack watchOptions 忽略不必要的文件，减少文件监听开销。\n\n实施步骤：\n1. 修改 next.config.mjs 的 webpack 配置\n2. 添加 config.watchOptions.ignored 配置\n3. 忽略 node_modules, .git, .next, test files, e2e 目录\n4. 测试热更新速度\n\n验收标准：\n- 热更新响应时间保持在 30-50ms\n- 修改代码后立即刷新\n- 测试文件修改不会触发重新编译",
+      "complexity": 2,
+      "priority": "P2",
+      "dependencies": [],
+      "estimated_days": 0.05,
+      "status": "pending",
+      "type": "performance",
+      "trace_to": "ultra-think analysis dimension 5.1"
+    },
+    {
+      "id": "perf-2.4",
+      "title": "TypeScript 开发模式宽松类型检查",
+      "description": "创建 tsconfig.dev.json，在开发模式禁用严格类型检查，减少 30-40% 类型检查时间。\n\n实施步骤：\n1. 创建 tsconfig.dev.json 继承自 tsconfig.json\n2. 禁用 noUnusedLocals, noUnusedParameters, noUncheckedIndexedAccess\n3. 排除测试文件和 e2e 目录\n4. 保留严格检查在 npm run type-check\n5. 测试开发模式启动速度\n\n验收标准：\n- TypeScript 类型检查时间减少 30-40%\n- npm run type-check 仍然执行严格检查\n- 开发体验不受影响",
+      "complexity": 2,
+      "priority": "P2",
+      "dependencies": [],
+      "estimated_days": 0.1,
+      "status": "pending",
+      "type": "performance",
+      "trace_to": "ultra-think analysis dimension 6.1"
+    },
+    {
+      "id": "perf-2.5",
+      "title": "优化环境变量预加载缓存",
+      "description": "在 next.config.mjs 中预加载关键环境变量，减少重复加载开销。\n\n实施步骤：\n1. 修改 next.config.mjs\n2. 添加 env 配置，预加载关键变量\n   - NEXT_PUBLIC_API_URL\n   - NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID\n   - NEXT_PUBLIC_BLOCKPASS_CLIENT_ID\n3. 测试环境变量是否正确加载\n\n验收标准：\n- 启动日志中不再显示 'Reload env: .env.local'\n- 环境变量加载时间减少 100-500ms\n- 所有环境变量值正确",
+      "complexity": 1,
+      "priority": "P3",
+      "dependencies": [],
+      "estimated_days": 0.05,
+      "status": "pending",
+      "type": "performance",
+      "trace_to": "ultra-think analysis dimension 7.1"
+    },
+    {
+      "id": "perf-2.6",
+      "title": "调整 Fast Refresh 和内存配置",
+      "description": "优化 Next.js Fast Refresh 和页面内存管理配置。\n\n实施步骤：\n1. 修改 next.config.mjs\n2. 在开发模式设置 reactStrictMode: false\n3. 配置 onDemandEntries.maxInactiveAge = 25000\n4. 配置 onDemandEntries.pagesBufferLength = 2\n5. 测试热更新和内存占用\n\n验收标准：\n- 内存占用减少 10-20%\n- 热更新速度保持在 30-50ms\n- 开发体验良好",
+      "complexity": 1,
+      "priority": "P3",
+      "dependencies": [],
+      "estimated_days": 0.05,
+      "status": "pending",
+      "type": "performance",
+      "trace_to": "ultra-think analysis dimension 4.2"
+    },
+    {
+      "id": "perf-3.1",
+      "title": "Material-UI 按需导入重构",
+      "description": "将 Material-UI 导入从命名导入改为默认导入，减少 40-60% MUI bundle 大小。\n\n实施步骤：\n1. 创建自动化脚本扫描所有 import 语句\n2. 替换 import { Button } from '@mui/material' 为 import Button from '@mui/material/Button'\n3. 批量处理所有文件（约 356 个 TS/TSX 文件）\n4. 测试所有页面是否正常\n5. 测试 Material-UI 主题是否正常\n\n验收标准：\n- 所有 MUI 导入使用默认导入\n- 生产 bundle 大小减少 40-60MB\n- 所有 UI 组件正常渲染\n- 主题系统正常工作\n\n⚠️ 注意：此任务工作量大，建议使用脚本自动化",
+      "complexity": 6,
+      "priority": "P2",
+      "dependencies": [
+        "perf-2.2"
+      ],
+      "estimated_days": 0.5,
+      "status": "pending",
+      "type": "performance",
+      "trace_to": "ultra-think analysis dimension 1.2"
+    },
+    {
+      "id": "perf-3.2",
+      "title": "路由级别代码分割优化",
+      "description": "为 26 个页面路由实现动态导入和代码分割，减少每个页面 30-50% bundle 大小。\n\n实施步骤：\n1. 识别每个页面的重型组件（Charts, Tables, Complex Forms）\n2. 使用 next/dynamic 实现懒加载\n3. 添加 loading 组件\n4. 配置 ssr: false（对于客户端组件）\n5. 测试每个页面的加载性能\n\n验收标准：\n- 每个页面的初始 bundle 减少 30-50%\n- 页面加载时显示 loading 状态\n- 所有页面功能正常\n- 用户体验良好（无明显延迟感）\n\n⚠️ 注意：此任务需要逐页实施，建议按优先级处理（首页 > Swap > Liquidity > 其他）",
+      "complexity": 8,
+      "priority": "P2",
+      "dependencies": [
+        "perf-3.1"
+      ],
+      "estimated_days": 0.5,
+      "status": "pending",
+      "type": "performance",
+      "trace_to": "ultra-think analysis dimension 3.2"
     }
   ]
 }
