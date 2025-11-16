@@ -12,7 +12,24 @@ const nextConfig = {
   },
   webpack: (config) => {
     config.resolve.fallback = { fs: false, net: false, tls: false };
+
+    // Externalize dependencies
     config.externals.push('pino-pretty', 'lokijs', 'encoding');
+
+    // Externalize React Native dependencies to prevent module resolution errors
+    // @metamask/sdk references these but they're not needed in web environment
+    config.externals.push(
+      '@react-native-async-storage/async-storage',
+      'react-native'
+    );
+
+    // Configure resolve aliases to explicitly mark these modules as unavailable
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@react-native-async-storage/async-storage': false,
+      'react-native': false,
+    };
+
     return config;
   },
 };
