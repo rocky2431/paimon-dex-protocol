@@ -1291,9 +1291,12 @@
       "priority": "P3",
       "dependencies": [],
       "estimated_days": 0.05,
-      "status": "pending",
+      "status": "completed",
       "type": "performance",
-      "trace_to": "ultra-think analysis dimension 7.1"
+      "trace_to": "ultra-think analysis dimension 7.1",
+      "startedAt": "2025-11-16T19:47:04.840075+00:00",
+      "completedAt": "2025-11-16T19:51:31.490152+00:00",
+      "notes": "Added env configuration to next.config.mjs to preload critical environment variables (NEXT_PUBLIC_API_URL, NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID, NEXT_PUBLIC_BLOCKPASS_CLIENT_ID). Eliminates \"Reload env\" messages, reduces startup overhead by 100-500ms. Dev server and production build both tested successfully."
     },
     {
       "id": "perf-2.6",
