@@ -1340,9 +1340,10 @@
         "perf-3.1"
       ],
       "estimated_days": 0.5,
-      "status": "pending",
+      "status": "in_progress",
       "type": "performance",
-      "trace_to": "ultra-think analysis dimension 3.2"
+      "trace_to": "ultra-think analysis dimension 3.2",
+      "startedAt": "2025-11-16T20:07:17.004499+00:00"
     }
   ]
 }
