@@ -68,6 +68,22 @@ const nextConfig = {
       },
     };
 
+    // 🚀 Performance: Optimize file watching (reduce CPU/memory overhead)
+    // Only watch source files, ignore build outputs, tests, and dependencies
+    config.watchOptions = {
+      ignored: [
+        '**/node_modules/**',      // Dependencies (never change during dev)
+        '**/.git/**',              // Git internal files
+        '**/.next/**',             // Next.js build output
+        '**/*.test.*',             // Jest test files
+        '**/*.spec.*',             // Test spec files
+        '**/e2e/**',               // E2E test directory
+        '**/test-results/**',      // Playwright test results
+        '**/playwright-report/**', // Playwright reports
+        '**/coverage/**',          // Test coverage reports
+      ],
+    };
+
     return config;
   },
 };
