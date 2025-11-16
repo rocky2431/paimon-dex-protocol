@@ -15,11 +15,37 @@ import { bsc, bscTestnet, type AppKitNetwork } from '@reown/appkit/networks';
 import { http, fallback } from 'viem';
 
 // Get projectId from environment
-export const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '';
+const envProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '';
 
-if (!projectId) {
-  console.warn('⚠️ NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is not defined');
+// Detect placeholder/invalid Project IDs
+const isPlaceholder =
+  !envProjectId ||
+  envProjectId === 'demo_project_id_placeholder' ||
+  envProjectId === 'your_project_id_here' ||
+  envProjectId.length < 32; // Valid WalletConnect Project IDs are 32 characters
+
+if (isPlaceholder) {
+  console.warn(
+    '⚠️ Invalid WalletConnect Project ID detected.\n\n' +
+    'Current value: "' + (envProjectId || '(empty)') + '"\n\n' +
+    'Impact:\n' +
+    '  ❌ Remote configuration will fail (HTTP 403 errors in console)\n' +
+    '  ❌ Analytics and usage tracking disabled\n' +
+    '  ✅ Local wallet connection still works (MetaMask, Binance Wallet, etc.)\n' +
+    '  ✅ WalletConnect QR code may have limited functionality\n\n' +
+    'To fix:\n' +
+    '  1. Visit https://cloud.reown.com (free account)\n' +
+    '  2. Create a new project\n' +
+    '  3. Copy your Project ID (32 characters)\n' +
+    '  4. Update .env.local:\n' +
+    '     NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_real_project_id\n' +
+    '  5. Restart dev server: npm run dev\n'
+  );
 }
+
+// Use empty string for placeholder to minimize errors
+// AppKit will fall back to local/default configuration
+export const projectId = isPlaceholder ? '' : envProjectId;
 
 // Set up metadata
 const metadata = {
