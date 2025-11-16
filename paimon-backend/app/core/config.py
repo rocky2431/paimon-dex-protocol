@@ -87,8 +87,23 @@ class Settings(BaseSettings):
     # Third-party Services
     BLOCKPASS_CLIENT_ID: str | None = None
     BLOCKPASS_SECRET: str | None = None
-    TASKON_API_KEY: str | None = None
     REOWN_PROJECT_ID: str | None = None
+
+    # Social Media API Configuration
+    # Twitter API v2
+    TWITTER_API_KEY: str | None = None
+    TWITTER_API_SECRET: str | None = None
+    TWITTER_CLIENT_ID: str | None = None
+    TWITTER_CLIENT_SECRET: str | None = None
+    TWITTER_BEARER_TOKEN: str | None = None
+
+    # Discord Bot
+    DISCORD_BOT_TOKEN: str | None = None
+    DISCORD_SERVER_ID: str | None = None
+
+    # Telegram Bot
+    TELEGRAM_BOT_TOKEN: str | None = None
+    TELEGRAM_CHANNEL_ID: str | None = None
 
     # Environment
     ENVIRONMENT: str = Field(default="development", description="Environment name")
