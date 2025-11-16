@@ -36,6 +36,14 @@ class User(Base, TimestampMixin):
     social_provider: Mapped[str | None] = mapped_column(String(50))  # google, x, email
     social_id: Mapped[str | None] = mapped_column(String(255))
 
+    # Social media accounts (for task verification)
+    twitter_id: Mapped[str | None] = mapped_column(String(100), index=True)
+    twitter_username: Mapped[str | None] = mapped_column(String(100))
+    discord_id: Mapped[str | None] = mapped_column(String(100), index=True)
+    discord_username: Mapped[str | None] = mapped_column(String(100))
+    telegram_id: Mapped[int | None] = mapped_column(Integer)
+    telegram_username: Mapped[str | None] = mapped_column(String(100))
+
     # Referral system
     referral_code: Mapped[str] = mapped_column(
         String(8), unique=True, index=True, nullable=False
