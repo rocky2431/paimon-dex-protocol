@@ -64,6 +64,7 @@ export const modal = createAppKit({
     email: true, // Enable email login
     socials: ['google', 'x'], // Enable Google and X (Twitter) social login
     emailShowWallets: true, // Show wallet options even when using email
+    analytics: false, // Disable analytics to prevent 403 errors and reduce initialization time
   },
   // Highlight Binance Wallet and BSC ecosystem wallets at the top
   // Note: Binance Wallet browser extension is auto-detected as injected wallet
