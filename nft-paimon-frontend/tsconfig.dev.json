@@ -1,0 +1,37 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // 🚀 Performance: Relaxed type checking for faster development
+    // These options are disabled in dev mode but enforced in CI/CD via npm run type-check
+
+    // Allow unused local variables during development
+    // (useful when prototyping or refactoring)
+    "noUnusedLocals": false,
+
+    // Allow unused function parameters during development
+    // (common in event handlers and callback functions)
+    "noUnusedParameters": false,
+
+    // Allow unchecked indexed access during development
+    // (reduces type errors when accessing object properties)
+    "noUncheckedIndexedAccess": false
+  },
+  "exclude": [
+    // Exclude test files (they have different type requirements)
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+
+    // Exclude E2E test directory
+    "e2e/**",
+
+    // Exclude test output directories
+    "test-results/**",
+    "playwright-report/**",
+    "coverage/**",
+
+    // Standard exclusions (inherited from tsconfig.json)
+    "node_modules"
+  ]
+}
