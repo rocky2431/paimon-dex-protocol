@@ -15,7 +15,7 @@ This guide will help you quickly get started with Paimon DEX platform, from wall
 1. [Quick Start](#quick-start)
 2. [Wallet Connection](#wallet-connection)
 3. [KYC Verification](#kyc-verification)
-4. [TaskOn Task System](#taskon-task-system)
+4. [Task System](#task-system)
 5. [Points System](#points-system)
 6. [Referral Program](#referral-program)
 7. [Portfolio Management](#portfolio-management)
@@ -226,7 +226,7 @@ Paimon DEX strictly protects your personal information:
 
 ---
 
-## TaskOn Task System
+## Task System
 
 ### Task Types
 
@@ -245,12 +245,37 @@ Paimon DEX offers multiple task types, complete tasks to earn points:
 | Subscribe YouTube | 40 | 1 minute |
 
 **How to Complete**:
-1. User Center → Task Center
-2. Find social task card
-3. Click **Complete**
-4. Complete action in new window (follow/retweet)
-5. Return to task page and click **Verify Completion**
-6. Points automatically issued
+1. User Center → Task Center → Social Tasks
+2. Click **Connect Social Account**
+3. Authorize Paimon DEX to access your social media
+4. Complete required action (follow/join)
+5. Click **Verify Completion** → System auto-verifies
+6. Points automatically issued upon verification
+
+⚠️ **Important Notes**:
+- First-time authorization required for social accounts (one-time only)
+- Wait 1-2 minutes after completing action before verifying
+- Each social account can only be linked to one wallet address
+
+### Social Account Authorization Flow
+
+#### 1. Twitter Authorization
+1. Click **Connect Twitter**
+2. Redirected to Twitter authorization page
+3. Click **Authorize App**
+4. Automatically return to Paimon DEX, binding complete
+
+#### 2. Discord Authorization
+1. Click **Connect Discord**
+2. Login to Discord account
+3. Allow permissions (view server membership)
+4. Binding complete
+
+#### 3. Telegram Authorization
+1. Click **Connect Telegram**
+2. Login with Telegram
+3. Allow access to basic information
+4. Binding complete
 
 #### 2. RWA Tasks
 
@@ -557,17 +582,25 @@ A: No. Points are account-bound and cannot be transferred or traded.
 **Q9: Task completed but no points?**
 
 A: Possible reasons:
+- Social account not authorized (for social tasks)
 - On-chain transaction not confirmed (wait 1-3 minutes)
 - Haven't clicked "Claim Reward" button
 - Task conditions not fully met (check detailed requirements)
 
-**Solution**: Refresh page, check task status. If still unresolved, contact support with transaction hash.
+**Solution**:
+- For social tasks: First authorize your social account in User Center
+- Refresh page, check task status
+- If still unresolved, contact support with transaction hash
+
+**Q10: How to unlink social accounts?**
+
+A: For security reasons, once linked, social accounts cannot be unlinked directly. If you need to change accounts, please contact customer support with verification proof.
 
 ---
 
 ### 4. Security Related
 
-**Q10: My wallet was stolen, what to do?**
+**Q11: My wallet was stolen, what to do?**
 
 A:
 1. **Immediately transfer assets**: Move remaining assets to new wallet
@@ -581,7 +614,7 @@ A:
 - Use hardware wallet for large amounts
 - Regularly check approval list
 
-**Q11: How to prevent phishing websites?**
+**Q12: How to prevent phishing websites?**
 
 A:
 - ✅ Bookmark official website https://app.paimon.dex

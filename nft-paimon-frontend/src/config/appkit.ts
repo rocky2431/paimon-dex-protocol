@@ -12,6 +12,7 @@
 import { createAppKit } from '@reown/appkit/react';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
 import { bsc, bscTestnet, type AppKitNetwork } from '@reown/appkit/networks';
+import { http, fallback } from 'viem';
 
 // Get projectId from environment
 export const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '';
@@ -31,11 +32,26 @@ const metadata = {
 // Define networks (use type assertion to match AppKitNetwork array type)
 const networksList: [AppKitNetwork, ...AppKitNetwork[]] = [bscTestnet, bsc]; // Testnet first for development
 
+// Configure RPC transports with fallback (solves 401 WalletConnect errors)
+const transports = {
+  [bscTestnet.id]: fallback([
+    http('https://data-seed-prebsc-1-s1.binance.org:8545'),
+    http('https://data-seed-prebsc-2-s1.binance.org:8545'),
+    http('https://bsc-testnet.publicnode.com'),
+  ]),
+  [bsc.id]: fallback([
+    http('https://bsc-dataseed.binance.org'),
+    http('https://bsc-dataseed1.defibit.io'),
+    http('https://bsc-dataseed1.ninicoin.io'),
+  ]),
+};
+
 // Create Wagmi Adapter
 export const wagmiAdapter = new WagmiAdapter({
   ssr: true,
   networks: networksList,
-  projectId,
+  projectId, // Still used for WalletConnect modal, not for RPC
+  transports, // Custom RPC transports (bypasses WalletConnect RPC)
 });
 
 // Create modal with social login support and Binance Wallet prioritization

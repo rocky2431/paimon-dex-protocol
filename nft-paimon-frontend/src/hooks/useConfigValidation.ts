@@ -53,9 +53,9 @@ const ADDRESSES = {
     PSM: '0x0000000000000000000000000000000000000000' as `0x${string}`, // TODO: Update after mainnet deployment
   },
   97: {
-    // BSC Testnet (2025-11-07 deployment)
-    USDC: '0xA1112f596A73111E102b4a9c39064b2b2383EC38' as `0x${string}`, // Mock USDC (6 decimals)
-    PSM: '0x46eB7627024cEd13826359a5c0aEc57c7255b330' as `0x${string}`, // PSM
+    // BSC Testnet (2025-11-15 deployment - testnet-nopools)
+    USDC: '0x2Dbcd194F22858Ae139Ba026830cBCc5C730FdF4' as `0x${string}`, // Mock USDC (6 decimals)
+    PSM: '0xC04288c5f143541d38D5E7EAd152dB69b386a384' as `0x${string}`, // PSMParameterized
   },
 } as const;
 
