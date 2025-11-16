@@ -1,18 +1,43 @@
 'use client';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { WagmiProvider } from 'wagmi';
+import React, { Suspense } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Box, CircularProgress } from '@mui/material';
-import { config } from '@/config/appkit'; // Changed from wagmi.ts to appkit.ts
 import { theme } from '@/config/theme';
 import { useConfigValidation } from '@/hooks/useConfigValidation';
 import { ConfigErrorPage } from '@/components/common';
 import { SocketProvider } from '@/contexts/SocketContext';
 import { NotificationToast } from '@/components/NotificationToast';
 
-const queryClient = new QueryClient();
+// Lazy load Web3Provider to improve initial page load performance
+// This prevents loading ~242MB of Web3 dependencies on pages that don't need wallets
+const Web3Provider = React.lazy(() =>
+  import('@/components/providers/Web3Provider').then((mod) => ({
+    default: mod.Web3Provider,
+  }))
+);
+
+/**
+ * Web3LoadingFallback Component
+ * Minimal loading UI while Web3Provider is being lazy-loaded
+ * 最小化的加载界面
+ */
+function Web3LoadingFallback() {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        backgroundColor: '#FFF5E6',
+      }}
+    >
+      <CircularProgress size={60} sx={{ color: '#FF6F00' }} />
+    </Box>
+  );
+}
 
 /**
  * ConfigValidator Component
@@ -58,18 +83,18 @@ function ConfigValidator({ children }: { children: React.ReactNode }) {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Suspense fallback={<Web3LoadingFallback />}>
+        <Web3Provider>
           <SocketProvider>
             <ConfigValidator>
               {children}
               <NotificationToast />
             </ConfigValidator>
           </SocketProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+        </Web3Provider>
+      </Suspense>
+    </ThemeProvider>
   );
 }
