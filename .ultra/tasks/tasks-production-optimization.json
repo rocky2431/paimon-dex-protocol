@@ -1,0 +1,960 @@
+{
+  "version": "4.1",
+  "metadata": {
+    "projectName": "Paimon DEX - 生产级优化方案",
+    "created": "2025-11-17T10:00:00Z",
+    "lastModified": "2025-11-17T10:00:00Z",
+    "description": "基于系统架构和文档的全面生产优化计划:Gas优化(30-46%)、前端性能(LCP<2.5s)、测试覆盖(85%→92%)、数据索引(10-20x速度)、安全加固",
+    "totalDuration": "12 周（3 个月）",
+    "phases": 3,
+    "technicalStack": {
+      "contracts": "Solidity 0.8.24 + Foundry + Multicall3",
+      "frontend": "Next.js 14 + wagmi v2 + Lighthouse CI",
+      "testing": "Forge + Playwright + Lighthouse",
+      "indexing": "The Graph + GraphQL",
+      "monitoring": "Tenderly + Sentry + Grafana"
+    },
+    "basedOn": [
+      ".ultra/docs/research/2025-11-17-production-optimization.md",
+      ".ultra/specs/product.md",
+      ".ultra/specs/architecture.md"
+    ]
+  },
+  "stats": {
+    "totalTasks": 17,
+    "completed": 0,
+    "inProgress": 1,
+    "pending": 16,
+    "blocked": 0,
+    "progressPercentage": 0,
+    "estimatedTotalDays": 60,
+    "estimatedTotalHours": 480,
+    "resourceRequirement": "12.5人月 (3人×3月)",
+    "lastModified": "2025-11-17T12:00:00Z"
+  },
+  "expectedBenefits": {
+    "technical": {
+      "gasSavings": "30-46% (年化节省$13K基于1万用户)",
+      "performanceImprovement": "3-5x (LCP<2.5s目标)",
+      "querySpeed": "10-20x (5-10s → <500ms)",
+      "testCoverage": "85% → 92%",
+      "technicalDebt": "6项高优先级 → 0项"
+    },
+    "business": {
+      "userRetention": "+5-10%",
+      "conversionRate": "+1-2%",
+      "supportTickets": "-20-30%",
+      "devEfficiency": "+30-50%",
+      "auditSpeed": "+20-40%"
+    },
+    "user": {
+      "avgGasCost": "200K gas → 120-140K gas",
+      "psmSwapFlow": "2笔交易 → 1笔交易",
+      "lpAddFlow": "5笔交易 → 2笔交易",
+      "pageLoadTime": "未测量 → LCP<2.5s",
+      "querySpeed": "5-10s → <500ms",
+      "transactionSuccessRate": "未知 → 95%+"
+    }
+  },
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "月度1: 基础优化（主网准备）",
+      "description": "完成P0优化,达到生产就绪状态:Multicall Gas优化、Core Web Vitals基准、测试覆盖90%",
+      "duration": "4 周",
+      "weeklyBreakdown": {
+        "W1": "合约Gas优化（Router封装）",
+        "W2": "前端Multicall集成",
+        "W3": "Core Web Vitals基准测试",
+        "W4": "测试覆盖率提升至90%"
+      },
+      "milestone": "主网部署准备完成（Gas优化+性能达标+测试覆盖）",
+      "tasks": 5,
+      "priority": "P0",
+      "deliverables": [
+        "Router封装函数（addLiquidityAndStake等5个关键流程）",
+        "前端Multicall集成（Swap+LP+Vault+Gauge+Boost）",
+        "Lighthouse CI配置（自动化性能测试）",
+        "测试覆盖率报告≥90%（边界+异常+性能测试）",
+        "Gas基准测试套件（PSM 120K, LP 350K目标）"
+      ]
+    },
+    {
+      "id": "phase-2",
+      "name": "月度2: 数据与安全",
+      "description": "完成P0剩余项+P1关键项:The Graph部署、安全加固、EIP-2612集成、Bundle优化",
+      "duration": "4 周",
+      "weeklyBreakdown": {
+        "W5": "The Graph subgraph部署",
+        "W6": "前端地址白名单强制执行",
+        "W7": "EIP-2612 Permit集成",
+        "W8": "Frontend Bundle优化"
+      },
+      "milestone": "数据层优化完成（查询速度提升10x+安全加固）",
+      "tasks": 4,
+      "priority": "P0-P1",
+      "deliverables": [
+        "The Graph subgraph（PSM+DEX+Treasury核心事件）",
+        "前端查询迁移至GraphQL（90%RPC调用减少）",
+        "合约地址白名单+CSP策略（100%阻止假合约）",
+        "Permit支持（PSM+DEXRouter单笔交易完成）",
+        "Bundle大小减少30%+（代码分割+动态导入）"
+      ]
+    },
+    {
+      "id": "phase-3",
+      "name": "月度3: 监控与完善",
+      "description": "完成P1剩余项+长期规划:事件索引优化、监控系统、技术债清零、Layer 2研究",
+      "duration": "4 周",
+      "weeklyBreakdown": {
+        "W9": "合约事件索引优化",
+        "W10": "Monitoring系统集成",
+        "W11": "技术债务偿还",
+        "W12": "Layer 2扩展研究"
+      },
+      "milestone": "生产级系统完善（监控覆盖+技术债清零）",
+      "tasks": 8,
+      "priority": "P1-P2",
+      "deliverables": [
+        "关键事件indexed优化（user,epoch字段）",
+        "Tenderly Alert配置（大额清算、健康因子警告）",
+        "Sentry前端错误追踪（实时监控）",
+        "技术债务清零（Gas基准稳定性+类型安全）",
+        "Layer 2可行性报告（Arbitrum/Optimism成本效益分析）",
+        "UI/UX设计系统规划（Figma+Storybook）"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "opt-1",
+      "phaseId": "phase-1",
+      "title": "Multicall Gas优化 - Router封装函数开发",
+      "description": "开发5个关键流程的Router封装函数,合并多步操作减少Gas消耗30-46%:addLiquidityAndStake、swapAndAddLiquidity、removeAndClaim、boostAndDeposit、fullExitFlow",
+      "status": "in_progress",
+      "startedAt": "2025-11-17T12:00:00Z",
+      "branch": "feat/task-opt-1-multicall-gas-optimization",
+      "priority": "P0",
+      "complexity": 7,
+      "estimatedHours": 60,
+      "estimatedDays": 7.5,
+      "assignedTo": "合约团队",
+      "dependencies": [],
+      "blockedBy": [],
+      "tags": ["gas-optimization", "smart-contracts", "multicall"],
+      "acceptanceCriteria": [
+        "5个Router封装函数实现并测试通过",
+        "Gas节省≥30% (200K→140K)",
+        "单次交易完成原本2-5步操作",
+        "所有边界测试通过（零地址、溢出、权限）",
+        "NatSpec文档完整"
+      ],
+      "technicalDetails": {
+        "implementation": "继承Multicall3,在DEXRouter中添加封装函数",
+        "gasTarget": "addLiquidityAndStake: 500K→350K (-30%)",
+        "testCoverage": "边界+异常+Gas基准测试",
+        "codeExample": "function addLiquidityAndStake(tokenA,tokenB,amountA,amountB,gauge) external returns (uint256)"
+      },
+      "traceToSpecs": [
+        ".ultra/docs/research/2025-11-17-production-optimization.md#P0-1-Multicall",
+        ".ultra/specs/api-contracts/gas-optimization.md",
+        ".ultra/specs/architecture.md#DEX-Router"
+      ],
+      "risks": [
+        {
+          "risk": "Multicall原子性失败导致整体回滚",
+          "mitigation": "使用tryAggregate(false)允许部分失败,前端分步模拟"
+        }
+      ]
+    },
+    {
+      "id": "opt-2",
+      "phaseId": "phase-1",
+      "title": "前端Multicall集成 - 5大流程改造",
+      "description": "前端集成Multicall3合约,改造5个关键流程为批量调用:Swap流程、LP流程、Vault流程、Gauge流程、Boost流程。使用viem的multicall功能",
+      "status": "pending",
+      "priority": "P0",
+      "complexity": 6,
+      "estimatedHours": 40,
+      "estimatedDays": 5,
+      "assignedTo": "前端团队",
+      "dependencies": ["opt-1"],
+      "blockedBy": [],
+      "tags": ["frontend", "multicall", "user-experience"],
+      "acceptanceCriteria": [
+        "5个流程全部改用Multicall调用",
+        "用户单次签名完成原本多步操作",
+        "错误处理完善（分步模拟+失败提示）",
+        "Gas预估准确（显示优化前后对比）",
+        "所有E2E测试通过"
+      ],
+      "technicalDetails": {
+        "implementation": "使用viem的multicall({ contracts: [...] })",
+        "flowsToOptimize": [
+          "Swap: Approve+Swap → 1步",
+          "Add LP: Approve(2)+AddLiquidity+Stake → 1步",
+          "Remove LP: Unstake+RemoveLiquidity+Claim → 1步",
+          "Vault: Approve+Deposit+Boost → 1步",
+          "Exit: UnstakeAll+Claim+Withdraw → 1步"
+        ],
+        "errorHandling": "tryMulticall + 逐步回退机制"
+      },
+      "traceToSpecs": [
+        ".ultra/docs/research/2025-11-17-production-optimization.md#前端Multicall集成",
+        ".ultra/specs/api-contracts/README.md",
+        "nft-paimon-frontend/src/hooks/"
+      ],
+      "risks": [
+        {
+          "risk": "批量操作失败导致用户体验降级",
+          "mitigation": "提供高级模式让用户选择独立交易或批量交易"
+        }
+      ]
+    },
+    {
+      "id": "opt-3",
+      "phaseId": "phase-1",
+      "title": "Core Web Vitals基准测试 - Lighthouse CI配置",
+      "description": "配置Lighthouse CI自动化性能测试,建立Core Web Vitals基准:LCP<2.5s、INP<200ms、CLS<0.1。集成到GitHub Actions CI/CD流程",
+      "status": "pending",
+      "priority": "P0",
+      "complexity": 5,
+      "estimatedHours": 24,
+      "estimatedDays": 3,
+      "assignedTo": "前端团队",
+      "dependencies": [],
+      "blockedBy": [],
+      "tags": ["performance", "frontend", "ci-cd"],
+      "acceptanceCriteria": [
+        "Lighthouse CI配置完成并运行",
+        "29个页面全部测量基准值",
+        "CI/CD流程集成（每次PR自动测试）",
+        "性能预算设置（LCP<2.5s强制）",
+        "监控Dashboard部署（实时追踪）"
+      ],
+      "technicalDetails": {
+        "implementation": "GitHub Actions + Lighthouse CI + web-vitals库",
+        "metrics": "LCP, INP, CLS, TTFB, FCP",
+        "ciConfig": "lighthouserc.json配置预算和断言",
+        "monitoring": "Sentry Performance + 自定义Analytics API"
+      },
+      "traceToSpecs": [
+        ".ultra/docs/research/2025-11-17-production-optimization.md#P0-2-Core-Web-Vitals",
+        ".ultra/specs/api-contracts/performance-baseline.md",
+        "nft-paimon-frontend/README.md"
+      ],
+      "risks": []
+    },
+    {
+      "id": "opt-4",
+      "phaseId": "phase-1",
+      "title": "测试覆盖率提升 - 边界+异常测试补充",
+      "description": "补充边界和异常测试,将测试覆盖率从85%提升至92%:零地址测试、溢出测试、权限测试、重入测试、Oracle操纵测试。重点覆盖关键路径100%",
+      "status": "pending",
+      "priority": "P0",
+      "complexity": 8,
+      "estimatedHours": 40,
+      "estimatedDays": 5,
+      "assignedTo": "全团队",
+      "dependencies": [],
+      "blockedBy": [],
+      "tags": ["testing", "quality", "security"],
+      "acceptanceCriteria": [
+        "整体覆盖率≥92% (当前85%)",
+        "关键路径覆盖率100% (PSM、Treasury、Emission)",
+        "分支覆盖率≥75%",
+        "所有新增测试通过",
+        "覆盖率报告生成并归档"
+      ],
+      "technicalDetails": {
+        "testTypes": [
+          "边界测试:零地址、最大值、空数组、零金额",
+          "异常测试:权限错误、状态错误、重入攻击",
+          "性能测试:Gas基准、大数据量处理",
+          "安全测试:Oracle操纵、闪电贷攻击",
+          "兼容性测试:不同USDC小数位(6 vs 18)"
+        ],
+        "priorityContracts": "PSM, Treasury, EmissionRouter, GaugeController",
+        "tools": "forge coverage + 手动审查"
+      },
+      "traceToSpecs": [
+        ".ultra/docs/research/2025-11-17-production-optimization.md#P0-3-测试覆盖率",
+        ".ultra/specs/architecture.md#测试策略",
+        "paimon-rwa-contracts/test/"
+      ],
+      "risks": [
+        {
+          "risk": "补充测试可能发现更多边界问题延长周期",
+          "mitigation": "优先覆盖关键路径,非关键问题记为技术债"
+        }
+      ]
+    },
+    {
+      "id": "opt-5",
+      "phaseId": "phase-1",
+      "title": "Gas基准测试套件 - 稳定性修复",
+      "description": "修复10个不稳定的Gas基准测试(当前10/990失败),使用相对误差断言(允许5%波动)替代绝对值断言,建立可靠的Gas回归测试",
+      "status": "pending",
+      "priority": "P0",
+      "complexity": 4,
+      "estimatedHours": 16,
+      "estimatedDays": 2,
+      "assignedTo": "合约团队",
+      "dependencies": ["opt-1"],
+      "blockedBy": [],
+      "tags": ["testing", "gas-optimization", "technical-debt"],
+      "acceptanceCriteria": [
+        "所有Gas基准测试通过(990/990)",
+        "相对误差断言实现(允许±5%)",
+        "Gas基准值文档化",
+        "CI环境稳定运行",
+        "回归测试可靠"
+      ],
+      "technicalDetails": {
+        "currentIssue": "依赖网络状态,CI环境波动导致失败",
+        "solution": "assertApproxEqRel(actual, expected, 5e16) // ±5%",
+        "benchmarkTargets": {
+          "PSM Swap": "120,000 gas",
+          "Add Liquidity": "350,000 gas",
+          "Treasury Deposit": "180,000 gas",
+          "Gauge Deposit": "100,000 gas"
+        }
+      },
+      "traceToSpecs": [
+        ".ultra/docs/research/2025-11-17-production-optimization.md#技术债务-1",
+        "paimon-rwa-contracts/test/unit/"
+      ],
+      "risks": []
+    },
+    {
+      "id": "opt-6",
+      "phaseId": "phase-2",
+      "title": "The Graph Subgraph开发 - 核心事件索引",
+      "description": "开发The Graph subgraph索引核心合约事件:PSM(Swap)、DEXPair(Swap/AddLiquidity/RemoveLiquidity)、Treasury(Deposit/Withdraw/Liquidation)、Gauge(Deposit/Withdraw)。支持GraphQL查询",
+      "status": "pending",
+      "priority": "P0",
+      "complexity": 7,
+      "estimatedHours": 40,
+      "estimatedDays": 5,
+      "assignedTo": "后端团队",
+      "dependencies": [],
+      "blockedBy": [],
+      "tags": ["indexing", "the-graph", "data-layer"],
+      "acceptanceCriteria": [
+        "subgraph.yaml配置完成(所有核心合约)",
+        "schema.graphql定义完整(User/Swap/Pair/Position)",
+        "mapping.ts事件处理逻辑实现",
+        "本地测试通过(graph-node)",
+        "部署到The Graph Hosted Service"
+      ],
+      "technicalDetails": {
+        "contracts": [
+          "PSMParameterized: SwapUSDCForUSDP, SwapUSDPForUSDC",
+          "DEXPair: Swap, Mint, Burn, Sync",
+          "Treasury: RWADeposited, USDPMinted, Liquidation",
+          "GaugeController: Deposit, Withdraw, RewardClaimed",
+          "VotingEscrowPaimon: Locked, Unlocked, VotingPowerUpdated"
+        ],
+        "entities": "User, Swap, Pair, LPPosition, DebtPosition, VeNFT, Reward, Transaction",
+        "network": "bsc-testnet (ChainID 97)"
+      },
+      "traceToSpecs": [
+        ".ultra/docs/research/2025-11-17-production-optimization.md#P0-4-The-Graph",
+        ".ultra/specs/data-models/subgraph-schema.md",
+        ".ultra/specs/data-models/core-entities.md"
+      ],
+      "risks": [
+        {
+          "risk": "The Graph同步延迟~30s影响用户体验",
+          "mitigation": "前端乐观更新+混合查询策略(GraphQL+RPC fallback)"
+        }
+      ]
+    },
+    {
+      "id": "opt-7",
+      "phaseId": "phase-2",
+      "title": "前端GraphQL集成 - 查询迁移",
+      "description": "前端迁移至GraphQL查询,替代90%的RPC轮询调用:用户数据查询、交易历史查询、LP持仓查询、收益历史查询。查询速度提升10-20x",
+      "status": "pending",
+      "priority": "P0",
+      "complexity": 6,
+      "estimatedHours": 32,
+      "estimatedDays": 4,
+      "assignedTo": "前端团队",
+      "dependencies": ["opt-6"],
+      "blockedBy": [],
+      "tags": ["frontend", "graphql", "performance"],
+      "acceptanceCriteria": [
+        "Apollo Client配置完成",
+        "5个核心查询实现(用户/交易/LP/债务/收益)",
+        "查询速度<500ms (原5-10s)",
+        "前端RPC调用减少90%",
+        "错误处理和降级机制完善"
+      ],
+      "technicalDetails": {
+        "queries": [
+          "GetUserProfile: 基本信息+TVL+债务+健康因子",
+          "GetUserSwaps: 交易历史(分页+过滤)",
+          "GetLPPositions: LP持仓列表+APR",
+          "GetDebtPosition: 抵押品详情+清算风险",
+          "GetRewardHistory: 收益历史+未领取金额"
+        ],
+        "implementation": "@apollo/client + GraphQL Code Generator",
+        "fallback": "GraphQL失败时降级到RPC查询"
+      },
+      "traceToSpecs": [
+        ".ultra/docs/research/2025-11-17-production-optimization.md#前端GraphQL集成",
+        ".ultra/specs/data-models/query-patterns.md",
+        "nft-paimon-frontend/src/hooks/"
+      ],
+      "risks": []
+    },
+    {
+      "id": "opt-8",
+      "phaseId": "phase-2",
+      "title": "安全加固 - 前端地址白名单强制执行",
+      "description": "前端硬编码合约地址校验,100%阻止与非官方合约交互:编译时常量白名单、所有合约调用前强制校验、CSP策略配置。防止钓鱼攻击",
+      "status": "pending",
+      "priority": "P0",
+      "complexity": 3,
+      "estimatedHours": 16,
+      "estimatedDays": 2,
+      "assignedTo": "前端团队",
+      "dependencies": [],
+      "blockedBy": [],
+      "tags": ["security", "frontend", "hardening"],
+      "acceptanceCriteria": [
+        "OFFICIAL_CONTRACTS常量配置(34个合约地址)",
+        "verifyContractAddress函数实现",
+        "所有合约调用前强制校验(100%覆盖)",
+        "CSP策略配置(防XSS)",
+        "安全测试通过(尝试假合约交互)"
+      ],
+      "technicalDetails": {
+        "whitelist": "从deployments/testnet/addresses.json导入",
+        "validation": "每次writeContract前调用verifyContractAddress()",
+        "csp": "Content-Security-Policy: connect-src限制RPC端点",
+        "errorHandling": "显示详细安全警告(期望vs实际地址)"
+      },
+      "traceToSpecs": [
+        ".ultra/docs/research/2025-11-17-production-optimization.md#P0-5-安全加固",
+        ".ultra/specs/api-contracts/security-integration.md",
+        "nft-paimon-frontend/src/config/contracts.ts"
+      ],
+      "risks": []
+    },
+    {
+      "id": "opt-9",
+      "phaseId": "phase-2",
+      "title": "EIP-2612 Permit集成 - PSM+Router支持",
+      "description": "在PSM和DEXRouter合约中集成EIP-2612 Permit,支持单笔交易完成Approve+操作,节省~46,000 gas。前端实现signPermit签名逻辑",
+      "status": "pending",
+      "priority": "P1",
+      "complexity": 6,
+      "estimatedHours": 80,
+      "estimatedDays": 10,
+      "assignedTo": "合约团队+前端团队",
+      "dependencies": [],
+      "blockedBy": [],
+      "tags": ["gas-optimization", "user-experience", "eip-2612"],
+      "acceptanceCriteria": [
+        "PSM.swapUSDCForUSDPWithPermit实现",
+        "DEXRouter.addLiquidityWithPermit实现",
+        "前端Permit签名逻辑实现",
+        "Gas节省≥46,000 (Approve交易省略)",
+        "兼容性测试(检查USDC是否支持EIP-2612)"
+      ],
+      "technicalDetails": {
+        "contracts": [
+          "PSM: swapUSDCForUSDPWithPermit(amount,deadline,v,r,s)",
+          "DEXRouter: addLiquidityWithPermit(...permitParams)",
+          "RemoveRouter: removeAndClaimWithPermit(...)"
+        ],
+        "frontend": "viem的signTypedData实现Permit签名",
+        "risk": "BSC USDC是否支持EIP-2612待确认(需实测)"
+      },
+      "traceToSpecs": [
+        ".ultra/docs/research/2025-11-17-production-optimization.md#P1-6-EIP-2612",
+        ".ultra/specs/api-contracts/gas-optimization.md#Permit"
+      ],
+      "risks": [
+        {
+          "risk": "BSC USDC不支持EIP-2612",
+          "mitigation": "先在testnet验证,不支持则降级为P2"
+        }
+      ]
+    },
+    {
+      "id": "opt-10",
+      "phaseId": "phase-2",
+      "title": "Frontend Bundle优化 - 代码分割+动态导入",
+      "description": "优化Next.js打包体积,减少30-40%:组件级动态导入(recharts)、优化第三方库导入(@mui/material按需导入)、SWC压缩配置、移除console.log",
+      "status": "pending",
+      "priority": "P1",
+      "complexity": 5,
+      "estimatedHours": 40,
+      "estimatedDays": 5,
+      "assignedTo": "前端团队",
+      "dependencies": ["opt-3"],
+      "blockedBy": [],
+      "tags": ["performance", "frontend", "bundle-optimization"],
+      "acceptanceCriteria": [
+        "Bundle大小减少30%+",
+        "首屏加载时间减少1-2s",
+        "LCP指标改善500-1000ms",
+        "所有图表组件动态导入(SSR:false)",
+        "next.config.mjs优化配置完成"
+      ],
+      "technicalDetails": {
+        "optimizations": [
+          "dynamic() + SSR:false导入recharts/echart",
+          "@mui/material按需导入(避免导入整个库)",
+          "next.config.mjs: swcMinify:true + removeConsole",
+          "experimental.optimizePackageImports配置"
+        ],
+        "tools": "@next/bundle-analyzer可视化分析"
+      },
+      "traceToSpecs": [
+        ".ultra/docs/research/2025-11-17-production-optimization.md#P1-7-Bundle优化",
+        "nft-paimon-frontend/next.config.mjs"
+      ],
+      "risks": [
+        {
+          "risk": "动态导入可能导致组件加载失败",
+          "mitigation": "分步实施+全面回归测试+灰度发布"
+        }
+      ]
+    },
+    {
+      "id": "opt-11",
+      "phaseId": "phase-3",
+      "title": "合约事件索引优化 - indexed字段添加",
+      "description": "为关键事件添加indexed字段提升查询效率10-100x:SwapUSDCForUSDP.user、AddLiquidity.user、Deposit(Gauge).user、RewardClaimed.user/epoch。需重新部署合约",
+      "status": "pending",
+      "priority": "P2",
+      "complexity": 4,
+      "estimatedHours": 24,
+      "estimatedDays": 3,
+      "assignedTo": "合约团队",
+      "dependencies": [],
+      "blockedBy": [],
+      "tags": ["indexing", "performance", "breaking-change"],
+      "acceptanceCriteria": [
+        "4个关键事件添加indexed (user字段)",
+        "Gas成本增加评估(每个~375 gas)",
+        "查询效率测试(10-100x提升验证)",
+        "兼容性分析(旧合约数据迁移计划)",
+        "部署计划制定(V2版本考虑)"
+      ],
+      "technicalDetails": {
+        "events": [
+          "PSM: SwapUSDCForUSDP(address indexed user, ...)",
+          "DEXPair: AddLiquidity(address indexed user, ...)",
+          "Gauge: Deposit(address indexed user, ...)",
+          "RewardDistributor: RewardClaimed(address indexed user, uint256 indexed epoch, ...)"
+        ],
+        "tradeoff": "Gas成本+375/indexed vs 查询速度10-100x",
+        "decision": "建议降级为P2,在V2版本实施"
+      },
+      "traceToSpecs": [
+        ".ultra/docs/research/2025-11-17-production-optimization.md#P1-8-事件索引",
+        "paimon-rwa-contracts/src/core/",
+        "paimon-rwa-contracts/src/dex/"
+      ],
+      "risks": [
+        {
+          "risk": "重新部署合约导致状态迁移复杂",
+          "mitigation": "方案A(推荐):暂缓至V2;方案B:开发迁移合约;方案C:Proxy升级"
+        }
+      ]
+    },
+    {
+      "id": "opt-12",
+      "phaseId": "phase-3",
+      "title": "Monitoring系统集成 - Tenderly+Sentry",
+      "description": "集成Tenderly链上监控和Sentry前端错误追踪,实现关键指标100%监控:大额清算告警、健康因子警告、前端错误率、交易成功率、RPC可用性",
+      "status": "pending",
+      "priority": "P1",
+      "complexity": 6,
+      "estimatedHours": 40,
+      "estimatedDays": 5,
+      "assignedTo": "DevOps团队",
+      "dependencies": [],
+      "blockedBy": [],
+      "tags": ["monitoring", "devops", "alerting"],
+      "acceptanceCriteria": [
+        "Tenderly Alert配置(清算>$100K、健康因子<1.2)",
+        "Sentry前端集成(错误追踪+性能监控)",
+        "链上指标监控(Gas价格、大额交易)",
+        "Discord/Email告警通道配置",
+        "监控Dashboard部署(Grafana)"
+      ],
+      "technicalDetails": {
+        "tenderly": "tenderly.yaml配置Alert规则",
+        "sentry": "@sentry/nextjs初始化+beforeSend过滤",
+        "chainMetrics": "watchContractEvent监听关键事件",
+        "alerting": "Discord Webhook + Email",
+        "metrics": [
+          "合约层:Gas价格异常、大额交易、清算事件、Oracle偏差",
+          "前端层:错误率、加载时间、交易成功率",
+          "基础设施:RPC可用性、The Graph同步延迟"
+        ]
+      },
+      "traceToSpecs": [
+        ".ultra/docs/research/2025-11-17-production-optimization.md#P1-9-Monitoring",
+        ".ultra/specs/architecture.md#监控与告警"
+      ],
+      "risks": []
+    },
+    {
+      "id": "opt-13",
+      "phaseId": "phase-3",
+      "title": "技术债务-前端类型安全 - wagmi-cli自动生成",
+      "description": "集成wagmi-cli自动从合约ABI生成TypeScript类型,消除运行时错误风险。配置自动化流程:ABI更新→类型生成→前端导入",
+      "status": "pending",
+      "priority": "P1",
+      "complexity": 4,
+      "estimatedHours": 16,
+      "estimatedDays": 2,
+      "assignedTo": "前端团队",
+      "dependencies": [],
+      "blockedBy": [],
+      "tags": ["technical-debt", "type-safety", "automation"],
+      "acceptanceCriteria": [
+        "wagmi-cli配置完成(wagmi.config.ts)",
+        "34个合约类型自动生成",
+        "前端导入路径统一(@/generated)",
+        "npm run generate命令可用",
+        "CI/CD集成(ABI变更自动触发)"
+      ],
+      "technicalDetails": {
+        "tool": "@wagmi/cli + viem插件",
+        "config": "wagmi.config.ts配置ABI路径",
+        "output": "src/generated/contracts.ts",
+        "automation": "package.json添加generate脚本"
+      },
+      "traceToSpecs": [
+        ".ultra/docs/research/2025-11-17-production-optimization.md#技术债务-2",
+        "nft-paimon-frontend/package.json"
+      ],
+      "risks": []
+    },
+    {
+      "id": "opt-14",
+      "phaseId": "phase-3",
+      "title": "技术债务-Phase B查找表自动生成",
+      "description": "在部署脚本中自动生成Phase B指数衰减查找表(236个值),替代手动计算。公式:E_B(t)=37,500,000*0.985^t,周范围13-248",
+      "status": "pending",
+      "priority": "P1",
+      "complexity": 3,
+      "estimatedHours": 12,
+      "estimatedDays": 1.5,
+      "assignedTo": "合约团队",
+      "dependencies": [],
+      "blockedBy": [],
+      "tags": ["technical-debt", "automation", "emission"],
+      "acceptanceCriteria": [
+        "computePhaseBLookupTable()函数实现",
+        "236个值自动计算并验证",
+        "DeployComplete.s.sol集成",
+        "与手动值对比验证(误差<0.01%)",
+        "部署测试通过"
+      ],
+      "technicalDetails": {
+        "formula": "baseAmount * (985**week) / (1000**week)",
+        "range": "week 13-248, 236 values",
+        "precision": "使用FixedPointMath确保精度",
+        "validation": "对比现有手动值"
+      },
+      "traceToSpecs": [
+        ".ultra/docs/research/2025-11-17-production-optimization.md#技术债务-4",
+        "paimon-rwa-contracts/script/DeployComplete.s.sol"
+      ],
+      "risks": []
+    },
+    {
+      "id": "opt-15",
+      "phaseId": "phase-3",
+      "title": "技术债务-部署脚本重构 - 通用函数库提取",
+      "description": "重构DeployComplete.s.sol(>1000行),提取通用部署函数库:deployWithVerify()、linkContracts()、initializeSystem()。提升可维护性",
+      "status": "pending",
+      "priority": "P2",
+      "complexity": 5,
+      "estimatedHours": 24,
+      "estimatedDays": 3,
+      "assignedTo": "合约团队",
+      "dependencies": [],
+      "blockedBy": [],
+      "tags": ["technical-debt", "refactoring", "maintainability"],
+      "acceptanceCriteria": [
+        "DeploymentLib.sol库合约实现",
+        "3个通用函数提取并测试",
+        "DeployComplete.s.sol简化至<500行",
+        "所有部署测试通过",
+        "文档更新"
+      ],
+      "technicalDetails": {
+        "functions": [
+          "deployWithVerify(bytecode,args) returns (address)",
+          "linkContracts(addresses) 批量设置依赖",
+          "initializeSystem(config) 统一初始化"
+        ],
+        "refactoring": "提取重复逻辑,保持部署顺序"
+      },
+      "traceToSpecs": [
+        ".ultra/docs/research/2025-11-17-production-optimization.md#技术债务-5",
+        "paimon-rwa-contracts/script/"
+      ],
+      "risks": []
+    },
+    {
+      "id": "opt-16",
+      "phaseId": "phase-3",
+      "title": "Layer 2扩展研究 - Arbitrum/Optimism成本效益分析",
+      "description": "评估Layer 2部署可行性,生成成本效益分析报告:Gas价格对比、用户基数评估、部署/维护成本、战略价值分析。输出部署建议",
+      "status": "pending",
+      "priority": "P2",
+      "complexity": 6,
+      "estimatedHours": 80,
+      "estimatedDays": 10,
+      "assignedTo": "架构团队",
+      "dependencies": [],
+      "blockedBy": [],
+      "tags": ["research", "layer2", "expansion"],
+      "acceptanceCriteria": [
+        "成本效益分析报告完成",
+        "3条链对比(BSC/Arbitrum/Optimism)",
+        "部署POC验证(可选)",
+        "多链流动性方案设计",
+        "战略决策建议"
+      ],
+      "technicalDetails": {
+        "comparison": {
+          "BSC": "3-7 gwei, 高用户基数, 当前focus",
+          "Arbitrum": "0.1-0.5 gwei, 中用户基数, 潜在用户",
+          "Optimism": "0.2-1 gwei, 中用户基数, 生态协同"
+        },
+        "considerations": "跨链流动性分散、多链维护成本、战略价值",
+        "recommendation": "暂不建议立即实施(BSC Gas已低)"
+      },
+      "traceToSpecs": [
+        ".ultra/docs/research/2025-11-17-production-optimization.md#P2-10-Layer2",
+        ".ultra/specs/architecture.md#多链策略"
+      ],
+      "risks": []
+    },
+    {
+      "id": "opt-17",
+      "phaseId": "phase-3",
+      "title": "UI/UX设计系统统一 - Figma+Storybook",
+      "description": "建立统一的设计语言和组件库:Figma设计系统、Material-UI主题定制、Storybook组件文档。提升开发效率和用户体验一致性",
+      "status": "pending",
+      "priority": "P2",
+      "complexity": 8,
+      "estimatedHours": 160,
+      "estimatedDays": 20,
+      "assignedTo": "前端团队+设计师",
+      "dependencies": [],
+      "blockedBy": [],
+      "tags": ["design-system", "ui-ux", "long-term"],
+      "acceptanceCriteria": [
+        "Figma设计系统建立(颜色/字体/间距)",
+        "Material-UI主题定制(theme.ts)",
+        "Storybook部署(所有组件文档化)",
+        "设计规范文档完成",
+        "开发效率提升验证"
+      ],
+      "technicalDetails": {
+        "tools": "Figma + Storybook + Material-UI theming",
+        "designTokens": "颜色、字体、间距、圆角、阴影",
+        "components": "29个页面的共享组件提取",
+        "documentation": "组件使用指南+代码示例"
+      },
+      "traceToSpecs": [
+        ".ultra/docs/research/2025-11-17-production-optimization.md#P2-11-UI-UX",
+        "nft-paimon-frontend/src/theme/"
+      ],
+      "risks": []
+    }
+  ],
+  "dependencies": {
+    "critical_path": [
+      "opt-1 → opt-2 → opt-5 (Multicall集成路径)",
+      "opt-6 → opt-7 (The Graph部署路径)",
+      "opt-3 → opt-10 (性能优化路径)"
+    ],
+    "parallel_opportunities": [
+      "Phase 1: opt-1,opt-3,opt-4可并行开发",
+      "Phase 2: opt-6,opt-8,opt-9可并行开发",
+      "Phase 3: opt-11,opt-12,opt-13,opt-14,opt-15可并行"
+    ],
+    "blocking_relationships": {
+      "opt-2": "依赖opt-1 (Router函数必须先开发)",
+      "opt-5": "依赖opt-1 (Gas基准基于优化后值)",
+      "opt-7": "依赖opt-6 (Subgraph必须先部署)",
+      "opt-10": "依赖opt-3 (性能基准建立后优化)"
+    }
+  },
+  "risks": [
+    {
+      "id": "risk-1",
+      "title": "合约重新部署导致状态迁移",
+      "description": "事件索引优化(opt-11)需要重新部署合约,现有用户状态迁移复杂",
+      "probability": "中等(40%)",
+      "impact": "严重",
+      "affectedTasks": ["opt-11"],
+      "mitigation": "方案A(推荐):暂缓至V2版本;方案B:开发状态迁移合约;方案C:使用Proxy模式升级",
+      "decision": "采用方案A,事件优化降级为P2"
+    },
+    {
+      "id": "risk-2",
+      "title": "The Graph同步延迟影响用户体验",
+      "description": "The Graph索引器有~30秒同步延迟,用户交易后立即查询可能看不到",
+      "probability": "高(必然存在)",
+      "impact": "中等",
+      "affectedTasks": ["opt-6", "opt-7"],
+      "mitigation": "前端乐观更新+显示\"同步中\"状态+混合查询策略(GraphQL+RPC fallback)"
+    },
+    {
+      "id": "risk-3",
+      "title": "Multicall批量操作原子性失败",
+      "description": "Multicall中任一操作失败会导致整个批次回滚",
+      "probability": "中等(30%)",
+      "impact": "中等",
+      "affectedTasks": ["opt-1", "opt-2"],
+      "mitigation": "使用tryAggregate(false)允许部分失败+前端分步模拟+提供高级模式选择"
+    },
+    {
+      "id": "risk-4",
+      "title": "Frontend Bundle优化破坏现有功能",
+      "description": "动态导入可能导致某些组件在特定条件下加载失败",
+      "probability": "低(10%)",
+      "impact": "中等",
+      "affectedTasks": ["opt-10"],
+      "mitigation": "分步实施+每次优化后全面回归测试+灰度发布(10%→50%→100%)+保留回滚机制"
+    },
+    {
+      "id": "risk-5",
+      "title": "测试覆盖率提升延长开发周期",
+      "description": "补充测试可能发现更多边界问题,需要额外修复",
+      "probability": "中等(30%)",
+      "impact": "中等",
+      "affectedTasks": ["opt-4"],
+      "mitigation": "优先覆盖关键路径(80/20原则)+非关键边界问题记录为技术债+并行开发测试和修复"
+    },
+    {
+      "id": "risk-6",
+      "title": "BSC USDC不支持EIP-2612",
+      "description": "BSC主网USDC可能不支持Permit功能,导致P1优化无法实施",
+      "probability": "中等(待验证)",
+      "impact": "中等",
+      "affectedTasks": ["opt-9"],
+      "mitigation": "先在testnet验证USDC合约,不支持则降级为P2或探索替代方案"
+    }
+  ],
+  "milestones": [
+    {
+      "id": "milestone-1",
+      "name": "主网部署准备完成",
+      "date": "Week 4",
+      "criteria": [
+        "Gas优化30%+达成 (opt-1,opt-2)",
+        "性能达标 LCP<2.5s (opt-3)",
+        "测试覆盖率≥90% (opt-4)",
+        "Gas基准测试稳定 (opt-5)"
+      ],
+      "deliverables": "生产就绪状态,可进行审计"
+    },
+    {
+      "id": "milestone-2",
+      "name": "数据层优化完成",
+      "date": "Week 8",
+      "criteria": [
+        "The Graph部署并查询速度<500ms (opt-6,opt-7)",
+        "安全加固100%覆盖 (opt-8)",
+        "Permit集成完成(可选,取决于USDC支持) (opt-9)",
+        "Bundle大小减少30%+ (opt-10)"
+      ],
+      "deliverables": "查询速度提升10x+安全加固完成"
+    },
+    {
+      "id": "milestone-3",
+      "name": "生产级系统完善",
+      "date": "Week 12",
+      "criteria": [
+        "监控系统100%覆盖关键指标 (opt-12)",
+        "技术债务高优先级清零 (opt-13,opt-14,opt-15)",
+        "Layer 2可行性报告完成 (opt-16)",
+        "设计系统规划完成 (opt-17)"
+      ],
+      "deliverables": "监控覆盖+技术债清零+长期规划"
+    }
+  ],
+  "resourceAllocation": {
+    "roles": [
+      {
+        "role": "合约开发",
+        "personMonths": 6,
+        "tasks": ["opt-1", "opt-5", "opt-9", "opt-11", "opt-14", "opt-15"],
+        "keyResponsibilities": "Gas优化、Permit集成、事件优化、技术债务"
+      },
+      {
+        "role": "前端开发",
+        "personMonths": 6,
+        "tasks": ["opt-2", "opt-3", "opt-7", "opt-8", "opt-10", "opt-13"],
+        "keyResponsibilities": "Multicall集成、性能优化、Bundle优化、类型安全"
+      },
+      {
+        "role": "测试工程师",
+        "personMonths": 2,
+        "tasks": ["opt-4"],
+        "keyResponsibilities": "覆盖率提升、性能测试、回归测试"
+      },
+      {
+        "role": "DevOps",
+        "personMonths": 1,
+        "tasks": ["opt-6", "opt-12"],
+        "keyResponsibilities": "The Graph部署、监控系统集成"
+      },
+      {
+        "role": "架构师",
+        "personMonths": 1.5,
+        "tasks": ["opt-16", "opt-17"],
+        "keyResponsibilities": "技术审查、L2研究、设计系统规划"
+      }
+    ],
+    "totalPersonMonths": 12.5,
+    "teamComposition": "约3个全职开发者工作3个月",
+    "budgetEstimate": "12.5人月 × $8K/月 = $100K (估算)"
+  },
+  "successMetrics": {
+    "technical": {
+      "gasSavings": "目标30-46%, 测量方法:部署前后Gas基准对比",
+      "performanceImprovement": "目标LCP<2.5s, 测量方法:Lighthouse CI每日监控",
+      "querySpeed": "目标<500ms, 测量方法:GraphQL vs RPC对比测试",
+      "testCoverage": "目标92%, 测量方法:forge coverage报告",
+      "technicalDebt": "目标高优先级清零, 测量方法:技术债务清单"
+    },
+    "business": {
+      "userRetention": "目标+5-10%, 测量方法:30日留存率对比",
+      "conversionRate": "目标+1-2%, 测量方法:访问→交易转化率",
+      "supportTickets": "目标-20-30%, 测量方法:客服工单统计",
+      "devEfficiency": "目标+30-50%, 测量方法:开发周期缩短比例",
+      "auditSpeed": "目标+20-40%, 测量方法:审计通过时间"
+    },
+    "user": {
+      "avgGasCost": "目标120-140K gas, 测量方法:链上交易数据统计",
+      "transactionSteps": "目标减少50-60%, 测量方法:用户操作步骤追踪",
+      "pageLoadTime": "目标LCP<2.5s, 测量方法:Real User Monitoring",
+      "dataQuerySpeed": "目标<500ms, 测量方法:前端查询时间统计",
+      "transactionSuccessRate": "目标95%+, 测量方法:成功/失败交易比"
+    }
+  },
+  "timeline": {
+    "startDate": "2025-11-18",
+    "endDate": "2026-02-15",
+    "totalWeeks": 12,
+    "weeklyReview": "每周五进行进度评审,调整优先级",
+    "monthlyReview": "每月最后一周进行月度回顾,更新研究报告"
+  }
+}
